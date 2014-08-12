@@ -1,13 +1,13 @@
 Installation
 ============
 
-Dependencies can be installed using setup.py in the same way as synapse: see synpase/README.rst.
+Dependencies can be installed using setup.py in the same way as synapse: see synapse/README.rst.
 
 Having installed dependencies, you can run sydent using::
 
     $ python -m sydent.sydent
 
-This will create a configuration file in sydent.conf with some defaults. You'll most likley want to change the server name and specify a mail relay.
+This will create a configuration file in sydent.conf with some defaults. You'll most likely want to change the server name and specify a mail relay.
 
 Requests
 ========
