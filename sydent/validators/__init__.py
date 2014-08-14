@@ -15,12 +15,12 @@
 # limitations under the License.
 
 
-class Token:
-    def __init__(self, _tokenId, _medium, _address, _tokenString, _clientSecret, _validated, _createdAt):
-        self.tokenId = _tokenId
+class ValidationSession:
+    def __init__(self, _id, _medium, _address, _clientSecret, _validated, _mtime):
+        self.id = _id
         self.medium = _medium
         self.address = _address
-        self.tokenString = _tokenString
         self.clientSecret = _clientSecret
         self.validated = _validated
-        self.createdAt = _createdAt
+        self.mtime = _mtime
+

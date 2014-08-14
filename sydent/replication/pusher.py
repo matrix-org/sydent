@@ -14,20 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
+import twisted.internet.reactor
+import twisted.internet.task
 
-def require_args(request, rqArgs):
-    missing = []
-    for a in rqArgs:
-        if a not in request.args:
-            missing.append(a)
+class Pusher:
+    def __init__(self, sydent):
+        self.sydent = sydent
 
-    if len(missing) > 0:
-        request.setResponseCode(400)
-        msg = "Missing args:"+(",".join(missing))
-        return {'error': 'badrequest', 'message': msg}
+    def setup(self):
+        cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
+        cb.start(10.0)
 
-def jsonwrap(f):
-    def inner(*args, **kwargs):
-        return json.dumps(f(*args, **kwargs)).encode("UTF-8")
-    return inner
+    def scheduledPush(self):
+        print "PUSH!"

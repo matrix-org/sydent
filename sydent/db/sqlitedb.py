@@ -38,7 +38,11 @@ class SqliteDatabase:
                 continue
             scriptPath = os.path.join(schemaDir, f)
             fp = open(scriptPath, 'r')
-            c.executescript(fp.read())
+            try:
+                c.executescript(fp.read())
+            except:
+                logger.error("Error importing %s", f)
+                raise
             fp.close()
 
         c.close()

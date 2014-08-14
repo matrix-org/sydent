@@ -14,5 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-CREATE TABLE if not exists threepid_associations (id integer primary key, medium varchar(16) not null, address varchar(256) not null, mxId varchar(256) not null, createdAt bigint not null, expires bigint not null); 
-CREATE UNIQUE INDEX if not exists medium_address on threepid_associations(medium, address);
+CREATE TABLE IF NOT EXISTS local_threepid_associations (id integer primary key, medium varchar(16) not null, address varchar(256) not null, mxId varchar(256) not null, createdAt bigint not null, expires bigint not null);
+CREATE UNIQUE INDEX IF NOT EXISTS medium_address on local_threepid_associations(medium, address);
+
+CREATE TABLE IF NOT EXISTS global_threepid_associations (id integer primary key, medium varchar(16) not null, address varchar(256) not null, mxId varchar(256) not null, createdAt bigint not null, expires bigint not null, originServer varchar(255) not null, originId integer not null, sgAssoc text not null);
+CREATE INDEX IF NOT EXISTS medium_address_createdAt on global_threepid_associations (medium, address, createdAt);

@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-CREATE TABLE IF NOT EXISTS threepid_validation_sessions (id integer primary key, medium varchar(16) not null, address varchar(256) not null, clientSecret varchar(32) not null, validated int default 0, mtime bigint not null);
-CREATE TABLE IF NOT EXISTS threepid_token_auths (id integer primary key, validationSession integer not null, token varchar(32) not null, sendAttemptNumber integer not null, foreign key (validationSession) references threepid_validations(id));
+CREATE TABLE IF NOT EXISTS peers (id integer primary key, name varchar(255) not null, lastSentVersion integer, lastPokeSucceededAt integer);
+CREATE UNIQUE INDEX IF NOT EXISTS name on peers(name);
 
+CREATE TABLE IF NOT EXISTS pubkeys (id integer primary key, peername varchar(255) not null, alg varchar(16) not null, key text not null, foreign key (peername) references peers (peername));
+CREATE UNIQUE INDEX IF NOT EXISTS peername_alg on pubkeys(peername, alg);

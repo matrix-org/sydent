@@ -64,8 +64,7 @@ class HttpServer:
 
         self.factory = Site(root)
 
-    def run(self):
+    def setup(self):
         httpPort = int(self.sydent.cfg.get('http', 'http.port'))
         logger.info("Starting HTTP server on port %d", httpPort)
         twisted.internet.reactor.listenTCP(httpPort, self.factory)
-        twisted.internet.reactor.run()

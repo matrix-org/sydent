@@ -20,27 +20,40 @@ import os
 import email.utils
 import logging
 import twisted.python.log
-import time
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from sydent.db.threepidtoken import ThreePidTokenStore
+from sydent.db.valsession import ThreePidValSessionStore
 
-from sydent.util import validationutils
+from sydent.util import validationutils, utime
 
 
 logger = logging.getLogger(__name__)
 
 class EmailValidator:
+    # the lifetime of a 3pid association
     THREEPID_ASSOCIATION_LIFETIME_MS = 100 * 365 * 24 * 60 * 60 * 1000
+
+    # how long a user can wait before validating a session after starting it
+    THREEPID_SESSION_VALIDATION_TIMEOUT = 24 * 60 * 60 * 1000
+
+    # how long we keep sessions for after they've been validated
+    THREEPID_SESSION_VALID_LIFETIME = 24 * 60 * 60 * 1000
 
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def requestToken(self, emailAddress, clientSecret):
-        tokenString = sydent.util.tokenutils.generateNumericTokenOfLength(
-            int(self.sydent.cfg.get('email', 'token.length')))
+    def requestToken(self, emailAddress, clientSecret, sendAttempt):
+        valSessionStore = ThreePidValSessionStore(self.sydent)
+
+        valSession = valSessionStore.getOrCreateTokenSession(medium='email',address=emailAddress,
+                                                            clientSecret=clientSecret)
+
+        valSessionStore.setMtime(valSession.id, utime())
+
+        if valSession.sendAttemptNumber >= sendAttempt:
+            return valSession.id
 
         myHostname = os.uname()[1]
 
@@ -49,7 +62,7 @@ class EmailValidator:
 
         mailTemplateFile = self.sydent.cfg.get('email', 'email.template')
 
-        mailString = open(mailTemplateFile).read().format(token=tokenString)
+        mailString = open(mailTemplateFile).read().format(token=valSession.token)
 
         msg = MIMEMultipart('alternative')
         msg['Subject'] = self.sydent.cfg.get('email', 'email.subject')
@@ -68,7 +81,7 @@ class EmailValidator:
 
         mailServer = self.sydent.cfg.get('email', 'email.smtphost')
 
-        logger.info("Attempting to mail code %s to %s using mail server %s", tokenString, rawTo, mailServer)
+        logger.info("Attempting to mail code %s to %s using mail server %s", valSession.token, rawTo, mailServer)
 
         try:
             smtp = smtplib.SMTP(mailServer)
@@ -80,41 +93,52 @@ class EmailValidator:
             ese.cause = origException
             raise ese
 
-        threePidStore = ThreePidTokenStore(self.sydent)
-        createdMs = int(time.time() * 1000.0)
-        tokenId = threePidStore.addToken('email', rawTo, tokenString, clientSecret, createdMs)
+        valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
 
-        return tokenId
+        return valSession.id
 
-    def validateToken(self, tokenId, clientSecret, token, mxId):
-        """
-        XXX: This also binds the validated 3pid to an mxId so the structure needs a rethink.
-        """
-        threePidStore = ThreePidTokenStore(self.sydent)
-        tokenObj = threePidStore.getTokenById(tokenId)
-        if not tokenObj:
+    def validateSessionWithToken(self, sid, clientSecret, token):
+        valSessionStore = ThreePidValSessionStore(self.sydent)
+        s = valSessionStore.getTokenSessionById(sid)
+        if not s:
             return False
+
+        if not clientSecret == s.clientSecret:
+            raise IncorrectClientSecretException()
+
+        if s.mtime + EmailValidator.THREEPID_SESSION_VALIDATION_TIMEOUT < utime():
+            raise SessionExpiredException()
 
         # TODO once we can validate the token oob
         #if tokenObj.validated and clientSecret == tokenObj.clientSecret:
         #    return True
 
-        if tokenObj.tokenString == token:
-            createdAt = int(time.time() * 1000.0)
-            expires = createdAt + EmailValidator.THREEPID_ASSOCIATION_LIFETIME_MS
+        if s.token == token:
+            valSessionStore.setValidated(s.id, True)
 
-            cur = self.sydent.db.cursor()
+            return {'success':True}
 
-            # sqlite's support for upserts is atrocious but this is temporary anyway
-            cur.execute("insert or replace into threepid_associations ('medium', 'address', 'mxId', 'createdAt', 'expires')"+
-                " values (?, ?, ?, ?, ?)",
-                (tokenObj.medium, tokenObj.address, mxId, createdAt, expires))
-            self.sydent.db.commit()
+            # createdAt = utime()
+            # expires = createdAt + EmailValidator.THREEPID_ASSOCIATION_LIFETIME_MS
+            #
+            # cur = self.sydent.db.cursor()
+            #
+            # # sqlite's support for upserts is atrocious but this is temporary anyway
+            # cur.execute("insert or replace into local_threepid_associations ('medium', 'address', 'mxId', 'createdAt', 'expires')"+
+            #     " values (?, ?, ?, ?, ?)",
+            #     (s.medium, s.address, mxId, createdAt, expires))
+            # self.sydent.db.commit()
 
-            return validationutils.signedThreePidAssociation(self.sydent, tokenObj.medium, tokenObj.address,
-                                                             createdAt, expires, mxId)
+            #return validationutils.signedThreePidAssociation(self.sydent, tokenObj.medium, tokenObj.address,
+            #                                                 createdAt, expires, mxId)
         else:
             return False
+
+class IncorrectClientSecretException(Exception):
+    pass
+
+class SessionExpiredException(Exception):
+    pass
 
 class EmailAddressException(Exception):
     pass

@@ -19,7 +19,7 @@ curl -XPOST 'http://localhost:8001/matrix/identity/api/v1/validate/email/request
 
 # receive 943258 by mail
 
-curl -XPOST 'http://localhost:8001/matrix/identity/api/v1/validate/email/submitToken' -d'token=943258&tokenId=1'
+curl -XPOST 'http://localhost:8001/matrix/identity/api/v1/validate/email/submitToken' -d'token=943258&tokenId=1&mxId=%40matthew%3amatrix.org'
 {"success": true}
 
 # lookup:

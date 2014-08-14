@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2014 matrix.org
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import sydent.util.tokenutils
+
+from sydent.validators import ValidationSession
+from sydent.util import utime
+
+class ThreePidValSessionStore:
+    def __init__(self, syd):
+        self.sydent = syd
+
+    def getOrCreateTokenSession(self, medium, address, clientSecret):
+        cur = self.sydent.db.cursor()
+
+        cur.execute("select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
+                    "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
+                    "where s.medium = ? and s.address = ? and s.clientSecret = ? and t.validationSession = s.id",
+                    (medium, address, clientSecret))
+        row = cur.fetchone()
+
+        if row:
+            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5])
+            s.token = row[6]
+            s.sendAttemptNumber = row[7]
+            return s
+
+        sid = self.addValSession(medium, address, clientSecret, utime(), commit=False)
+
+        tokenString = sydent.util.tokenutils.generateNumericTokenOfLength(
+            int(self.sydent.cfg.get('email', 'token.length')))
+
+        cur.execute("insert into threepid_token_auths (validationSession, token, sendAttemptNumber) values (?, ?, ?)",
+                    (sid, tokenString, -1))
+        self.sydent.db.commit()
+
+        s = ValidationSession(sid, medium, address, clientSecret, False, utime())
+        s.token = tokenString
+        s.sendAttemptNumber = -1
+        return s
+
+
+    def addValSession(self, medium, address, clientSecret, mtime, commit=True):
+        cur = self.sydent.db.cursor()
+
+        cur.execute("insert into threepid_validation_sessions ('medium', 'address', 'clientSecret', 'mtime')"+
+            " values (?, ?, ?, ?)", (medium, address, clientSecret, mtime))
+        if commit:
+            self.sydent.db.commit()
+        return cur.lastrowid
+
+    def setSendAttemptNumber(self, sid, attemptNo):
+        cur = self.sydent.db.cursor()
+
+        cur.execute("update threepid_token_auths set sendAttemptNumber = ? where id = ?", (attemptNo, sid))
+        self.sydent.db.commit()
+
+    def setValidated(self, sid, validated):
+        cur = self.sydent.db.cursor()
+
+        cur.execute("update threepid_validation_sessions set validated = ? where id = ?", (validated, sid))
+        self.sydent.db.commit()
+
+    def setMtime(self, sid, mtime):
+        cur = self.sydent.db.cursor()
+
+        cur.execute("update threepid_validation_sessions set mtime = ? where id = ?", (mtime, sid))
+        self.sydent.db.commit()
+
+    # def getValSessionById(self, sid):
+    #     cur = self.sydent.db.cursor()
+    #
+    #     cur.execute("select id, medium, address, clientSecret, validated, createdAt from "+
+    #         "threepid_validations where id = ?", (sid))
+    #     row = cur.fetchone()
+    #
+    #     if not row:
+    #         return None
+    #
+    #     return Token(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+
+    def getTokenSessionById(self, sid):
+        cur = self.sydent.db.cursor()
+
+        cur.execute("select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
+                    "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
+                    "where s.id = ? and t.validationSession = s.id", (sid))
+        row = cur.fetchone()
+
+        if row:
+            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5])
+            s.token = row[6]
+            s.sendAttemptNumber = row[7]
+            return s
+
+        return None
+
+    # def getTokenByFeatures(self, medium, address, clientSecret):
+    #     cur = self.sydent.db.cursor()
+    #
+    #     cur.execute("select id, medium, address, token, clientSecret, validated, createdAt from "+
+    #                 "threepid_validations where medium = ? and address = ? and clientSecret = ?",
+    #                 (medium, address, clientSecret))
+    #     row = cur.fetchone()
+    #
+    #     if not row:
+    #         return None
+    #
+    #     return Token(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+

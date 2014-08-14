@@ -16,7 +16,10 @@
 
 from twisted.web.resource import Resource
 
-from sydent.validators.emailvalidator import EmailAddressException, EmailSendException
+from sydent.validators.emailvalidator import EmailAddressException, EmailSendException, SessionExpiredException
+from sydent.validators.emailvalidator import IncorrectClientSecretException
+
+from sydent.http.servlets import require_args, jsonwrap
 
 import json
 
@@ -36,20 +39,22 @@ class EmailRequestCodeServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
+    @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        if 'email' not in request.args or 'clientSecret' not in request.args:
-            request.setResponseCode(400)
-            resp = {'error': 'badrequest', 'message': "'email' and 'clientSecret' fields are required"}
-            return json.dumps(resp)
+
+        error = require_args(request, ('email', 'clientSecret', 'sendAttempt'))
+        if error:
+            return error
 
         email = request.args['email'][0]
         clientSecret = request.args['clientSecret'][0]
+        sendAttempt = request.args['sendAttempt'][0]
 
         resp = None
 
         try:
-            tokenId = self.sydent.validators.email.requestToken(email, clientSecret)
+            tokenId = self.sydent.validators.email.requestToken(email, clientSecret, sendAttempt)
         except EmailAddressException:
             request.setResponseCode(400)
             resp = {'error': 'email_invalid'}
@@ -60,12 +65,13 @@ class EmailRequestCodeServlet(Resource):
         if not resp:
             resp = {'success':True, 'tokenId':tokenId}
 
-        return json.dumps(resp).encode("UTF-8")
+        return resp
 
+    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return "{}".encode("UTF-8")
+        return {}
 
 class EmailValidateCodeServlet(Resource):
     isLeaf = True
@@ -73,25 +79,34 @@ class EmailValidateCodeServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
+    @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        if 'tokenId' not in request.args or 'token' not in request.args or 'mxId' not in request.args:
-            request.setResponseCode(400)
-            resp = {'error': 'badrequest', 'message': "'tokenId', 'token' and 'mxId' fields are required"}
-            return json.dumps(resp)
+
+        err = require_args(request, ('token', 'tokenId', 'clientSecret'))
+        if err:
+            return err
 
         tokenId = request.args['tokenId'][0]
         tokenString = request.args['token'][0]
-        mxId = request.args['mxId'][0]
+        clientSecret = request.args['clientSecret'][0]
 
-        sgassoc = self.sydent.validators.email.validateToken(tokenId, None, tokenString, mxId)
+        try:
+            sgassoc = self.sydent.validators.email.validateSessionWithToken(tokenId, clientSecret, tokenString)
+        except IncorrectClientSecretException:
+            return {'error': 'incorrect-client-secret',
+                    'message': "Client secret does not match the one given when requesting the token"}
+        except SessionExpiredException:
+            return {'error': 'session-expired',
+                    'message': "This validation session has expired: call requestToken again"}
 
         if not sgassoc:
             sgassoc = {'success':False}
 
-        return json.dumps(sgassoc).encode("UTF-8")
+        return sgassoc
 
+    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return "{}".encode("UTF-8")
+        return {}

@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#from twisted.enterprise import adbapi
-
 import ConfigParser
 import logging
 import os
+
+import twisted.internet.reactor
 
 from db.sqlitedb import SqliteDatabase
 
@@ -31,13 +31,15 @@ from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCod
 from http.servlets.lookupservlet import LookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 
+from replication.pusher import Pusher
+
 logger = logging.getLogger(__name__)
 
 class Sydent:
     CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto']
     CONFIG_DEFAULTS = {
         'server.name' : '',
-        'db.file': 'sydent.sqlite',
+        'db.file': 'sydent.db',
         'token.length': '6',
         'http.port': '8090',
         'email.template': 'res/email.template',
@@ -84,6 +86,8 @@ class Sydent:
 
         self.httpServer = HttpServer(self)
 
+        self.pusher = Pusher(self)
+
     def parse_config(self):
         self.cfg = ConfigParser.SafeConfigParser(Sydent.CONFIG_DEFAULTS)
         for sect in Sydent.CONFIG_SECTIONS:
@@ -99,7 +103,9 @@ class Sydent:
         fp.close()
 
     def run(self):
-        self.httpServer.run()
+        self.httpServer.setup()
+        self.pusher.setup()
+        twisted.internet.reactor.run()
 
 class Validators:
     pass
