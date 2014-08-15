@@ -17,7 +17,7 @@
 import sydent.util.tokenutils
 
 from sydent.validators import ValidationSession
-from sydent.util import utime
+from sydent.util import time_msec
 
 
 class ThreePidValSessionStore:
@@ -39,7 +39,7 @@ class ThreePidValSessionStore:
             s.sendAttemptNumber = row[7]
             return s
 
-        sid = self.addValSession(medium, address, clientSecret, utime(), commit=False)
+        sid = self.addValSession(medium, address, clientSecret, time_msec(), commit=False)
 
         tokenString = sydent.util.tokenutils.generateNumericTokenOfLength(
             int(self.sydent.cfg.get('email', 'token.length')))
@@ -48,7 +48,7 @@ class ThreePidValSessionStore:
                     (sid, tokenString, -1))
         self.sydent.db.commit()
 
-        s = ValidationSession(sid, medium, address, clientSecret, False, utime())
+        s = ValidationSession(sid, medium, address, clientSecret, False, time_msec())
         s.token = tokenString
         s.sendAttemptNumber = -1
         return s

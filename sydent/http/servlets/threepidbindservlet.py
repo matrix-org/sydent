@@ -25,16 +25,16 @@ class ThreePidBindServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request):
-        err = require_args(request, ('sid', 'clientSecret', 'mxId'))
+        err = require_args(request, ('sid', 'clientSecret', 'mxid'))
         if err:
             return err
 
         sid = request.args['sid'][0]
         clientSecret = request.args['clientSecret'][0]
-        mxId = request.args['mxId'][0]
+        mxid = request.args['mxid'][0]
 
         try:
-            res = self.sydent.threepidBinder.addBinding(sid, clientSecret, mxId)
+            res = self.sydent.threepidBinder.addBinding(sid, clientSecret, mxid)
             return res
         except IncorrectClientSecretException:
             return {'error': 'incorrect-client-secret',

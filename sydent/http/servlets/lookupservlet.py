@@ -38,15 +38,15 @@ class LookupServlet(Resource):
         cur = self.sydent.db.cursor()
 
         # sqlite's support for upserts is atrocious but this is temporary anyway
-        res = cur.execute("select mxId,createdAt,expires from threepid_associations "+
+        res = cur.execute("select mxid,createdAt,expires from threepid_associations "+
                     "where medium = ? and address = ?", (medium, address))
         row = res.fetchone()
         if not row:
             return json.dumps({})
 
-        mxId = row[0]
+        mxid = row[0]
         created = row[1]
         expires = row[2]
 
-        sgassoc = validationutils.signedThreePidAssociation(self.sydent, medium, address, mxId, created, expires)
+        sgassoc = validationutils.signedThreePidAssociation(self.sydent, medium, address, mxid, created, expires)
         return json.dumps(sgassoc)

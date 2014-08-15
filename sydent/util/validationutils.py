@@ -16,13 +16,12 @@
 
 import syutil.crypto.jsonsign
 
-from sydent.threepid import ThreepidAssociation
-
 
 def signedThreePidAssociation(sydent, assoc):
     sgassoc = { 'medium': assoc.medium,
                 'address': assoc.address,
-                'mxid': assoc.mxId,
+                'mxid': assoc.mxid,
+                'ts': assoc.ts,
                 'not_before': assoc.not_before,
                 'not_after': assoc.not_after
               }

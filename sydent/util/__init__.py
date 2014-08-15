@@ -16,8 +16,5 @@
 
 import time
 
-def utime():
+def time_msec():
     return int(time.time() * 1000)
-
-def posixtime():
-    return int(time.time())

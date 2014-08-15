@@ -14,10 +14,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+def threePidAssocFromDict(d):
+    assoc = ThreepidAssociation(d['medium'], d['address'], d['mxid'], d['ts'], d['not_before'], d['not_after'])
+    if 'signatures' in d and len(d['signatures']) > 0:
+        firstSigName = d['signatures'].keys()[0]
+        serverName = firstSigName.split(":")[0]
+
+        assoc.originServer = serverName
+    return assoc
+
 class ThreepidAssociation:
-    def __init__(self, medium, address, mxId, not_before, not_after):
+    def __init__(self, medium, address, mxid, ts, not_before, not_after):
+        """
+        :param medium: The medium of the 3pid (eg. email)
+        :param address: The identifier (eg. email address)
+        :param mxid: The matrix ID the 3pid is associated with
+        :param ts: The creation timestamp of this association, ms
+        :param not_before: The timestamp, in ms, at which this association becomes valid
+        :param not_after: The timestamp, in ms, at which this association ceases to be valid
+        """
         self.medium = medium
         self.address = address
-        self.mxId = mxId
+        self.mxid = mxid
+        self.ts = ts
         self.not_before = not_before
         self.not_after = not_after
+
+class GlobalThreepidAssociation(ThreepidAssociation):
+    """
+    Extra attributes:
+    originServer: The ID server that is asserting the association
+    originId: The ID of this association on the origin server
+    """
+    pass

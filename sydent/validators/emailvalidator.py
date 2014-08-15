@@ -25,7 +25,7 @@ from email.mime.multipart import MIMEMultipart
 
 from sydent.db.valsession import ThreePidValSessionStore
 
-from sydent.util import utime
+from sydent.util import time_msec
 
 from sydent.validators import IncorrectClientSecretException, SessionExpiredException
 
@@ -48,7 +48,7 @@ class EmailValidator:
         valSession = valSessionStore.getOrCreateTokenSession(medium='email', address=emailAddress,
                                                              clientSecret=clientSecret)
 
-        valSessionStore.setMtime(valSession.id, utime())
+        valSessionStore.setMtime(valSession.id, time_msec())
 
         if valSession.sendAttemptNumber >= sendAttempt:
             return valSession.id
@@ -104,7 +104,7 @@ class EmailValidator:
         if not clientSecret == s.clientSecret:
             raise IncorrectClientSecretException()
 
-        if s.mtime + EmailValidator.THREEPID_SESSION_VALIDATION_TIMEOUT < utime():
+        if s.mtime + EmailValidator.THREEPID_SESSION_VALIDATION_TIMEOUT < time_msec():
             raise SessionExpiredException()
 
         # TODO once we can validate the token oob

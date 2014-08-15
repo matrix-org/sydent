@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sydent.util import time_msec
+
+from sydent.threepid import ThreepidAssociation
 
 class LocalAssociationStore:
     def __init__(self, sydent):
@@ -24,7 +27,66 @@ class LocalAssociationStore:
 
         # sqlite's support for upserts is atrocious
         cur.execute("insert or replace into local_threepid_associations "
-                    "('medium', 'address', 'mxId', 'createdAt', 'expires')"
-                    " values (?, ?, ?, ?, ?)",
-            (assoc.medium, assoc.address, assoc.mxId, assoc.not_before, assoc.not_after))
+                    "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter')"
+                    " values (?, ?, ?, ?, ?, ?)",
+            (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
+
+    def getAssociationsAfterId(self, afterId, limit):
+        cur = self.sydent.db.cursor()
+
+        q = "select id, medium, address, mxid, ts, notBefore, notAfter from local_threepid_associations " \
+            "where id > ? order by id asc"
+        if limit is not None:
+            q += " limit ?"
+            res = cur.execute(q, (afterId, limit))
+        else:
+            # No no, no no no no, no no no no, no no, there's no limit.
+            res = cur.execute(q, (afterId,))
+
+        tuples = []
+        for row in res.fetchall():
+            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6])
+            tuples.append( (row[0], assoc) )
+
+        return tuples
+
+class GlobalAssociationStore:
+    def __init__(self, sydent):
+        self.sydent = sydent
+
+    def associationForThreepid(self, medium, address):
+        cur = self.sydent.db.cursor()
+        res = cur.execute("select sgAssoc from global_threepid_associations where "
+                    "medium = ? and address = ? and notBefore > ? and notAfter < ? "
+                    "order by ts desc limit 1",
+            (medium, address, time_msec(), time_msec()))
+
+        row = res.fetchone()
+
+        return row
+
+    def addAssociation(self, assoc, rawSgAssoc):
+        """
+        :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
+        :param sgAssoc The original raw bytes of the signed association
+        :return:
+        """
+        cur = self.sydent.db.cursor()
+        res = cur.execute("insert into global_threepid_associations "
+                          "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
+                          "(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                          (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
+                          assoc.originServer, assoc.originId, rawSgAssoc))
+        self.sydent.db.commit()
+
+    def lastIdFromServer(self, server):
+        cur = self.sydent.db.cursor()
+        res = cur.execute("select max(originId),count(originId) from global_threepid_associations "
+                          "where originServer = ?", (server,))
+        row = res.fetchone()
+
+        if row[1] == 0:
+            return None
+
+        return row[0]
