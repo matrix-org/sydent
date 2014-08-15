@@ -80,17 +80,17 @@ class ThreePidValSessionStore:
         cur.execute("update threepid_validation_sessions set mtime = ? where id = ?", (mtime, sid))
         self.sydent.db.commit()
 
-    # def getValSessionById(self, sid):
-    #     cur = self.sydent.db.cursor()
-    #
-    #     cur.execute("select id, medium, address, clientSecret, validated, createdAt from "+
-    #         "threepid_validations where id = ?", (sid))
-    #     row = cur.fetchone()
-    #
-    #     if not row:
-    #         return None
-    #
-    #     return Token(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+    def getSessionById(self, sid):
+         cur = self.sydent.db.cursor()
+
+         cur.execute("select id, medium, address, clientSecret, validated, mtime from "+
+             "threepid_validation_sessions where id = ?", (sid))
+         row = cur.fetchone()
+
+         if not row:
+             return None
+
+         return ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5])
 
     def getTokenSessionById(self, sid):
         cur = self.sydent.db.cursor()

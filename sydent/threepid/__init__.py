@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
-
-def utime():
-    return int(time.time() * 1000)
-
-def posixtime():
-    return int(time.time())
+class ThreepidAssociation:
+    def __init__(self, medium, address, mxId, not_before, not_after):
+        self.medium = medium
+        self.address = address
+        self.mxId = mxId
+        self.not_before = not_before
+        self.not_after = not_after

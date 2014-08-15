@@ -25,7 +25,7 @@ def require_args(request, rqArgs):
 
     if len(missing) > 0:
         request.setResponseCode(400)
-        msg = "Missing args:"+(",".join(missing))
+        msg = "Missing args: "+(",".join(missing))
         return {'error': 'badrequest', 'message': msg}
 
 def jsonwrap(f):

@@ -16,15 +16,17 @@
 
 import syutil.crypto.jsonsign
 
+from sydent.threepid import ThreepidAssociation
 
-def signedThreePidAssociation(sydent, medium, address, mxId, not_before, not_after):
-    sgassoc = { 'medium': medium,
-                'address': address,
-                'mxid': mxId,
-                'not_before': not_before,
-                'not_after': not_after
+
+def signedThreePidAssociation(sydent, assoc):
+    sgassoc = { 'medium': assoc.medium,
+                'address': assoc.address,
+                'mxid': assoc.mxId,
+                'not_before': assoc.not_before,
+                'not_after': assoc.not_after
               }
-    sgassoc = syutil.jsonsign.sign_json(sgassoc, sydent.server_name, sydent.keyring.ed25519)
+    sgassoc = syutil.crypto.jsonsign.sign_json(sgassoc, sydent.server_name, sydent.keyring.ed25519)
     return sgassoc
 
 

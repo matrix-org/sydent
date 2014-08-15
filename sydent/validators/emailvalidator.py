@@ -25,15 +25,14 @@ from email.mime.multipart import MIMEMultipart
 
 from sydent.db.valsession import ThreePidValSessionStore
 
-from sydent.util import validationutils, utime
+from sydent.util import utime
+
+from sydent.validators import IncorrectClientSecretException, SessionExpiredException
 
 logger = logging.getLogger(__name__)
 
 
 class EmailValidator:
-    # the lifetime of a 3pid association
-    THREEPID_ASSOCIATION_LIFETIME_MS = 100 * 365 * 24 * 60 * 60 * 1000
-
     # how long a user can wait before validating a session after starting it
     THREEPID_SESSION_VALIDATION_TIMEOUT = 24 * 60 * 60 * 1000
 
@@ -116,30 +115,8 @@ class EmailValidator:
             valSessionStore.setValidated(s.id, True)
 
             return {'success': True}
-
-            # createdAt = utime()
-            # expires = createdAt + EmailValidator.THREEPID_ASSOCIATION_LIFETIME_MS
-            #
-            # cur = self.sydent.db.cursor()
-            #
-            # # sqlite's support for upserts is atrocious but this is temporary anyway
-            # cur.execute("insert or replace into local_threepid_associations ('medium', 'address', 'mxId', 'createdAt', 'expires')"+
-            #     " values (?, ?, ?, ?, ?)",
-            #     (s.medium, s.address, mxId, createdAt, expires))
-            # self.sydent.db.commit()
-
-            #return validationutils.signedThreePidAssociation(self.sydent, tokenObj.medium, tokenObj.address,
-            #                                                 createdAt, expires, mxId)
         else:
             return False
-
-
-class IncorrectClientSecretException(Exception):
-    pass
-
-
-class SessionExpiredException(Exception):
-    pass
 
 
 class EmailAddressException(Exception):

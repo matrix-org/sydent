@@ -52,7 +52,7 @@ class EmailRequestCodeServlet(Resource):
         resp = None
 
         try:
-            tokenId = self.sydent.validators.email.requestToken(email, clientSecret, sendAttempt)
+            sid = self.sydent.validators.email.requestToken(email, clientSecret, sendAttempt)
         except EmailAddressException:
             request.setResponseCode(400)
             resp = {'error': 'email_invalid'}
@@ -61,7 +61,7 @@ class EmailRequestCodeServlet(Resource):
             resp = {'error': 'send_error'}
 
         if not resp:
-            resp = {'success': True, 'tokenId': tokenId}
+            resp = {'success': True, 'sid': sid}
 
         return resp
 
@@ -82,16 +82,16 @@ class EmailValidateCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        err = require_args(request, ('token', 'tokenId', 'clientSecret'))
+        err = require_args(request, ('token', 'sid', 'clientSecret'))
         if err:
             return err
 
-        tokenId = request.args['tokenId'][0]
+        sid = request.args['sid'][0]
         tokenString = request.args['token'][0]
         clientSecret = request.args['clientSecret'][0]
 
         try:
-            sgassoc = self.sydent.validators.email.validateSessionWithToken(tokenId, clientSecret, tokenString)
+            resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)
         except IncorrectClientSecretException:
             return {'error': 'incorrect-client-secret',
                     'message': "Client secret does not match the one given when requesting the token"}
@@ -99,10 +99,10 @@ class EmailValidateCodeServlet(Resource):
             return {'error': 'session-expired',
                     'message': "This validation session has expired: call requestToken again"}
 
-        if not sgassoc:
-            sgassoc = {'success': False}
+        if not resp:
+            resp = {'success': False}
 
-        return sgassoc
+        return resp
 
     @jsonwrap
     def render_OPTIONS(self, request):

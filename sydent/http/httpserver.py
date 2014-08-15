@@ -44,6 +44,9 @@ class HttpServer:
 
         lookup = self.sydent.servlets.lookup
 
+        threepid = Resource()
+        bind = self.sydent.servlets.threepidBind
+
         pubkey = Resource()
         pk_ed25519 = self.sydent.servlets.pubkey_ed25519
 
@@ -59,6 +62,9 @@ class HttpServer:
 
         v1.putChild('pubkey', pubkey)
         pubkey.putChild('ed25519', pk_ed25519)
+
+        v1.putChild('3pid', threepid)
+        threepid.putChild('bind', bind)
 
         email.putChild('requestToken', emailReqCode)
         email.putChild('submitToken', emailValCode)

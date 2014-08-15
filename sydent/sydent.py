@@ -30,6 +30,9 @@ from sign.ed25519 import SydentEd25519
 from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
 from http.servlets.lookupservlet import LookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
+from http.servlets.threepidbindservlet import ThreePidBindServlet
+
+from threepid.bind import ThreepidBinder
 
 from replication.pusher import Pusher
 
@@ -77,12 +80,16 @@ class Sydent:
 
         self.keyring = Keyring()
         self.keyring.ed25519 = SydentEd25519(self).signing_key
+        self.keyring.ed25519.alg = 'ed25519'
 
         self.servlets = Servlets()
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
+        self.servlets.threepidBind = ThreePidBindServlet(self)
+
+        self.threepidBinder = ThreepidBinder(self)
 
         self.httpServer = HttpServer(self)
 

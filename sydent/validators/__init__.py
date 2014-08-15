@@ -24,3 +24,14 @@ class ValidationSession:
         self.validated = _validated
         self.mtime = _mtime
 
+
+class IncorrectClientSecretException(Exception):
+    pass
+
+
+class SessionExpiredException(Exception):
+    pass
+
+
+class InvalidSessionIdException(Exception):
+    pass

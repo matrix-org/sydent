@@ -14,10 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
 
-def utime():
-    return int(time.time() * 1000)
+class LocalAssociationStore:
+    def __init__(self, sydent):
+        self.sydent = sydent
 
-def posixtime():
-    return int(time.time())
+    def addOrUpdateAssociation(self, assoc):
+        cur = self.sydent.db.cursor()
+
+        # sqlite's support for upserts is atrocious
+        cur.execute("insert or replace into local_threepid_associations "
+                    "('medium', 'address', 'mxId', 'createdAt', 'expires')"
+                    " values (?, ?, ?, ?, ?)",
+            (assoc.medium, assoc.address, assoc.mxId, assoc.not_before, assoc.not_after))
+        self.sydent.db.commit()
