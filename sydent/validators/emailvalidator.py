@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sydent.util.tokenutils
 import smtplib
 import os
 import email.utils
