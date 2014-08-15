@@ -21,8 +21,6 @@ from sydent.validators.emailvalidator import IncorrectClientSecretException
 
 from sydent.http.servlets import require_args, jsonwrap
 
-import json
-
 
 def send_cors(request):
     request.setHeader(b"Content-Type", b"application/json")
