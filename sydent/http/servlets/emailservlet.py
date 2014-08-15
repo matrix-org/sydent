@@ -61,7 +61,7 @@ class EmailRequestCodeServlet(Resource):
             resp = {'error': 'send_error'}
 
         if not resp:
-            resp = {'success':True, 'tokenId':tokenId}
+            resp = {'success': True, 'tokenId': tokenId}
 
         return resp
 
@@ -70,6 +70,7 @@ class EmailRequestCodeServlet(Resource):
         send_cors(request)
         request.setResponseCode(200)
         return {}
+
 
 class EmailValidateCodeServlet(Resource):
     isLeaf = True
@@ -99,7 +100,7 @@ class EmailValidateCodeServlet(Resource):
                     'message': "This validation session has expired: call requestToken again"}
 
         if not sgassoc:
-            sgassoc = {'success':False}
+            sgassoc = {'success': False}
 
         return sgassoc
 

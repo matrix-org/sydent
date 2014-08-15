@@ -19,6 +19,7 @@ import sydent.util.tokenutils
 from sydent.validators import ValidationSession
 from sydent.util import utime
 
+
 class ThreePidValSessionStore:
     def __init__(self, syd):
         self.sydent = syd
@@ -52,11 +53,10 @@ class ThreePidValSessionStore:
         s.sendAttemptNumber = -1
         return s
 
-
     def addValSession(self, medium, address, clientSecret, mtime, commit=True):
         cur = self.sydent.db.cursor()
 
-        cur.execute("insert into threepid_validation_sessions ('medium', 'address', 'clientSecret', 'mtime')"+
+        cur.execute("insert into threepid_validation_sessions ('medium', 'address', 'clientSecret', 'mtime')" +
             " values (?, ?, ?, ?)", (medium, address, clientSecret, mtime))
         if commit:
             self.sydent.db.commit()
@@ -97,7 +97,7 @@ class ThreePidValSessionStore:
 
         cur.execute("select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
                     "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
-                    "where s.id = ? and t.validationSession = s.id", (sid))
+                    "where s.id = ? and t.validationSession = s.id", (sid,))
         row = cur.fetchone()
 
         if row:
@@ -120,4 +120,3 @@ class ThreePidValSessionStore:
     #         return None
     #
     #     return Token(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
-

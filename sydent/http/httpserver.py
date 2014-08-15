@@ -23,6 +23,7 @@ import twisted.internet.reactor
 
 logger = logging.getLogger(__name__)
 
+
 class HttpServer:
     def __init__(self, sydent):
         self.sydent = sydent

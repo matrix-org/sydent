@@ -18,11 +18,11 @@ import syutil.crypto.jsonsign
 
 
 def signedThreePidAssociation(sydent, medium, address, mxId, not_before, not_after):
-    sgassoc = { 'medium' : medium,
-                'address' : address,
-                'mxid' : mxId,
-                'not_before':not_before,
-                'not_after':not_after
+    sgassoc = { 'medium': medium,
+                'address': address,
+                'mxid': mxId,
+                'not_before': not_before,
+                'not_after': not_after
               }
     sgassoc = syutil.jsonsign.sign_json(sgassoc, sydent.server_name, sydent.keyring.ed25519)
     return sgassoc

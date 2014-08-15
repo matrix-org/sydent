@@ -27,8 +27,8 @@ from sydent.db.valsession import ThreePidValSessionStore
 
 from sydent.util import validationutils, utime
 
-
 logger = logging.getLogger(__name__)
+
 
 class EmailValidator:
     # the lifetime of a 3pid association
@@ -46,8 +46,8 @@ class EmailValidator:
     def requestToken(self, emailAddress, clientSecret, sendAttempt):
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
-        valSession = valSessionStore.getOrCreateTokenSession(medium='email',address=emailAddress,
-                                                            clientSecret=clientSecret)
+        valSession = valSessionStore.getOrCreateTokenSession(medium='email', address=emailAddress,
+                                                             clientSecret=clientSecret)
 
         valSessionStore.setMtime(valSession.id, utime())
 
@@ -115,7 +115,7 @@ class EmailValidator:
         if s.token == token:
             valSessionStore.setValidated(s.id, True)
 
-            return {'success':True}
+            return {'success': True}
 
             # createdAt = utime()
             # expires = createdAt + EmailValidator.THREEPID_ASSOCIATION_LIFETIME_MS
@@ -133,14 +133,18 @@ class EmailValidator:
         else:
             return False
 
+
 class IncorrectClientSecretException(Exception):
     pass
+
 
 class SessionExpiredException(Exception):
     pass
 
+
 class EmailAddressException(Exception):
     pass
+
 
 class EmailSendException(Exception):
     pass
