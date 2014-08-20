@@ -23,6 +23,8 @@ import syutil.crypto.jsonsign
 import logging
 import json
 
+from StringIO import StringIO
+
 import nacl.signing
 import nacl.encoding
 
@@ -52,7 +54,7 @@ class LocalPeer(Peer):
     The local peer (ourselves: essentially copying from the local associations table to the global one)
     """
     def __init__(self, sydent):
-        super(LocalPeer, self).__init__(sydent.server_name)
+        super(LocalPeer, self).__init__(sydent.server_name, {})
         self.sydent = sydent
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
@@ -95,7 +97,7 @@ class RemotePeer(Peer):
         agent = Agent(twisted.internet.reactor)
         headers = Headers({'Content-Type':['application/json']})
         uri = "https://%s/matrix/identity/replicate/v1/push" % (self.servername)
-        reqDeferred = agent.request('POST', uri, headers, FileBodyProducer(json.dump(body)))
+        reqDeferred = agent.request('POST', uri.encode('utf8'), headers, FileBodyProducer(StringIO(json.dumps(body))))
 
         updateDeferred = twisted.internet.defer.Deferred()
 
