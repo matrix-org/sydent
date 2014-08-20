@@ -37,11 +37,11 @@ class ThreePidBindServlet(Resource):
             res = self.sydent.threepidBinder.addBinding(sid, clientSecret, mxid)
             return res
         except IncorrectClientSecretException:
-            return {'error': 'incorrect-client-secret',
-                    'message': "Client secret does not match the one given when requesting the token"}
+            return {'errcode': 'M_INCORRECT_CLIENT_SECRET',
+                    'error': "Client secret does not match the one given when requesting the token"}
         except SessionExpiredException:
-            return {'error': 'session-expired',
-                    'message': "This validation session has expired: call requestToken again"}
+            return {'errcode': 'M_SESSION_EXPIRED',
+                    'error': "This validation session has expired: call requestToken again"}
         except InvalidSessionIdException:
-            return {'error': 'invalid-session-id',
-                    'message': "Unknown session ID"}
+            return {'errcode': 'M_INVALID_SESSION_ID',
+                    'error': "Unknown session ID"}

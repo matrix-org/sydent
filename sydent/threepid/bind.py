@@ -18,7 +18,8 @@ from sydent.db.valsession import ThreePidValSessionStore
 from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.validators import InvalidSessionIdException, IncorrectClientSecretException
 
-from sydent.util import validationutils, time_msec
+from sydent.util import time_msec
+from sydent.threepid.assocsigner import AssociationSigner
 
 from sydent.threepid import ThreepidAssociation
 
@@ -50,6 +51,7 @@ class ThreepidBinder:
 
         self.sydent.pusher.doLocalPush()
 
-        sgassoc = validationutils.signedThreePidAssociation(self.sydent, assoc)
+        assocSigner = AssociationSigner(self.sydent)
+        sgassoc = assocSigner.signedThreePidAssociation(assoc)
 
         return sgassoc

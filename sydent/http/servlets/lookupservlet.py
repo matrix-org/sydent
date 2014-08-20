@@ -15,10 +15,12 @@
 # limitations under the License.
 
 from twisted.web.resource import Resource
+from sydent.db.threepid_associations import GlobalAssociationStore
 
 import json
 
-from sydent.util import validationutils
+from sydent.threepid.assocsigner import AssociationSigner
+from sydent.http.servlets import jsonwrap, require_args
 
 class LookupServlet(Resource):
     isLeaf = True
@@ -26,27 +28,29 @@ class LookupServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
+    @jsonwrap
     def render_GET(self, request):
-        if not 'medium' in request.args or not 'address' in request.args:
-            request.setResponseCode(400)
-            resp = {'error': 'badrequest', 'message': "'medium' and 'address' fields are required"}
-            return json.dumps(resp)
+        err = require_args(request, ('medium', 'address'))
+        if err:
+            return err
 
         medium = request.args['medium'][0]
         address = request.args['address'][0]
 
-        cur = self.sydent.db.cursor()
+        globalAssocStore = GlobalAssociationStore(self.sydent)
 
-        # sqlite's support for upserts is atrocious but this is temporary anyway
-        res = cur.execute("select mxid,createdAt,expires from threepid_associations "+
-                    "where medium = ? and address = ?", (medium, address))
-        row = res.fetchone()
-        if not row:
+        assoc = globalAssocStore.associationForThreepid(medium, address)
+
+        if not assoc:
             return json.dumps({})
 
         mxid = row[0]
         created = row[1]
         expires = row[2]
 
-        sgassoc = validationutils.signedThreePidAssociation(self.sydent, medium, address, mxid, created, expires)
+        assocSigner = AssociationSigner(self.sydent)
+
+        dfljgdlfgj
+
+        sgassoc = assocSigner.signedThreePidAssociation(medium, address, mxid, created, expires)
         return json.dumps(sgassoc)

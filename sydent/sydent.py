@@ -19,10 +19,11 @@ import logging
 import os
 
 import twisted.internet.reactor
+from twisted.python import log
 
 from db.sqlitedb import SqliteDatabase
 
-from http.httpserver import HttpServer
+from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
 from validators.emailvalidator import EmailValidator
 
 from sign.ed25519 import SydentEd25519
@@ -31,6 +32,7 @@ from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCod
 from http.servlets.lookupservlet import LookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
+from http.servlets.replication import ReplicationPushServlet
 
 from threepid.bind import ThreepidBinder
 
@@ -44,7 +46,10 @@ class Sydent:
         'server.name' : '',
         'db.file': 'sydent.db',
         'token.length': '6',
-        'http.port': '8090',
+        'clientapi.http.port': '8090',
+        'replication.https.certfile':'',
+        'replication.https.cacert':'', # This should only be used for testing
+        'replication.https.port': '4434',
         'email.template': 'res/email.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
@@ -63,6 +68,8 @@ class Sydent:
         else:
             logging.basicConfig(level=logging.INFO, filename=logPath)
 
+        observer = log.PythonLoggingObserver()
+        observer.start()
 
         self.db = SqliteDatabase(self).db
 
@@ -88,10 +95,12 @@ class Sydent:
         self.servlets.lookup = LookupServlet(self)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.threepidBind = ThreePidBindServlet(self)
+        self.servlets.replicationPush = ReplicationPushServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 
-        self.httpServer = HttpServer(self)
+        self.clientApiHttpServer = ClientApiHttpServer(self)
+        self.replicationHttpsServer = ReplicationHttpsServer(self)
 
         self.pusher = Pusher(self)
 
@@ -110,7 +119,8 @@ class Sydent:
         fp.close()
 
     def run(self):
-        self.httpServer.setup()
+        self.clientApiHttpServer.setup()
+        self.replicationHttpsServer.setup()
         self.pusher.setup()
         twisted.internet.reactor.run()
 

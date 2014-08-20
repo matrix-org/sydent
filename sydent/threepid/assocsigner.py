@@ -14,21 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
+import syutil.crypto.jsonsign
 
+class AssociationSigner:
+    def __init__(self, sydent):
+        self.sydent = sydent
 
-def require_args(request, rqArgs):
-    missing = []
-    for a in rqArgs:
-        if a not in request.args:
-            missing.append(a)
-
-    if len(missing) > 0:
-        request.setResponseCode(400)
-        msg = "Missing parameters: "+(",".join(missing))
-        return {'errcode': 'M_MISSING_PARAMS', 'error': msg}
-
-def jsonwrap(f):
-    def inner(*args, **kwargs):
-        return json.dumps(f(*args, **kwargs)).encode("UTF-8")
-    return inner
+    def signedThreePidAssociation(self, assoc):
+        sgassoc = { 'medium': assoc.medium,
+                    'address': assoc.address,
+                    'mxid': assoc.mxid,
+                    'ts': assoc.ts,
+                    'not_before': assoc.not_before,
+                    'not_after': assoc.not_after
+                  }
+        sgassoc = syutil.crypto.jsonsign.sign_json(sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519)
+        return sgassoc

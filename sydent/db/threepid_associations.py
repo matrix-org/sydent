@@ -16,7 +16,9 @@
 
 from sydent.util import time_msec
 
-from sydent.threepid import ThreepidAssociation
+from sydent.threepid import ThreepidAssociation, threePidAssocFromDict
+
+import json
 
 class LocalAssociationStore:
     def __init__(self, sydent):
@@ -35,6 +37,9 @@ class LocalAssociationStore:
     def getAssociationsAfterId(self, afterId, limit):
         cur = self.sydent.db.cursor()
 
+        if afterId is None:
+            afterId = -1
+
         q = "select id, medium, address, mxid, ts, notBefore, notAfter from local_threepid_associations " \
             "where id > ? order by id asc"
         if limit is not None:
@@ -44,18 +49,18 @@ class LocalAssociationStore:
             # No no, no no no no, no no no no, no no, there's no limit.
             res = cur.execute(q, (afterId,))
 
-        tuples = []
+        assocs = {}
         for row in res.fetchall():
             assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6])
-            tuples.append( (row[0], assoc) )
+            assocs[row[0]] = assoc
 
-        return tuples
+        return assocs
 
 class GlobalAssociationStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def associationForThreepid(self, medium, address):
+    def signedAssociationForThreepid(self, medium, address):
         cur = self.sydent.db.cursor()
         res = cur.execute("select sgAssoc from global_threepid_associations where "
                     "medium = ? and address = ? and notBefore > ? and notAfter < ? "
@@ -64,9 +69,18 @@ class GlobalAssociationStore:
 
         row = res.fetchone()
 
-        return row
+        if not row:
+            return None
 
-    def addAssociation(self, assoc, rawSgAssoc):
+        sgAssocBytes = row[0]
+
+        sgAssocJsonObj = json.loads(sgAssocBytes)
+
+        sgAssoc = threePidAssocFromDict(sgAssocJsonObj)
+
+        return sgAssoc
+
+    def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
         :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
         :param sgAssoc The original raw bytes of the signed association
@@ -77,8 +91,9 @@ class GlobalAssociationStore:
                           "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
                           "(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                           (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
-                          assoc.originServer, assoc.originId, rawSgAssoc))
-        self.sydent.db.commit()
+                          originServer, originId, rawSgAssoc))
+        if commit:
+            self.sydent.db.commit()
 
     def lastIdFromServer(self, server):
         cur = self.sydent.db.cursor()

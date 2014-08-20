@@ -16,11 +16,6 @@
 
 def threePidAssocFromDict(d):
     assoc = ThreepidAssociation(d['medium'], d['address'], d['mxid'], d['ts'], d['not_before'], d['not_after'])
-    if 'signatures' in d and len(d['signatures']) > 0:
-        firstSigName = d['signatures'].keys()[0]
-        serverName = firstSigName.split(":")[0]
-
-        assoc.originServer = serverName
     return assoc
 
 class ThreepidAssociation:
@@ -39,11 +34,3 @@ class ThreepidAssociation:
         self.ts = ts
         self.not_before = not_before
         self.not_after = not_after
-
-class GlobalThreepidAssociation(ThreepidAssociation):
-    """
-    Extra attributes:
-    originServer: The ID server that is asserting the association
-    originId: The ID of this association on the origin server
-    """
-    pass

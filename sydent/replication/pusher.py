@@ -14,34 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 import twisted.internet.reactor
 import twisted.internet.task
 
-from Peer import LocalPeer
+from sydent.replication.peer import LocalPeer
 from sydent.db.threepid_associations import LocalAssociationStore
-from sydent.util.validationutils import signedThreePidAssociation
+from sydent.db.peers import PeerStore
+from sydent.threepid.assocsigner import AssociationSigner
+
+logger = logging.getLogger(__name__)
+
 
 class Pusher:
     def __init__(self, sydent):
         self.sydent = sydent
+        self.pushing = False
+        self.peerStore = PeerStore(self.sydent)
 
     def setup(self):
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
         cb.start(10.0)
 
     def getSignedAssociationsAfterId(self, afterId, limit):
-        signedAssocTuples = []
+        signedAssocs = {}
 
         localAssocStore = LocalAssociationStore(self.sydent)
-        localAssocTuples = localAssocStore.getAssociationsAfterId(afterId, limit)
+        localAssocs = localAssocStore.getAssociationsAfterId(afterId, limit)
 
-        for tup in localAssocTuples:
-            (localId, assoc) = tup
+        assocSigner = AssociationSigner(self.sydent)
 
-            sgAssoc = signedThreePidAssociation(self.sydent, assoc)
-            signedAssocTuples.append( (localId, sgAssoc) )
+        for localId,assoc in localAssocs:
+            sgAssoc = assocSigner(assoc)
+            signedAssocs[localId] = sgAssoc
 
-        return signedAssocTuples
+        return signedAssocs
 
     def doLocalPush(self):
         """
@@ -52,10 +60,39 @@ class Pusher:
         """
         localPeer = LocalPeer(self.sydent)
 
-        signedAssocTuples = self.getSignedAssociationsAfterId(localPeer.lastId, None)
+        signedAssocs = self.getSignedAssociationsAfterId(localPeer.lastId, None)
 
-        localPeer.pushUpdates(signedAssocTuples)
-
+        localPeer.pushUpdates(signedAssocs)
 
     def scheduledPush(self):
-        print "PUSH!"
+        if self.pushing:
+            return
+        self.pushing = True
+
+        updateDeferred = None
+
+        try:
+            peers = self.peerStore.getAllPeers()
+
+            for p in peers:
+                signedAssocTuples = self.getSignedAssociationsAfterId(p.lastSentVersion, 100)
+                if len(signedAssocTuples) > 0:
+                    logger.info("Pushing %d updates to %s", len(signedAssocTuples), p.servername)
+                    updateDeferred = p.pushUpdates(signedAssocTuples)
+                    updateDeferred.addCallback(Pusher._pushSucceeded, (self,p))
+                    updateDeferred.addErrback(Pusher._pushFailed, (self,p))
+                    break
+        finally:
+            if not updateDeferred:
+                self.pushing = False
+
+    def _pushSucceeded(self, peer):
+        logger.info("Pushed updates to %s", peer.servername)
+        self.pushing = False
+        self.scheduledPush()
+        pass
+
+    def _pushFailed(self, peer):
+        logger.info("Failed to push updates to %s", peer.servername)
+        self.pushing = False
+        pass

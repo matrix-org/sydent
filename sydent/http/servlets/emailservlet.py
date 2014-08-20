@@ -55,10 +55,10 @@ class EmailRequestCodeServlet(Resource):
             sid = self.sydent.validators.email.requestToken(email, clientSecret, sendAttempt)
         except EmailAddressException:
             request.setResponseCode(400)
-            resp = {'error': 'email_invalid'}
+            resp = {'errcode': 'M_INVALID_EMAIL', 'error':'Invalid email address'}
         except EmailSendException:
             request.setResponseCode(500)
-            resp = {'error': 'send_error'}
+            resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to sent email'}
 
         if not resp:
             resp = {'success': True, 'sid': sid}
@@ -93,11 +93,11 @@ class EmailValidateCodeServlet(Resource):
         try:
             resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)
         except IncorrectClientSecretException:
-            return {'error': 'incorrect-client-secret',
-                    'message': "Client secret does not match the one given when requesting the token"}
+            return {'errcode': 'M_INCORRECT_CLIENT_SECRET',
+                    'error': "Client secret does not match the one given when requesting the token"}
         except SessionExpiredException:
-            return {'error': 'session-expired',
-                    'message': "This validation session has expired: call requestToken again"}
+            return {'errcode': 'M_SESSION_EXPIRED',
+                    'error': "This validation session has expired: call requestToken again"}
 
         if not resp:
             resp = {'success': False}
