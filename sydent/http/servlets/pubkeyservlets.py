@@ -26,7 +26,7 @@ class Ed25519Servlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
-        pubKey = self.sydent.signers.ed25519.signing_key.verify_key
+        pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyHex = pubKey.encode(encoder=nacl.encoding.HexEncoder)
 
         return json.dumps({'public_key':pubKeyHex})
