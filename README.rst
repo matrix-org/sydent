@@ -14,19 +14,19 @@ Requests
 
 The requests that synapse servers and clients submit to the identity server are, briefly, as follows:
 
-curl -XPOST 'http://localhost:8001/matrix/identity/api/v1/validate/email/requestToken' -d'email=matthew@arasphere.net&clientSecret=abcd'
+curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/validate/email/requestToken' -d'email=matthew@arasphere.net&clientSecret=abcd'
 {"success": true, "tokenId": 1}
 
 # receive 943258 by mail
 
-curl -XPOST 'http://localhost:8001/matrix/identity/api/v1/validate/email/submitToken' -d'token=943258&tokenId=1&mxId=%40matthew%3amatrix.org'
+curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/validate/email/submitToken' -d'token=943258&tokenId=1&mxId=%40matthew%3amatrix.org'
 {"success": true}
 
 # lookup:
 
-curl 'http://localhost:8001/matrix/identity/api/v1/lookup?medium=email&address=henry%40matrix.org'
+curl 'http://localhost:8090/matrix/identity/api/v1/lookup?medium=email&address=henry%40matrix.org'
 
 # fetch pubkey key for a server
 
-curl http://localhost:8001/matrix/identity/api/v1/pubkey/ed25519
+curl http://localhost:8090/matrix/identity/api/v1/pubkey/ed25519
 
