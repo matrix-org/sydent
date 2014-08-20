@@ -45,8 +45,8 @@ class Pusher:
 
         assocSigner = AssociationSigner(self.sydent)
 
-        for localId,assoc in localAssocs:
-            sgAssoc = assocSigner(assoc)
+        for localId in localAssocs:
+            sgAssoc = assocSigner.signedThreePidAssociation(localAssocs[localId])
             signedAssocs[localId] = sgAssoc
 
         return signedAssocs
