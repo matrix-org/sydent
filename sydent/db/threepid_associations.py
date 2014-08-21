@@ -90,7 +90,7 @@ class GlobalAssociationStore:
         :return:
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("insert ignore into global_threepid_associations "
+        res = cur.execute("insert or ignore into global_threepid_associations "
                           "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
                           "(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                           (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
