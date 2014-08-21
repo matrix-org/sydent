@@ -83,9 +83,9 @@ class EmailValidator:
 
         try:
             logger.info("Token: %s", valSession.token)
-            #smtp = smtplib.SMTP(mailServer)
-            #smtp.sendmail(rawFrom, rawTo, msg.as_string())
-            #smtp.quit()
+            smtp = smtplib.SMTP(mailServer)
+            smtp.sendmail(rawFrom, rawTo, msg.as_string())
+            smtp.quit()
         except Exception as origException:
             twisted.python.log.err()
             ese = EmailSendException()
