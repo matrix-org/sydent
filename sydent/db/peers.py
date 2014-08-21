@@ -38,7 +38,7 @@ class PeerStore:
         if len(pubkeys) == 0:
             return None
 
-        p = RemotePeer(serverName, pubkeys)
+        p = RemotePeer(self.sydent, serverName, pubkeys)
         p.lastSentVersion = lastSentVer
         if port:
             p.port = port

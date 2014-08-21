@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import twisted.python.log
 from twisted.web.resource import Resource
 from sydent.http.servlets import require_args, jsonwrap
 from sydent.threepid import threePidAssocFromDict
@@ -84,6 +85,7 @@ class ReplicationPushServlet(Resource):
                 failedIds.append(originId)
                 logger.warn("Failed to verify signed association from %s with origin ID %s",
                             peer.servername, originId)
+                twisted.python.log.err()
 
         if len(failedIds) > 0:
             self.sydent.db.rollback()

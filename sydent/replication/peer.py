@@ -91,8 +91,10 @@ class RemotePeer(Peer):
                     return True
                 else:
                     logger.debug("Ignoring unknown key type: %s", keyType)
-
-        raise NoMatchingSignatureException()
+        e = NoMatchingSignatureException()
+        e.foundSigs = self.pubkeys.keys()
+        e.requiredServername = self.servername
+        raise e
 
     def pushUpdates(self, sgAssocs):
         body = {'sgAssocs': sgAssocs}
@@ -131,7 +133,8 @@ class NoSignaturesException(Exception):
 
 
 class NoMatchingSignatureException(Exception):
-    pass
+    def __str__(self):
+        return "Found signatures: %s, required server name: %s" % (self.foundSigs, self.requiredServername)
 
 
 class RemotePeerError(Exception):
