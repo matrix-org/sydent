@@ -23,12 +23,13 @@ from zope.interface import implementer
 
 import twisted.internet.reactor
 import twisted.internet.defer
-from twisted.internet.ssl import DefaultOpenSSLContextFactory, optionsForClientTLS
+from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.iweb import IPolicyForHTTPS
 from twisted.web.http_headers import Headers
 
 logger = logging.getLogger(__name__)
+
 
 class ReplicationHttpsClient:
     """
@@ -53,12 +54,13 @@ class ReplicationHttpsClient:
             logger.error("HTTPS post attempted but HTTPS is not configured")
             return
 
-        headers = Headers({'Content-Type':['application/json'], 'User-Agent':['Sydent']})
+        headers = Headers({'Content-Type': ['application/json'], 'User-Agent': ['Sydent']})
         uri = "https://%s:%s%s" % (host, port, path)
         reqDeferred = self.agent.request('POST', uri.encode('utf8'), headers,
                                          FileBodyProducer(StringIO(json.dumps(jsonObject))))
 
         return reqDeferred
+
 
 @implementer(IPolicyForHTTPS)
 class SydentPolicyForHTTPS(object):

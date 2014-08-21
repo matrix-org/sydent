@@ -16,17 +16,19 @@
 
 from sydent.replication.peer import RemotePeer
 
+
 class PeerStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
     def getPeerByName(self, name):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk where "
-                          "p.name = ? and pk.peername = p.name and p.active = 1", (name,))
+        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+                          "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
 
         serverName = None
         port = None
+        lastSentVer = None
         pubkeys = {}
 
         for row in res.fetchall():
@@ -47,8 +49,8 @@ class PeerStore:
 
     def getAllPeers(self):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk where "
-                          "pk.peername = p.name and p.active = 1")
+        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+                          "where pk.peername = p.name and p.active = 1")
 
         peers = []
 

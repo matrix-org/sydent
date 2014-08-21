@@ -19,6 +19,7 @@ from twisted.web.resource import Resource
 import json
 import nacl.encoding
 
+
 class Ed25519Servlet(Resource):
     isLeaf = True
 
@@ -29,4 +30,4 @@ class Ed25519Servlet(Resource):
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyHex = pubKey.encode(encoder=nacl.encoding.HexEncoder)
 
-        return json.dumps({'public_key':pubKeyHex})
+        return json.dumps({'public_key': pubKeyHex})

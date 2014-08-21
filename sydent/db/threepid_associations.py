@@ -20,6 +20,7 @@ from sydent.threepid import ThreepidAssociation, threePidAssocFromDict
 
 import json
 
+
 class LocalAssociationStore:
     def __init__(self, sydent):
         self.sydent = sydent
@@ -31,7 +32,7 @@ class LocalAssociationStore:
         cur.execute("insert or replace into local_threepid_associations "
                     "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter')"
                     " values (?, ?, ?, ?, ?, ?)",
-            (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
+                    (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
 
     def getAssociationsAfterId(self, afterId, limit):
@@ -59,6 +60,7 @@ class LocalAssociationStore:
 
         return (assocs, maxId)
 
+
 class GlobalAssociationStore:
     def __init__(self, sydent):
         self.sydent = sydent
@@ -68,7 +70,7 @@ class GlobalAssociationStore:
         res = cur.execute("select sgAssoc from global_threepid_associations where "
                     "medium = ? and address = ? and notBefore > ? and notAfter < ? "
                     "order by ts desc limit 1",
-            (medium, address, time_msec(), time_msec()))
+                    (medium, address, time_msec(), time_msec()))
 
         row = res.fetchone()
 

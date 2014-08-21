@@ -42,22 +42,23 @@ from replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
 
+
 class Sydent:
     CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto']
     CONFIG_DEFAULTS = {
-        'server.name' : '',
+        'server.name': '',
         'db.file': 'sydent.db',
         'token.length': '6',
         'clientapi.http.port': '8090',
-        'replication.https.certfile':'',
-        'replication.https.cacert':'', # This should only be used for testing
+        'replication.https.certfile': '',
+        'replication.https.cacert': '', # This should only be used for testing
         'replication.https.port': '4434',
         'email.template': 'res/email.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
         'email.smtphost': 'localhost',
-        'log.path':'',
-        'ed25519.signingkey':''
+        'log.path': '',
+        'ed25519.signingkey': ''
     }
 
     def __init__(self):
@@ -79,8 +80,8 @@ class Sydent:
         if self.server_name == '':
             self.server_name = os.uname()[1]
             logger.warn(("You had not specified a server name. I have guessed that this server is called '%s' "
-                        +" and saved this in the config file. If this is incorrect, you should edit server.name in "
-                        +"the config file.") % (self.server_name))
+                        + " and saved this in the config file. If this is incorrect, you should edit server.name in "
+                        + "the config file.") % (self.server_name,))
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
 
@@ -129,14 +130,18 @@ class Sydent:
         self.pusher.setup()
         twisted.internet.reactor.run()
 
+
 class Validators:
     pass
+
 
 class Servlets:
     pass
 
+
 class Keyring:
     pass
+
 
 if __name__ == '__main__':
     syd = Sydent()

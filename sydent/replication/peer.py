@@ -17,7 +17,6 @@ import twisted.internet.defer
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
-from sydent.http.httpsclient import ReplicationHttpsClient
 
 import syutil.crypto.jsonsign
 
@@ -32,6 +31,7 @@ import twisted.internet.defer
 from twisted.web.client import readBody
 
 logger = logging.getLogger(__name__)
+
 
 class Peer(object):
     def __init__(self, servername, pubkeys):
@@ -62,7 +62,7 @@ class LocalPeer(Peer):
 
     def pushUpdates(self, sgAssocs):
         globalAssocStore = GlobalAssociationStore(self.sydent)
-        for localId,sgAssoc in sgAssocs:
+        for localId, sgAssoc in sgAssocs:
             if localId > self.lastId:
                 assocObj = threePidAssocFromDict(sgAssoc)
 
@@ -71,6 +71,7 @@ class LocalPeer(Peer):
 
         d = twisted.internet.defer.succeed(True)
         return d
+
 
 class RemotePeer(Peer):
     def __init__(self, sydent, server_name, pubkeys):

@@ -73,6 +73,7 @@ class ClientApiHttpServer:
         logger.info("Starting Client API HTTP server on port %d", httpPort)
         twisted.internet.reactor.listenTCP(httpPort, self.factory)
 
+
 class ReplicationHttpsServer:
     def __init__(self, sydent):
         self.sydent = sydent
