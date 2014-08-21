@@ -74,7 +74,7 @@ class LocalPeer(Peer):
 
 class RemotePeer(Peer):
     def __init__(self, sydent, server_name, pubkeys):
-        super(RemotePeer, self).__init__(server_name, {})
+        super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = 1001
 
@@ -82,17 +82,18 @@ class RemotePeer(Peer):
         if not 'signatures' in jsonMessage:
             raise NoSignaturesException()
 
-        for keyType,key in self.pubkeys:
+        for keyType in self.pubkeys:
             keyDescriptor = '%s:%s' % (self.servername, keyType)
             if keyDescriptor in jsonMessage['signatures']:
                 if keyType == 'ed25519':
-                    verifyKey = nacl.signing.SigningKey(self.pubkeys['ed25519'], encoder=nacl.encoding.Base64Encoder)
+                    verifyKey = nacl.signing.VerifyKey(self.pubkeys['ed25519'], encoder=nacl.encoding.HexEncoder)
+                    verifyKey.alg = 'ed25519'
                     syutil.crypto.jsonsign.verify_signed_json(jsonMessage, self.servername, verifyKey)
                     return True
                 else:
                     logger.debug("Ignoring unknown key type: %s", keyType)
         e = NoMatchingSignatureException()
-        e.foundSigs = self.pubkeys.keys()
+        e.foundSigs = jsonMessage['signatures'].keys()
         e.requiredServername = self.servername
         raise e
 
