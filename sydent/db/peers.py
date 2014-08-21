@@ -81,7 +81,8 @@ class PeerStore:
 
         return peers
 
-    def setLastPokeSucceeded(self, peerName, lastPokeSucceeded):
+    def setLastSentVersionAndPokeSucceeded(self, peerName, lastSentVersion, lastPokeSucceeded):
         cur = self.sydent.db.cursor()
-        res = cur.execute("update peers set lastPokeSucceeded = ? where name = ?", (lastPokeSucceeded, peerName))
+        res = cur.execute("update peers set lastSentVersion = ?, lastPokeSucceededAt = ? "
+                          "where name = ?", (lastSentVersion, lastPokeSucceeded, peerName))
         self.sydent.db.commit()

@@ -49,12 +49,15 @@ class LocalAssociationStore:
             # No no, no no no no, no no no no, no no, there's no limit.
             res = cur.execute(q, (afterId,))
 
+        maxId = None
+
         assocs = {}
         for row in res.fetchall():
             assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6])
             assocs[row[0]] = assoc
+            maxId = row[0]
 
-        return assocs
+        return (assocs, maxId)
 
 class GlobalAssociationStore:
     def __init__(self, sydent):
@@ -87,7 +90,7 @@ class GlobalAssociationStore:
         :return:
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("insert into global_threepid_associations "
+        res = cur.execute("insert ignore into global_threepid_associations "
                           "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
                           "(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                           (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
