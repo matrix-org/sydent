@@ -25,6 +25,7 @@ from db.sqlitedb import SqliteDatabase
 
 from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
+from http.httpsclient import ReplicationHttpsClient
 from validators.emailvalidator import EmailValidator
 
 from sign.ed25519 import SydentEd25519
@@ -104,6 +105,7 @@ class Sydent:
 
         self.clientApiHttpServer = ClientApiHttpServer(self)
         self.replicationHttpsServer = ReplicationHttpsServer(self)
+        self.replicationHttpsClient = ReplicationHttpsClient(self)
 
         self.pusher = Pusher(self)
 

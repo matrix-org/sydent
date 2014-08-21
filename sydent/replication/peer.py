@@ -100,8 +100,10 @@ class RemotePeer(Peer):
     def pushUpdates(self, sgAssocs):
         body = {'sgAssocs': sgAssocs}
 
-        httpCli = ReplicationHttpsClient(self.sydent)
-        reqDeferred = httpCli.postJson(self.servername, self.port, '/matrix/identity/replicate/v1/push', body)
+        reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
+                                                                  self.port,
+                                                                  '/matrix/identity/replicate/v1/push',
+                                                                  body)
 
         updateDeferred = twisted.internet.defer.Deferred()
 
