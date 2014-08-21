@@ -82,9 +82,10 @@ class EmailValidator:
         logger.info("Attempting to mail code %s to %s using mail server %s", valSession.token, rawTo, mailServer)
 
         try:
-            smtp = smtplib.SMTP(mailServer)
-            smtp.sendmail(rawFrom, rawTo, msg.as_string())
-            smtp.quit()
+            logger.info("Token: %s", valSession.token)
+            #smtp = smtplib.SMTP(mailServer)
+            #smtp.sendmail(rawFrom, rawTo, msg.as_string())
+            #smtp.quit()
         except Exception as origException:
             twisted.python.log.err()
             ese = EmailSendException()

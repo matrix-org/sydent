@@ -22,46 +22,60 @@ class PeerStore:
 
     def getPeerByName(self, name):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk where "
+        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk where "
                           "p.name = ? and pk.peername = p.name and p.active = 1", (name,))
 
+        serverName = None
+        port = None
         pubkeys = {}
 
         for row in res.fetchall():
-            lastSentVer = row[1]
-            pubkeys[row[2]] = row[3]
+            serverName = row[0]
+            port = row[1]
+            lastSentVer = row[2]
+            pubkeys[row[3]] = row[4]
 
         if len(pubkeys) == 0:
             return None
 
-        p = RemotePeer(name, pubkeys)
+        p = RemotePeer(serverName, pubkeys)
         p.lastSentVersion = lastSentVer
+        if port:
+            p.port = port
 
         return p
 
     def getAllPeers(self):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk where "
+        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk where "
                           "pk.peername = p.name and p.active = 1")
 
         peers = []
 
         peername = None
+        port = None
         lastSentVer = None
         pubkeys = {}
 
         for row in res.fetchall():
             if row[0] != peername:
                 if len(pubkeys) > 0:
-                    peers.append(RemotePeer(peername, pubkeys))
+                    p = RemotePeer(self.sydent, peername, pubkeys)
+                    p.lastSentVersion = lastSentVer
+                    if port:
+                        p.port = port
+                    peers.append(p)
                     pubkeys = {}
                 peername = row[0]
-                lastSentVer = row[1]
-            pubkeys[row[2]] = row[3]
+                port = row[1]
+                lastSentVer = row[2]
+            pubkeys[row[3]] = row[4]
 
         if len(pubkeys) > 0:
-            p = RemotePeer(peername, pubkeys)
+            p = RemotePeer(self.sydent, peername, pubkeys)
             p.lastSentVersion = lastSentVer
+            if port:
+                p.port = port
             peers.append(p)
             pubkeys = {}
 

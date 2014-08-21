@@ -96,43 +96,14 @@ class ReplicationHttpsServer:
     def setup(self):
         httpPort = int(self.sydent.cfg.get('http', 'replication.https.port'))
 
-        privKeyAndCertFilename = self.sydent.cfg.get('http', 'replication.https.certfile')
-        if privKeyAndCertFilename == '':
-            logger.warn("No HTTPS private key / cert found: not starting the replication HTTPS server")
-            return
+        if self.sydent.sslComponents.myPrivateCertificate:
+            # We will already have logged a warn if this is absent, so don't do it again
+            cert = self.sydent.sslComponents.myPrivateCertificate
+            certOptions = twisted.internet.ssl.CertificateOptions(privateKey=cert.privateKey.original,
+                                                                  certificate=cert.original,
+                                                                  trustRoot=self.sydent.sslComponents.trustRoot)
 
-        try:
-            fp = open(privKeyAndCertFilename)
-        except IOError:
-            logger.warn("Unable to read private key / cert file from %s: not starting the replication HTTPS server.",
-                        privKeyAndCertFilename)
-            return
+            logger.info("Loaded server private key and certificate!")
+            logger.info("Starting Replication HTTPS server on port %d", httpPort)
 
-        authData = fp.read()
-        fp.close()
-        certificate = twisted.internet.ssl.PrivateCertificate.loadPEM(authData)
-
-        # If this option is specified, use a specific root CA cert. This is useful for testing when it's not
-        # practical to get the client cert signed by a real root CA but should never be used on a production server.
-        caCertFilename = self.sydent.cfg.get('http', 'replication.https.cacert')
-        if len(caCertFilename) > 0:
-            try:
-                fp = open(caCertFilename)
-                caCert = twisted.internet.ssl.Certificate.loadPEM(fp.read())
-                fp.close()
-            except:
-                logger.warn("Failed to open CA cert file %s", caCertFilename)
-                raise
-            logger.warn("Using custom CA cert file: %s", caCertFilename)
-            trustRoot = twisted.internet._sslverify.OpenSSLCertificateAuthorities([caCert.original])
-        else:
-            trustRoot = twisted.internet.ssl.OpenSSLDefaultPaths()
-
-        certOptions = twisted.internet.ssl.CertificateOptions(privateKey=certificate.privateKey.original,
-                                                              certificate=certificate.original,
-                                                              trustRoot=trustRoot)
-
-        logger.info("Loaded server private key and certificate!")
-        logger.info("Starting Replication HTTPS server on port %d", httpPort)
-
-        twisted.internet.reactor.listenSSL(httpPort, self.factory, certOptions)
+            twisted.internet.reactor.listenSSL(httpPort, self.factory, certOptions)

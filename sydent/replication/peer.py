@@ -17,21 +17,19 @@ import twisted.internet.defer
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
+from sydent.http.httpsclient import ReplicationHttpsClient
 
 import syutil.crypto.jsonsign
 
 import logging
 import json
 
-from StringIO import StringIO
-
 import nacl.signing
 import nacl.encoding
 
 import twisted.internet.reactor
 import twisted.internet.defer
-from twisted.web.client import Agent, FileBodyProducer
-from twisted.web.http_headers import Headers
+from twisted.web.client import readBody
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +73,11 @@ class LocalPeer(Peer):
         return d
 
 class RemotePeer(Peer):
+    def __init__(self, sydent, server_name, pubkeys):
+        super(RemotePeer, self).__init__(server_name, {})
+        self.sydent = sydent
+        self.port = 1001
+
     def verifyMessage(self, jsonMessage):
         if not 'signatures' in jsonMessage:
             raise NoSignaturesException()
@@ -94,23 +97,34 @@ class RemotePeer(Peer):
     def pushUpdates(self, sgAssocs):
         body = {'sgAssocs': sgAssocs}
 
-        agent = Agent(twisted.internet.reactor)
-        headers = Headers({'Content-Type':['application/json']})
-        uri = "https://%s/matrix/identity/replicate/v1/push" % (self.servername)
-        reqDeferred = agent.request('POST', uri.encode('utf8'), headers, FileBodyProducer(StringIO(json.dumps(body))))
+        httpCli = ReplicationHttpsClient(self.sydent)
+        reqDeferred = httpCli.postJson(self.servername, self.port, '/matrix/identity/replicate/v1/push', body)
 
         updateDeferred = twisted.internet.defer.Deferred()
 
-        reqDeferred.addCallback(RemotePeer._pushSuccess, (self,updateDeferred))
-        reqDeferred.addErrback(RemotePeer._pushFailed, (self,updateDeferred))
+        reqDeferred.addCallback(self._pushSuccess, updateDeferred=updateDeferred)
+        reqDeferred.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
         return updateDeferred
 
-    def _pushSuccess(self, updateDeferred):
-        updateDeferred.callback()
+    def _pushSuccess(self, result, updateDeferred):
+        if result.code >= 200 and result.code < 300:
+            updateDeferred.callback(result)
+        else:
+            d = readBody(result)
+            d.addCallback(self._failedPushBodyRead, updateDeferred=updateDeferred)
+            d.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
-    def _pushFailed(self, updateDeferred):
-        updateDeferred.errback()
+    def _failedPushBodyRead(self, body, updateDeferred):
+        errObj = json.loads(body)
+        e = RemotePeerError()
+        e.errorDict = errObj
+        updateDeferred.errback(e)
+
+    def _pushFailed(self, failure, updateDeferred):
+        updateDeferred.errback(failure)
+        return None
+
 
 class NoSignaturesException(Exception):
     pass
@@ -118,3 +132,8 @@ class NoSignaturesException(Exception):
 
 class NoMatchingSignatureException(Exception):
     pass
+
+
+class RemotePeerError(Exception):
+    def __str__(self):
+        return repr(self.errorDict)

@@ -75,24 +75,25 @@ class Pusher:
             peers = self.peerStore.getAllPeers()
 
             for p in peers:
+                logger.debug("Looking for update after %d to push to %s", p.lastSentVersion, p.servername)
                 signedAssocTuples = self.getSignedAssociationsAfterId(p.lastSentVersion, 100)
+                logger.debug("%d updates to push to %s", len(signedAssocTuples), p.servername)
                 if len(signedAssocTuples) > 0:
                     logger.info("Pushing %d updates to %s", len(signedAssocTuples), p.servername)
                     updateDeferred = p.pushUpdates(signedAssocTuples)
-                    updateDeferred.addCallback(Pusher._pushSucceeded, (self,p))
-                    updateDeferred.addErrback(Pusher._pushFailed, (self,p))
+                    updateDeferred.addCallback(self._pushSucceeded, peer=p)
+                    updateDeferred.addErrback(self._pushFailed, peer=p)
                     break
         finally:
             if not updateDeferred:
                 self.pushing = False
 
-    def _pushSucceeded(self, peer):
-        logger.info("Pushed updates to %s", peer.servername)
+    def _pushSucceeded(self, result, peer):
+        logger.info("Pushed updates to %s with result %d %s", peer.servername, result.code, result.phrase)
         self.pushing = False
         self.scheduledPush()
-        pass
 
-    def _pushFailed(self, peer):
-        logger.info("Failed to push updates to %s", peer.servername)
+    def _pushFailed(self, failure, peer):
+        logger.info("Failed to push updates to %s: %s", peer.servername, failure)
         self.pushing = False
-        pass
+        return None

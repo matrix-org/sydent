@@ -23,6 +23,7 @@ from twisted.python import log
 
 from db.sqlitedb import SqliteDatabase
 
+from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
 from validators.emailvalidator import EmailValidator
 
@@ -98,6 +99,8 @@ class Sydent:
         self.servlets.replicationPush = ReplicationPushServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
+
+        self.sslComponents = SslComponents(self)
 
         self.clientApiHttpServer = ClientApiHttpServer(self)
         self.replicationHttpsServer = ReplicationHttpsServer(self)
