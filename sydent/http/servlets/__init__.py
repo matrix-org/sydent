@@ -32,3 +32,11 @@ def jsonwrap(f):
     def inner(*args, **kwargs):
         return json.dumps(f(*args, **kwargs)).encode("UTF-8")
     return inner
+
+def send_cors(request):
+    request.setHeader(b"Content-Type", b"application/json")
+    request.setHeader("Access-Control-Allow-Origin", "*")
+    request.setHeader("Access-Control-Allow-Methods",
+                      "GET, POST, PUT, DELETE, OPTIONS")
+    request.setHeader("Access-Control-Allow-Headers",
+                      "Origin, X-Requested-With, Content-Type, Accept")

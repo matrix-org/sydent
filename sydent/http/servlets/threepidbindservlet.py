@@ -16,7 +16,7 @@
 
 from twisted.web.resource import Resource
 
-from sydent.http.servlets import require_args, jsonwrap
+from sydent.http.servlets import require_args, jsonwrap, send_cors
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException
 
 class ThreePidBindServlet(Resource):
@@ -25,6 +25,7 @@ class ThreePidBindServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request):
+        send_cors(request)
         err = require_args(request, ('sid', 'clientSecret', 'mxid'))
         if err:
             return err
@@ -45,3 +46,9 @@ class ThreePidBindServlet(Resource):
         except InvalidSessionIdException:
             return {'errcode': 'M_INVALID_SESSION_ID',
                     'error': "Unknown session ID"}
+
+    @jsonwrap
+    def render_OPTIONS(self, request):
+        send_cors(request)
+        request.setResponseCode(200)
+        return {}

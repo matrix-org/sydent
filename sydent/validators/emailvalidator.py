@@ -82,7 +82,6 @@ class EmailValidator:
         logger.info("Attempting to mail code %s to %s using mail server %s", valSession.token, rawTo, mailServer)
 
         try:
-            logger.info("Token: %s", valSession.token)
             smtp = smtplib.SMTP(mailServer)
             smtp.sendmail(rawFrom, rawTo, msg.as_string())
             smtp.quit()

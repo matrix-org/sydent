@@ -19,16 +19,7 @@ from twisted.web.resource import Resource
 from sydent.validators.emailvalidator import EmailAddressException, EmailSendException, SessionExpiredException
 from sydent.validators.emailvalidator import IncorrectClientSecretException
 
-from sydent.http.servlets import require_args, jsonwrap
-
-
-def send_cors(request):
-    request.setHeader(b"Content-Type", b"application/json")
-    request.setHeader("Access-Control-Allow-Origin", "*")
-    request.setHeader("Access-Control-Allow-Methods",
-                      "GET, POST, PUT, DELETE, OPTIONS")
-    request.setHeader("Access-Control-Allow-Headers",
-                      "Origin, X-Requested-With, Content-Type, Accept")
+from sydent.http.servlets import require_args, jsonwrap, send_cors
 
 
 class EmailRequestCodeServlet(Resource):

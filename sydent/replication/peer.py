@@ -62,12 +62,13 @@ class LocalPeer(Peer):
 
     def pushUpdates(self, sgAssocs):
         globalAssocStore = GlobalAssociationStore(self.sydent)
-        for localId, sgAssoc in sgAssocs:
+        for localId in sgAssocs:
             if localId > self.lastId:
-                assocObj = threePidAssocFromDict(sgAssoc)
+                assocObj = threePidAssocFromDict(sgAssocs[localId])
 
                 # We can probably skip verification for the local peer (although it could be good as a sanity check)
-                globalAssocStore.addAssociation(assocObj, json.dumps(sgAssoc), self.sydent.server_name, localId)
+                globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
+                                                self.sydent.server_name, localId)
 
         d = twisted.internet.defer.succeed(True)
         return d
