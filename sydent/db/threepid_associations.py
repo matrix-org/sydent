@@ -65,10 +65,10 @@ class GlobalAssociationStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def signedAssociationForThreepid(self, medium, address):
+    def signedAssociationStringForThreepid(self, medium, address):
         cur = self.sydent.db.cursor()
         res = cur.execute("select sgAssoc from global_threepid_associations where "
-                    "medium = ? and address = ? and notBefore > ? and notAfter < ? "
+                    "medium = ? and address = ? and notBefore < ? and notAfter > ? "
                     "order by ts desc limit 1",
                     (medium, address, time_msec(), time_msec()))
 
@@ -79,11 +79,7 @@ class GlobalAssociationStore:
 
         sgAssocBytes = row[0]
 
-        sgAssocJsonObj = json.loads(sgAssocBytes)
-
-        sgAssoc = threePidAssocFromDict(sgAssocJsonObj)
-
-        return sgAssoc
+        return sgAssocBytes
 
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """

@@ -28,7 +28,6 @@ class LookupServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
-    @jsonwrap
     def render_GET(self, request):
         err = require_args(request, ('medium', 'address'))
         if err:
@@ -39,18 +38,9 @@ class LookupServlet(Resource):
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
 
-        assoc = globalAssocStore.associationForThreepid(medium, address)
+        sgassoc = globalAssocStore.signedAssociationStringForThreepid(medium, address)
 
-        if not assoc:
+        if not sgassoc:
             return json.dumps({})
 
-        mxid = row[0]
-        created = row[1]
-        expires = row[2]
-
-        assocSigner = AssociationSigner(self.sydent)
-
-        dfljgdlfgj
-
-        sgassoc = assocSigner.signedThreePidAssociation(medium, address, mxid, created, expires)
-        return json.dumps(sgassoc)
+        return sgassoc.encode('utf8')
