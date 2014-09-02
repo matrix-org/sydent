@@ -19,8 +19,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 
 import json
 
-from sydent.threepid.assocsigner import AssociationSigner
-from sydent.http.servlets import jsonwrap, require_args
+from sydent.http.servlets import require_args
 
 class LookupServlet(Resource):
     isLeaf = True
