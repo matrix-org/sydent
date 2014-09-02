@@ -28,7 +28,7 @@ curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/validate/email/submitT
 
 Use the validated email address to bind it to a matrix ID:
 
-curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/3pid/bind' -d'sid=1&clientSecret=abcd&mxId=%40matthew%3amatrix.org'
+curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/3pid/bind' -d'sid=1&clientSecret=abcd&mxid=%40matthew%3amatrix.org'
 
 # lookup:
 
