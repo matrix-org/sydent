@@ -16,7 +16,8 @@
 
 import sydent.util.tokenutils
 
-from sydent.validators import ValidationSession
+from sydent.validators import ValidationSession, IncorrectClientSecretException, InvalidSessionIdException, \
+    SessionExpiredException, SessionNotValidatedException
 from sydent.util import time_msec
 
 
@@ -108,15 +109,22 @@ class ThreePidValSessionStore:
 
         return None
 
-    # def getTokenByFeatures(self, medium, address, clientSecret):
-    #     cur = self.sydent.db.cursor()
-    #
-    #     cur.execute("select id, medium, address, token, clientSecret, validated, createdAt from "+
-    #                 "threepid_validations where medium = ? and address = ? and clientSecret = ?",
-    #                 (medium, address, clientSecret))
-    #     row = cur.fetchone()
-    #
-    #     if not row:
-    #         return None
-    #
-    #     return Token(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+    def getValidatedSession(self, sid, clientSecret):
+        """
+        Retrieve a validated and still-valid session whose client secret matches the one passed in
+        """
+        s = self.getSessionById(sid)
+
+        if not s:
+            raise InvalidSessionIdException()
+
+        if not s.clientSecret == clientSecret:
+            raise IncorrectClientSecretException()
+
+        if s.mtime + ValidationSession.THREEPID_SESSION_VALID_LIFETIME < time_msec():
+            raise SessionExpiredException()
+
+        if not s.validated:
+            raise SessionNotValidatedException()
+
+        return s

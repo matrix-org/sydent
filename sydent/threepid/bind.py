@@ -34,13 +34,7 @@ class ThreepidBinder:
         valSessionStore = ThreePidValSessionStore(self.sydent)
         localAssocStore = LocalAssociationStore(self.sydent)
 
-        s = valSessionStore.getSessionById(valSessionId)
-
-        if not s:
-            raise InvalidSessionIdException
-
-        if not s.clientSecret == clientSecret:
-            raise IncorrectClientSecretException
+        s = valSessionStore.getValidatedSession(valSessionId, clientSecret)
 
         createdAt = time_msec()
         expires = createdAt + ThreepidBinder.THREEPID_ASSOCIATION_LIFETIME_MS

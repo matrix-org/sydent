@@ -38,6 +38,7 @@ class ClientApiHttpServer:
         email = Resource()
         emailReqCode = self.sydent.servlets.emailRequestCode
         emailValCode = self.sydent.servlets.emailValidate
+        getValidated3pid = self.sydent.servlets.getValidated3pid
 
         lookup = self.sydent.servlets.lookup
 
@@ -62,6 +63,7 @@ class ClientApiHttpServer:
 
         v1.putChild('3pid', threepid)
         threepid.putChild('bind', bind)
+        threepid.putChild('getValidated3pid', getValidated3pid)
 
         email.putChild('requestToken', emailReqCode)
         email.putChild('submitToken', emailValCode)

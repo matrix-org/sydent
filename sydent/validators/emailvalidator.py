@@ -24,6 +24,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.validators import ValidationSession
 
 from sydent.util import time_msec
 
@@ -33,12 +34,6 @@ logger = logging.getLogger(__name__)
 
 
 class EmailValidator:
-    # how long a user can wait before validating a session after starting it
-    THREEPID_SESSION_VALIDATION_TIMEOUT = 24 * 60 * 60 * 1000
-
-    # how long we keep sessions for after they've been validated
-    THREEPID_SESSION_VALID_LIFETIME = 24 * 60 * 60 * 1000
-
     def __init__(self, sydent):
         self.sydent = sydent
 
@@ -104,7 +99,7 @@ class EmailValidator:
         if not clientSecret == s.clientSecret:
             raise IncorrectClientSecretException()
 
-        if s.mtime + EmailValidator.THREEPID_SESSION_VALIDATION_TIMEOUT < time_msec():
+        if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT < time_msec():
             raise SessionExpiredException()
 
         # TODO once we can validate the token oob

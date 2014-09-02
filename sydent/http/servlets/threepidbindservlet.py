@@ -17,7 +17,8 @@
 from twisted.web.resource import Resource
 
 from sydent.http.servlets import require_args, jsonwrap, send_cors
-from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException
+from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
+    SessionNotValidatedException
 
 class ThreePidBindServlet(Resource):
     def __init__(self, sydent):
@@ -34,18 +35,25 @@ class ThreePidBindServlet(Resource):
         clientSecret = request.args['clientSecret'][0]
         mxid = request.args['mxid'][0]
 
+        # Return the same error for not found / bad client secret otherwise people can get information about
+        # sessions without knowing the secret
+        noMatchError = {'errcode': 'M_NO_VALID_SESSION',
+                        'error': "No valid session was found matching that sid and client secret"}
+
         try:
             res = self.sydent.threepidBinder.addBinding(sid, clientSecret, mxid)
             return res
         except IncorrectClientSecretException:
-            return {'errcode': 'M_INCORRECT_CLIENT_SECRET',
-                    'error': "Client secret does not match the one given when requesting the token"}
+            return noMatchError
         except SessionExpiredException:
             return {'errcode': 'M_SESSION_EXPIRED',
                     'error': "This validation session has expired: call requestToken again"}
         except InvalidSessionIdException:
-            return {'errcode': 'M_INVALID_SESSION_ID',
-                    'error': "Unknown session ID"}
+            return noMatchError
+        except SessionNotValidatedException:
+            return {'errcode': 'M_SESSION_NOT_VALIDATED',
+                    'error': "This validation session has not yet been completed"}
+
 
     @jsonwrap
     def render_OPTIONS(self, request):
