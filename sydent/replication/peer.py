@@ -104,7 +104,7 @@ class RemotePeer(Peer):
 
         reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
                                                                   self.port,
-                                                                  '/matrix/identity/replicate/v1/push',
+                                                                  '/_matrix/identity/replicate/v1/push',
                                                                   body)
 
         updateDeferred = twisted.internet.defer.Deferred()

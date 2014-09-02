@@ -48,7 +48,7 @@ class ClientApiHttpServer:
         pubkey = Resource()
         pk_ed25519 = self.sydent.servlets.pubkey_ed25519
 
-        root.putChild('matrix', matrix)
+        root.putChild('_matrix', matrix)
         matrix.putChild('identity', identity)
         identity.putChild('api', api)
         api.putChild('v1', v1)
