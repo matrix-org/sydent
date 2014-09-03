@@ -19,7 +19,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 
 import json
 
-from sydent.http.servlets import require_args
+from sydent.http.servlets import require_args, jsonwrap, send_cors
 
 class LookupServlet(Resource):
     isLeaf = True
@@ -28,6 +28,7 @@ class LookupServlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
+        send_cors(request)
         err = require_args(request, ('medium', 'address'))
         if err:
             return err
@@ -43,3 +44,9 @@ class LookupServlet(Resource):
             return json.dumps({})
 
         return sgassoc.encode('utf8')
+
+    @jsonwrap
+    def render_OPTIONS(self, request):
+        send_cors(request)
+        request.setResponseCode(200)
+        return {}
