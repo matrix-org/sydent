@@ -16,25 +16,25 @@ The requests that synapse servers and clients submit to the identity server are,
 
 Request the validation of your email address:
 
-curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/validate/email/requestToken' -d'email=matthew@arasphere.net&clientSecret=abcd&sendAttempt=1'
+curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/requestToken' -d'email=matthew@arasphere.net&clientSecret=abcd&sendAttempt=1'
 {"success": true, "tokenId": 1}
 
 # receive 943258 by mail
 
 Use this code to validate your email address:
 
-curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/validate/email/submitToken' -d'token=943258&sid=1&clientSecret=abcd'
+curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/submitToken' -d'token=943258&sid=1&clientSecret=abcd'
 {"success": true}
 
 Use the validated email address to bind it to a matrix ID:
 
-curl -XPOST 'http://localhost:8090/matrix/identity/api/v1/3pid/bind' -d'sid=1&clientSecret=abcd&mxid=%40matthew%3amatrix.org'
+curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/3pid/bind' -d'sid=1&clientSecret=abcd&mxid=%40matthew%3amatrix.org'
 
 # lookup:
 
-curl 'http://localhost:8090/matrix/identity/api/v1/lookup?medium=email&address=henry%40matrix.org'
+curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=henry%40matrix.org'
 
 # fetch pubkey key for a server
 
-curl http://localhost:8090/matrix/identity/api/v1/pubkey/ed25519
+curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519
 
