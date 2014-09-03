@@ -85,7 +85,7 @@ class ThreePidValSessionStore:
          cur = self.sydent.db.cursor()
 
          cur.execute("select id, medium, address, clientSecret, validated, mtime from "+
-             "threepid_validation_sessions where id = ?", (sid))
+             "threepid_validation_sessions where id = ?", (sid,))
          row = cur.fetchone()
 
          if not row:
