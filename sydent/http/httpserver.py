@@ -84,7 +84,7 @@ class ReplicationHttpsServer:
         matrix = Resource()
         identity = Resource()
 
-        root.putChild('matrix', matrix)
+        root.putChild('_matrix', matrix)
         matrix.putChild('identity', identity)
 
         replicate = Resource()
