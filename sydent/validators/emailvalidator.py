@@ -45,7 +45,8 @@ class EmailValidator:
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
-        if valSession.sendAttemptNumber >= sendAttempt:
+        if int(valSession.sendAttemptNumber) >= int(sendAttempt):
+            logger.info("Not mailing code because current send attempt (%d) is not less than given send attempt (%s)", int(sendAttempt), int(valSession.sendAttemptNumber))
             return valSession.id
 
         myHostname = os.uname()[1]
