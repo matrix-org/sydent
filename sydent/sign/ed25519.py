@@ -29,11 +29,13 @@ class SydentEd25519:
         skHex = self.sydent.cfg.get('crypto', 'ed25519.signingkey')
         if skHex != '':
             self.signing_key = nacl.signing.SigningKey(skHex, encoder=nacl.encoding.HexEncoder)
+            self.signing_key.version = '0' # argh
         else:
             logger.info("This server does not yet have an ed25519 signing key. "+
                         "Creating one and saving it in the config file.")
 
             self.signing_key = nacl.signing.SigningKey.generate()
+            self.signing_key.version = '0' # argh
             skHex = self.signing_key.encode(encoder=nacl.encoding.HexEncoder)
             self.sydent.cfg.set('crypto', 'ed25519.signingkey', skHex)
             self.sydent.save_config()
