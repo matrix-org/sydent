@@ -59,7 +59,8 @@ class Sydent:
         'email.subject': 'Your Validation Token',
         'email.smtphost': 'localhost',
         'log.path': '',
-        'ed25519.signingkey': ''
+        'ed25519.signingkey': '',
+        'obey_x_forwarded_for': False
     }
 
     def __init__(self):
@@ -131,6 +132,12 @@ class Sydent:
         self.replicationHttpsServer.setup()
         self.pusher.setup()
         twisted.internet.reactor.run()
+
+    def ip_from_request(self, request):
+        if (self.cfg.get('http', 'obey_x_forwarded_for') and
+                request.requestHeaders.hasHeader("X-Forwarded-For")):
+            return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
+        return request.getClientIP()
 
 
 class Validators:

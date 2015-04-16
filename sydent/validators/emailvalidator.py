@@ -18,10 +18,12 @@ import smtplib
 import os
 import email.utils
 import logging
+import random
+import string
+import urllib
 import twisted.python.log
 
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import email.utils
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.validators import ValidationSession
@@ -37,7 +39,7 @@ class EmailValidator:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def requestToken(self, emailAddress, clientSecret, sendAttempt):
+    def requestToken(self, emailAddress, clientSecret, sendAttempt, nextLink, ipaddress=None):
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
         valSession = valSessionStore.getOrCreateTokenSession(medium='email', address=emailAddress,
@@ -50,21 +52,24 @@ class EmailValidator:
             return valSession.id
 
         myHostname = os.uname()[1]
+        midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
+        messageid = "%d%s@%s" % (time_msec(), midRandom, myHostname)
+        ipstring = ipaddress if ipaddress else u"an unknown location"
 
-        mailFrom = self.sydent.cfg.get('email', 'email.from').format(hostname=myHostname)
         mailTo = emailAddress
+        mailFrom = self.sydent.cfg.get('email', 'email.from')
 
         mailTemplateFile = self.sydent.cfg.get('email', 'email.template')
 
-        mailString = open(mailTemplateFile).read().format(token=valSession.token)
-
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = self.sydent.cfg.get('email', 'email.subject')
-        msg['From'] = mailFrom
-        msg['To'] = mailTo
-
-        plainPart = MIMEText(mailString)
-        msg.attach(plainPart)
+        mailString = open(mailTemplateFile).read() % {
+            'date': email.utils.formatdate(localtime=False),
+            'to': mailTo,
+            'from': mailFrom,
+            'messageid': messageid,
+            'ipaddress': ipstring,
+            'link': self.makeValidateLink(valSession, clientSecret, nextLink),
+            'token': valSession.token,
+        }
 
         rawFrom = email.utils.parseaddr(mailFrom)[1]
         rawTo = email.utils.parseaddr(mailTo)[1]
@@ -79,7 +84,7 @@ class EmailValidator:
 
         try:
             smtp = smtplib.SMTP(mailServer)
-            smtp.sendmail(rawFrom, rawTo, msg.as_string())
+            smtp.sendmail(rawFrom, rawTo, mailString)
             smtp.quit()
         except Exception as origException:
             twisted.python.log.err()
@@ -90,6 +95,18 @@ class EmailValidator:
         valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
 
         return valSession.id
+
+    def makeValidateLink(self, valSession, clientSecret, nextLink):
+        base = self.sydent.cfg.get('http', 'client_http_base')
+        link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&clientSecret=%s&sid=%d" % (
+            base,
+            urllib.quote(valSession.token),
+            urllib.quote(clientSecret),
+            valSession.id,
+        )
+        if nextLink:
+            link += "&nextLink=%s" % (urllib.quote(nextLink))
+        return link
 
     def validateSessionWithToken(self, sid, clientSecret, token):
         valSessionStore = ThreePidValSessionStore(self.sydent)

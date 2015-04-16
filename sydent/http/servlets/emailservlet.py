@@ -39,17 +39,24 @@ class EmailRequestCodeServlet(Resource):
         email = request.args['email'][0]
         clientSecret = request.args['clientSecret'][0]
         sendAttempt = request.args['sendAttempt'][0]
+        ipaddress = self.sydent.ip_from_request(request)
+
+        nextLink = None
+        if 'nextLink' in request.args:
+            nextLink = request.args['nextLink'][0]
 
         resp = None
 
         try:
-            sid = self.sydent.validators.email.requestToken(email, clientSecret, sendAttempt)
+            sid = self.sydent.validators.email.requestToken(
+                email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress
+            )
         except EmailAddressException:
             request.setResponseCode(400)
             resp = {'errcode': 'M_INVALID_EMAIL', 'error':'Invalid email address'}
         except EmailSendException:
             request.setResponseCode(500)
-            resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to sent email'}
+            resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to send email'}
 
         if not resp:
             resp = {'success': True, 'sid': sid}
@@ -69,8 +76,27 @@ class EmailValidateCodeServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
+    def render_GET(self, request):
+        resp = self.do_validate_request(request)
+        if resp['success']:
+            msg = "Verification successful! Please return to your Matrix client to continue."
+            if 'nextLink' in request.args:
+                next_link = request.args['nextLink'][0]
+                request.setResponseCode(302)
+                request.setHeader("Location", next_link)
+        else:
+            msg = "Verification failed: you may need to request another verification email"
+
+        templateFile = self.sydent.cfg.get('http', 'verify_response_template')
+
+        request.setHeader("Content-Type", "text/html")
+        return open(templateFile).read() % {'message': msg}
+
     @jsonwrap
     def render_POST(self, request):
+        return self.do_validate_request(request)
+
+    def do_validate_request(self, request):
         send_cors(request)
 
         err = require_args(request, ('token', 'sid', 'clientSecret'))
