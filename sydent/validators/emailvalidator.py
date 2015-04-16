@@ -95,12 +95,15 @@ class EmailValidator:
         valSessionStore = ThreePidValSessionStore(self.sydent)
         s = valSessionStore.getTokenSessionById(sid)
         if not s:
+            logger.info("Session ID %s not found", (sid))
             return False
 
         if not clientSecret == s.clientSecret:
+            logger.info("Incorrect client secret", (sid))
             raise IncorrectClientSecretException()
 
         if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT < time_msec():
+            logger.info("Session expired")
             raise SessionExpiredException()
 
         # TODO once we can validate the token oob
@@ -108,10 +111,12 @@ class EmailValidator:
         #    return True
 
         if s.token == token:
+            logger.info("Setting session %s as validated", (s.id))
             valSessionStore.setValidated(s.id, True)
 
             return {'success': True}
         else:
+            logger.info("Incorrect token submitted")
             return False
 
 
