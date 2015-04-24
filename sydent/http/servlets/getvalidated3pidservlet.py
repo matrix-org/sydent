@@ -31,12 +31,21 @@ class GetValidated3pidServlet(Resource):
 
     @jsonwrap
     def render_GET(self, request):
-        err = require_args(request, ('sid', 'client_secret'))
+        # err = require_args(request, ('sid', 'client_secret'))
+        err = require_args(request, ('sid',))
         if err:
             return err
 
         sid = request.args['sid'][0]
-        clientSecret = request.args['client_secret'][0]
+        #clientSecret = request.args['client_secret'][0]
+
+        if 'client_secret' in request.args:
+            clientSecret = request.args['client_secret'][0]
+        elif 'clientSecret' in request.args:
+            clientSecret = request.args['clientSecret'][0]
+        else:
+            request.setResponseCode(400)
+            return {'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
 
         valSessionStore = ThreePidValSessionStore(self.sydent)
 

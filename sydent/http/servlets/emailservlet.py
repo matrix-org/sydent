@@ -32,13 +32,31 @@ class EmailRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error = require_args(request, ('email', 'client_secret', 'send_attempt'))
+        # error = require_args(request, ('email', 'client_secret', 'send_attempt'))
+        error = require_args(request, ('email',))
         if error:
+            request.setResponseCode(400)
             return error
 
+        # look for both camelcase and underscores for transition
+        if 'client_secret' in request.args:
+            clientSecret = request.args['client_secret'][0]
+        elif 'clientSecret' in request.args:
+            clientSecret = request.args['clientSecret'][0]
+        else:
+            request.setResponseCode(400)
+            return {'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
+
+        if 'send_attempt' in request.args:
+            sendAttempt = request.args['send_attempt'][0]
+        elif 'sendAttempt' in request.args:
+            sendAttempt = request.args['sendAttempt'][0]
+        else:
+            request.setResponseCode(400)
+            return {'errcode': 'M_MISSING_PARAM', 'error':'No send_attempt'}
+
         email = request.args['email'][0]
-        clientSecret = request.args['client_secret'][0]
-        sendAttempt = request.args['send_attempt'][0]
+
         ipaddress = self.sydent.ip_from_request(request)
 
         nextLink = None
@@ -99,13 +117,20 @@ class EmailValidateCodeServlet(Resource):
     def do_validate_request(self, request):
         send_cors(request)
 
-        err = require_args(request, ('token', 'sid', 'client_secret'))
+        # err = require_args(request, ('token', 'sid', 'client_secret'))
+        err = require_args(request, ('token', 'sid'))
         if err:
             return err
 
         sid = request.args['sid'][0]
         tokenString = request.args['token'][0]
-        clientSecret = request.args['client_secret'][0]
+        if 'client_secret' in request.args:
+            clientSecret = request.args['client_secret'][0]
+        elif 'clientSecret' in request.args:
+            clientSecret = request.args['clientSecret'][0]
+        else:
+            request.setResponseCode(400)
+            return {'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
 
         try:
             resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)
