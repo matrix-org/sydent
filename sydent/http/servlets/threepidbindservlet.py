@@ -27,12 +27,12 @@ class ThreePidBindServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        err = require_args(request, ('sid', 'clientSecret', 'mxid'))
+        err = require_args(request, ('sid', 'client_secret', 'mxid'))
         if err:
             return err
 
         sid = request.args['sid'][0]
-        clientSecret = request.args['clientSecret'][0]
+        clientSecret = request.args['client_secret'][0]
         mxid = request.args['mxid'][0]
 
         # Return the same error for not found / bad client secret otherwise people can get information about

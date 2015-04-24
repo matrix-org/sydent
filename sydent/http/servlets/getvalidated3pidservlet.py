@@ -31,12 +31,12 @@ class GetValidated3pidServlet(Resource):
 
     @jsonwrap
     def render_GET(self, request):
-        err = require_args(request, ('sid', 'clientSecret'))
+        err = require_args(request, ('sid', 'client_secret'))
         if err:
             return err
 
         sid = request.args['sid'][0]
-        clientSecret = request.args['clientSecret'][0]
+        clientSecret = request.args['client_secret'][0]
 
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
@@ -56,4 +56,4 @@ class GetValidated3pidServlet(Resource):
             return {'errcode': 'M_SESSION_NOT_VALIDATED',
                     'error': "This validation session has not yet been completed"}
 
-        return { 'medium': s.medium, 'address': s.address, 'validatedAt': s.mtime }
+        return { 'medium': s.medium, 'address': s.address, 'validated_at': s.mtime }

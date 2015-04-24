@@ -32,18 +32,18 @@ class EmailRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error = require_args(request, ('email', 'clientSecret', 'sendAttempt'))
+        error = require_args(request, ('email', 'client_secret', 'send_attempt'))
         if error:
             return error
 
         email = request.args['email'][0]
-        clientSecret = request.args['clientSecret'][0]
-        sendAttempt = request.args['sendAttempt'][0]
+        clientSecret = request.args['client_secret'][0]
+        sendAttempt = request.args['send_attempt'][0]
         ipaddress = self.sydent.ip_from_request(request)
 
         nextLink = None
-        if 'nextLink' in request.args:
-            nextLink = request.args['nextLink'][0]
+        if 'next_link' in request.args:
+            nextLink = request.args['next_link'][0]
 
         resp = None
 
@@ -99,13 +99,13 @@ class EmailValidateCodeServlet(Resource):
     def do_validate_request(self, request):
         send_cors(request)
 
-        err = require_args(request, ('token', 'sid', 'clientSecret'))
+        err = require_args(request, ('token', 'sid', 'client_secret'))
         if err:
             return err
 
         sid = request.args['sid'][0]
         tokenString = request.args['token'][0]
-        clientSecret = request.args['clientSecret'][0]
+        clientSecret = request.args['client_secret'][0]
 
         try:
             resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)

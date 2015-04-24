@@ -98,7 +98,7 @@ class EmailValidator:
 
     def makeValidateLink(self, valSession, clientSecret, nextLink):
         base = self.sydent.cfg.get('http', 'client_http_base')
-        link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&clientSecret=%s&sid=%d" % (
+        link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
             base,
             urllib.quote(valSession.token),
             urllib.quote(clientSecret),
