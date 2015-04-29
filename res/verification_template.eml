@@ -21,7 +21,7 @@ address:
 
 %(link)s
 
-If your client requires a code, the code is {token}
+If your client requires a code, the code is %(token)s
 
 If you aren't aware of making such a request, please disregard this email.
 
@@ -57,7 +57,7 @@ address:</p>
 
 <p>%(link)s</p>
 
-<p>If your client requires a code, the code is {token}</p>
+<p>If your client requires a code, the code is %(token)s</p>
 
 <p>If you aren't aware of making such a request, please disregard this
 email.</p>
