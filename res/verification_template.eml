@@ -48,7 +48,7 @@ body {
 
 <p>We have received a request from %(ipaddress)s to use this email address
 with a matrix.org identity server. If this was you who made this request,
-you may use the followiing link to complete the verification of your email
+you may use the following link to complete the verification of your email
 address:</p>
 
 <p><a href="%(link)s">Complete email verification</a></p>
