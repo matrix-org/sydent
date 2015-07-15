@@ -80,7 +80,11 @@ class EmailValidator:
 
         mailServer = self.sydent.cfg.get('email', 'email.smtphost')
 
-        logger.info("Attempting to mail code %s to %s using mail server %s", valSession.token, rawTo, mailServer)
+        logger.info(
+            "Attempting to mail code %s (nextLink: %s)"
+            " to %s using mail server %s",
+            valSession.token, nextLink, rawTo, mailServer
+        )
 
         try:
             smtp = smtplib.SMTP(mailServer)
