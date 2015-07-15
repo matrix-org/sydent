@@ -109,6 +109,15 @@ class EmailValidator:
             valSession.id,
         )
         if nextLink:
+            # manipulate the nextLink to add the sid, because
+            # the caller won't get it until we send a response,
+            # by which time we've sent the mail.
+            if '?' in nextLink:
+                nextLink += '&'
+            else:
+                nextLink += '?'
+            nextLink += "sid=" + urllib.quote(valSession.id)
+
             link += "&nextLink=%s" % (urllib.quote(nextLink))
         return link
 
