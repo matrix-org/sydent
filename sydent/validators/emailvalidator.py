@@ -116,7 +116,7 @@ class EmailValidator:
                 nextLink += '&'
             else:
                 nextLink += '?'
-            nextLink += "sid=" + urllib.quote(valSession.id)
+            nextLink += "sid=" + urllib.quote(str(valSession.id))
 
             link += "&nextLink=%s" % (urllib.quote(nextLink))
         return link
