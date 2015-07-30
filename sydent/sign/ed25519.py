@@ -36,7 +36,7 @@ class SydentEd25519:
         if sk_str == '':
             logger.info("This server does not yet have an ed25519 signing key. "+
                         "Creating one and saving it in the config file.")
-            self.signing_key = syutil.crypto.signing_key.generate_singing_key("0")
+            self.signing_key = syutil.crypto.signing_key.generate_signing_key("0")
             save_key = True
         elif len(sk_parts) == 1:
             # old format key

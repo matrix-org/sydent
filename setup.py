@@ -31,7 +31,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     description="Reference Synapse Identity Verification and Lookup Server",
     install_requires=[
-        "syutil==0.0.1",
+        "syutil==0.0.7",
         "Twisted>=14.0.0",
         "service_identity>=1.0.0",
         "pyasn1",
