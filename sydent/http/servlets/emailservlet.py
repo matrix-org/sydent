@@ -130,15 +130,15 @@ class EmailValidateCodeServlet(Resource):
             clientSecret = request.args['clientSecret'][0]
         else:
             request.setResponseCode(400)
-            return {'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
+            return {'success': False, 'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
 
         try:
             resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)
         except IncorrectClientSecretException:
-            return {'errcode': 'M_INCORRECT_CLIENT_SECRET',
+            return {'success': False, 'errcode': 'M_INCORRECT_CLIENT_SECRET',
                     'error': "Client secret does not match the one given when requesting the token"}
         except SessionExpiredException:
-            return {'errcode': 'M_SESSION_EXPIRED',
+            return {'success': False, 'errcode': 'M_SESSION_EXPIRED',
                     'error': "This validation session has expired: call requestToken again"}
 
         if not resp:
