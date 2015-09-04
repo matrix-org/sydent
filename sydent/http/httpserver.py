@@ -68,6 +68,8 @@ class ClientApiHttpServer:
         email.putChild('requestToken', emailReqCode)
         email.putChild('submitToken', emailValCode)
 
+        v1.putChild('register-callback', self.sydent.servlets.registerCallback)
+
         self.factory = Site(root)
 
     def setup(self):

@@ -36,6 +36,7 @@ from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
+from http.servlets.registercallbackservlet import RegisterCallbackServlet
 
 from threepid.bind import ThreepidBinder
 
@@ -102,6 +103,7 @@ class Sydent:
         self.servlets.threepidBind = ThreePidBindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
+        self.servlets.registerCallback = RegisterCallbackServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 
