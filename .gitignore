@@ -1,2 +1,5 @@
 *.pyc
 .idea/
+
+sydent.conf
+sydent.db
