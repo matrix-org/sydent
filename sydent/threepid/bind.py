@@ -89,7 +89,7 @@ class ThreepidBinder:
                 server,
             )
 
-            logger.info('Making bind callback to: %s' % callbackUrl)
+            logger.info('Making bind callback to: %s', callbackUrl)
             reqDeferred = self.agent.request(
                 'POST',
                 callbackUrl.encode('utf8'),
@@ -101,9 +101,8 @@ class ThreepidBinder:
             )
 
             reqDeferred.addErrback(
-                lambda err: logger.warn('Error making bind callback to %s: %s', (
-                    callbackUrl, err
-                ))
+                lambda err: logger.warn('Error making bind callback to %s: %s',
+                                        callbackUrl, err)
             )
 
     # The below is lovingly ripped off of synapse/http/endpoint.py
