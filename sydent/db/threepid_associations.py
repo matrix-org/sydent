@@ -81,6 +81,20 @@ class GlobalAssociationStore:
 
         return sgAssocBytes
 
+    def getMxid(self, medium, address):
+        cur = self.sydent.db.cursor()
+        res = cur.execute("select mxid from global_threepid_associations where "
+                    "medium = ? and address = ? and notBefore < ? and notAfter > ? "
+                    "order by ts desc limit 1",
+                    (medium, address, time_msec(), time_msec()))
+
+        row = res.fetchone()
+
+        if not row:
+            return None
+
+        return row[0]
+
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
         :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
