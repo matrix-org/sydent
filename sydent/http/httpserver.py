@@ -68,6 +68,8 @@ class ClientApiHttpServer:
         email.putChild('requestToken', emailReqCode)
         email.putChild('submitToken', emailValCode)
 
+        v1.putChild('nonce-it-up', self.sydent.servlets.nonceServlet)
+
         self.factory = Site(root)
 
     def setup(self):
