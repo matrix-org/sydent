@@ -96,7 +96,7 @@ class EmailValidateCodeServlet(Resource):
 
     def render_GET(self, request):
         resp = self.do_validate_request(request)
-        if resp['success']:
+        if 'success' in resp and resp['success']:
             msg = "Verification successful! Please return to your Matrix client to continue."
             if 'nextLink' in request.args:
                 next_link = request.args['nextLink'][0]
