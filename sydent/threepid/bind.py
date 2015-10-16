@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import syutil
 from sydent.db.invite_tokens import JoinTokenStore
 
 from sydent.db.valsession import ThreePidValSessionStore
@@ -50,8 +51,17 @@ class ThreepidBinder:
 
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(s.medium, s.address)
-        if pendingJoinTokens:
-            sgassoc["invites"] = pendingJoinTokens
+        invites = []
+        for token in pendingJoinTokens:
+            token["mxid"] = mxid
+            token["signed"] = {
+                "mxid": mxid,
+                "token": token["token"],
+            }
+            token["signed"] = syutil.crypto.jsonsign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
+            invites.append(token)
+        if invites:
+            sgassoc["invites"] = invites
             joinTokenStore.deleteTokens(s.medium, s.address)
 
         return sgassoc

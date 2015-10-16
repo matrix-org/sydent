@@ -16,6 +16,8 @@
 import hashlib
 import random
 import string
+import syutil
+from syutil.base64util import encode_base64
 
 from twisted.web.resource import Resource
 
@@ -26,7 +28,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import require_args, send_cors
 
 
-class NonceServlet(Resource):
+class StoreInviteServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
@@ -49,16 +51,16 @@ class NonceServlet(Resource):
                 "mxid": mxid,
             })
 
-        outerNonce = self._randomString(256)
-        innerNonce = self._randomString(256)
-        innerDigest = hashlib.sha256(innerNonce + medium + address).hexdigest()
-        outerDigest = hashlib.sha256(outerNonce + innerDigest).hexdigest()
+        token = self._randomString(256)
 
-        JoinTokenStore(self.sydent).storeToken(medium, address, roomId, innerNonce)
+        JoinTokenStore(self.sydent).storeToken(medium, address, roomId, token)
+
+        pubKey = self.sydent.keyring.ed25519.verify_key
+        pubKeyBase64 = encode_base64(pubKey.encode())
 
         resp = {
-            "nonce": outerNonce,
-            "digest": outerDigest,
+            "token": token,
+            "public_key": pubKeyBase64,
         }
 
         return json.dumps(resp)

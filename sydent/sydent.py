@@ -26,6 +26,7 @@ from db.sqlitedb import SqliteDatabase
 from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
 from http.httpsclient import ReplicationHttpsClient
+from http.servlets.pubkeyservlets import PubkeyIsValidServlet
 from validators.emailvalidator import EmailValidator
 
 from sign.ed25519 import SydentEd25519
@@ -36,7 +37,7 @@ from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
-from http.servlets.nonceservlet import NonceServlet
+from http.servlets.store_invite_servlet import StoreInviteServlet
 
 from threepid.bind import ThreepidBinder
 
@@ -100,10 +101,11 @@ class Sydent:
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
+        self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.threepidBind = ThreePidBindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
-        self.servlets.nonceServlet = NonceServlet(self)
+        self.servlets.storeInviteServlet = StoreInviteServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 

@@ -59,7 +59,8 @@ class ClientApiHttpServer:
         v1.putChild('lookup', lookup)
 
         v1.putChild('pubkey', pubkey)
-        pubkey.putChild('ed25519', pk_ed25519)
+        pubkey.putChild('isvalid', self.sydent.servlets.pubkeyIsValid)
+        pubkey.putChild('ed25519:0', pk_ed25519)
 
         v1.putChild('3pid', threepid)
         threepid.putChild('bind', bind)
@@ -68,7 +69,7 @@ class ClientApiHttpServer:
         email.putChild('requestToken', emailReqCode)
         email.putChild('submitToken', emailValCode)
 
-        v1.putChild('nonce-it-up', self.sydent.servlets.nonceServlet)
+        v1.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
 
         self.factory = Site(root)
 
