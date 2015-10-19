@@ -46,9 +46,6 @@ class ThreepidBinder:
 
         self.sydent.pusher.doLocalPush()
 
-        assocSigner = AssociationSigner(self.sydent)
-        sgassoc = assocSigner.signedThreePidAssociation(assoc)
-
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(s.medium, s.address)
         invites = []
@@ -61,7 +58,9 @@ class ThreepidBinder:
             token["signed"] = syutil.crypto.jsonsign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
             invites.append(token)
         if invites:
-            sgassoc["invites"] = invites
+            assoc["invites"] = invites
             joinTokenStore.deleteTokens(s.medium, s.address)
 
+        assocSigner = AssociationSigner(self.sydent)
+        sgassoc = assocSigner.signedThreePidAssociation(assoc)
         return sgassoc
