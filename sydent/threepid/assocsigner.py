@@ -28,5 +28,6 @@ class AssociationSigner:
                     'not_before': assoc.not_before,
                     'not_after': assoc.not_after
                   }
+        sgassoc.update(assoc.extra_fields)
         sgassoc = syutil.crypto.jsonsign.sign_json(sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519)
         return sgassoc

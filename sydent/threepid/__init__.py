@@ -34,3 +34,4 @@ class ThreepidAssociation:
         self.ts = ts
         self.not_before = not_before
         self.not_after = not_after
+        self.extra_fields = {}

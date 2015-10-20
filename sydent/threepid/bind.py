@@ -58,7 +58,7 @@ class ThreepidBinder:
             token["signed"] = syutil.crypto.jsonsign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
             invites.append(token)
         if invites:
-            assoc["invites"] = invites
+            assoc.extra_fields["invites"] = invites
             joinTokenStore.deleteTokens(s.medium, s.address)
 
         assocSigner = AssociationSigner(self.sydent)
