@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 class JoinTokenStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
@@ -22,9 +24,9 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
-                    " ('medium', 'address', 'room_id', 'token')"
-                    " VALUES (?, ?, ?, ?)",
-                    (medium, address, roomId, token,))
+                    " ('medium', 'address', 'room_id', 'token', 'received_ts')"
+                    " VALUES (?, ?, ?, ?, ?)",
+                    (medium, address, roomId, token, int(time.time())))
         self.sydent.db.commit()
 
     def getTokens(self, medium, address):
@@ -54,7 +56,7 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
 
         cur.execute(
-            "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
-            (medium, address,)
+            "UPDATE invite_tokens SET sent_ts = ? WHERE medium = ? AND address = ?",
+            (int(time.time()), medium, address,)
         )
         self.sydent.db.commit()
