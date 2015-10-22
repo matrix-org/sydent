@@ -52,7 +52,7 @@ class JoinTokenStore(object):
 
         return ret
 
-    def deleteTokens(self, medium, address):
+    def markTokensAsSent(self, medium, address):
         cur = self.sydent.db.cursor()
 
         cur.execute(

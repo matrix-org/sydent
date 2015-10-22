@@ -59,7 +59,7 @@ class ThreepidBinder:
             invites.append(token)
         if invites:
             assoc.extra_fields["invites"] = invites
-            joinTokenStore.deleteTokens(s.medium, s.address)
+            joinTokenStore.markTokensAsSent(s.medium, s.address)
 
         assocSigner = AssociationSigner(self.sydent)
         sgassoc = assocSigner.signedThreePidAssociation(assoc)
