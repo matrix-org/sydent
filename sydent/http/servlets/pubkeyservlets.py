@@ -13,11 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import syutil
 
+from syutil.base64util import encode_base64
 from twisted.web.resource import Resource
 
 import json
-import nacl.encoding
+from sydent.http.servlets import require_args
 
 
 class Ed25519Servlet(Resource):
@@ -28,6 +30,22 @@ class Ed25519Servlet(Resource):
 
     def render_GET(self, request):
         pubKey = self.sydent.keyring.ed25519.verify_key
-        pubKeyHex = pubKey.encode(encoder=nacl.encoding.HexEncoder)
+        pubKeyBase64 = encode_base64(pubKey.encode())
 
-        return json.dumps({'public_key': pubKeyHex})
+        return json.dumps({'public_key': pubKeyBase64})
+
+class PubkeyIsValidServlet(Resource):
+    isLeaf = True
+
+    def __init__(self, syd):
+        self.sydent = syd
+
+    def render_GET(self, request):
+        err = require_args(request, ("public_key",))
+        if err:
+            return json.dumps(err)
+
+        pubKey = self.sydent.keyring.ed25519.verify_key
+        pubKeyBase64 = encode_base64(pubKey.encode())
+
+        return json.dumps({'valid': request.args["public_key"][0] == pubKeyBase64})

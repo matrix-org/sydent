@@ -13,10 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import syutil
+from sydent.db.invite_tokens import JoinTokenStore
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.db.threepid_associations import LocalAssociationStore
-from sydent.validators import InvalidSessionIdException, IncorrectClientSecretException
 
 from sydent.util import time_msec
 from sydent.threepid.assocsigner import AssociationSigner
@@ -45,7 +46,21 @@ class ThreepidBinder:
 
         self.sydent.pusher.doLocalPush()
 
+        joinTokenStore = JoinTokenStore(self.sydent)
+        pendingJoinTokens = joinTokenStore.getTokens(s.medium, s.address)
+        invites = []
+        for token in pendingJoinTokens:
+            token["mxid"] = mxid
+            token["signed"] = {
+                "mxid": mxid,
+                "token": token["token"],
+            }
+            token["signed"] = syutil.crypto.jsonsign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
+            invites.append(token)
+        if invites:
+            assoc.extra_fields["invites"] = invites
+            joinTokenStore.markTokensAsSent(s.medium, s.address)
+
         assocSigner = AssociationSigner(self.sydent)
         sgassoc = assocSigner.signedThreePidAssociation(assoc)
-
         return sgassoc
