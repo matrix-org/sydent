@@ -7,7 +7,7 @@ fi
 
 email="$1"
 mxid="$2"
-client_secret=$(uuidgen)
+client_secret="$(uuidgen)"
 
 curl -d "client_secret=${client_secret}" -d email=${email} -d send_attempt=1 http://localhost:8090/_matrix/identity/api/v1/validate/email/requestToken
 sid=$(sqlite3 sydent.db "select threepid_validation_sessions.id from threepid_token_auths join threepid_validation_sessions on threepid_validation_sessions.id == threepid_token_auths.validationSession where threepid_validation_sessions.address = \"${email}\";")
