@@ -34,12 +34,13 @@ class StoreInviteServlet(Resource):
 
     def render_POST(self, request):
         send_cors(request)
-        err = require_args(request, ("medium", "address", "room_id",))
+        err = require_args(request, ("medium", "address", "room_id", "sender",))
         if err:
             return json.dumps(err)
         medium = request.args["medium"][0]
         address = request.args["address"][0]
         roomId = request.args["room_id"][0]
+        sender = request.args["sender"][0]
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
         mxid = globalAssocStore.getMxid(medium, address)
@@ -51,9 +52,9 @@ class StoreInviteServlet(Resource):
                 "mxid": mxid,
             })
 
-        token = self._randomString(256)
+        token = self._randomString(128)
 
-        JoinTokenStore(self.sydent).storeToken(medium, address, roomId, token)
+        JoinTokenStore(self.sydent).storeToken(medium, address, roomId, sender, token)
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())

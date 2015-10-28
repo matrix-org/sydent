@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS invite_tokens (
     medium varchar(16) not null,
     address varchar(256) not null,
     room_id varchar(256) not null,
+    sender varchar(256) not null,
     token varchar(256) not null,
     received_ts bigint, -- When the invite was received by us from the homeserver
     sent_ts bigint -- When the token was sent by us to the user

@@ -20,20 +20,20 @@ class JoinTokenStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def storeToken(self, medium, address, roomId, token):
+    def storeToken(self, medium, address, roomId, sender, token):
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
-                    " ('medium', 'address', 'room_id', 'token', 'received_ts')"
-                    " VALUES (?, ?, ?, ?, ?)",
-                    (medium, address, roomId, token, int(time.time())))
+                    " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts')"
+                    " VALUES (?, ?, ?, ?, ?, ?)",
+                    (medium, address, roomId, sender, token, int(time.time())))
         self.sydent.db.commit()
 
     def getTokens(self, medium, address):
         cur = self.sydent.db.cursor()
 
         res = cur.execute(
-            "SELECT medium, address, room_id, token FROM invite_tokens"
+            "SELECT medium, address, room_id, sender, token FROM invite_tokens"
             " WHERE medium = ? AND address = ?",
             (medium, address,)
         )
@@ -42,11 +42,12 @@ class JoinTokenStore(object):
         ret = []
 
         for row in rows:
-            medium, address, roomId, token = row
+            medium, address, roomId, sender, token = row
             ret.append({
                 "medium": medium,
                 "address": address,
                 "room_id": roomId,
+                "sender": sender,
                 "token": token,
             })
 
