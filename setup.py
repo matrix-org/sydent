@@ -39,7 +39,7 @@ setup(
         "daemonize",
     ],
     dependency_links=[
-        "git+ssh://git@git.openmarket.com/tng/syutil.git#egg=syutil-0.0.1",
+        "git+ssh://git@github.com/matrix-org/syutil.git@0.0.7#egg=syutil-0.0.7"
     ],
     setup_requires=[
         "setuptools_trial",
