@@ -52,6 +52,13 @@ class StoreInviteServlet(Resource):
                 "mxid": mxid,
             })
 
+        if medium != "email":
+            request.setResponseCode(400)
+            return json.dumps({
+                "errcode": "M_UNRECOGNIZED",
+                "error": "Didn't understand medium '%s'" % (medium,),
+            })
+
         token = self._randomString(128)
 
         JoinTokenStore(self.sydent).storeToken(medium, address, roomId, sender, token)
@@ -62,9 +69,21 @@ class StoreInviteServlet(Resource):
         resp = {
             "token": token,
             "public_key": pubKeyBase64,
+            "display_name": self.redact("address"),
         }
 
         return json.dumps(resp)
+
+    def redact(self, address):
+        return "@".join(map(self._redact, address.split("@", 1)))
+
+    def _redact(self, s):
+        if len(s) > 5:
+            return s[:3] + "..."
+        elif len(s) > 1:
+            return s[0] + "..."
+        else:
+            return "..."
 
     def _randomString(self, length):
         return ''.join(random.choice(string.ascii_letters) for _ in xrange(length))
