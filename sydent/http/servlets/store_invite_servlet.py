@@ -64,10 +64,12 @@ class StoreInviteServlet(Resource):
 
         JoinTokenStore(self.sydent).storeToken(medium, address, roomId, sender, token)
 
-        sendEmail(self.sydent, "email.invite_template", address, {
-            "room_id": roomId,
-            "sender": sender,
-        })
+        substitutions = {}
+        for key, values in request.args:
+            if len(values) == 1 and type(values[0]) == str:
+                substitutions[key] = values[0]
+
+        sendEmail(self.sydent, "email.invite_template", address, substitutions)
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
