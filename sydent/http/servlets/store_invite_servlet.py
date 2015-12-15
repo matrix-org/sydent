@@ -69,7 +69,7 @@ class StoreInviteServlet(Resource):
         resp = {
             "token": token,
             "public_key": pubKeyBase64,
-            "display_name": self.redact("address"),
+            "display_name": self.redact(address),
         }
 
         return json.dumps(resp)
