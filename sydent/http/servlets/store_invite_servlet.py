@@ -26,6 +26,7 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
 from sydent.http.servlets import require_args, send_cors
+from sydent.util.emailutils import sendEmail
 
 
 class StoreInviteServlet(Resource):
@@ -62,6 +63,11 @@ class StoreInviteServlet(Resource):
         token = self._randomString(128)
 
         JoinTokenStore(self.sydent).storeToken(medium, address, roomId, sender, token)
+
+        sendEmail(self.sydent, "email.invite_template", address, {
+            "room_id": roomId,
+            "sender": sender,
+        })
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())

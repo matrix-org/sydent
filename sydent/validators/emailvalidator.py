@@ -14,18 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import smtplib
 import os
-import email.utils
 import logging
 import random
 import string
 import urllib
-import twisted.python.log
-
-import email.utils
 
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.util.emailutils import sendEmail
 from sydent.validators import ValidationSession
 
 from sydent.util import time_msec
@@ -56,45 +52,17 @@ class EmailValidator:
         messageid = "%d%s@%s" % (time_msec(), midRandom, myHostname)
         ipstring = ipaddress if ipaddress else u"an unknown location"
 
-        mailTo = emailAddress
-        mailFrom = self.sydent.cfg.get('email', 'email.from')
-
-        mailTemplateFile = self.sydent.cfg.get('email', 'email.template')
-
-        mailString = open(mailTemplateFile).read() % {
-            'date': email.utils.formatdate(localtime=False),
-            'to': mailTo,
-            'from': mailFrom,
+        substitutions = {
             'messageid': messageid,
             'ipaddress': ipstring,
             'link': self.makeValidateLink(valSession, clientSecret, nextLink),
             'token': valSession.token,
         }
-
-        rawFrom = email.utils.parseaddr(mailFrom)[1]
-        rawTo = email.utils.parseaddr(mailTo)[1]
-
-        if rawFrom == '' or rawTo == '':
-            logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
-            raise EmailAddressException()
-
-        mailServer = self.sydent.cfg.get('email', 'email.smtphost')
-
         logger.info(
-            "Attempting to mail code %s (nextLink: %s)"
-            " to %s using mail server %s",
-            valSession.token, nextLink, rawTo, mailServer
+            "Attempting to mail code %s (nextLink: %s) to %s",
+            valSession.token, nextLink, emailAddress,
         )
-
-        try:
-            smtp = smtplib.SMTP(mailServer)
-            smtp.sendmail(rawFrom, rawTo, mailString)
-            smtp.quit()
-        except Exception as origException:
-            twisted.python.log.err()
-            ese = EmailSendException()
-            ese.cause = origException
-            raise ese
+        sendEmail(self.sydent, 'email.template', emailAddress, substitutions)
 
         valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
 
@@ -148,11 +116,3 @@ class EmailValidator:
         else:
             logger.info("Incorrect token submitted")
             return False
-
-
-class EmailAddressException(Exception):
-    pass
-
-
-class EmailSendException(Exception):
-    pass
