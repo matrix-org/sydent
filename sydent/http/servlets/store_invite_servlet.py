@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import cgi
 import hashlib
 import random
 import string
@@ -67,7 +68,7 @@ class StoreInviteServlet(Resource):
         substitutions = {}
         for key, values in request.args:
             if len(values) == 1 and type(values[0]) == str:
-                substitutions[key] = values[0]
+                substitutions[key] = cgi.escape(values[0])
 
         sendEmail(self.sydent, "email.invite_template", address, substitutions)
 
