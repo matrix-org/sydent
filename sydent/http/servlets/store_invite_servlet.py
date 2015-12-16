@@ -66,7 +66,7 @@ class StoreInviteServlet(Resource):
         JoinTokenStore(self.sydent).storeToken(medium, address, roomId, sender, token)
 
         substitutions = {}
-        for key, values in request.args:
+        for key, values in request.args.items():
             if len(values) == 1 and type(values[0]) == str:
                 substitutions[key] = cgi.escape(values[0])
 
