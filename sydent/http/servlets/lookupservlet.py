@@ -20,6 +20,8 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 import json
 
 from sydent.http.servlets import require_args, jsonwrap, send_cors
+import syutil.crypto.jsonsign
+
 
 class LookupServlet(Resource):
     isLeaf = True
@@ -43,7 +45,31 @@ class LookupServlet(Resource):
         if not sgassoc:
             return json.dumps({})
 
-        return sgassoc.encode('utf8')
+        sgassoc = json.loads(sgassoc.encode('utf8'))
+        if not self.sydent.server_name in sgassoc['signatures']:
+            # We have not yet worked out what the proper trust model should be.
+            #
+            # Maybe clients implicitly trust a server they talk to (and so we
+            # should sign every assoc we return as ourselves, so they can
+            # verify this).
+            #
+            # Maybe clients really want to know what server did the original
+            # verification, and want to only know exactly who signed the assoc.
+            #
+            # Until we work out what we should do, sign all assocs we return as
+            # ourself. This is vaguely ok because there actually is only one
+            # identity server, but it happens to have two names (matrix.org and
+            # vector.im), and so we're not really lying too much.
+            #
+            # We do this when we return assocs, not when we receive them over
+            # replication, so that we can undo this decision in the future if
+            # we wish, without having destroyed the raw underlying data.
+            sgassoc = syutil.crypto.jsonsign.sign_json(
+                sgassoc,
+                self.sydent.server_name,
+                self.sydent.keyring.ed25519
+            )
+        return json.dumps(sgassoc)
 
     @jsonwrap
     def render_OPTIONS(self, request):
