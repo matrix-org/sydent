@@ -27,12 +27,13 @@ logger = logging.getLogger(__name__)
 def sendEmail(sydent, templateName, mailTo, substitutions):
         mailFrom = sydent.cfg.get('email', 'email.from')
         mailTemplateFile = sydent.cfg.get('email', templateName)
-        allSubstitutions = {
+        allSubstitutions = {}
+        allSubstitutions.update(substitutions)
+        allSubstitutions.update({
             'date': email.utils.formatdate(localtime=False),
             'to': mailTo,
             'from': mailFrom,
-        }
-        allSubstitutions.update(substitutions)
+        })
         mailString = open(mailTemplateFile).read() % allSubstitutions
         rawFrom = email.utils.parseaddr(mailFrom)[1]
         rawTo = email.utils.parseaddr(mailTo)[1]
