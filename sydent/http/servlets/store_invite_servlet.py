@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import cgi
 import hashlib
 import random
 import string
@@ -26,6 +27,7 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
 from sydent.http.servlets import require_args, send_cors
+from sydent.util.emailutils import sendEmail
 
 
 class StoreInviteServlet(Resource):
@@ -62,6 +64,13 @@ class StoreInviteServlet(Resource):
         token = self._randomString(128)
 
         JoinTokenStore(self.sydent).storeToken(medium, address, roomId, sender, token)
+
+        substitutions = {}
+        for key, values in request.args:
+            if len(values) == 1 and type(values[0]) == str:
+                substitutions[key] = cgi.escape(values[0])
+
+        sendEmail(self.sydent, "email.invite_template", address, substitutions)
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
