@@ -16,7 +16,8 @@
 
 from twisted.web.resource import Resource
 
-from sydent.validators.emailvalidator import EmailAddressException, EmailSendException, SessionExpiredException
+from sydent.util.emailutils import EmailAddressException, EmailSendException
+from sydent.validators.emailvalidator import SessionExpiredException
 from sydent.validators.emailvalidator import IncorrectClientSecretException
 
 from sydent.http.servlets import require_args, jsonwrap, send_cors
