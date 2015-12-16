@@ -15,11 +15,16 @@
 # limitations under the License.
 
 import logging
+import os
+import random
 import smtplib
 import email.utils
+import string
 import twisted.python.log
 
 import email.utils
+
+from sydent.util import time_msec
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +32,15 @@ logger = logging.getLogger(__name__)
 def sendEmail(sydent, templateName, mailTo, substitutions):
         mailFrom = sydent.cfg.get('email', 'email.from')
         mailTemplateFile = sydent.cfg.get('email', templateName)
+
+        myHostname = os.uname()[1]
+        midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
+        messageid = "%d%s@%s" % (time_msec(), midRandom, myHostname)
+
         allSubstitutions = {}
         allSubstitutions.update(substitutions)
         allSubstitutions.update({
+            'messageid': messageid,
             'date': email.utils.formatdate(localtime=False),
             'to': mailTo,
             'from': mailFrom,

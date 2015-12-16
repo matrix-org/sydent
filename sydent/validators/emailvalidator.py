@@ -14,10 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
-import random
-import string
 import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore
@@ -47,13 +44,9 @@ class EmailValidator:
             logger.info("Not mailing code because current send attempt (%d) is not less than given send attempt (%s)", int(sendAttempt), int(valSession.sendAttemptNumber))
             return valSession.id
 
-        myHostname = os.uname()[1]
-        midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
-        messageid = "%d%s@%s" % (time_msec(), midRandom, myHostname)
         ipstring = ipaddress if ipaddress else u"an unknown location"
 
         substitutions = {
-            'messageid': messageid,
             'ipaddress': ipstring,
             'link': self.makeValidateLink(valSession, clientSecret, nextLink),
             'token': valSession.token,
