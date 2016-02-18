@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import syutil.crypto.jsonsign
+import signedjson.key
 
 class AssociationSigner:
     def __init__(self, sydent):
@@ -29,5 +29,5 @@ class AssociationSigner:
                     'not_after': assoc.not_after
                   }
         sgassoc.update(assoc.extra_fields)
-        sgassoc = syutil.crypto.jsonsign.sign_json(sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519)
+        sgassoc = signedjson.key.sign_json(sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519)
         return sgassoc

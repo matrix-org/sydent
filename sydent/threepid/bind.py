@@ -18,7 +18,7 @@ import json
 import logging
 import math
 import random
-import syutil
+import signedjson.key
 from sydent.db.invite_tokens import JoinTokenStore
 
 from sydent.db.valsession import ThreePidValSessionStore
@@ -71,7 +71,7 @@ class ThreepidBinder:
                 "mxid": mxid,
                 "token": token["token"],
             }
-            token["signed"] = syutil.crypto.jsonsign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
+            token["signed"] = signedjson.key.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
             invites.append(token)
         if invites:
             assoc.extra_fields["invites"] = invites
