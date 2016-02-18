@@ -13,10 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import syutil
-
-from syutil.base64util import encode_base64
 from twisted.web.resource import Resource
+from unpaddedbase64 import encode_base64
 
 import json
 from sydent.http.servlets import require_args

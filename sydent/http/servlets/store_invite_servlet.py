@@ -14,13 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import cgi
-import hashlib
 import random
 import string
-import syutil
-from syutil.base64util import encode_base64
 
 from twisted.web.resource import Resource
+from unpaddedbase64 import encode_base64
 
 import json
 from sydent.db.invite_tokens import JoinTokenStore
