@@ -61,3 +61,25 @@ class JoinTokenStore(object):
             (int(time.time()), medium, address,)
         )
         self.sydent.db.commit()
+
+    def storeEphemeralPublicKey(self, publicKey):
+        cur = self.sydent.db.cursor()
+        cur.execute(
+            "INSERT INTO ephemeral_public_keys"
+            " (public_key, persistence_ts)"
+            " VALUES (?, ?)",
+            (publicKey, int(time.time()))
+        )
+        self.sydent.db.commit()
+
+    def validateEphemeralPublicKey(self, publicKey):
+        cur = self.sydent.db.cursor()
+        cur.execute(
+            "UPDATE ephemeral_public_keys"
+            " SET verify_count = verify_count + 1"
+            " WHERE public_key = ?"
+            " LIMIT 1",
+            (publicKey,)
+        )
+        self.sydent.db.commit()
+        return cur.rowcount > 0

@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import cgi
+import nacl.signing
 import random
 import string
 
@@ -61,12 +62,23 @@ class StoreInviteServlet(Resource):
 
         token = self._randomString(128)
 
-        JoinTokenStore(self.sydent).storeToken(medium, address, roomId, sender, token)
+        tokenStore = JoinTokenStore(self.sydent)
+
+        ephemeralPrivateKey = nacl.signing.SigningKey.generate()
+        ephemeralPublicKey = ephemeralPrivateKey.verify_key
+
+        ephemeralPrivateKeyBase64 = encode_base64(ephemeralPrivateKey.encode(), True)
+        ephemeralPublicKeyBase64 = encode_base64(ephemeralPublicKey.encode(), True)
+
+        tokenStore.storeEphemeralPublicKey(ephemeralPublicKeyBase64)
+        tokenStore.storeToken(medium, address, roomId, sender, token)
 
         substitutions = {}
         for key, values in request.args.items():
             if len(values) == 1 and type(values[0]) == str:
                 substitutions[key] = cgi.escape(values[0])
+        substitutions["token"] = token
+        substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
 
         sendEmail(self.sydent, "email.invite_template", address, substitutions)
 
@@ -76,6 +88,7 @@ class StoreInviteServlet(Resource):
         resp = {
             "token": token,
             "public_key": pubKeyBase64,
+            "public_keys": [pubKeyBase64, ephemeralPublicKeyBase64],
             "display_name": self.redact(address),
         }
 
