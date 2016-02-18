@@ -26,7 +26,7 @@ from db.sqlitedb import SqliteDatabase
 from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
 from http.httpsclient import ReplicationHttpsClient
-from http.servlets.pubkeyservlets import PubkeyIsValidServlet
+from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
 from validators.emailvalidator import EmailValidator
 
 from sign.ed25519 import SydentEd25519
@@ -102,6 +102,7 @@ class Sydent:
         self.servlets.lookup = LookupServlet(self)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
+        self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
         self.servlets.threepidBind = ThreePidBindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)

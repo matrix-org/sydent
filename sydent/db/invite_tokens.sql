@@ -24,4 +24,13 @@ CREATE TABLE IF NOT EXISTS invite_tokens (
     received_ts bigint, -- When the invite was received by us from the homeserver
     sent_ts bigint -- When the token was sent by us to the user
 );
-CREATE UNIQUE INDEX IF NOT EXISTS medium_address on invite_tokens(medium, address);
+CREATE INDEX IF NOT EXISTS invite_token_medium_address on invite_tokens(medium, address);
+
+CREATE TABLE IF NOT EXISTS ephemeral_public_keys(
+    id integer primary key,
+    public_key varchar(256) not null,
+    verify_count bigint default 0,
+    persistence_ts bigint
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ephemeral_public_keys_index on ephemeral_public_keys(public_key);

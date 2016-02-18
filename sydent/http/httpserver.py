@@ -46,6 +46,8 @@ class ClientApiHttpServer:
         bind = self.sydent.servlets.threepidBind
 
         pubkey = Resource()
+        ephemeralPubkey = Resource()
+
         pk_ed25519 = self.sydent.servlets.pubkey_ed25519
 
         root.putChild('_matrix', matrix)
@@ -61,6 +63,8 @@ class ClientApiHttpServer:
         v1.putChild('pubkey', pubkey)
         pubkey.putChild('isvalid', self.sydent.servlets.pubkeyIsValid)
         pubkey.putChild('ed25519:0', pk_ed25519)
+        pubkey.putChild('ephemeral', ephemeralPubkey)
+        ephemeralPubkey.putChild('isvalid', self.sydent.servlets.ephemeralPubkeyIsValid)
 
         v1.putChild('3pid', threepid)
         threepid.putChild('bind', bind)

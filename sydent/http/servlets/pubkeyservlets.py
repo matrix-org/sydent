@@ -17,6 +17,7 @@ from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
 import json
+from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import require_args
 
 
@@ -47,3 +48,20 @@ class PubkeyIsValidServlet(Resource):
         pubKeyBase64 = encode_base64(pubKey.encode())
 
         return json.dumps({'valid': request.args["public_key"][0] == pubKeyBase64})
+
+
+class EphemeralPubkeyIsValidServlet(Resource):
+    isLeaf = True
+
+    def __init__(self, syd):
+        self.joinTokenStore = JoinTokenStore(syd)
+
+    def render_GET(self, request):
+        err = require_args(request, ("public_key",))
+        if err:
+            return json.dumps(err)
+        publicKey = request.args["public_key"][0]
+
+        return json.dumps({
+            'valid': self.joinTokenStore.validateEphemeralPublicKey(publicKey),
+        })
