@@ -85,10 +85,22 @@ class StoreInviteServlet(Resource):
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
+        baseUrl = "%s/_matrix/identity/api/v1" % (self.sydent.cfg.get('http', 'client_http_base'),)
+
+        keysToReturn = []
+        keysToReturn.append({
+            "public_key": pubKeyBase64,
+            "key_validity_url": baseUrl + "/pubkey/isvalid",
+        })
+        keysToReturn.append({
+            "public_key": ephemeralPublicKeyBase64,
+            "key_validity_url": baseUrl + "/pubkey/ephemeral/isvalid",
+        })
+
         resp = {
             "token": token,
             "public_key": pubKeyBase64,
-            "public_keys": [pubKeyBase64, ephemeralPublicKeyBase64],
+            "public_keys": keysToReturn,
             "display_name": self.redact(address),
         }
 
