@@ -18,7 +18,7 @@ from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
 
 import json
-import signedjson.key
+import signedjson.sign
 
 from sydent.http.servlets import require_args, jsonwrap, send_cors
 
@@ -63,7 +63,7 @@ class LookupServlet(Resource):
             # We do this when we return assocs, not when we receive them over
             # replication, so that we can undo this decision in the future if
             # we wish, without having destroyed the raw underlying data.
-            sgassoc = signedjson.key.sign_json(
+            sgassoc = signedjson.sign.sign_json(
                 sgassoc,
                 self.sydent.server_name,
                 self.sydent.keyring.ed25519
