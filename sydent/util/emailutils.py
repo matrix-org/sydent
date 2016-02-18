@@ -35,7 +35,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
 
         myHostname = os.uname()[1]
         midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
-        messageid = "%d%s@%s" % (time_msec(), midRandom, myHostname)
+        messageid = "<%d%s@%s>" % (time_msec(), midRandom, myHostname)
 
         allSubstitutions = {}
         allSubstitutions.update(substitutions)
