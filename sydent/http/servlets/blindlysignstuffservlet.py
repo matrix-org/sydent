@@ -19,7 +19,7 @@ import json
 import signedjson.key
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
-from sydent.http.servlets import require_args
+from sydent.http.servlets import require_args, jsonwrap, send_cors
 
 
 class BlindlySignStuffServlet(Resource):
@@ -30,7 +30,7 @@ class BlindlySignStuffServlet(Resource):
         self.tokenStore = JoinTokenStore(syd)
 
     def render_POST(self, request):
-
+        send_cors(request)
         err = require_args(request, ("private_key", "token", "mxid"))
         if err:
             return json.dumps(err)
@@ -69,3 +69,9 @@ class BlindlySignStuffServlet(Resource):
             })
 
         return json.dumps(signed)
+
+    @jsonwrap
+    def render_OPTIONS(self, request):
+        send_cors(request)
+        request.setResponseCode(200)
+        return {}
