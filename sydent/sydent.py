@@ -26,6 +26,7 @@ from db.sqlitedb import SqliteDatabase
 from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
 from http.httpsclient import ReplicationHttpsClient
+from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
 from validators.emailvalidator import EmailValidator
 
@@ -107,6 +108,7 @@ class Sydent:
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
+        self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 

@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS invite_tokens (
     sent_ts bigint -- When the token was sent by us to the user
 );
 CREATE INDEX IF NOT EXISTS invite_token_medium_address on invite_tokens(medium, address);
+CREATE INDEX IF NOT EXISTS invite_token_token on invite_tokens(token);
 
 CREATE TABLE IF NOT EXISTS ephemeral_public_keys(
     id integer primary key,
