@@ -75,6 +75,8 @@ class ClientApiHttpServer:
 
         v1.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
 
+        v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+
         self.factory = Site(root)
 
     def setup(self):

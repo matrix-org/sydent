@@ -83,3 +83,14 @@ class JoinTokenStore(object):
         )
         self.sydent.db.commit()
         return cur.rowcount > 0
+
+    def getSenderForToken(self, token):
+        cur = self.sydent.db.cursor()
+        res = cur.execute(
+            "SELECT sender FROM invite_tokens WHERE token = ?",
+            (token,)
+        )
+        rows = res.fetchall()
+        if rows:
+            return rows[0][0]
+        return None
