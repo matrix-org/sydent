@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title></title>
+<style>
+body {
+    font-family: "Myriad Pro", "Myriad", Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+    margin: 1em;
+}
+#vectorlogo {
+    margin: auto;
+    text-align: center;
+    padding: 10px;
+}
+#message {
+    width: 300px;
+    text-align: left;
+    padding: 1em;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+    
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    
+    -webkit-box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
+    
+    background-color: #f8f8f8;
+    border: 1px #ccc solid;
+}
+</style>
+</head>
+<body>
+<div id="vectorlogo">
+<img src="//vector.im/img/logo.png" alt="vector.im" />
+</div>
+<div id="message">
+<p>%(message)s</p>
+</div>
+</body>
+</html>

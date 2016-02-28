@@ -1,0 +1,78 @@
+Date: %(date)s
+From: %(from)s
+To: %(to)s
+Message-ID: %(messageid)s
+Subject: %(sender_display_name)s has invited you to a room on Vector
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hi,
+
+%(sender_display_name)s has invited you into a room %(room_name)s on
+Vector. To join the conversation please follow the link below.
+
+https://vector.im/#/room/%(room_id)s?email=%(to)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name)s&room_avatar_url=%(room_avatar_url)s
+
+Please note that you will need to use Chrome, Firefox or Safari.
+
+thanks,
+
+Vector
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: multipart/related;
+	boundary="M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR";
+	type="text/html"
+
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title></title>
+<style>
+body {
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+    margin: 1em;
+}
+#page {
+    margin: auto;
+    width: 640px;
+    padding: 1em;
+    border: 1px solid #76cfa6;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+<div id="page">
+<p>Hi,</p>
+
+<p>%(sender_display_name)s has invited you into a room %(room_name)s on
+Vector.</p>
+
+<p>
+    <a
+    href="https://vector.im/#/room/%(room_id)s?email=%(to)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name)s&room_avatar_url=%(room_avatar_url)s">Join the conversation.</a>
+</p>
+
+<p>Please note that you will need to use Chrome, Firefox or Safari.</p>
+
+<p>thanks,</p>
+
+<p>Vector</p>
+</div>
+</body>
+</html>
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--

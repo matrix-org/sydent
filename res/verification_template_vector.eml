@@ -1,0 +1,83 @@
+Date: %(date)s
+From: %(from)s
+To: %(to)s
+Message-ID: %(messageid)s
+Subject: Your Vector Validation Token
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hello,
+
+We have received a request from %(ipaddress)s to use this email address
+on vector.im. If this was you who made this request, you may use the
+following link to complete the verification of your email address:
+
+%(link)s
+
+Please note that you will need to use Chrome, Firefox or Safari.
+
+If your client requires a code, the code is %(token)s
+
+If you aren't aware of making such a request, please disregard this email.
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: multipart/related;
+	boundary="M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR";
+	type="text/html"
+
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title></title>
+<style>
+body {
+    font-family: "Myriad Pro", "Myriad", Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+    margin: 1em;
+}
+#page {
+    margin: auto;
+    width: 640px;
+    padding: 1em;
+    border: 1px solid #76cfa6;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+<div id="page">
+<p>Hello,</p>
+
+<p>We have received a request from %(ipaddress)s to use this email
+address on vector.im. If this was you who made this request, you may use
+the following link to complete the verification of your email
+address:</p>
+
+<p><a href="%(link)s">Complete email verification</a></p>
+
+<p>...or copy this link into your web browser:</p>
+
+<p style="word-wrap: break-word; ">%(link)s</p>
+
+<p>Please note that you will need to use Chrome, Firefox or Safari.</p>
+
+<p>If your client requires a code, the code is %(token)s</p>
+
+<p>If you aren't aware of making such a request, please disregard this
+email.</p>
+</div>
+</body>
+</html>
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--
