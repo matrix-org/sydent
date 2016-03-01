@@ -80,7 +80,7 @@ class StoreInviteServlet(Resource):
         substitutions["token"] = token
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
         if substitutions["room_name"]:
-            substitutions["room_name"] = "(%s)" % substitutions["room_name"]
+            substitutions["bracketed_room_name"] = "(%s)" % substitutions["room_name"]
 
         sendEmail(self.sydent, "email.invite_template", address, substitutions)
 
