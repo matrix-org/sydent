@@ -18,6 +18,8 @@ import twisted.internet.defer
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 
+import signedjson.sign
+
 import logging
 import json
 
@@ -74,6 +76,21 @@ class RemotePeer(Peer):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = 1001
+
+    def verifyMessage(self, jsonMessage):
+        if not 'signatures' in jsonMessage:
+            raise NoSignaturesException()
+
+        key_ids = signedjson.sign.signature_ids(jsonMessage, self.servername)
+        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith("ed25519:"):
+            e = NoMatchingSignatureException()
+            e.foundSigs = jsonMessage['signatures'].keys()
+            e.requiredServername = self.servername
+            raise e
+        verify_key = yield self.get_server_verify_key(server_name, key_ids)
+        verifyKey = nacl.signing.VerifyKey(self.pubkeys['ed25519'], encoder=nacl.encoding.HexEncoder)
+        verifyKey.alg = 'ed25519'
+        signedjson.sign.verify_signed_json(jsonMessage, self.servername, verifyKey)
 
     def pushUpdates(self, sgAssocs):
         body = {'sgAssocs': sgAssocs}
