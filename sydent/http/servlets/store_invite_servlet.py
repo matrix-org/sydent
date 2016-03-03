@@ -78,9 +78,21 @@ class StoreInviteServlet(Resource):
             if len(values) == 1 and type(values[0]) == str:
                 substitutions[key] = cgi.escape(values[0])
         substitutions["token"] = token
+
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
-        if substitutions["room_name"]:
+        if "room_name" in substitutions:
             substitutions["bracketed_room_name"] = "(%s)" % substitutions["room_name"]
+
+        required = [
+            'sender_display_name',
+            'token',
+            'room_name',
+            'bracketed_room_name',
+            'room_avatar_url',
+            'sender_display_name',
+        ]
+        for k in required:
+            substitutions.setdefault(k, '')
 
         sendEmail(self.sydent, "email.invite_template", address, substitutions)
 
