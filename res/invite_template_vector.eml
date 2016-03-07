@@ -62,7 +62,7 @@ Vector.</p>
 
 <p>
     <a
-    href="https://vector.im/#/room/%(room_id)s?email=%(to)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name)s&room_avatar_url=%(room_avatar_url)s&inviter_name=%(sender_display_name)s&guest_access_token=%(guest_access_token)s">Join the conversation.</a>
+    href="https://vector.im/#/room/%(room_id)s?email=%(to)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name)s&room_avatar_url=%(room_avatar_url)s&inviter_name=%(sender_display_name)s&guest_access_token=%(guest_access_token)s&guest_user_id=%(guest_user_id)s">Join the conversation.</a>
 </p>
 
 <p>Please note that you will need to use Chrome, Firefox or Safari.</p>
