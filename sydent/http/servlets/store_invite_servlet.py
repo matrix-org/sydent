@@ -86,6 +86,7 @@ class StoreInviteServlet(Resource):
             'bracketed_room_name',
             'room_avatar_url',
             'sender_display_name',
+            'guest_user_id',
             'guest_access_token',
         ]
         for k in required:
