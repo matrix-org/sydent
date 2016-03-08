@@ -2,7 +2,7 @@ Date: %(date)s
 From: %(from)s
 To: %(to)s
 Message-ID: %(messageid)s
-Subject: %(sender_display_name)s has invited you to a room on Vector
+Subject: %(subject_header_value)s
 MIME-Version: 1.0
 Content-Type: multipart/alternative; 
 	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
@@ -16,7 +16,7 @@ Hi,
 %(sender_display_name)s has invited you into a room %(bracketed_room_name)s on
 Vector. To join the conversation please follow the link below.
 
-https://vector.im/#/room/%(room_id)s?email=%(to)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name)s&room_avatar_url=%(room_avatar_url)s&inviter_name=%(sender_display_name)s&guest_access_token=%(guest_access_token)s&guest_user_id=%(guest_user_id)s
+https://vector.im/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
 Please note that you will need to use Chrome, Firefox or Safari.
 
@@ -57,12 +57,12 @@ body {
 <div id="page">
 <p>Hi,</p>
 
-<p>%(sender_display_name)s has invited you into a room %(bracketed_room_name)s on
+<p>%(sender_display_name_forhtml)s has invited you into a room %(bracketed_room_name_forhtml)s on
 Vector.</p>
 
 <p>
     <a
-    href="https://vector.im/#/room/%(room_id)s?email=%(to)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name)s&room_avatar_url=%(room_avatar_url)s&inviter_name=%(sender_display_name)s&guest_access_token=%(guest_access_token)s&guest_user_id=%(guest_user_id)s">Join the conversation.</a>
+    href="https://vector.im/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
 </p>
 
 <p>Please note that you will need to use Chrome, Firefox or Safari.</p>

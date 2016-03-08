@@ -21,6 +21,8 @@ import smtplib
 import email.utils
 import string
 import twisted.python.log
+import cgi
+import urllib
 
 import email.utils
 
@@ -45,6 +47,12 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
             'to': mailTo,
             'from': mailFrom,
         })
+
+        for k,v in allSubstitutions.items():
+            allSubstitutions[k] = v.decode('utf8')
+            allSubstitutions[k+"_forhtml"] = cgi.escape(v.decode('utf8'))
+            allSubstitutions[k+"_forurl"] = urllib.quote(v)
+
         mailString = open(mailTemplateFile).read() % allSubstitutions
         rawFrom = email.utils.parseaddr(mailFrom)[1]
         rawTo = email.utils.parseaddr(mailTo)[1]
@@ -55,7 +63,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         logger.info("Sending mail to %s with mail server: %s" % (mailTo, mailServer,))
         try:
             smtp = smtplib.SMTP(mailServer)
-            smtp.sendmail(rawFrom, rawTo, mailString)
+            smtp.sendmail(rawFrom, rawTo, mailString.encode('utf-8'))
             smtp.quit()
         except Exception as origException:
             twisted.python.log.err()
