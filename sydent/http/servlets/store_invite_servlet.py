@@ -13,10 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cgi
 import nacl.signing
 import random
 import string
+from email.header import Header
 
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
@@ -76,7 +76,7 @@ class StoreInviteServlet(Resource):
         substitutions = {}
         for key, values in request.args.items():
             if len(values) == 1 and type(values[0]) == str:
-                substitutions[key] = cgi.escape(values[0])
+                substitutions[key] = values[0]
         substitutions["token"] = token
 
         required = [
@@ -96,6 +96,8 @@ class StoreInviteServlet(Resource):
         if substitutions["room_name"] != '':
             substitutions["bracketed_room_name"] = "(%s)" % substitutions["room_name"]
 
+        subject_header = Header(self.sydent.cfg.get('email', 'email.invite.subject', raw=True) % substitutions, 'utf8')
+        substitutions["subject_header_value"] = subject_header.encode()
 
         sendEmail(self.sydent, "email.invite_template", address, substitutions)
 

@@ -60,6 +60,7 @@ class Sydent:
         'email.template': 'res/email.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
+        'email.invite.subject': '%(sender_display_name)s has invited you to chat',
         'email.smtphost': 'localhost',
         'log.path': '',
         'ed25519.signingkey': '',
