@@ -121,7 +121,7 @@ class ThreePidValSessionStore:
         if not s.clientSecret == clientSecret:
             raise IncorrectClientSecretException()
 
-        if s.mtime + ValidationSession.THREEPID_SESSION_VALID_LIFETIME < time_msec():
+        if s.mtime + ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS < time_msec():
             raise SessionExpiredException()
 
         if not s.validated:

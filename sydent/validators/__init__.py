@@ -17,10 +17,10 @@
 
 class ValidationSession:
     # how long a user can wait before validating a session after starting it
-    THREEPID_SESSION_VALIDATION_TIMEOUT = 24 * 60 * 60 * 1000
+    THREEPID_SESSION_VALIDATION_TIMEOUT_MS = 24 * 60 * 60 * 1000
 
     # how long we keep sessions for after they've been validated
-    THREEPID_SESSION_VALID_LIFETIME = 24 * 60 * 60 * 1000
+    THREEPID_SESSION_VALID_LIFETIME_MS = 24 * 60 * 60 * 1000
 
     def __init__(self, _id, _medium, _address, _clientSecret, _validated, _mtime):
         self.id = _id

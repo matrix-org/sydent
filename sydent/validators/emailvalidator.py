@@ -93,7 +93,7 @@ class EmailValidator:
             logger.info("Incorrect client secret", (sid))
             raise IncorrectClientSecretException()
 
-        if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT < time_msec():
+        if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
             logger.info("Session expired")
             raise SessionExpiredException()
 
