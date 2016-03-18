@@ -38,7 +38,7 @@ body {
 </head>
 <body>
 <div id="vectorlogo">
-<img src="//vector.im/img/logo.png" alt="vector.im" />
+<img src="//vector.im/beta/img/logo.png" alt="vector.im" />
 </div>
 <div id="message">
 <p>%(message)s</p>
