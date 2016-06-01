@@ -13,15 +13,14 @@ Content-Disposition: inline
 
 Hello,
 
-We have received a request from %(ipaddress)s to use this email address
+We have received a request from %(ipaddress)s to register this email address
 on vector.im. If this was you who made this request, you may use the
 following link to complete the verification of your email address:
 
 %(link)s
 
-Please note that you will need to use Chrome, Firefox or Safari.
-
-If your client requires a code, the code is %(token)s
+Please note that you will need to use Chrome, Firefox or Safari on the web, or
+iOS or Android on mobile.
 
 If you aren't aware of making such a request, please disregard this email.
 
@@ -34,49 +33,93 @@ Content-Type: multipart/related;
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<title></title>
-<style>
+<!doctype html>
+<html lang="en">
+    <head>
+        <style type="text/css">
 body {
-    font-family: "Myriad Pro", "Myriad", Helvetica, Arial, sans-serif;
-    font-size: 12pt;
-    margin: 1em;
+    margin: 0px;
 }
+
+pre, code {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
 #page {
-    margin: auto;
-    width: 640px;
-    padding: 1em;
-    border: 1px solid #76cfa6;
-    border-radius: 5px;
+    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+    font-color: #454545;
+    font-size: 12pt;
+    width: 100%;
+    padding: 20px;
 }
-</style>
-</head>
-<body>
-<div id="page">
-<p>Hello,</p>
 
-<p>We have received a request from %(ipaddress)s to use this email
-address on vector.im. If this was you who made this request, you may use
-the following link to complete the verification of your email
-address:</p>
+#inner {
+    width: 640px;
+}
 
-<p><a href="%(link)s">Complete email verification</a></p>
+.header {
+    width: 100%;
+    height: 87px;
+    color: #454545;
+    border-bottom: 4px solid #e5e5e5;
+}
 
-<p>...or copy this link into your web browser:</p>
+.logo {
+    text-align: right;
+    margin-left: 20px;
+}
 
-<p style="word-wrap: break-word; ">%(link)s</p>
+.header {
+    border-bottom: 4px solid #e4f7ed ! important;
+}
 
-<p>Please note that you will need to use Chrome, Firefox or Safari.</p>
+.notif_link a, .footer a {
+    color: #76CFA6 ! important;
+}
+        </style>
+    </head>
+    <body>
+        <table id="page">
+            <tr>
+                <td> </td>
+                <td id="inner">
+                    <table class="header">
+                        <tr>
+                            <td>
+                            </td>
+                            <td class="logo">
+                                    <img src="http://matrix.org/img/vector-logo-email.png" width="64" height="83" alt="[Vector]"/>
+                            </td>
+                        </tr>
+                    </table>
 
-<p>If your client requires a code, the code is %(token)s</p>
+                    <p>Hello,</p>
 
-<p>If you aren't aware of making such a request, please disregard this
-email.</p>
-</div>
-</body>
+                    <p>We have received a request from %(ipaddress)s to register this email
+                    address on vector.im. If this was you who made this request, you may use
+                    the following link to complete the verification of your email
+                    address:</p>
+
+                    <p><a href="%(link)s">Complete email verification</a></p>
+
+                    <p>...or copy this link into your web browser:</p>
+
+                    <p style="word-wrap: break-word; ">%(link)s</p>
+
+                    <p>Please note that Vector requires
+                    <a href="https://www.google.com/chrome">Chrome</a>,
+                    <a href="https://www.getfirefox.com">Firefox</a> or
+                    <a href="https://www.apple.com/safari">Safari</a> on the web,
+                    or iOS or Android on mobile.</p>
+
+                    <p>If you aren't aware of making such a request, please disregard this
+                    email.</p>
+                </td>
+                <td> </td>
+            </tr>
+        </table>
+    </body>
 </html>
 --M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
 

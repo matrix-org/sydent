@@ -18,7 +18,8 @@ Vector. To join the conversation please follow the link below.
 
 https://vector.im/beta/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
-Please note that you will need to use Chrome, Firefox or Safari.
+Please note that you will need to use Chrome, Firefox or Safari on the web, or
+iOS or Android on mobile.
 
 thanks,
 
@@ -33,28 +34,67 @@ Content-Type: multipart/related;
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<title></title>
-<style>
+<!doctype html>
+<html lang="en">
+    <head>
+        <style type="text/css">
 body {
-    font-family: "Open Sans", Helvetica, Arial, sans-serif;
-    font-size: 12pt;
-    margin: 1em;
+    margin: 0px;
 }
+
+pre, code {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
 #page {
-    margin: auto;
-    width: 640px;
-    padding: 1em;
-    border: 1px solid #76cfa6;
-    border-radius: 5px;
+    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+    font-color: #454545;
+    font-size: 12pt;
+    width: 100%;
+    padding: 20px;
 }
-</style>
-</head>
-<body>
-<div id="page">
+
+#inner {
+    width: 640px;
+}
+
+.header {
+    width: 100%;
+    height: 87px;
+    color: #454545;
+    border-bottom: 4px solid #e5e5e5;
+}
+
+.logo {
+    text-align: right;
+    margin-left: 20px;
+}
+
+.header {
+    border-bottom: 4px solid #e4f7ed ! important;
+}
+
+.notif_link a, .footer a {
+    color: #76CFA6 ! important;
+}
+        </style>
+    </head>
+    <body>
+        <table id="page">
+            <tr>
+                <td> </td>
+                <td id="inner">
+                    <table class="header">
+                        <tr>
+                            <td>
+                            </td>
+                            <td class="logo">
+                                    <img src="http://matrix.org/img/vector-logo-email.png" width="64" height="83" alt="[Vector]"/>
+                            </td>
+                        </tr>
+                    </table>
+
 <p>Hi,</p>
 
 <p>%(sender_display_name_forhtml)s has invited you into a room %(bracketed_room_name_forhtml)s on
@@ -65,13 +105,20 @@ Vector.</p>
     href="https://vector.im/beta/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
 </p>
 
-<p>Please note that you will need to use Chrome, Firefox or Safari.</p>
+<p>Please note that Vector requires
+<a href="https://www.google.com/chrome">Chrome</a>,
+<a href="https://www.getfirefox.com">Firefox</a> or
+<a href="https://www.apple.com/safari">Safari</a> on the web,
+or iOS or Android on mobile.</p>
 
 <p>thanks,</p>
 
 <p>Vector</p>
-</div>
-</body>
+                </td>
+                <td> </td>
+            </tr>
+        </table>
+    </body>
 </html>
 --M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
 

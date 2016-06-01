@@ -4,8 +4,10 @@
 <meta charset="utf-8" />
 <title></title>
 <style>
+
 body {
-    font-family: "Myriad Pro", "Myriad", Helvetica, Arial, sans-serif;
+    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+    font-color: #454545;
     font-size: 12pt;
     margin: 1em;
 }
