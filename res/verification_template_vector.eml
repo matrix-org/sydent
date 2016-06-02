@@ -107,10 +107,6 @@ pre, code {
 
                     <p><a href="%(link)s">Complete email verification</a></p>
 
-                    <p>...or copy this link into your web browser:</p>
-
-                    <p style="word-wrap: break-word; ">%(link)s</p>
-
                     <p>Please note that Vector requires
                     <a href="https://www.google.com/chrome">Chrome</a>,
                     <a href="https://www.getfirefox.com">Firefox</a> or
