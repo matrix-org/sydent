@@ -77,8 +77,7 @@ class JoinTokenStore(object):
         cur.execute(
             "UPDATE ephemeral_public_keys"
             " SET verify_count = verify_count + 1"
-            " WHERE public_key = ?"
-            " LIMIT 1",
+            " WHERE public_key = ?",
             (publicKey,)
         )
         self.sydent.db.commit()
