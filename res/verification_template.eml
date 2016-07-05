@@ -9,7 +9,6 @@ Content-Type: multipart/alternative;
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Content-Disposition: inline
 
 Hello,
@@ -27,7 +26,6 @@ If you aren't aware of making such a request, please disregard this email.
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
 Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Content-Disposition: inline
 
 <!DOCTYPE html>
