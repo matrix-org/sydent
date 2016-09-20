@@ -2,7 +2,7 @@ Date: %(date)s
 From: %(from)s
 To: %(to)s
 Message-ID: %(messageid)s
-Subject: Your Vector Validation Token
+Subject: Your Riot Validation Token
 MIME-Version: 1.0
 Content-Type: multipart/alternative; 
 	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
@@ -14,7 +14,7 @@ Content-Disposition: inline
 Hello,
 
 We have received a request from %(ipaddress)s to register this email address
-on vector.im. If this was you who made this request, you may use the
+on riot.im. If this was you who made this request, you may use the
 following link to complete the verification of your email address:
 
 %(link)s
@@ -26,7 +26,7 @@ If you aren't aware of making such a request, please disregard this email.
 
 thanks,
 
-Vector
+Riot
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
 Content-Type: multipart/related;
@@ -93,7 +93,7 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="http://matrix.org/img/vector-logo-email.png" width="64" height="83" alt="[Vector]"/>
+                                    <img src="https://riot.im/img/riot-logo-email.png" width="64" height="64" alt="Riot"/>
                             </td>
                         </tr>
                     </table>
@@ -101,13 +101,13 @@ pre, code {
                     <p>Hello,</p>
 
                     <p>We have received a request from %(ipaddress)s to register this email
-                    address on vector.im. If this was you who made this request, you may use
+                    address on riot.im. If this was you who made this request, you may use
                     the following link to complete the verification of your email
                     address:</p>
 
                     <p><a href="%(link)s">Complete email verification</a></p>
 
-                    <p>Please note that Vector requires
+                    <p>Please note that Riot requires
                     <a href="https://www.google.com/chrome">Chrome</a>,
                     <a href="https://www.getfirefox.com">Firefox</a> or
                     <a href="https://www.apple.com/safari">Safari</a> on the web,
@@ -118,7 +118,7 @@ pre, code {
 
                     <p>thanks,</p>
 
-                    <p>Vector</p>
+                    <p>Riot</p>
                 </td>
                 <td> </td>
             </tr>
