@@ -1,3 +1,12 @@
+Sydent Should not be Used
+=========================
+Sydent could be repalced soon and should not be used.
+
+See Issue `#22 
+<https://github.com/matrix-org/sydent/issues/22>`_ and `#21 <https://github.com/matrix-org/sydent/issues/21>`_:
+
+    Typically you really don't need to run a sydent; all it does is map email addresses to matrix ids so people can discover you publically on matrix by your email addres. This only works if you are part of the public cluster of sydents, which a personal instance won't be. We are looking at how to fix this (by replacing sydent) to be decentralised but haven't got there yet.
+
 Installation
 ============
 
