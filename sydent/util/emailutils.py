@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import logging
-import os
+import socket
 import random
 import smtplib
 import email.utils
@@ -35,7 +35,9 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         mailFrom = sydent.cfg.get('email', 'email.from')
         mailTemplateFile = sydent.cfg.get('email', templateName)
 
-        myHostname = os.uname()[1]
+        myHostname = sydent.cfg.get('email', 'email.hostname')
+        if myHostname == '':
+            myHostname = socket.getfqdn()
         midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
         messageid = "<%d%s@%s>" % (time_msec(), midRandom, myHostname)
 
@@ -60,9 +62,21 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
             logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
             raise EmailAddressException()
         mailServer = sydent.cfg.get('email', 'email.smtphost')
+        mailPort = sydent.cfg.get('email', 'email.smtpport')
+        mailUsername = sydent.cfg.get('email', 'email.smtpusername')
+        mailPassword = sydent.cfg.get('email', 'email.smtppassword')
+        mailTLSMode = sydent.cfg.get('email', 'email.tlsmode')
         logger.info("Sending mail to %s with mail server: %s" % (mailTo, mailServer,))
         try:
-            smtp = smtplib.SMTP(mailServer)
+            if mailTLSMode == 'SSL' or mailTLSMode == 'TLS':
+                smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)
+            elif mailTLSMode == 'STARTTLS':
+                smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
+                smtp.starttls()
+            else:
+                smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
+            if mailUsername != '':
+                smtp.login(mailUsername, mailPassword)
             smtp.sendmail(rawFrom, rawTo, mailString.encode('utf-8'))
             smtp.quit()
         except Exception as origException:
