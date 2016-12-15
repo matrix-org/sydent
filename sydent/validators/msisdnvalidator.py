@@ -46,9 +46,6 @@ class MsisdnValidator:
             logger.info("Not texting code because current send attempt (%d) is not less than given send attempt (%s)", int(sendAttempt), int(valSession.sendAttemptNumber))
             return valSession.id
 
-        #substitutions = {
-        #    'token': valSession.token,
-        #}
         logger.info(
             "Attempting to text code %s to %s",
             valSession.token, msisdn,
