@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 from twisted.web.resource import Resource
 import phonenumbers
 
@@ -21,6 +22,9 @@ from sydent.validators.msisdnvalidator import SessionExpiredException
 from sydent.validators.msisdnvalidator import IncorrectClientSecretException
 
 from sydent.http.servlets import require_args, jsonwrap, send_cors
+
+
+logger = logging.getLogger(__name__)
 
 
 class MsisdnRequestCodeServlet(Resource):
@@ -44,8 +48,9 @@ class MsisdnRequestCodeServlet(Resource):
         sendAttempt = request.args['send_attempt'][0]
 
         try:
-            phone_number_object = phonenumbers.parse(raw_phone_number, None)
-        except e:
+            phone_number_object = phonenumbers.parse(raw_phone_number, country)
+        except Exception as e:
+            logger.warn("Invalid phone number given: %r", e)
             request.setResponseCode(400)
             return {'errcode': 'M_INVALID_PHONE_NUMBER', 'error': "Invalid phone number" }
 
@@ -60,7 +65,7 @@ class MsisdnRequestCodeServlet(Resource):
                 msisdn, clientSecret, sendAttempt, None
             )
         except e:
-            logger.error("Exception sending SMS", e);
+            logger.error("Exception sending SMS: %r", e);
             request.setResponseCode(500)
             resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
 
