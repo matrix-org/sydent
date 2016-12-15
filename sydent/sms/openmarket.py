@@ -63,8 +63,6 @@ class OpenMarketSMS:
             API_BASE_URL, body, { "headers": headers }
         )
         headers = dict(resp.headers.getAllRawHeaders())
-        print resp
-        print headers
 
         if 'Location' not in headers:
             raise Exception("Got response from sending SMS with no location header")

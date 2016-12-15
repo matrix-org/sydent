@@ -38,6 +38,7 @@ setup(
         "pyasn1",
         "pynacl",
         "daemonize",
+        "phonenumbers",
     ],
     setup_requires=[
         "setuptools_trial",

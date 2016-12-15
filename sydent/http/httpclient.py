@@ -43,11 +43,9 @@ class SimpleHttpClient(object):
     def post_json_get_nothing(self, uri, post_json, opts):
         json_str = json.dumps(post_json)
 
-        print "opts: %r" % (opts,)
         headers = opts.get('headers', Headers({
             b"Content-Type": [b"application/json"],
         }))
-        print "headers: %r" % (headers,)
 
         logger.debug("HTTP POST %s -> %s", json_str, uri)
 

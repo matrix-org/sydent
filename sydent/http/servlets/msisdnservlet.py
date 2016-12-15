@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from twisted.web.resource import Resource
+import phonenumbers
 
 from sydent.validators.msisdnvalidator import SessionExpiredException
 from sydent.validators.msisdnvalidator import IncorrectClientSecretException
@@ -32,31 +33,36 @@ class MsisdnRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error = require_args(request, ('msisdn', 'client_secret', 'send_attempt'))
+        error = require_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
         if error:
             request.setResponseCode(400)
             return error
 
-        msisdn = request.args['msisdn'][0]
+        raw_phone_number = request.args['phone_number'][0]
+        country = request.args['country'][0]
         clientSecret = request.args['client_secret'][0]
         sendAttempt = request.args['send_attempt'][0]
 
-        #nextLink = None
-        #if 'next_link' in request.args:
-        #    nextLink = request.args['next_link'][0]
+        try:
+            phone_number_object = phonenumbers.parse(raw_phone_number, None)
+        except e:
+            request.setResponseCode(400)
+            return {'errcode': 'M_INVALID_PHONE_NUMBER', 'error': "Invalid phone number" }
+
+        msisdn = phonenumbers.format_number(
+            phone_number_object, phonenumbers.PhoneNumberFormat.E164
+        )[1:]
 
         resp = None
 
-        #try:
-        sid = self.sydent.validators.msisdn.requestToken(
-            msisdn, clientSecret, sendAttempt, None
-        )
-        #except EmailAddressException:
-        #    request.setResponseCode(400)
-        #    resp = {'errcode': 'M_INVALID_EMAIL', 'error':'Invalid email address'}
-        #except EmailSendException:
-        #    request.setResponseCode(500)
-        #    resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to send email'}
+        try:
+            sid = self.sydent.validators.msisdn.requestToken(
+                msisdn, clientSecret, sendAttempt, None
+            )
+        except e:
+            logger.error("Exception sending SMS", e);
+            request.setResponseCode(500)
+            resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
 
         if not resp:
             resp = {'success': True, 'sid': sid}
@@ -85,7 +91,7 @@ class MsisdnValidateCodeServlet(Resource):
                 request.setResponseCode(302)
                 request.setHeader("Location", next_link)
         else:
-            msg = "Verification failed: you may need to request another verification email"
+            msg = "Verification failed: you may need to request another verification text"
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
 
