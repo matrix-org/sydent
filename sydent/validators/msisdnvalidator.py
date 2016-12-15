@@ -18,7 +18,7 @@ import logging
 import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.validators import ValidationSession
+from sydent.validators import ValidationSession, common
 from sydent.sms.openmarket import OpenMarketSMS
 
 from sydent.util import time_msec
@@ -56,3 +56,5 @@ class MsisdnValidator:
 
         return valSession.id
 
+    def validateSessionWithToken(self, sid, clientSecret, token):
+        return common.validateSessionWithToken(self.sydent, sid, clientSecret, token)

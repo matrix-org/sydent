@@ -19,7 +19,7 @@ import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.emailutils import sendEmail
-from sydent.validators import ValidationSession
+from sydent.validators import common
 
 from sydent.util import time_msec
 
@@ -83,29 +83,4 @@ class EmailValidator:
         return link
 
     def validateSessionWithToken(self, sid, clientSecret, token):
-        valSessionStore = ThreePidValSessionStore(self.sydent)
-        s = valSessionStore.getTokenSessionById(sid)
-        if not s:
-            logger.info("Session ID %s not found", (sid))
-            return False
-
-        if not clientSecret == s.clientSecret:
-            logger.info("Incorrect client secret", (sid))
-            raise IncorrectClientSecretException()
-
-        if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
-            logger.info("Session expired")
-            raise SessionExpiredException()
-
-        # TODO once we can validate the token oob
-        #if tokenObj.validated and clientSecret == tokenObj.clientSecret:
-        #    return True
-
-        if s.token == token:
-            logger.info("Setting session %s as validated", (s.id))
-            valSessionStore.setValidated(s.id, True)
-
-            return {'success': True}
-        else:
-            logger.info("Incorrect token submitted")
-            return False
+        return common.validateSessionWithToken(self.sydent, sid, clientSecret, token)

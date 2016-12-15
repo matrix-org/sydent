@@ -119,7 +119,7 @@ class MsisdnValidateCodeServlet(Resource):
         clientSecret = request.args['client_secret'][0]
 
         try:
-            resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)
+            resp = self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)
         except IncorrectClientSecretException:
             return {'success': False, 'errcode': 'M_INCORRECT_CLIENT_SECRET',
                     'error': "Client secret does not match the one given when requesting the token"}
