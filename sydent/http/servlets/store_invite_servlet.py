@@ -25,7 +25,7 @@ import json
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
-from sydent.http.servlets import require_args, send_cors
+from sydent.http.servlets import get_args, send_cors
 from sydent.util.emailutils import sendEmail
 
 
@@ -38,10 +38,10 @@ class StoreInviteServlet(Resource):
         err = require_args(request, ("medium", "address", "room_id", "sender",))
         if err:
             return json.dumps(err)
-        medium = request.args["medium"][0]
-        address = request.args["address"][0]
-        roomId = request.args["room_id"][0]
-        sender = request.args["sender"][0]
+        medium = args["medium"]
+        address = args["address"]
+        roomId = args["room_id"]
+        sender = args["sender"]
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
         mxid = globalAssocStore.getMxid(medium, address)

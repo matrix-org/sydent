@@ -21,7 +21,7 @@ import phonenumbers
 from sydent.validators.msisdnvalidator import SessionExpiredException
 from sydent.validators.msisdnvalidator import IncorrectClientSecretException
 
-from sydent.http.servlets import require_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 
 
 logger = logging.getLogger(__name__)
@@ -37,15 +37,15 @@ class MsisdnRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error = require_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
+        error, args = get_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
         if error:
             request.setResponseCode(400)
             return error
 
-        raw_phone_number = request.args['phone_number'][0]
-        country = request.args['country'][0]
-        clientSecret = request.args['client_secret'][0]
-        sendAttempt = request.args['send_attempt'][0]
+        raw_phone_number = args['phone_number']
+        country = args['country']
+        clientSecret = args['client_secret']
+        sendAttempt = args['send_attempt']
 
         try:
             phone_number_object = phonenumbers.parse(raw_phone_number, country)
@@ -88,11 +88,17 @@ class MsisdnValidateCodeServlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
-        resp = self.do_validate_request(request)
+        send_cors(request)
+
+        err, args = get_args(request, ('token', 'sid', 'client_secret'))
+        if err:
+            return err
+
+        resp = self.do_validate_request(args)
         if 'success' in resp and resp['success']:
             msg = "Verification successful! Please return to your Matrix client to continue."
-            if 'nextLink' in request.args:
-                next_link = request.args['nextLink'][0]
+            if 'next_link' in args:
+                next_link = args['next_link']
                 request.setResponseCode(302)
                 request.setHeader("Location", next_link)
         else:
@@ -105,18 +111,18 @@ class MsisdnValidateCodeServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request):
-        return self.do_validate_request(request)
-
-    def do_validate_request(self, request):
         send_cors(request)
 
-        err = require_args(request, ('token', 'sid', 'client_secret'))
+        err, args = get_args(request, ('token', 'sid', 'client_secret'))
         if err:
             return err
 
-        sid = request.args['sid'][0]
-        tokenString = request.args['token'][0]
-        clientSecret = request.args['client_secret'][0]
+        return self.do_validate_request(args)
+
+    def do_validate_request(self, args):
+        sid = args['sid']
+        tokenString = args['token']
+        clientSecret = args['client_secret']
 
         try:
             resp = self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)

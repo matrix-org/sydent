@@ -20,7 +20,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 import json
 import signedjson.sign
 
-from sydent.http.servlets import require_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 
 class LookupServlet(Resource):
     isLeaf = True
@@ -30,12 +30,12 @@ class LookupServlet(Resource):
 
     def render_GET(self, request):
         send_cors(request)
-        err = require_args(request, ('medium', 'address'))
+        err, args = get_args(request, ('medium', 'address'))
         if err:
             return err
 
-        medium = request.args['medium'][0]
-        address = request.args['address'][0]
+        medium = args['medium']
+        address = args['address']
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
 
