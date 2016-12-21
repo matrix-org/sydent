@@ -62,7 +62,7 @@ class EmailRequestCodeServlet(Resource):
             resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to send email'}
 
         if not resp:
-            resp = {'success': True, 'sid': sid}
+            resp = {'success': True, 'sid': str(sid)}
 
         return resp
 

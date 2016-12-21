@@ -70,7 +70,7 @@ class MsisdnRequestCodeServlet(Resource):
             resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
 
         if not resp:
-            resp = {'success': True, 'sid': sid}
+            resp = {'success': True, 'sid': str(sid)}
 
         return resp
 
