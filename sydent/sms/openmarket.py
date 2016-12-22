@@ -24,8 +24,11 @@ from twisted.web.http_headers import Headers
 logger = logging.getLogger(__name__)
 
 
-#API_BASE_URL = "https://smsc.openmarket.com/sms/v4/mt"
-API_BASE_URL = "http://smsc-cie.openmarket.com/sms/v4/mt"
+API_BASE_URL = "https://smsc.openmarket.com/sms/v4/mt"
+# The Customer Integration Environment, where you can send
+# the same requests but it doesn't actually send any SMS.
+# Useful for testing.
+#API_BASE_URL = "http://smsc-cie.openmarket.com/sms/v4/mt"
 
 class OpenMarketSMS:
     def __init__(self, sydent):

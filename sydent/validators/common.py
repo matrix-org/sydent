@@ -9,6 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 def validateSessionWithToken(sydent, sid, clientSecret, token):
+    """
+    Attempt to validate a session, identified by the sid, using
+    the token from out-of-band. The client secret is given to
+    prevent attempts to guess the token for a sid.
+    If the session was sucessfully validated, return a dict
+    with 'success': True that can be sent to the client,
+    otherwise return False.
+    """
     valSessionStore = ThreePidValSessionStore(sydent)
     s = valSessionStore.getTokenSessionById(sid)
     if not s:
