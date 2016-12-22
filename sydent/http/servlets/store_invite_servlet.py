@@ -35,7 +35,7 @@ class StoreInviteServlet(Resource):
 
     def render_POST(self, request):
         send_cors(request)
-        err = require_args(request, ("medium", "address", "room_id", "sender",))
+        err, args = get_args(request, ("medium", "address", "room_id", "sender",))
         if err:
             return json.dumps(err)
         medium = args["medium"]

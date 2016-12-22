@@ -102,20 +102,13 @@ class EmailValidateCodeServlet(Resource):
     def do_validate_request(self, request):
         send_cors(request)
 
-        # err = require_args(request, ('token', 'sid', 'client_secret'))
-        err = require_args(request, ('token', 'sid'))
+        err, args = get_args(request, ('token', 'sid', 'client_secret'))
         if err:
             return err
 
-        sid = request.args['sid'][0]
-        tokenString = request.args['token'][0]
-        if 'client_secret' in request.args:
-            clientSecret = request.args['client_secret'][0]
-        elif 'clientSecret' in request.args:
-            clientSecret = request.args['clientSecret'][0]
-        else:
-            request.setResponseCode(400)
-            return {'success': False, 'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
+        sid = args['sid']
+        tokenString = args['token']
+        clientSecret = args['client_secret']
 
         try:
             resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)
