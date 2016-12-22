@@ -31,7 +31,7 @@ class GetValidated3pidServlet(Resource):
 
     @jsonwrap
     def render_GET(self, request):
-        err, args = require_args(request, ('sid', 'client_secret'))
+        err, args = get_args(request, ('sid', 'client_secret'))
         if err:
             return err
 
