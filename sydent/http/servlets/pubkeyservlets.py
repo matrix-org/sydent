@@ -18,7 +18,7 @@ from unpaddedbase64 import encode_base64
 
 import json
 from sydent.db.invite_tokens import JoinTokenStore
-from sydent.http.servlets import require_args
+from sydent.http.servlets import get_args
 
 
 class Ed25519Servlet(Resource):
@@ -40,14 +40,14 @@ class PubkeyIsValidServlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
-        err = require_args(request, ("public_key",))
+        err, args = get_args(request, ("public_key",))
         if err:
             return json.dumps(err)
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
-        return json.dumps({'valid': request.args["public_key"][0] == pubKeyBase64})
+        return json.dumps({'valid': args["public_key"] == pubKeyBase64})
 
 
 class EphemeralPubkeyIsValidServlet(Resource):
@@ -57,10 +57,10 @@ class EphemeralPubkeyIsValidServlet(Resource):
         self.joinTokenStore = JoinTokenStore(syd)
 
     def render_GET(self, request):
-        err = require_args(request, ("public_key",))
+        err, args = get_args(request, ("public_key",))
         if err:
             return json.dumps(err)
-        publicKey = request.args["public_key"][0]
+        publicKey = args["public_key"]
 
         return json.dumps({
             'valid': self.joinTokenStore.validateEphemeralPublicKey(publicKey),

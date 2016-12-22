@@ -16,7 +16,7 @@
 
 import twisted.python.log
 from twisted.web.resource import Resource
-from sydent.http.servlets import require_args, jsonwrap
+from sydent.http.servlets import jsonwrap
 from sydent.threepid import threePidAssocFromDict
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore

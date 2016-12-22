@@ -15,18 +15,50 @@
 # limitations under the License.
 
 import json
+import copy
 
 
-def require_args(request, rqArgs):
+def get_args(request, required_args):
+    """
+    Helper function to get arguments for an HTTP request
+    Currently takes args from the top level keys of a json object or
+    www-form-urlencoded for backwards compatability.
+    Returns a tuple (error, args) where if error is non-null,
+    the requesat is malformed. Otherwise, args contains the
+    parameters passed.
+    """
+    args = None
+    if (
+        request.requestHeaders.hasHeader('Content-Type') and
+        request.requestHeaders.getRawHeaders('Content-Type')[0] == 'application/json'
+    ):
+        try:
+            args = json.load(request.content)
+        except ValueError:
+            request.setResponseCode(400)
+            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}, None
+    else:
+        args = copy.copy(request.args)
+        # Twisted supplies everything as an array because it's valid to
+        # supply the same params multiple times with www-form-urlencoded
+        # params. This make it incompatible with the json object though,
+        # so we need to convert one of them. Since this is the
+        # backwards-compat option, we convert this one.
+        for k, v in args.items():
+            if isinstance(v, list) and len(v) == 1:
+                args[k] = v[0]
+
     missing = []
-    for a in rqArgs:
-        if a not in request.args:
+    for a in required_args:
+        if a not in args:
             missing.append(a)
 
     if len(missing) > 0:
         request.setResponseCode(400)
         msg = "Missing parameters: "+(",".join(missing))
-        return {'errcode': 'M_MISSING_PARAMS', 'error': msg}
+        return {'errcode': 'M_MISSING_PARAMS', 'error': msg}, None
+
+    return None, args
 
 def jsonwrap(f):
     def inner(*args, **kwargs):

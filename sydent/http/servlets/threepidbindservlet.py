@@ -16,7 +16,7 @@
 
 from twisted.web.resource import Resource
 
-from sydent.http.servlets import require_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 
@@ -27,20 +27,13 @@ class ThreePidBindServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        #err = require_args(request, ('sid', 'client_secret', 'mxid'))
-        err = require_args(request, ('sid', 'mxid'))
+        err, args = get_args(request, ('sid', 'client_secret', 'mxid'))
         if err:
             return err
 
-        sid = request.args['sid'][0]
-        mxid = request.args['mxid'][0]
-        if 'client_secret' in request.args:
-            clientSecret = request.args['client_secret'][0]
-        elif 'clientSecret' in request.args:
-            clientSecret = request.args['clientSecret'][0]
-        else:
-            request.setResponseCode(400)
-            return {'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
+        sid = args['sid']
+        mxid = args['mxid']
+        clientSecret = args['client_secret']
 
         # Return the same error for not found / bad client secret otherwise people can get information about
         # sessions without knowing the secret

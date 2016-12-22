@@ -20,7 +20,7 @@ from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.validators.emailvalidator import SessionExpiredException
 from sydent.validators.emailvalidator import IncorrectClientSecretException
 
-from sydent.http.servlets import require_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 
 
 class EmailRequestCodeServlet(Resource):
@@ -33,36 +33,20 @@ class EmailRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        # error = require_args(request, ('email', 'client_secret', 'send_attempt'))
-        error = require_args(request, ('email',))
+        error, args = get_args(request, ('email', 'client_secret', 'send_attempt'))
         if error:
             request.setResponseCode(400)
             return error
 
-        # look for both camelcase and underscores for transition
-        if 'client_secret' in request.args:
-            clientSecret = request.args['client_secret'][0]
-        elif 'clientSecret' in request.args:
-            clientSecret = request.args['clientSecret'][0]
-        else:
-            request.setResponseCode(400)
-            return {'errcode': 'M_MISSING_PARAM', 'error':'No client_secret'}
-
-        if 'send_attempt' in request.args:
-            sendAttempt = request.args['send_attempt'][0]
-        elif 'sendAttempt' in request.args:
-            sendAttempt = request.args['sendAttempt'][0]
-        else:
-            request.setResponseCode(400)
-            return {'errcode': 'M_MISSING_PARAM', 'error':'No send_attempt'}
-
-        email = request.args['email'][0]
+        email = args['email']
+        clientSecret = args['client_secret']
+        sendAttempt = args['send_attempt']
 
         ipaddress = self.sydent.ip_from_request(request)
 
         nextLink = None
-        if 'next_link' in request.args:
-            nextLink = request.args['next_link'][0]
+        if 'next_link' in args:
+            nextLink = args['next_link']
 
         resp = None
 
@@ -78,7 +62,7 @@ class EmailRequestCodeServlet(Resource):
             resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to send email'}
 
         if not resp:
-            resp = {'success': True, 'sid': sid}
+            resp = {'success': True, 'sid': str(sid)}
 
         return resp
 
