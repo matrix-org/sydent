@@ -29,6 +29,7 @@ def get_args(request, required_args):
     """
     args = None
     if (
+        request.content and len(request.content) > 0 and
         request.requestHeaders.hasHeader('Content-Type') and
         request.requestHeaders.getRawHeaders('Content-Type')[0] == 'application/json'
     ):
