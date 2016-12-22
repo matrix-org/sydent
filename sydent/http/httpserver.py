@@ -36,8 +36,11 @@ class ClientApiHttpServer:
 
         validate = Resource()
         email = Resource()
+        msisdn = Resource()
         emailReqCode = self.sydent.servlets.emailRequestCode
         emailValCode = self.sydent.servlets.emailValidate
+        msisdnReqCode = self.sydent.servlets.msisdnRequestCode
+        msisdnValCode = self.sydent.servlets.msisdnValidate
         getValidated3pid = self.sydent.servlets.getValidated3pid
 
         lookup = self.sydent.servlets.lookup
@@ -57,6 +60,7 @@ class ClientApiHttpServer:
 
         v1.putChild('validate', validate)
         validate.putChild('email', email)
+        validate.putChild('msisdn', msisdn)
 
         v1.putChild('lookup', lookup)
 
@@ -72,6 +76,9 @@ class ClientApiHttpServer:
 
         email.putChild('requestToken', emailReqCode)
         email.putChild('submitToken', emailValCode)
+
+        msisdn.putChild('requestToken', msisdnReqCode)
+        msisdn.putChild('submitToken', msisdnValCode)
 
         v1.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
 

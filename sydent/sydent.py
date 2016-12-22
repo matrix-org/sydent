@@ -29,10 +29,12 @@ from http.httpsclient import ReplicationHttpsClient
 from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
 from validators.emailvalidator import EmailValidator
+from validators.msisdnvalidator import MsisdnValidator
 
 from sign.ed25519 import SydentEd25519
 
 from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
+from http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
 from http.servlets.lookupservlet import LookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
@@ -48,7 +50,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sydent:
-    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto']
+    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms']
     CONFIG_DEFAULTS = {
         'server.name': '',
         'db.file': 'sydent.db',
@@ -96,6 +98,7 @@ class Sydent:
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
+        self.validators.msisdn = MsisdnValidator(self)
 
         self.keyring = Keyring()
         self.keyring.ed25519 = SydentEd25519(self).signing_key
@@ -104,6 +107,8 @@ class Sydent:
         self.servlets = Servlets()
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
+        self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
+        self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
