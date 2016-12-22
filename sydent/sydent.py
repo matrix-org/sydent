@@ -65,6 +65,7 @@ class Sydent:
         'email.invite.subject': '%(sender_display_name)s has invited you to chat',
         'email.smtphost': 'localhost',
         'log.path': '',
+        'pidfile.path': 'sydent.pid',
         'ed25519.signingkey': '',
         'obey_x_forwarded_for': False
     }
@@ -78,6 +79,8 @@ class Sydent:
             logging.basicConfig(level=logging.INFO, filename=logPath)
         else:
             logging.basicConfig(level=logging.INFO, filename=logPath)
+
+        self.pidfile = self.cfg.get('general', "pidfile.path");
 
         observer = log.PythonLoggingObserver()
         observer.start()
@@ -144,6 +147,11 @@ class Sydent:
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
+
+        if self.pidfile:
+            with open(self.pidfile, 'w') as pidfile:
+                pidfile.write(str(os.getpid()) + "\n")
+
         twisted.internet.reactor.run()
 
     def ip_from_request(self, request):
