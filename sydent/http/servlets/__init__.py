@@ -29,7 +29,6 @@ def get_args(request, required_args):
     """
     args = None
     if (
-        request.content and len(request.content) > 0 and
         request.requestHeaders.hasHeader('Content-Type') and
         request.requestHeaders.getRawHeaders('Content-Type')[0] == 'application/json'
     ):
@@ -38,7 +37,11 @@ def get_args(request, required_args):
         except ValueError:
             request.setResponseCode(400)
             return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}, None
-    else:
+
+    # If we didn't get anything from that, try the request args
+    # (riot-web's usage of the ed25519 sign servlet currently involves
+    # sending the params in the query string with a json body of 'null')
+    if args is None:
         args = copy.copy(request.args)
         # Twisted supplies everything as an array because it's valid to
         # supply the same params multiple times with www-form-urlencoded
