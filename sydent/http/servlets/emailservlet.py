@@ -45,7 +45,7 @@ class EmailRequestCodeServlet(Resource):
         ipaddress = self.sydent.ip_from_request(request)
 
         nextLink = None
-        if 'next_link' in args:
+        if 'next_link' in args and not args['next_link'].startswith("file:///"):
             nextLink = args['next_link']
 
         resp = None
@@ -85,8 +85,9 @@ class EmailValidateCodeServlet(Resource):
             msg = "Verification successful! Please return to your Matrix client to continue."
             if 'nextLink' in request.args:
                 next_link = request.args['nextLink'][0]
-                request.setResponseCode(302)
-                request.setHeader("Location", next_link)
+                if not next_link.startswith("file:///"):
+                    request.setResponseCode(302)
+                    request.setHeader("Location", next_link)
         else:
             msg = "Verification failed: you may need to request another verification email"
 
