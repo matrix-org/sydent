@@ -95,6 +95,41 @@ class GlobalAssociationStore:
 
         return row[0]
 
+    def getMxids(self, threepid_tuples):
+        cur = self.sydent.db.cursor()
+
+        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))");
+
+        inserted_cap = 0
+        while inserted_cap < len(threepid_tuples):
+            cur.executemany(
+                "INSERT INTO tmp_getmxids (medium, address) VALUES (?, ?)",
+                threepid_tuples[inserted_cap:inserted_cap + 500]
+            )
+            inserted_cap += 500
+
+        res = cur.execute(
+            "SELECT gte.medium, gte.address, gte.ts, gte.mxid FROM global_threepid_associations gte "
+            "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium AND gte.address = tmp_getmxids.address "
+            "WHERE gte.notBefore < ? AND gte.notAfter > ? "
+            "ORDER BY gte.ts DESC",
+            (time_msec(), time_msec())
+        )
+
+        results = []
+        current = ()
+        for row in res.fetchall():
+            # only use the most recent entry for each
+            # threepid (they're sorted by ts)
+            if (row[0], row[1]) == current:
+                continue
+            current = (row[0], row[1])
+            results.append((row[0], row[1], row[3]))
+
+        res = cur.execute("DROP TABLE tmp_getmxids")
+
+        return results
+
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
         :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object

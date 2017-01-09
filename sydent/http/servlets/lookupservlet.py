@@ -70,6 +70,23 @@ class LookupServlet(Resource):
             )
         return json.dumps(sgassoc)
 
+    def render_POST(self, request):
+        send_cors(request)
+        err, args = get_args(request, ('threepids',))
+        if err:
+            return err
+
+        threepids = args['threepids']
+        if not isinstance(threepids, list):
+            request.setResponseCode(400)
+            return {'errcode': 'M_INVALID_PARAM', 'error': 'threepids must be a list'}, None
+            
+        globalAssocStore = GlobalAssociationStore(self.sydent)
+        results = globalAssocStore.getMxids(threepids)
+
+        return json.dumps(results)
+         
+
     @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
