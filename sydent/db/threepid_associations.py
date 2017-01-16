@@ -109,6 +109,8 @@ class GlobalAssociationStore:
             inserted_cap += 500
 
         res = cur.execute(
+            # 'notBefore' is the time the association starts being valid, 'notAfter' the the time at which
+            # it ceases to be valid, so the ts must be greater than 'notBefore' and less than 'notAfter'.
             "SELECT gte.medium, gte.address, gte.ts, gte.mxid FROM global_threepid_associations gte "
             "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium AND gte.address = tmp_getmxids.address "
             "WHERE gte.notBefore < ? AND gte.notAfter > ? "
