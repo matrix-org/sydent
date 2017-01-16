@@ -29,6 +29,12 @@ class LookupServlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
+        """
+        Look up an individual threepid.
+        Params: 'medium': the medium of the threepid
+                'address': the address of the threepid
+        Returns: A signed association if the threepid has a corresponding mxid, otherwise the empty object.
+        """
         send_cors(request)
         err, args = get_args(request, ('medium', 'address'))
         if err:
@@ -71,6 +77,12 @@ class LookupServlet(Resource):
         return json.dumps(sgassoc)
 
     def render_POST(self, request):
+        """
+        Bulk-lookup for threepids.
+        Params: 'threepids': list of threepids, each of which is a list of medium, address
+        Returns: List of results where each result is a 3 item list of medium, address, mxid
+        Threepids for which no mapping is found are omitted.
+        """
         send_cors(request)
         err, args = get_args(request, ('threepids',))
         if err:
