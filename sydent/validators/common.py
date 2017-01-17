@@ -1,7 +1,7 @@
 import logging
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.validators import ValidationSession
+from sydent.validators import ValidationSession, SessionExpiredException
 from sydent.util import time_msec
 
 
