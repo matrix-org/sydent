@@ -17,10 +17,15 @@
 from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
 
+import logging
 import json
 import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+
+
+logger = logging.getLogger(__name__)
+
 
 class LookupServlet(Resource):
     isLeaf = True
@@ -92,6 +97,8 @@ class LookupServlet(Resource):
         if not isinstance(threepids, list):
             request.setResponseCode(400)
             return {'errcode': 'M_INVALID_PARAM', 'error': 'threepids must be a list'}, None
+
+        logger.info("Bulk lookup of %d threepids: %r", len(threepids), threepids)
             
         globalAssocStore = GlobalAssociationStore(self.sydent)
         results = globalAssocStore.getMxids(threepids)
