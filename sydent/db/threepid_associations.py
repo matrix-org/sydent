@@ -115,7 +115,7 @@ class GlobalAssociationStore:
                 "SELECT gte.medium, gte.address, gte.ts, gte.mxid FROM global_threepid_associations gte "
                 "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium AND gte.address = tmp_getmxids.address "
                 "WHERE gte.notBefore < ? AND gte.notAfter > ? "
-                "ORDER BY gte.ts DESC",
+                "ORDER BY gte.medium, gte.address, gte.ts DESC",
                 (time_msec(), time_msec())
             )
 
