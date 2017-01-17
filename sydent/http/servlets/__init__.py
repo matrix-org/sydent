@@ -30,7 +30,7 @@ def get_args(request, required_args):
     args = None
     if (
         request.requestHeaders.hasHeader('Content-Type') and
-        request.requestHeaders.getRawHeaders('Content-Type')[0] == 'application/json'
+        request.requestHeaders.getRawHeaders('Content-Type')[0].startswith('application/json')
     ):
         try:
             args = json.load(request.content)
