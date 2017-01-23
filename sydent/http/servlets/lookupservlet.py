@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014 OpenMarket Ltd
+# Copyright 2017 OpenMarket Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,6 +84,8 @@ class LookupServlet(Resource):
     def render_POST(self, request):
         """
         Bulk-lookup for threepids.
+        ** DEPRECATED **
+        Use /bulk_lookup which returns the result encapsulated in a dict
         Params: 'threepids': list of threepids, each of which is a list of medium, address
         Returns: List of results where each result is a 3 item list of medium, address, mxid
         Threepids for which no mapping is found are omitted.
