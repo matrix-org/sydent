@@ -44,6 +44,7 @@ class ClientApiHttpServer:
         getValidated3pid = self.sydent.servlets.getValidated3pid
 
         lookup = self.sydent.servlets.lookup
+        bulk_lookup = self.sydent.servlets.bulk_lookup
 
         threepid = Resource()
         bind = self.sydent.servlets.threepidBind
@@ -63,6 +64,7 @@ class ClientApiHttpServer:
         validate.putChild('msisdn', msisdn)
 
         v1.putChild('lookup', lookup)
+        v1.putChild('bulk_lookup', bulk_lookup)
 
         v1.putChild('pubkey', pubkey)
         pubkey.putChild('isvalid', self.sydent.servlets.pubkeyIsValid)

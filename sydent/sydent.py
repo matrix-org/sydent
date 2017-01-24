@@ -36,6 +36,7 @@ from sign.ed25519 import SydentEd25519
 from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
 from http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
 from http.servlets.lookupservlet import LookupServlet
+from http.servlets.bulklookupservlet import BulkLookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
 from http.servlets.replication import ReplicationPushServlet
@@ -115,6 +116,7 @@ class Sydent:
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
         self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
+        self.servlets.bulk_lookup = BulkLookupServlet(self)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
