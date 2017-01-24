@@ -39,6 +39,7 @@ class BulkLookupServlet(Resource):
         Params: 'threepids': list of threepids, each of which is a list of medium, address
         Returns: Object with key 'threepids', which is a list of results where each result
                  is a 3 item list of medium, address, mxid
+                 Note that results are not streamed to the client.
         Threepids for which no mapping is found are omitted.
         """
         send_cors(request)
