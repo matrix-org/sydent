@@ -67,8 +67,12 @@ class GlobalAssociationStore:
 
     def signedAssociationStringForThreepid(self, medium, address):
         cur = self.sydent.db.cursor()
+        # We treat address as case-insensitive because that's true for all the threepids
+        # we have currently (we treat the local part of email addresses as case insensitive
+        # which is technically incorrect). If we someday get a case-sensitive threepid,
+        # this can change.
         res = cur.execute("select sgAssoc from global_threepid_associations where "
-                    "medium = ? and address = ? and notBefore < ? and notAfter > ? "
+                    "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
                     "order by ts desc limit 1",
                     (medium, address, time_msec(), time_msec()))
 
@@ -84,7 +88,7 @@ class GlobalAssociationStore:
     def getMxid(self, medium, address):
         cur = self.sydent.db.cursor()
         res = cur.execute("select mxid from global_threepid_associations where "
-                    "medium = ? and address = ? and notBefore < ? and notAfter > ? "
+                    "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
                     "order by ts desc limit 1",
                     (medium, address, time_msec(), time_msec()))
 
@@ -113,7 +117,7 @@ class GlobalAssociationStore:
                 # 'notBefore' is the time the association starts being valid, 'notAfter' the the time at which
                 # it ceases to be valid, so the ts must be greater than 'notBefore' and less than 'notAfter'.
                 "SELECT gte.medium, gte.address, gte.ts, gte.mxid FROM global_threepid_associations gte "
-                "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium AND gte.address = tmp_getmxids.address "
+                "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium AND lower(gte.address) = lower(tmp_getmxids.address) "
                 "WHERE gte.notBefore < ? AND gte.notAfter > ? "
                 "ORDER BY gte.medium, gte.address, gte.ts DESC",
                 (time_msec(), time_msec())
