@@ -17,7 +17,7 @@ The requests that synapse servers and clients submit to the identity server are,
 Request the validation of your email address:
 
 curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/requestToken' -d'email=matthew@arasphere.net&client_secret=abcd&send_attempt=1'
-{"success": true, "tokenId": 1}
+{"success": true, "sid": 1}
 
 # receive 943258 by mail
 
