@@ -58,6 +58,12 @@ class MsisdnRequestCodeServlet(Resource):
             phone_number_object, phonenumbers.PhoneNumberFormat.E164
         )[1:]
 
+        # International formatted number. The same as an E164 but with spaces
+        # in appropriate places to make it nicer for the humans.
+        intl_fmt = phonenumbers.format_number(
+            phone_number_object, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+        )
+
         resp = None
 
         try:
@@ -70,7 +76,10 @@ class MsisdnRequestCodeServlet(Resource):
             resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
 
         if not resp:
-            resp = {'success': True, 'sid': str(sid)}
+            resp = {
+                'success': True, 'sid': str(sid),
+                'msisdn': msisdn, 'intl_fmt': intl_fmt,
+            }
 
         return resp
 
