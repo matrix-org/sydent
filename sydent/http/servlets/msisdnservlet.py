@@ -18,8 +18,7 @@ import logging
 from twisted.web.resource import Resource
 import phonenumbers
 
-from sydent.validators.msisdnvalidator import SessionExpiredException
-from sydent.validators.msisdnvalidator import IncorrectClientSecretException
+from sydent.validators import IncorrectClientSecretException, SessionExpiredException
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
