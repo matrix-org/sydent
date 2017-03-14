@@ -4,6 +4,8 @@ from sydent.db.valsession import ThreePidValSessionStore
 from sydent.validators import ValidationSession, SessionExpiredException
 from sydent.util import time_msec
 
+from sydent.validators import IncorrectClientSecretException, SessionExpiredException
+
 
 logger = logging.getLogger(__name__)
 

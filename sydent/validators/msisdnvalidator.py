@@ -23,8 +23,6 @@ from sydent.sms.openmarket import OpenMarketSMS
 
 from sydent.util import time_msec
 
-from sydent.validators import IncorrectClientSecretException, SessionExpiredException
-
 logger = logging.getLogger(__name__)
 
 
