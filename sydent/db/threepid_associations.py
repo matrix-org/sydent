@@ -103,6 +103,7 @@ class GlobalAssociationStore:
         cur = self.sydent.db.cursor()
 
         cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))");
+        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))");
 
         try:
             inserted_cap = 0
