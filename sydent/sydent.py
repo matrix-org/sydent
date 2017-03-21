@@ -73,6 +73,7 @@ class Sydent:
         'log.path': '',
         'pidfile.path': 'sydent.pid',
         'ed25519.signingkey': '',
+        'bodyTemplate': 'Your code is {token}',
         'obey_x_forwarded_for': False
     }
 

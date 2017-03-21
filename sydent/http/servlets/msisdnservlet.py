@@ -69,7 +69,7 @@ class MsisdnRequestCodeServlet(Resource):
             sid = self.sydent.validators.msisdn.requestToken(
                 msisdn, clientSecret, sendAttempt, None
             )
-        except e:
+        except Exception as e:
             logger.error("Exception sending SMS: %r", e);
             request.setResponseCode(500)
             resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
