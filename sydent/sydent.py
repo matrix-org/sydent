@@ -53,13 +53,20 @@ logger = logging.getLogger(__name__)
 class Sydent:
     CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms']
     CONFIG_DEFAULTS = {
+        # general
         'server.name': '',
+        'log.path': '',
+        'pidfile.path': 'sydent.pid',
+        # db
         'db.file': 'sydent.db',
-        'token.length': '6',
+        # http
         'clientapi.http.port': '8090',
         'replication.https.certfile': '',
         'replication.https.cacert': '', # This should only be used for testing
         'replication.https.port': '4434',
+        'obey_x_forwarded_for': False,
+        # email
+        'token.length': '6',
         'email.template': 'res/email.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
@@ -70,11 +77,10 @@ class Sydent:
         'email.smtppassword': '',
         'email.hostname': '',
         'email.tlsmode': '0',
-        'log.path': '',
-        'pidfile.path': 'sydent.pid',
-        'ed25519.signingkey': '',
+        # sms
         'bodyTemplate': 'Your code is {token}',
-        'obey_x_forwarded_for': False
+        # crypto
+        'ed25519.signingkey': '',
     }
 
     def __init__(self):
