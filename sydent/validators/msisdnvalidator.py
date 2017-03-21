@@ -48,7 +48,12 @@ class MsisdnValidator:
             "Attempting to text code %s to %s",
             valSession.token, msisdn,
         )
-        self.omSms.sendTextSMS("Your code is " + valSession.token, msisdn)
+
+        smsBodyTemplate = self.sydent.cfg.get('sms', 'bodyTemplate')
+
+        smsBody = smsBodyTemplate.format(token=valSession.token)
+
+        self.omSms.sendTextSMS(smsBody, msisdn)
 
         valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
 
