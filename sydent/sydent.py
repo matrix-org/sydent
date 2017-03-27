@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import ConfigParser
+import argparse
 import logging
 import os
 
@@ -85,7 +86,20 @@ class Sydent:
     }
 
     def __init__(self):
-        logger.info("Starting Sydent server")
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument(
+            "configfile",
+            nargs='?',
+            default="sydent.conf",
+            help="the sydent config file, defaults to sydent.conf",
+        )
+
+        options = parser.parse_args()
+
+        self.configfile = options.configfile
+
+        logger.info("Starting Sydent server with config %s", self.configfile)
         self.parse_config()
 
         logPath = self.cfg.get('general', "log.path")
@@ -153,10 +167,10 @@ class Sydent:
                 self.cfg.add_section(sect)
             except ConfigParser.DuplicateSectionError:
                 pass
-        self.cfg.read("sydent.conf")
+        self.cfg.read(self.configfile)
 
     def save_config(self):
-        fp = open("sydent.conf", 'w')
+        fp = open(self.configfile, 'w')
         self.cfg.write(fp)
         fp.close()
 

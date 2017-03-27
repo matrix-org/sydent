@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# import ldap3
-# import ldap3.core.exceptions
 import logging
 import os
 
