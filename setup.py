@@ -43,7 +43,8 @@ setup(
     setup_requires=[
         "setuptools_trial",
         "setuptools>=1.0.0", # Needs setuptools that supports git+ssh. It's not obvious when support for this was introduced.
-        "mock"
+        "mock",
+        "ldap3"
     ],
     include_package_data=True,
     long_description=read("README.rst"),

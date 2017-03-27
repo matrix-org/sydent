@@ -22,6 +22,7 @@ import twisted.internet.reactor
 from twisted.python import log
 
 from db.sqlitedb import SqliteDatabase
+from db.ldap import LDAPDatabase
 
 from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
@@ -51,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sydent:
-    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms']
+    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms', 'ldap']
     CONFIG_DEFAULTS = {
         # general
         'server.name': '',
@@ -99,6 +100,8 @@ class Sydent:
         observer.start()
 
         self.db = SqliteDatabase(self).db
+
+        self.ldap = LDAPDatabase(self)
 
         self.server_name = self.cfg.get('general', 'server.name')
         if self.server_name == '':
