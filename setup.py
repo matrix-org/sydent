@@ -39,6 +39,7 @@ setup(
         "pynacl",
         "daemonize",
         "phonenumbers",
+        "ldap3",
     ],
     setup_requires=[
         "setuptools_trial",

@@ -21,7 +21,6 @@ import os
 try:
     import ldap3
     import ldap3.core.exceptions
-    import ldapurl
 
     # ldap3 v2 changed ldap3.AUTH_SIMPLE -> ldap3.SIMPLE
     try:
@@ -55,6 +54,8 @@ class LDAPDatabase:
             logger.info("Missing ldap3 library. This is required for LDAP integration")
             return
 
+
+
         self.sydent = syd
 
         self.ldap_uri = self.sydent.cfg.get("ldap", "uri")
@@ -68,37 +69,20 @@ class LDAPDatabase:
         self.ldap_filter = self.sydent.cfg.get("ldap", "filter").replace('"','').replace("'","")
 
     def HasLdapConfiguration(self):
-        if (not self.ldap_uri):
-            # No configuration
-            return False
-        else:
+        if hasattr(self, 'ldap_uri'):
             logger.info("Exists LDAP configuration.")
             return True
+        else:
+            # No configuration
+            return False
 
     def getMxid(self,medium,address):
         if (not medium == "email"):
             # Support only Email from LDAP
             return None
         try:
-            # URI support
-            ldap_url = ldapurl.LDAPUrl(self.ldap_uri.lower())
-            use_ssl = False
-            if (ldap_url.urlscheme == "ldaps"):
-                use_ssl = True
-            if (":" not in ldap_url.hostport):
-                ldap_host = ldap_url.hostport
-                if use_ssl:
-                    ldap_port = 636
-                else:
-                    ldap_port = 389
-            else:
-                ldap_host = ldap_url.hostport.split(':')[0]
-                ldap_port = ldap_url.hostport.split(':')[1]
-
             server = ldap3.Server(
-                host = ldap_host,
-                port = ldap_port,
-                use_ssl=use_ssl,
+                host = self.ldap_uri.lower(),
                 get_info=None
             )
             logger.debug(
