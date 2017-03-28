@@ -6,7 +6,7 @@ Type=simple
 User=matrix-sydent
 WorkingDirectory=/var/lib/matrix-sydent
 EnvironmentFile=/etc/default/matrix-sydent
-ExecStart=/usr/bin/python -m sydent.sydent /etc/matrix-synapse/sydent.conf
+ExecStart=/usr/bin/python -m sydent.sydent /etc/matrix-sydent/sydent.conf
 Restart=always
 RestartSec=3
 
