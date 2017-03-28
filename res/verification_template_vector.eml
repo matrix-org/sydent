@@ -13,9 +13,9 @@ Content-Disposition: inline
 
 Hello,
 
-We have received a request from %(ipaddress)s to register this email address
-on riot.im. If this was you who made this request, you may use the
-following link to complete the verification of your email address:
+We have received a request to register this email address on riot.im. If this
+was you who made this request, you may use the following link to complete the
+verification of your email address:
 
 %(link)s
 
@@ -100,7 +100,7 @@ pre, code {
 
                     <p>Hello,</p>
 
-                    <p>We have received a request from %(ipaddress)s to register this email
+                    <p>We have received a request to register this email
                     address on riot.im. If this was you who made this request, you may use
                     the following link to complete the verification of your email
                     address:</p>
