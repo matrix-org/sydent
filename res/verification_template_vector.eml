@@ -13,7 +13,7 @@ Content-Disposition: inline
 
 Hello there!
 
-You have asked to register this email address with riot.im - the open source,
+You have asked us to register this email address with riot.im - the open source,
 distributed and secure shared workspace for the web that's built on Matrix.
 
 If it was really you who made this request, you can click on the following link to
@@ -124,7 +124,7 @@ pre, code {
 
                     <p>Hello there!</p>
 
-                    <p>You have asked to register this email address with riot.im - the open source,
+                    <p>You have asked us to register this email address with riot.im - the open source,
                     distributed and secure shared workspace for the web that's built on Matrix.</p>
 
                     <p>If it was really you who made this request, you can click on the following link to
@@ -145,7 +145,7 @@ pre, code {
                     <p>Riot</p>
 
                     <br>
-                    <p>About Riot</p>
+                    <p>About Riot:</p>
 
                     <p><em>Break through</em> - Riot allows teams to communicate across a wide range of collaboration
                     apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
