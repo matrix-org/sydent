@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import ConfigParser
+import argparse
 import logging
 import os
 
@@ -22,6 +23,7 @@ import twisted.internet.reactor
 from twisted.python import log
 
 from db.sqlitedb import SqliteDatabase
+from db.ldap import LDAPDatabase
 
 from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
@@ -51,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sydent:
-    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms']
+    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms', 'ldap']
     CONFIG_DEFAULTS = {
         # general
         'server.name': '',
@@ -84,7 +86,20 @@ class Sydent:
     }
 
     def __init__(self):
-        logger.info("Starting Sydent server")
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument(
+            "configfile",
+            nargs='?',
+            default="sydent.conf",
+            help="the sydent config file, defaults to sydent.conf",
+        )
+
+        options = parser.parse_args()
+
+        self.configfile = options.configfile
+
+        logger.info("Starting Sydent server with config %s", self.configfile)
         self.parse_config()
 
         logPath = self.cfg.get('general', "log.path")
@@ -99,6 +114,8 @@ class Sydent:
         observer.start()
 
         self.db = SqliteDatabase(self).db
+
+        self.ldap = LDAPDatabase(self)
 
         self.server_name = self.cfg.get('general', 'server.name')
         if self.server_name == '':
@@ -150,10 +167,10 @@ class Sydent:
                 self.cfg.add_section(sect)
             except ConfigParser.DuplicateSectionError:
                 pass
-        self.cfg.read("sydent.conf")
+        self.cfg.read(self.configfile)
 
     def save_config(self):
-        fp = open("sydent.conf", 'w')
+        fp = open(self.configfile, 'w')
         self.cfg.write(fp)
         fp.close()
 

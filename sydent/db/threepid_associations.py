@@ -100,17 +100,33 @@ class GlobalAssociationStore:
         return row[0]
 
     def getMxids(self, threepid_tuples):
+        # If exists LDAP configuration
+        # Perform LDAP lookup
+        # If LDAP lookup result empty perform database lookup
+        threepid_for_db_lookup = []
+        results = []
+        if self.sydent.ldap.HasLdapConfiguration():
+            threepid_for_db_lookup = []
+            for request in threepid_tuples:
+                res = self.sydent.ldap.getMxid(request[0],request[1])
+                if res:
+                    results.append(res)
+                else:
+                    # Not found. Need to lookup in database
+                    threepid_for_db_lookup.append(request)
+        else:
+            # Search all in database
+            threepid_for_db_lookup = threepid_tuples
+        # TODO I think we don't perform 3pid assotiation if it exists in LDAP.
         cur = self.sydent.db.cursor()
-
         cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))");
         cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))");
-
         try:
             inserted_cap = 0
-            while inserted_cap < len(threepid_tuples):
+            while inserted_cap < len(threepid_for_db_lookup):
                 cur.executemany(
                     "INSERT INTO tmp_getmxids (medium, address) VALUES (?, ?)",
-                    threepid_tuples[inserted_cap:inserted_cap + 500]
+                    threepid_for_db_lookup[inserted_cap:inserted_cap + 500]
                 )
                 inserted_cap += 500
 
@@ -124,7 +140,6 @@ class GlobalAssociationStore:
                 (time_msec(), time_msec())
             )
 
-            results = []
             current = ()
             for row in res.fetchall():
                 # only use the most recent entry for each
