@@ -30,6 +30,7 @@ API_BASE_URL = "https://smsc.openmarket.com/sms/v4/mt"
 # Useful for testing.
 #API_BASE_URL = "http://smsc-cie.openmarket.com/sms/v4/mt"
 
+# The TON (ie. Type of Number) codes by type used in our config file
 TONS = {
     'long': 1,
     'short': 3,
