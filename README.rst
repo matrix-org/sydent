@@ -9,6 +9,16 @@ Having installed dependencies, you can run sydent using::
 
 This will create a configuration file in sydent.conf with some defaults. You'll most likely want to change the server name and specify a mail relay.
 
+Defaults for SMS originators will not be added to the generated config file, these should be added in the form::
+
+    originators.<country code> = <long|short|alpha>:<originator>
+
+Where country code is the numeric country code, or 'default' to specify the originator used for countries not listed. For example, to use a selection of long codes for the US/Canda, a short code for the UK and an alphanumertic originator for everywhere else::
+
+    originators.1 = long:12125552368,long:12125552369
+    originators.44 = short:12345
+    originators.default = alpha:Matrix
+
 Requests
 ========
 

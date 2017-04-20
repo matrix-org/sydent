@@ -30,6 +30,19 @@ API_BASE_URL = "https://smsc.openmarket.com/sms/v4/mt"
 # Useful for testing.
 #API_BASE_URL = "http://smsc-cie.openmarket.com/sms/v4/mt"
 
+# The TON (ie. Type of Number) codes by type used in our config file
+TONS = {
+    'long': 1,
+    'short': 3,
+    'alpha': 5,
+}
+
+def tonFromType(t):
+    if t in TONS:
+        return TONS[t]
+    raise Exception("Unknown number type (%s) for originator" % t)
+
+
 class OpenMarketSMS:
     def __init__(self, sydent):
         self.sydent = sydent
@@ -49,8 +62,9 @@ class OpenMarketSMS:
             },
         }
         if source:
-            body['source'] = {
-                "address": source,
+            body['mobileTerminate']['source'] = {
+                "ton": tonFromType(source['type']),
+                "address": source['text'],
             }
 
         b64creds = b64encode(b"%s:%s" % (
