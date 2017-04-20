@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2016 OpenMarket Ltd
+# Copyright 2017 Vector Creations Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,7 +68,7 @@ class MsisdnRequestCodeServlet(Resource):
 
         try:
             sid = self.sydent.validators.msisdn.requestToken(
-                msisdn, clientSecret, sendAttempt, None
+                phone_number_object, clientSecret, sendAttempt, None
             )
         except Exception as e:
             logger.error("Exception sending SMS: %r", e);
