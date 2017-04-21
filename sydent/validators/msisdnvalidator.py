@@ -23,6 +23,8 @@ from sydent.db.valsession import ThreePidValSessionStore
 from sydent.validators import ValidationSession, common
 from sydent.sms.openmarket import OpenMarketSMS
 
+from sydent.validators import DestinationRejectedException
+
 from sydent.util import time_msec
 
 logger = logging.getLogger(__name__)
@@ -33,8 +35,9 @@ class MsisdnValidator:
         self.sydent = sydent
         self.omSms = OpenMarketSMS(sydent)
 
-        # cache originators from config file
+        # cache originators & sms rules from config file
         self.originators = {}
+        self.smsRules = {}
         for opt in self.sydent.cfg.options('sms'):
             if opt.startswith('originators.'):
                 country = opt.split('.')[1]
@@ -52,8 +55,22 @@ class MsisdnValidator:
                         "type": parts[0],
                         "text": parts[1],
                     })
+            elif opt.startswith('smsrule.'):
+                country = opt.split('.')[1]
+                action = self.sydent.cfg.get('sms', opt)
+
+                if action not in ['allow', 'reject']:
+                    raise Exception("Invalid SMS rule action: %s, expecting 'allow' or 'deny'" % action)
+
+                self.smsRules[country] = action
+
 
     def requestToken(self, phoneNumber, clientSecret, sendAttempt, nextLink):
+        if str(phoneNumber.country_code) in self.smsRules:
+            action = self.smsRules[str(phoneNumber.country_code)]
+            if action == 'reject':
+                raise DestinationRejectedException()
+
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
         msisdn = phonenumbers.format_number(

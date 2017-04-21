@@ -19,7 +19,9 @@ import logging
 from twisted.web.resource import Resource
 import phonenumbers
 
-from sydent.validators import IncorrectClientSecretException, SessionExpiredException
+from sydent.validators import (
+    IncorrectClientSecretException, SessionExpiredException, DestinationRejectedException
+)
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
@@ -70,6 +72,10 @@ class MsisdnRequestCodeServlet(Resource):
             sid = self.sydent.validators.msisdn.requestToken(
                 phone_number_object, clientSecret, sendAttempt, None
             )
+        except DestinationRejectedException:
+            logger.error("Destination rejected for number: %s", msisdn);
+            request.setResponseCode(400)
+            resp = {'errcode': 'M_DESTINATION_REJECTED', 'error': 'Phone numbers in this country are not currently supported'}
         except Exception as e:
             logger.error("Exception sending SMS: %r", e);
             request.setResponseCode(500)
