@@ -20,11 +20,21 @@ link below to join via Riot (requires Chrome, Firefox, Safari, iOS or Android)
 
 https://riot.im/app/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
-Matrix.org is an open standard for interoperable communication: supporting group
-chat, file transfer, voice and video calling, integrations to other apps, bridges
-to other communication systems and much more.
 
-thanks,
+About Matrix:
+
+Matrix.org is an open standard for interoperable, decentralised, real-time communication
+over IP, supporting group chat, file transfer, voice and video calling, integrations to
+other apps, bridges to other communication systems and much more. It can be used to power
+Instant Messaging, VoIP/WebRTC signalling, Internet of Things communication - or anywhere
+you need a standard HTTP API for publishing and subscribing to data whilst tracking the
+conversation history.
+
+Matrix defines the standard, and provides open source reference implementations of
+Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
+create new communication solutions or extend the capabilities and reach of existing ones.
+
+Thanks,
 
 Matrix
 
@@ -106,12 +116,21 @@ or iOS or Android on mobile.)</p>
     href="https://riot.im/app/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
 </p>
 
-<p>Matrix.org is an open standard for interoperable communication: supporting group chat, file
-transfer, voice and video calling, integrations to other apps, bridges
-to other communication systems and much more.</p>
+<br>
+<p>About Matrix:</p>
 
+<p>Matrix.org is an open standard for interoperable, decentralised, real-time communication
+over IP, supporting group chat, file transfer, voice and video calling, integrations to
+other apps, bridges to other communication systems and much more. It can be used to power
+Instant Messaging, VoIP/WebRTC signalling, Internet of Things communication - or anywhere
+you need a standard HTTP API for publishing and subscribing to data whilst tracking the
+conversation history.</p>
 
-<p>thanks,</p>
+<p>Matrix defines the standard, and provides open source reference implementations of
+Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
+create new communication solutions or extend the capabilities and reach of existing ones.</p>
+
+<p>Thanks,</p>
 
 <p>Matrix</p>
                 </td>
