@@ -60,7 +60,7 @@ class MsisdnValidator:
                 action = self.sydent.cfg.get('sms', opt)
 
                 if action not in ['allow', 'reject']:
-                    raise Exception("Invalid SMS rule action: %s, expecting 'allow' or 'deny'" % action)
+                    raise Exception("Invalid SMS rule action: %s, expecting 'allow' or 'reject'" % action)
 
                 self.smsRules[country] = action
 
