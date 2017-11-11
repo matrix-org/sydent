@@ -17,5 +17,14 @@
 import string
 import random
 
+def generateTokenForMedium(medium):
+    if medium == 'email':
+        return generateAlphanumericTokenOfLength(32)
+    else:
+        return generateNumericTokenOfLength(6)
+
 def generateNumericTokenOfLength(length):
     return "".join([random.choice(string.digits) for _ in range(length)])
+
+def generateAlphanumericTokenOfLength(length):
+    return "".join([random.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for _ in range(length)])

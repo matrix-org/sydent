@@ -42,8 +42,7 @@ class ThreePidValSessionStore:
 
         sid = self.addValSession(medium, address, clientSecret, time_msec(), commit=False)
 
-        tokenString = sydent.util.tokenutils.generateNumericTokenOfLength(
-            int(self.sydent.cfg.get('email', 'token.length')))
+        tokenString = sydent.util.tokenutils.generateTokenForMedium(medium)
 
         cur.execute("insert into threepid_token_auths (validationSession, token, sendAttemptNumber) values (?, ?, ?)",
                     (sid, tokenString, -1))
