@@ -66,7 +66,6 @@ class Sydent:
         'replication.https.port': '4434',
         'obey_x_forwarded_for': False,
         # email
-        'token.length': '6',
         'email.template': 'res/email.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
