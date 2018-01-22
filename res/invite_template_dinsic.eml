@@ -11,45 +11,22 @@ Content-Type: multipart/alternative;
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
-Hi,
+Bonjour,
 
-%(sender_display_name)s has invited you into a room %(bracketed_room_name)s on
-Riot. To join the conversation please follow the link below.
+%(sender_display_name)s vous a invité sur Tchap, dans le salon %(bracketed_room_name)s.
 
-https://riot.im/app/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
+Pour rejoindre la conversation, suivez le lien ci dessous:
 
-Riot is an open source collaboration app built on the Matrix.org
-open standard for interoperable communication: supporting group chat,
-file transfer, voice and video calling, integrations to other apps, bridges
-to other communication systems and much more.
+https://chat.i.tchap.rie.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
-Please note that you will need to use Chrome, Firefox or Safari on the web, or
-iOS or Android on mobile.
+Merci d'utiliser Tchap!
 
-Thanks,
+Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
 
-Riot
+Tchap est une déclinaison du projet open source Riot/Matrix.
 
+Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
 
-About Riot:
-
-Break through - Riot allows teams to communicate across a wide range of collaboration
-apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-allow these team members to seamlessly work together. Riot offers the richest
-network of communication bridges.
-
-Own Your Own Data - No one should control your communication and data but you. Riot
-lets you run your own server, and provides users and teams with the most advanced
-crypto ratchet technology available today for a decentralized secure Internet.
-
-Open Source - Riot is entirely open source: all the code is published on GitHub
-(Apache License) for anyone to see and extend. This means teams can customize or
-contribute to the code and everyone can benefit from the speed of community innovation.
-
-Made on Matrix - Riot is built on top of Matrix. Matrix is an open network for secure,
-decentralized communication delivering a community of users, bridged networks,
-integrated bots and applications plus full end-to-end encryption. To learn more about
-Matrix visit https://matrix.org.
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
 Content-Type: multipart/related;
@@ -116,56 +93,36 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://riot.im/img/riot-logo-email.png" width="64" height="64" alt="Riot"/>
+                                    <img src="https://matrix.i.tchap.rie.gouv.fr/images/tchap%20144x144.png" width="64" height="64" alt="Tchap"/>
                             </td>
                         </tr>
                     </table>
 
-<p>Hi,</p>
+    <p>Bonjour,</p>
 
-<p>%(sender_display_name_forhtml)s has invited you into a room %(bracketed_room_name_forhtml)s on
-Riot.</p>
+    <p>%(sender_display_name)s vous a invité sur Tchap, dans le salon %(bracketed_room_name)s.
+    </p>
 
-<p>
-    <a
-    href="https://riot.im/app/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
-</p>
+    <p>
+        <a
+        href="https://chat.i.tchap.rie.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Rejoindre la conversation</a>
+    </p>
 
-<p>Riot is an open source collaboration app built on the Matrix.org
-open standard for interoperable communication: supporting group chat, file
-transfer, voice and video calling, integrations to other apps, bridges
-to other communication systems and much more.</p>
+    <p>
+    Merci d'utiliser Tchap!
+    </p>
 
-<p>Please note that Riot requires
-<a href="https://www.google.com/chrome">Chrome</a>,
-<a href="https://www.getfirefox.com">Firefox</a> or
-<a href="https://www.apple.com/safari">Safari</a> on the web,
-or iOS or Android on mobile.</p>
+    <p>
+    Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
+    </p>
 
-<p>Thanks,</p>
+    <p>
+    Tchap est une déclinaison du projet open source Riot/Matrix.
+    </p>
 
-<p>Riot</p>
-
-<br>
-<p>About Riot:</p>
-
-<p><em>Break through</em> - Riot allows teams to communicate across a wide range of collaboration
-apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-allow these team members to seamlessly work together. Riot offers the richest
-network of communication bridges.</p>
-
-<p><em>Own Your Own Data</em> - No one should control your communication and data but you. Riot
-lets you run your own server, and provides users and teams with the most advanced
-crypto ratchet technology available today for a decentralized secure Internet.</p>
-
-<p><em>Open Source</em> - Riot is entirely open source: all the code is published on GitHub
-(Apache License) for anyone to see and extend. This means teams can customize or
-contribute to the code and everyone can benefit from the speed of community innovation.</p>
-
-<p><em>Made on Matrix</em> - Riot is built on top of Matrix. Matrix is an open network for secure,
-decentralized communication delivering a community of users, bridged networks,
-integrated bots and applications plus full end-to-end encryption. To learn more about
-Matrix visit https://matrix.org.</p>
+    <p>
+    Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
+    </p>
 
                 </td>
                 <td> </td>

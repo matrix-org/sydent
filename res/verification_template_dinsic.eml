@@ -11,45 +11,26 @@ Content-Type: multipart/alternative;
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
-Hello there!
+Bonjour,
 
-You have asked us to register this email address with riot.im - the open source,
-distributed and secure shared workspace for the web that's built on Matrix.
+Vous avez fait une demande d'enregistrement avec cette addresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.
 
-If it was really you who made this request, you can click on the following link to
-complete the verification of your email address:
+Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:
 
 %(link)s
 
-Please note that you will need to use Chrome, Firefox or Safari on the web, or
-iOS or Android on mobile.
+Si vous n'avez pas fait de demande d'accès à tchap, vous pouvez ignorer cet email.
 
-If you didn't make this request, you can safely disregard this email.
-
-Thanks!
-
-Riot
+Merci d'utiliser Tchap!
 
 
-About Riot:
+Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
 
-Break through - Riot allows teams to communicate across a wide range of collaboration
-apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-allow these team members to seamlessly work together. Riot offers the richest
-network of communication bridges.
+Tchap est une déclinaison du projet open source Riot/Matrix.
 
-Own Your Own Data - No one should control your communication and data but you. Riot
-lets you run your own server, and provides users and teams with the most advanced
-crypto ratchet technology available today for a decentralized secure Internet.
+Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
 
-Open Source - Riot is entirely open source: all the code is published on GitHub
-(Apache License) for anyone to see and extend. This means teams can customize or
-contribute to the code and everyone can benefit from the speed of community innovation.
 
-Made on Matrix - Riot is built on top of Matrix. Matrix is an open network for secure,
-decentralized communication delivering a community of users, bridged networks,
-integrated bots and applications plus full end-to-end encryption. To learn more about
-Matrix visit https://matrix.org.
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
 Content-Type: multipart/related;
@@ -117,54 +98,34 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://riot.im/img/riot-logo-email.png" width="64" height="64" alt="Riot"/>
+                                    <img src="https://matrix.i.tchap.rie.gouv.fr/images/tchap%20144x144.png" width="64" height="64" alt="Tchap"/>
                             </td>
                         </tr>
                     </table>
 
-                    <p>Hello there!</p>
+                    <p>Bonjour</p>
 
-                    <p>You have asked us to register this email address with riot.im - the open source,
-                    distributed and secure shared workspace for the web that's built on Matrix.</p>
+                    <p>Vous avez fait une demande d'enregistrement avec cette addresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.</p>
 
-                    <p>If it was really you who made this request, you can click on the following link to
-                    complete the verification of your email address:</p>
+                    <p>Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:</p>
 
-                    <p><a href="%(link)s">Complete email verification</a></p>
+                    <p><a href="%(link)s">Terminer la validation de l'email</a></p>
 
-                    <p>Please note that Riot requires
-                    <a href="https://www.google.com/chrome">Chrome</a>,
-                    <a href="https://www.getfirefox.com">Firefox</a> or
-                    <a href="https://www.apple.com/safari">Safari</a> on the web,
-                    or iOS or Android on mobile.</p>
+                    <p>Si vous n'avez pas fait de demande d'accès à tchap, vous pouvez ignorer cet email.</p>
 
-                    <p>If you didn't make this request, you can safely disregard this email.</p>
+                    <p>Merci d'utiliser Tchap!</p>
 
-                    <p>Thanks!</p>
+                    <p>
+                    Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
+                    </p>
 
-                    <p>Riot</p>
+                    <p>
+                    Tchap est une déclinaison du projet open source Riot/Matrix.
+                    </p>
 
-                    <br>
-                    <p>About Riot:</p>
-
-                    <p><em>Break through</em> - Riot allows teams to communicate across a wide range of collaboration
-                    apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-                    allow these team members to seamlessly work together. Riot offers the richest
-                    network of communication bridges.</p>
-
-                    <p><em>Own Your Own Data</em> - No one should control your communication and data but you. Riot
-                    lets you run your own server, and provides users and teams with the most advanced
-                    crypto ratchet technology available today for a decentralized secure Internet.</p>
-
-                    <p><em>Open Source</em> - Riot is entirely open source: all the code is published on GitHub
-                    (Apache License) for anyone to see and extend. This means teams can customize or
-                    contribute to the code and everyone can benefit from the speed of community innovation.</p>
-
-                    <p><em>Made on Matrix</em> - Riot is built on top of Matrix. Matrix is an open network for secure,
-                    decentralized communication delivering a community of users, bridged networks,
-                    integrated bots and applications plus full end-to-end encryption. To learn more about
-                    Matrix visit https://matrix.org.</p>
-
+                    <p>
+                    Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
+                    </p>
                 </td>
                 <td> </td>
             </tr>
