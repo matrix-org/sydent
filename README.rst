@@ -1,7 +1,7 @@
 Installation
 ============
 
-Dependencies can be installed using setup.py in the same way as synapse: see synapse/README.rst.
+Dependencies can be installed using ``python setup.py develop`` in a virtualenv.
 
 Having installed dependencies, you can run sydent using::
 
