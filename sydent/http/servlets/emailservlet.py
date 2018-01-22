@@ -82,14 +82,16 @@ class EmailValidateCodeServlet(Resource):
     def render_GET(self, request):
         resp = self.do_validate_request(request)
         if 'success' in resp and resp['success']:
-            msg = "Verification successful! Please return to your Matrix client to continue."
+            #msg = "Verification successful! Please return to your Matrix client to continue."
+            msg = "Vérification réussie! Vous pouvez maintenant utiliser l’application."
             if 'nextLink' in request.args:
                 next_link = request.args['nextLink'][0]
                 if not next_link.startswith("file:///"):
                     request.setResponseCode(302)
                     request.setHeader("Location", next_link)
         else:
-            msg = "Verification failed: you may need to request another verification email"
+            #msg = "Verification failed: you may need to request another verification email"
+            msg = "La vérification a échoué: essayez de recommencer la procédure."
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
 
