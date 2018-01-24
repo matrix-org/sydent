@@ -83,7 +83,7 @@ class EmailValidateCodeServlet(Resource):
         resp = self.do_validate_request(request)
         if 'success' in resp and resp['success']:
             #msg = "Verification successful! Please return to your Matrix client to continue."
-            msg = "Vérification réussie! Vous pouvez maintenant utiliser l’application."
+            msg = u"Vérification réussie! Vous pouvez maintenant utiliser l’application."
             if 'nextLink' in request.args:
                 next_link = request.args['nextLink'][0]
                 if not next_link.startswith("file:///"):
@@ -91,12 +91,12 @@ class EmailValidateCodeServlet(Resource):
                     request.setHeader("Location", next_link)
         else:
             #msg = "Verification failed: you may need to request another verification email"
-            msg = "La vérification a échoué: essayez de recommencer la procédure."
+            msg = u"La vérification a échoué: essayez de recommencer la procédure."
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
 
         request.setHeader("Content-Type", "text/html")
-        return open(templateFile).read().decode('utf8') % {'message': msg}
+        return (open(templateFile).read().decode('utf8') % {'message': msg}).encode('utf8')
 
     @jsonwrap
     def render_POST(self, request):
