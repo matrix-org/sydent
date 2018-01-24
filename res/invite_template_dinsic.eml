@@ -13,7 +13,7 @@ Content-Disposition: inline
 
 Bonjour,
 
-%(sender_display_name)s vous a invité sur Tchap, dans le salon %(bracketed_room_name)s.
+%(sender_display_name)s vous a invité sur Tchap. %(bracketed_room_name)s
 
 Pour rejoindre la conversation, suivez le lien ci dessous:
 
@@ -100,7 +100,7 @@ pre, code {
 
     <p>Bonjour,</p>
 
-    <p>%(sender_display_name)s vous a invité sur Tchap, dans le salon %(bracketed_room_name)s.
+    <p>%(sender_display_name)s vous a invité sur Tchap. %(bracketed_room_name)s
     </p>
 
     <p>
