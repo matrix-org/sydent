@@ -55,7 +55,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
             allSubstitutions[k+"_forhtml"] = cgi.escape(v.decode('utf8'))
             allSubstitutions[k+"_forurl"] = urllib.quote(v)
 
-        mailString = open(mailTemplateFile).read() % allSubstitutions
+        mailString = open(mailTemplateFile).read().decode('utf8') % allSubstitutions
         rawFrom = email.utils.parseaddr(mailFrom)[1]
         rawTo = email.utils.parseaddr(mailTo)[1]
         if rawFrom == '' or rawTo == '':

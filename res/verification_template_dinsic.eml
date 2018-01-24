@@ -98,7 +98,7 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://matrix.i.tchap.rie.gouv.fr/images/tchap%20144x144.png" width="64" height="64" alt="Tchap"/>
+                                    <img src="https://matrix.i.tchap.rie.gouv.fr/images/tchap%%20144x144.png" width="64" height="64" alt="Tchap"/>
                             </td>
                         </tr>
                     </table>

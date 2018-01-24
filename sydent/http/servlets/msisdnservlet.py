@@ -122,7 +122,7 @@ class MsisdnValidateCodeServlet(Resource):
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
 
         request.setHeader("Content-Type", "text/html")
-        return open(templateFile).read() % {'message': msg}
+        return open(templateFile).read().decode('utf8') % {'message': msg}
 
     @jsonwrap
     def render_POST(self, request):
