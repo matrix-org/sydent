@@ -40,7 +40,7 @@ body {
 </head>
 <body>
 <div id="vectorlogo">
-<img src="//riot.im/app/img/logos/riot-logo.svg" alt="riot.im" width="256" height="256" />
+<img src="//matrix.i.tchap.rie.gouv.fr/images/splash.gif" alt="tchap" width="240" height="240" />
 </div>
 <div id="message">
 <p>%(message)s</p>
