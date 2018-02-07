@@ -84,7 +84,7 @@ class ReplicationPushServlet(Resource):
 
                 # if this is an association that matches one of our invite_tokens then we should call the onBind callback
                 # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
-                sydent.threepidBinder.notifyPendingInvites(assocObj)
+                self.sydent.threepidBinder.notifyPendingInvites(assocObj)
 
             except:
                 failedIds.append(originId)
