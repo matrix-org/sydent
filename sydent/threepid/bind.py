@@ -62,7 +62,7 @@ class ThreepidBinder:
 
         self.sydent.pusher.doLocalPush()
 
-    def notifyPendingInvites(assoc):
+    def notifyPendingInvites(self, assoc):
         # this is called back by the replication code once we see new bindings
         # (including local ones created by addBinding() above)
 
