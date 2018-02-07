@@ -62,20 +62,24 @@ class ThreepidBinder:
 
         self.sydent.pusher.doLocalPush()
 
+    def notifyPendingInvites(assoc):
+        # this is called back by the replication code once we see new bindings
+        # (including local ones created by addBinding() above)
+
         joinTokenStore = JoinTokenStore(self.sydent)
-        pendingJoinTokens = joinTokenStore.getTokens(s.medium, s.address)
+        pendingJoinTokens = joinTokenStore.getTokens(assoc.medium, assoc.address)
         invites = []
         for token in pendingJoinTokens:
-            token["mxid"] = mxid
+            token["mxid"] = assoc.mxid
             token["signed"] = {
-                "mxid": mxid,
+                "mxid": assoc.mxid,
                 "token": token["token"],
             }
             token["signed"] = signedjson.sign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
             invites.append(token)
         if invites:
             assoc.extra_fields["invites"] = invites
-            joinTokenStore.markTokensAsSent(s.medium, s.address)
+            joinTokenStore.markTokensAsSent(assoc.medium, assoc.address)
 
         assocSigner = AssociationSigner(self.sydent)
         sgassoc = assocSigner.signedThreePidAssociation(assoc)
