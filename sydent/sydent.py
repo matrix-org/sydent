@@ -16,6 +16,7 @@
 
 import ConfigParser
 import logging
+import logging.handlers
 import os
 
 import twisted.internet.reactor
@@ -83,14 +84,33 @@ class Sydent:
     }
 
     def __init__(self):
-        logger.info("Starting Sydent server")
         self.parse_config()
+
+        log_format = (
+            "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
+            " - %(message)s"
+        )
+        formatter = logging.Formatter(log_format)
 
         logPath = self.cfg.get('general', "log.path")
         if logPath != '':
-            logging.basicConfig(level=logging.INFO, filename=logPath)
+            handler = logging.handlers.RotatingFileHandler(
+                logPath, maxBytes=(1000 * 1000 * 100), backupCount=3
+            )
+            handler.setFormatter(formatter)
+            def sighup(signum, stack):
+                logger.info("Closing log file due to SIGHUP")
+                handler.doRollover()
+                logger.info("Opened new log file due to SIGHUP")
         else:
-            logging.basicConfig(level=logging.INFO, filename=logPath)
+            handler = logging.StreamHandler()
+
+        handler.setFormatter(formatter)
+        rootLogger = logging.getLogger('')
+        rootLogger.setLevel(logging.INFO)
+        rootLogger.addHandler(handler)
+
+        logger.info("Starting Sydent server")
 
         self.pidfile = self.cfg.get('general', "pidfile.path");
 
