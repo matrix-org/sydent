@@ -19,7 +19,9 @@ from twisted.web.resource import Resource
 import logging
 import json
 import re
+import copy
 
+from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
 
@@ -52,8 +54,11 @@ class DiscoverUrlsServlet(Resource):
         Maps a threepid to an HS/IS tuple
         Params: 'medium': the medium of the threepid
                 'address': the address of the threepid
-        Returns: { hs_url: ..., is_url: ... }
+        Returns: { hs_url: ..., is_url: ..., invited: true/false }
         """
+
+        # TODO: lock this so it can only be called by the HS?
+
         send_cors(request)
         err, args = get_args(request, ('medium', 'address'))
         if err:
@@ -62,17 +67,21 @@ class DiscoverUrlsServlet(Resource):
         medium = args['medium']
         address = args['address']
 
+        joinTokenStore = JoinTokenStore(self.sydent)
+        pendingJoinTokens = joinTokenStore.getTokens(medium, address)
+
+        result = {}
+
         if address in self.config['medium']['email']['entries']:
-            return json.dumps(self.config['medium']['email']['entries'][address])
+            result = self.config['medium']['email']['entries'][address]
+        else:
+            for pattern in self.config['medium']['email']['patterns']:
+                if (re.match("^" + pattern + "$", address)):
+                    result = self.config['medium']['email']['patterns'][pattern]
 
-        for pattern in self.config['medium']['email']['patterns']:
-            if (re.match("^" + pattern + "$", address)):
-                return json.dumps(
-                    self.config['medium']['email']['patterns'][pattern]
-                )
-
-        request.setResponseCode(404)
-        return
+        result = copy.deepcopy(result)
+        result['invited'] = True if pendingJoinTokens else False
+        return json.dumps(result)
 
     @jsonwrap
     def render_OPTIONS(self, request):
