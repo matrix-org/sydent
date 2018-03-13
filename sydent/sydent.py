@@ -42,6 +42,7 @@ from http.servlets.threepidbindservlet import ThreePidBindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
+from http.servlets.discoverurlsservlet import DiscoverUrlsServlet
 
 from threepid.bind import ThreepidBinder
 
@@ -131,6 +132,7 @@ class Sydent:
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
+        self.servlets.discoverUrls = DiscoverUrlsServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 

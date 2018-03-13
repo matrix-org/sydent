@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,6 +47,8 @@ class ClientApiHttpServer:
         lookup = self.sydent.servlets.lookup
         bulk_lookup = self.sydent.servlets.bulk_lookup
 
+        discoverUrls = self.sydent.servlets.discoverUrls
+
         threepid = Resource()
         bind = self.sydent.servlets.threepidBind
 
@@ -65,6 +68,8 @@ class ClientApiHttpServer:
 
         v1.putChild('lookup', lookup)
         v1.putChild('bulk_lookup', bulk_lookup)
+
+        v1.putChild('discover_urls', discoverUrls)
 
         v1.putChild('pubkey', pubkey)
         pubkey.putChild('isvalid', self.sydent.servlets.pubkeyIsValid)
