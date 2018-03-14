@@ -47,7 +47,7 @@ class ClientApiHttpServer:
         lookup = self.sydent.servlets.lookup
         bulk_lookup = self.sydent.servlets.bulk_lookup
 
-        discoverUrls = self.sydent.servlets.discoverUrls
+        info = self.sydent.servlets.info
 
         threepid = Resource()
         bind = self.sydent.servlets.threepidBind
@@ -69,7 +69,7 @@ class ClientApiHttpServer:
         v1.putChild('lookup', lookup)
         v1.putChild('bulk_lookup', bulk_lookup)
 
-        v1.putChild('discover_urls', discoverUrls)
+        v1.putChild('info', info)
 
         v1.putChild('pubkey', pubkey)
         pubkey.putChild('isvalid', self.sydent.servlets.pubkeyIsValid)

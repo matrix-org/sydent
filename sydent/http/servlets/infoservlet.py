@@ -28,33 +28,33 @@ from sydent.http.servlets import get_args, jsonwrap, send_cors
 logger = logging.getLogger(__name__)
 
 
-class DiscoverUrlsServlet(Resource):
+class InfoServlet(Resource):
     isLeaf = True
 
     def __init__(self, syd):
         self.sydent = syd
 
         try:
-            file = open('discover_urls.yaml')
+            file = open('info.yaml')
             self.config = yaml.load(f)
             close(file)
 
             # medium:
             #   email:
             #     entries:
-            #       matthew@matrix.org: { hs_url: 'https://matrix.org', is_url: 'https://matrix.org' }
+            #       matthew@matrix.org: { hs: 'matrix.org' }
             #     patterns:
-            #       - .*@matrix.org: { hs_url: 'https://matrix.org', is_url: 'https://matrix.org' }
+            #       - .*@matrix.org: { hs: 'matrix.org' }
 
         except Exception as e:
             logger.error(e)
 
     def render_GET(self, request):
         """
-        Maps a threepid to an HS/IS tuple
+        Maps a threepid to the responsible HS domain, and gives invitation status
         Params: 'medium': the medium of the threepid
                 'address': the address of the threepid
-        Returns: { hs_url: ..., is_url: ..., invited: true/false }
+        Returns: { hs: ..., invited: true/false }
         """
 
         # TODO: lock this so it can only be called by the HS?
