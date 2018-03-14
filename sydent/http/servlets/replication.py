@@ -81,6 +81,11 @@ class ReplicationPushServlet(Resource):
 
                 globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
                 logger.info("Stored association origin ID %s from %s", originId, peer.servername)
+
+                # if this is an association that matches one of our invite_tokens then we should call the onBind callback
+                # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
+                self.sydent.threepidBinder.notifyPendingInvites(assocObj)
+
             except:
                 failedIds.append(originId)
                 logger.warn("Failed to verify signed association from %s with origin ID %s",
