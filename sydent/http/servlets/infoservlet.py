@@ -76,9 +76,13 @@ class InfoServlet(Resource):
         if address in self.config['medium']['email']['entries']:
             result = self.config['medium']['email']['entries'][address]
         else:
-            for pattern in self.config['medium']['email']['patterns']:
-                if (re.match("^" + pattern + "$", address)):
-                    result = self.config['medium']['email']['patterns'][pattern]
+            for pattern_group in self.config['medium']['email']['patterns']:
+                for pattern in pattern_group:
+                    if (re.match("^" + pattern + "$", address)):
+                        result = pattern_group[pattern]
+                        break
+                if result:
+                    break
 
         result = copy.deepcopy(result)
         result['invited'] = True if pendingJoinTokens else False
