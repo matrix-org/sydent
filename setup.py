@@ -37,6 +37,7 @@ setup(
         "service_identity>=1.0.0",
         "pyasn1",
         "pynacl",
+        "pyyaml",
         "daemonize",
         "phonenumbers",
     ],

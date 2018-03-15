@@ -20,6 +20,7 @@ import logging
 import json
 import re
 import copy
+import yaml
 
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
@@ -36,7 +37,7 @@ class InfoServlet(Resource):
 
         try:
             file = open('info.yaml')
-            self.config = yaml.load(f)
+            self.config = yaml.load(file)
             close(file)
 
             # medium:
