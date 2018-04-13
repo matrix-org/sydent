@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from twisted.web.resource import Resource
+from twisted.internet import defer
+from twisted.web import server
 
 import json
 import logging
@@ -38,19 +40,28 @@ class ProfileReplicationServlet(Resource):
             return []
         return [x.strip() for x in rawstr.split(',')]
 
-    @jsonwrap
     def render_POST(self, request):
+        self._async_render_POST(request)
+        return server.NOT_DONE_YET
+
+    @defer.inlineCallbacks
+    def _async_render_POST(self, request):
+        yield
         try:
             body = json.load(request.content)
         except ValueError:
             request.setResponseCode(400)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
+            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
+            request.finish()
+            defer.returnValue(None)
 
         missing = [k for k in ("batchnum", "batch", "origin_server") if k not in body]
         if len(missing) > 0:
             request.setResponseCode(400)
             msg = "Missing parameters: "+(",".join(missing))
-            return {'errcode': 'M_MISSING_PARAMS', 'error': msg}
+            request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': msg}))
+            request.finish()
+            defer.returnValue(None)
 
         # XXX: verify the sig to auth the source HS
 
@@ -61,7 +72,9 @@ class ProfileReplicationServlet(Resource):
         allowed_hses = self._getAllowedHomeservers()
         if not origin_server in allowed_hses:
             request.setResponseCode(403)
-            return {'errcode': 'M_FORBIDDEN', 'error': 'origin server not whitelisted'}
+            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'origin server not whitelisted'}))
+            request.finish()
+            defer.returnValue(None)
 
         profile_store = ProfileStore(self.sydent)
 
@@ -71,13 +84,17 @@ class ProfileReplicationServlet(Resource):
         if batchnum <= latest_batch_on_host:
             logger.info("Ignoring batch %d from %s: we already have %d", batchnum, origin_server, latest_batch_on_host)
             # we already have this batch, thanks
-            return {}
+            request.write(json.dumps({}))
+            request.finish()
+            defer.returnValue(None)
         elif batchnum == latest_batch_on_host + 1:
             # good, this is the next batch
             if len(batch) > MAX_BATCH_SIZE:
                 logger.warn("Host %s sent batch of %s which exceeds max of %d", origin_server, len(batch), MAX_BATCH_SIZE)
                 request.setResponseCode(400)
-                return {'errcode': 'M_UNKNOWN', 'error': 'batch size exceeds max of %d' % (MAX_BATCH_SIZE,)}
+                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'batch size exceeds max of %d' % (MAX_BATCH_SIZE,)}))
+                request.finish()
+                defer.returnValue(None)
                 
             bad_uids = []
             for uid, info in batch.items():
@@ -87,14 +104,20 @@ class ProfileReplicationServlet(Resource):
                 logger.warn("Host %s sent batch with missing fields", origin_server)
                 request.setResponseCode(400)
                 msg = "Missing data for user IDs: %s (required: display_name, avatar_url" % (','.join(bad_uids,))
-                return {'errcode': 'M_UNKNOWN', 'error': msg}
+                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': msg}))
+                request.finish()
+                defer.returnValue(None)
 
             logger.info("Storing %d profiles in batch %d from %s", len(batch), batchnum, origin_server)
             profile_store.addBatch(origin_server, batchnum, batch)
-            return {}
+            request.write((json.dumps({})))
+            request.finish()
+            defer.returnValue(None)
         else:
             # we've missing a batch, so don't accept this one: they need to be in order
             logger.warn("Rejecting batch %d from %s as we only have %d", batchnum, origin_server, latest_batch_on_host)
             request.setResponseCode(400)
             msg = "Expecting batch %d but got %d" % (latest_batch_on_host + 1, batchnum)
-            return {'errcode': 'M_UNKNOWN', 'error': msg}
+            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': msg}))
+            request.finish()
+            defer.returnValue(None)
