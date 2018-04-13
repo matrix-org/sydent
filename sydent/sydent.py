@@ -44,6 +44,7 @@ from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.infoservlet import InfoServlet
+from http.servlets.profilereplicationservlet import ProfileReplicationServlet
 
 from threepid.bind import ThreepidBinder
 
@@ -53,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sydent:
-    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms']
+    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms', 'userdir']
     CONFIG_DEFAULTS = {
         # general
         'server.name': '',
@@ -82,6 +83,8 @@ class Sydent:
         'bodyTemplate': 'Your code is {token}',
         # crypto
         'ed25519.signingkey': '',
+        # user directory
+        'userdir.allowed_homeservers': '',
     }
 
     def __init__(self):
@@ -152,6 +155,7 @@ class Sydent:
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
+        self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.info = InfoServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
