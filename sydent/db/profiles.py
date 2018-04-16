@@ -38,3 +38,22 @@ class ProfileStore:
             vals,
         )
         self.sydent.db.commit()
+
+    def getProfilesMatchingSearchTerm(self, search_term, limit):
+        cur = self.sydent.db.cursor()
+
+        sql = (
+            "SELECT user_id, display_name, avatar_url FROM profiles WHERE "
+            "user_id LIKE LOWER(?) OR "
+            "LOWER(display_name) LIKE LOWER(?) "
+            "LIMIT ?"
+        )
+
+        like_pat = '%' + search_term.replace('%', '%%') + '%'
+
+        res = cur.execute(sql, (like_pat, like_pat, limit))
+        return [{
+            'user_id': r[0],
+            'display_name': r[1],
+            'avatar_url': r[2],
+        } for r in res.fetchall()]

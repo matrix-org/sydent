@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,6 +46,7 @@ from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.infoservlet import InfoServlet
 from http.servlets.profilereplicationservlet import ProfileReplicationServlet
+from http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
 
 from threepid.bind import ThreepidBinder
 
@@ -157,6 +159,7 @@ class Sydent:
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
         self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.info = InfoServlet(self)
+        self.servlets.userDirectorySearchServlet = UserDirectorySearchServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 

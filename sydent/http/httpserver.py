@@ -55,6 +55,8 @@ class ClientApiHttpServer:
         pubkey = Resource()
         ephemeralPubkey = Resource()
 
+        userDirectory = Resource()
+
         pk_ed25519 = self.sydent.servlets.pubkey_ed25519
 
         root.putChild('_matrix', matrix)
@@ -90,6 +92,10 @@ class ClientApiHttpServer:
         v1.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
 
         v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+
+        v1.putChild('user_directory', userDirectory)
+
+        userDirectory.putChild('search', self.sydent.servlets.userDirectorySearchServlet)
 
         federation = Resource()
         matrix.putChild('federation', federation)
