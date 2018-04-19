@@ -3,6 +3,17 @@ Installation
 
 Dependencies can be installed using setup.py in the same way as synapse: see synapse/README.rst.
 
+    sudo apt-get install build-essential python2.7-dev libffi-dev \
+                         python-pip python-setuptools sqlite3 \
+                         libssl-dev python-virtualenv libjpeg-dev libxslt1-dev
+
+
+    virtualenv -p python2.7 ~/sydent
+    source ~/sydent/bin/activate
+    pip install --upgrade pip
+    pip install --upgrade setuptools
+    pip install https://github.com/matrix-org/sydent/tarball/master
+
 Having installed dependencies, you can run sydent using::
 
     $ python -m sydent.sydent
