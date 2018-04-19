@@ -16,11 +16,20 @@
 from twisted.web.resource import Resource
 from twisted.internet import defer
 from twisted.web import server
+from twisted.web.client import readBody
+import twisted.names.client
+from twisted.names import dns
+from twisted.names.error import DNSNameError
 
+import signedjson.sign
+import signedjson.key
+from signedjson.sign import SignatureVerifyException
+from unpaddedbase64 import decode_base64
 import json
 import logging
 from sydent.http.servlets import get_args, jsonwrap
 from sydent.db.profiles  import ProfileStore
+from sydent.http.httpclient import FederationHttpClient
 
 
 logger = logging.getLogger(__name__)
@@ -45,6 +54,70 @@ class ProfileReplicationServlet(Resource):
         return server.NOT_DONE_YET
 
     @defer.inlineCallbacks
+    def getEndpointForServer(self, server_name):
+        if ':' in server_name:
+            defer.returnValue(tuple(server_name.rsplit(':', 1)))
+
+        service_name = "_%s._%s.%s" % ('_matrix', '_tcp', server_name)
+
+        default = server_name, 8448
+
+        try:
+            answers, _, _ = yield twisted.names.client.lookupService(service_name)
+        except DNSNameError:
+            defer.returnValue(default)
+
+        for answer in answers:
+            if answer.type != dns.SRV or not answer.payload:
+                continue
+
+            # XXX we just use the first
+            defer.returnValue(str(answer.payload.target), answer.payload.port)
+
+        defer.returnValue(default)
+
+    @defer.inlineCallbacks
+    def getKeysForServer(self, server_name):
+        """Get the signing key data from a home server.
+        """
+        host_port = yield self.getEndpointForServer(server_name)
+        logger.info("Got host/port %s/%s for %s", host_port[0], host_port[1], server_name)
+        client = FederationHttpClient(self.sydent)
+        result = yield client.get_json("https://%s:%s/_matrix/key/v2/server/" % host_port)
+        if 'verify_keys' not in result:
+            raise Exception("No key found in response")
+        defer.returnValue(result['verify_keys'])
+
+    @defer.inlineCallbacks
+    def verifyServerSignedJson(self, signed_json):
+        """Given a signed json object, try to verify any one
+        of the signatures on it
+        XXX: This contains a very noddy version of the home server
+        SRV lookup and signature verification. It forms HTTPS URLs
+        from the result of the SRV lookup which will mean the Host:
+        parameter in the request will be wrong. It only looks at
+        the first SRV result. It does no caching (just fetches the
+        signature each time and does not contact any other servers
+        to do perspectives checks.
+        """
+        if 'signatures' not in signed_json:
+            raise SignatureVerifyException()
+        for server_name, sigs in signed_json['signatures'].items():
+            server_keys = yield self.getKeysForServer(server_name)
+            for key_name, sig in sigs.items():
+                if key_name in server_keys:
+                    if 'key' not in server_keys[key_name]:
+                        logger.warn("Ignoring key %s with no 'key'")
+                        continue
+                    key_bytes = decode_base64(server_keys[key_name]['key'])
+                    verify_key = signedjson.key.decode_verify_key_bytes(key_name, key_bytes)
+                    signedjson.sign.verify_signed_json(signed_json, server_name, verify_key)
+                    logger.info("Verified signature with key %s from %s", key_name, server_name)
+                    defer.returnValue(None)
+        logger.warn("No matching key found for signature block %r", signed_json['signatures'])
+        raise SignatureVerifyException()
+
+    @defer.inlineCallbacks
     def _async_render_POST(self, request):
         yield
         try:
@@ -63,7 +136,13 @@ class ProfileReplicationServlet(Resource):
             request.finish()
             defer.returnValue(None)
 
-        # XXX: verify the sig to auth the source HS
+        try:
+            yield self.verifyServerSignedJson(body)
+        except SignatureVerifyException:
+            request.setResponseCode(403)
+            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'Signature verification failed'}))
+            request.finish()
+            defer.returnValue(None)
 
         batchnum = body["batchnum"]
         batch = body["batch"]
