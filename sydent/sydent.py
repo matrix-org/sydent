@@ -32,6 +32,7 @@ from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
 from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
+from hs_federation.verifier import Verifier
 
 from sign.ed25519 import SydentEd25519
 
@@ -53,6 +54,12 @@ from threepid.bind import ThreepidBinder
 from replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
+
+
+def list_from_comma_sep_string(rawstr):
+    if rawstr == '':
+        return []
+    return [x.strip() for x in rawstr.split(',')]
 
 
 class Sydent:
@@ -134,6 +141,10 @@ class Sydent:
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
 
+        self.user_dir_allowed_hses = set(list_from_comma_sep_string(
+            self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
+        ))
+
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
         self.validators.msisdn = MsisdnValidator(self)
@@ -141,6 +152,8 @@ class Sydent:
         self.keyring = Keyring()
         self.keyring.ed25519 = SydentEd25519(self).signing_key
         self.keyring.ed25519.alg = 'ed25519'
+
+        self.sig_verifier = Verifier(self)
 
         self.servlets = Servlets()
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
