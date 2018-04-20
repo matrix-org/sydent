@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import logging
+import time
 
 from twisted.internet import defer
 from twisted.names.error import DNSNameError
@@ -29,6 +30,7 @@ from sydent.http.httpclient import FederationHttpClient
 
 logger = logging.getLogger(__name__)
 
+
 """
 Verifies signed json blobs from Matrix Homeservers by finding the
 Homeserver's address, contacting it, requesting its keys and
@@ -37,6 +39,9 @@ verifying that the signature on the json blob matches.
 class Verifier(object):
     def __init__(self, sydent):
         self.sydent = sydent
+        self.cache = {
+            # server_name: <result from keys query>,
+        }
 
     @defer.inlineCallbacks
     def _getEndpointForServer(self, server_name):
@@ -65,12 +70,26 @@ class Verifier(object):
     def _getKeysForServer(self, server_name):
         """Get the signing key data from a home server.
         """
+
+        if server_name in self.cache:
+            cached = self.cache[server_name]
+            now = int(time.time() * 1000)
+            if cached['valid_until_ts'] > now:
+                defer.returnValue(self.cache[server_name]['verify_keys'])
+
         host_port = yield self._getEndpointForServer(server_name)
         logger.info("Got host/port %s/%s for %s", host_port[0], host_port[1], server_name)
         client = FederationHttpClient(self.sydent)
         result = yield client.get_json("https://%s:%s/_matrix/key/v2/server/" % host_port)
         if 'verify_keys' not in result:
             raise Exception("No key found in response")
+
+        if 'valid_until_ts' in result:
+            # Don't cache anything without a valid_until_ts or we wouldn't
+            # know when to expire it.
+            logger.info("Got keys for %s: caching until %s", server_name, result['valid_until_ts'])
+            self.cache[server_name] = result
+
         defer.returnValue(result['verify_keys'])
 
     @defer.inlineCallbacks
