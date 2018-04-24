@@ -40,7 +40,7 @@ body {
 </head>
 <body>
 <div id="vectorlogo">
-<img src="//matrix.i.tchap.rie.gouv.fr/images/splash.gif" alt="tchap" width="240" height="240" />
+<img src="//matrix.i.tchap.gouv.fr/images/splash.gif" alt="tchap" width="240" height="240" />
 </div>
 <div id="message">
 <p>%(message)s</p>

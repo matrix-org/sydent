@@ -17,7 +17,7 @@ Bonjour,
 
 Pour rejoindre la conversation, suivez le lien ci dessous:
 
-https://chat.i.tchap.rie.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
+https://chat.i.tchap.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
 Merci d'utiliser Tchap!
 
@@ -93,7 +93,7 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://matrix.i.tchap.rie.gouv.fr/images/tchap%%20144x144.png" width="64" height="64" alt="Tchap"/>
+                                    <img src="https://matrix.i.tchap.gouv.fr/images/tchap%%20144x144.png" width="64" height="64" alt="Tchap"/>
                             </td>
                         </tr>
                     </table>
@@ -105,7 +105,7 @@ pre, code {
 
     <p>
         <a
-        href="https://chat.i.tchap.rie.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Rejoindre la conversation</a>
+        href="https://chat.i.tchap.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Rejoindre la conversation</a>
     </p>
 
     <p>
