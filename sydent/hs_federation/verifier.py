@@ -39,6 +39,8 @@ verifying that the signature on the json blob matches.
 class Verifier(object):
     def __init__(self, sydent):
         self.sydent = sydent
+        # Cache of server keys. These are cached until the 'valid_until_ts' time
+        # in the result.
         self.cache = {
             # server_name: <result from keys query>,
         }
