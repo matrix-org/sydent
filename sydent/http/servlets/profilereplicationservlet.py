@@ -87,7 +87,7 @@ class ProfileReplicationServlet(Resource):
             request.write(json.dumps({}))
             request.finish()
             defer.returnValue(None)
-        elif batchnum == latest_batch_on_host + 1:
+        else:
             # good, this is the next batch
             if len(batch) > MAX_BATCH_SIZE:
                 logger.warn("Host %s sent batch of %s which exceeds max of %d", origin_server, len(batch), MAX_BATCH_SIZE)
@@ -111,13 +111,5 @@ class ProfileReplicationServlet(Resource):
             logger.info("Storing %d profiles in batch %d from %s", len(batch), batchnum, origin_server)
             profile_store.addBatch(origin_server, batchnum, batch)
             request.write((json.dumps({})))
-            request.finish()
-            defer.returnValue(None)
-        else:
-            # we've missing a batch, so don't accept this one: they need to be in order
-            logger.warn("Rejecting batch %d from %s as we only have %d", batchnum, origin_server, latest_batch_on_host)
-            request.setResponseCode(400)
-            msg = "Expecting batch %d but got %d" % (latest_batch_on_host + 1, batchnum)
-            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': msg}))
             request.finish()
             defer.returnValue(None)
