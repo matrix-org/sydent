@@ -38,7 +38,7 @@ class InfoServlet(Resource):
         try:
             file = open('info.yaml')
             self.config = yaml.load(file)
-            close(file)
+            file.close()
 
             # medium:
             #   email:
