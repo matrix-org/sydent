@@ -17,6 +17,9 @@ from twisted.web.resource import Resource
 from twisted.internet import defer
 from twisted.web import server
 
+import signedjson.sign
+import signedjson.key
+from signedjson.sign import SignatureVerifyException
 import json
 import logging
 from sydent.http.servlets import get_args, jsonwrap
@@ -34,15 +37,10 @@ class ProfileReplicationServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
-    def _getAllowedHomeservers(self):
-        rawstr = self.sydent.cfg.get('userdir', 'userdir.allowed_homeservers', '')
-        if rawstr == '':
-            return []
-        return [x.strip() for x in rawstr.split(',')]
-
     def render_POST(self, request):
         self._async_render_POST(request)
         return server.NOT_DONE_YET
+
 
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
@@ -63,18 +61,18 @@ class ProfileReplicationServlet(Resource):
             request.finish()
             defer.returnValue(None)
 
-        # XXX: verify the sig to auth the source HS
+        try:
+            yield self.sydent.sig_verifier.verifyServerSignedJson(body, self.sydent.user_dir_allowed_hses)
+        except SignatureVerifyException:
+            request.setResponseCode(403)
+            msg = "Signature verification failed or origin not whitelisted"
+            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': msg}))
+            request.finish()
+            defer.returnValue(None)
 
         batchnum = body["batchnum"]
         batch = body["batch"]
         origin_server = body["origin_server"]
-
-        allowed_hses = self._getAllowedHomeservers()
-        if not origin_server in allowed_hses:
-            request.setResponseCode(403)
-            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'origin server not whitelisted'}))
-            request.finish()
-            defer.returnValue(None)
 
         profile_store = ProfileStore(self.sydent)
 

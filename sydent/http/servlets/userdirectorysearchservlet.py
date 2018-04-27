@@ -15,6 +15,9 @@
 # limitations under the License.
 
 from twisted.web.resource import Resource
+from twisted.internet import defer
+from twisted.web import server
+from signedjson.sign import SignatureVerifyException
 
 import logging
 import json
@@ -34,21 +37,38 @@ class UserDirectorySearchServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
-    @jsonwrap
     def render_POST(self, request):
+        self._async_render_POST(request)
+        return server.NOT_DONE_YET
+
+    @defer.inlineCallbacks
+    def _async_render_POST(self, request):
         send_cors(request)
         try:
             body = json.load(request.content)
         except ValueError:
             request.setResponseCode(400)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
+            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
+            request.finish()
+            defer.returnValue(None)
 
         if 'search_term' not in body:
             request.setResponseCode(400)
-            return {'errcode': 'M_MISSING_PARAMS', 'error': 'Missing param: search_term'}
+            request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': 'Missing param: search_term'}))
+            request.finish()
+            defer.returnValue(None)
 
         search_term = body['search_term']
         limit = min(body.get('limit', 10), MAX_SEARCH_LIMIT)
+
+        try:
+            yield self.sydent.sig_verifier.verifyServerSignedJson(body, self.sydent.user_dir_allowed_hses)
+        except SignatureVerifyException:
+            request.setResponseCode(403)
+            msg = "Signature verification failed or origin not whitelisted"
+            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': msg}))
+            request.finish()
+            defer.returnValue(None)
 
         profileStore = ProfileStore(self.sydent)
 
@@ -56,10 +76,11 @@ class UserDirectorySearchServlet(Resource):
         # are more results we could have returned
         results = profileStore.getProfilesMatchingSearchTerm(search_term, limit + 1)
 
-        return {
+        request.write(json.dumps({
             'results': results[0:limit],
             'limited': len(results) > limit,
-        }
+        }))
+        request.finish()
 
     @jsonwrap
     def render_OPTIONS(self, request):
