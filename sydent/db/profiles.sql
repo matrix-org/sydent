@@ -16,6 +16,6 @@ limitations under the License.
 
 CREATE TABLE IF NOT EXISTS profiles (user_id TEXT primary key, display_name TEXT DEFAULT NULL, avatar_url TEXT DEFAULT NULL, origin_server TEXT NOT NULL, batch BIGINT NOT NULL);
 
-CREATE INDEX IF NOT EXISTS profiles_displayname on profiles(display_name);
+CREATE INDEX IF NOT EXISTS profiles_lower_displayname on profiles(LOWER(display_name));
 CREATE INDEX IF NOT EXISTS profiles_origin_server_batch on profiles(origin_server, batch);
 
