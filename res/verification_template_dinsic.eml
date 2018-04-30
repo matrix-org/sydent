@@ -13,7 +13,9 @@ Content-Disposition: inline
 
 Bonjour,
 
-Vous avez fait une demande d'enregistrement avec cette addresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.
+Vous avez fait une demande d'enregistrement avec cette adresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.
+
+CE SERVICE EST ACTUELLEMENT EN CONSTRUCTION, il est ouvert uniquement à titre expérimental, et s'appuie sur une VERSION BETA du logiciel qui est en cours de développement.
 
 Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:
 
@@ -98,14 +100,16 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://matrix.i.tchap.gouv.fr/images/tchap%%20144x144.png" width="64" height="64" alt="Tchap"/>
+                                    <img src="https://matrix.i.tchap.gouv.fr/images/tchap192.png" width="192" height="192" alt="Tchap"/>
                             </td>
                         </tr>
                     </table>
 
                     <p>Bonjour</p>
 
-                    <p>Vous avez fait une demande d'enregistrement avec cette addresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.</p>
+                    <p>Vous avez fait une demande d'enregistrement avec cette adresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.</p>
+
+		    <p>CE SERVICE EST ACTUELLEMENT EN CONSTRUCTION, il est ouvert uniquement à titre expérimental, et s'appuie sur une VERSION BETA du logiciel qui est en cours de développement.</p>
 
                     <p>Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:</p>
 
