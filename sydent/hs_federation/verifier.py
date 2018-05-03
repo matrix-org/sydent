@@ -57,7 +57,7 @@ class Verifier(object):
         try:
             answers, _, _ = yield twisted.names.client.lookupService(service_name)
         except DNSNameError:
-            logger.info("DNSNameError doing SRV lookup for %s - using default", server_name)
+            logger.info("DNSNameError doing SRV lookup for %s - using default", service_name)
             defer.returnValue(default)
 
         for answer in answers:
