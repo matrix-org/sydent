@@ -50,7 +50,7 @@ class Verifier(object):
         if ':' in server_name:
             defer.returnValue(tuple(server_name.rsplit(':', 1)))
 
-        service_name = "_%s._%s.%s" % ('_matrix', '_tcp', server_name)
+        service_name = "%s.%s.%s" % ('_matrix', '_tcp', server_name)
 
         default = server_name, 8448
 
