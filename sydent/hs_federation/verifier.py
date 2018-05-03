@@ -136,7 +136,7 @@ class Verifier(object):
                 signed_json['signatures'], server_keys,
             )
         logger.warn(
-            "Unable to verify any signatures. Acceptable server names: %r",
-            acceptable_server_names,
+            "Unable to verify any signatures from block %r. Acceptable server names: %r",
+            signed_json['signatures'], acceptable_server_names,
         )
         raise SignatureVerifyException()
