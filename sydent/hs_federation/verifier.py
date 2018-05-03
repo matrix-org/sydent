@@ -57,6 +57,7 @@ class Verifier(object):
         try:
             answers, _, _ = yield twisted.names.client.lookupService(service_name)
         except DNSNameError:
+            logger.info("DNSNameError doing SRV lookup for %s - using default", server_name)
             defer.returnValue(default)
 
         for answer in answers:
@@ -66,6 +67,7 @@ class Verifier(object):
             # XXX we just use the first
             defer.returnValue(str(answer.payload.target), answer.payload.port)
 
+        logger.info("No valid answers found in response from %s (%r)", server_name, answers)
         defer.returnValue(default)
 
     @defer.inlineCallbacks
