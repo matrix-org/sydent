@@ -20,6 +20,7 @@ import time
 from twisted.internet import defer
 from twisted.names.error import DNSNameError
 import twisted.names.client
+import twisted.names.dns
 from unpaddedbase64 import decode_base64
 import signedjson.sign
 import signedjson.key
@@ -61,7 +62,7 @@ class Verifier(object):
             defer.returnValue(default)
 
         for answer in answers:
-            if answer.type != dns.SRV or not answer.payload:
+            if answer.type != twisted.names.dns.SRV or not answer.payload:
                 continue
 
             # XXX we just use the first
