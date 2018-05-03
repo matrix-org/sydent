@@ -131,5 +131,8 @@ class Verifier(object):
                     signedjson.sign.verify_signed_json(signed_json, server_name, verify_key)
                     logger.info("Verified signature with key %s from %s", key_name, server_name)
                     defer.returnValue((server_name, key_name))
-        logger.warn("No matching key found for signature block %r", signed_json['signatures'])
+        logger.warn(
+            "No matching key found for signature block %r in server keys %r",
+            signed_json['signatures'], server_keys,
+        )
         raise SignatureVerifyException()
