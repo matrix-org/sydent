@@ -66,7 +66,8 @@ class Verifier(object):
                 continue
 
             # XXX we just use the first
-            defer.returnValue(str(answer.payload.target), answer.payload.port)
+            logger.info("Got SRV answer: %r / %d for %s", answer.payload.target, answer.payload.port, service_name)
+            defer.returnValue((str(answer.payload.target), answer.payload.port))
 
         logger.info("No valid answers found in response from %s (%r)", server_name, answers)
         defer.returnValue(default)
