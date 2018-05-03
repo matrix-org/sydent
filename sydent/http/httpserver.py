@@ -97,13 +97,7 @@ class ClientApiHttpServer:
 
         userDirectory.putChild('search', self.sydent.servlets.userDirectorySearchServlet)
 
-        federation = Resource()
-        matrix.putChild('federation', federation)
-
-        federation_v1 = Resource()
-        federation.putChild('v1', federation_v1)
-
-        federation_v1.putChild('replicate_profiles', self.sydent.servlets.profileReplicationServlet)
+        v1.putChild('replicate_profiles', self.sydent.servlets.profileReplicationServlet)
 
         self.factory = Site(root)
 
