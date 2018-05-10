@@ -33,7 +33,7 @@ setup(
     install_requires=[
         "signedjson==1.0.0",
         "unpaddedbase64==1.1.0",
-        "Twisted>=14.0.0",
+        "Twisted>=14.0.0,<18.0.0",
         "service_identity>=1.0.0",
         "pyasn1",
         "pynacl",
