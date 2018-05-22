@@ -62,10 +62,12 @@ class LocalPeer(Peer):
         for localId in sgAssocs:
             if localId > self.lastId:
                 assocObj = threePidAssocFromDict(sgAssocs[localId])
-
-                # We can probably skip verification for the local peer (although it could be good as a sanity check)
-                globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
-                                                self.sydent.server_name, localId)
+                if assocObj.mxid is not None:
+                    # We can probably skip verification for the local peer (although it could be good as a sanity check)
+                    globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
+                                                    self.sydent.server_name, localId)
+                else:
+                    globalAssocStore.removeAssociation(assocObj.medium, assocObj.address)
 
         d = twisted.internet.defer.succeed(True)
         return d
@@ -99,6 +101,9 @@ class RemotePeer(Peer):
                                                                   self.port,
                                                                   '/_matrix/identity/replicate/v1/push',
                                                                   body)
+
+        # XXX: We'll also need to prune the deleted associations out of the
+        # local associations table once they've been replicated to all peers.
 
         updateDeferred = twisted.internet.defer.Deferred()
 

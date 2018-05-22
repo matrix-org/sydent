@@ -31,6 +31,7 @@ class VersionStore:
             cur = self.sydent.db.cursor()
 
             # add auto_increment to the primary key of local_threepid_associations to ensure ids are never re-used
+            # and also allow the mxid column to be null to represent the deletion of a binding
             logger.info("Migrating schema from v0 to v1")
             cur.execute("DROP INDEX IF EXISTS medium_address")
             cur.execute("DROP INDEX IF EXISTS local_threepid_medium_address")
@@ -39,7 +40,7 @@ class VersionStore:
                 "CREATE TABLE local_threepid_associations (id integer primary key autoincrement, "
                 "medium varchar(16) not null, "
                 "address varchar(256) not null, "
-                "mxid varchar(256) not null, "
+                "mxid varchar(256), "
                 "ts integer not null, "
                 "notBefore bigint not null, "
                 "notAfter bigint not null)"

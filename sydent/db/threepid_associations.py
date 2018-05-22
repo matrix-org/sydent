@@ -60,16 +60,18 @@ class LocalAssociationStore:
 
         return (assocs, maxId)
 
-    def removeAssociations(self, medium, address, mxid):
+    def removeAssociation(self, threepid, mxid):
         cur = self.sydent.db.cursor()
+        ts = time_msec()
         cur.execute(
-            "DELETE FROM local_threepid_associations WHERE "
-            "medium = ? AND address = ? AND mxid = ?",
-            (medium, address, mxid),
+            "REPLACE INTO local_threepid_associations "
+            "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter') ",
+            " values (?, ?, ?, ?, null, null)"
+            (medium, address, null, ts, mxid),
         )
         logger.info(
-            "Deleted %d rows from local associations for %s/%s/%s",
-            cur.rowcount, medium, address, mxid,
+            "Deleting local assoc for %s/%s/%s replaced %d rows",
+            medium, address, mxid, cur.rowcount,
         )
         self.sydent.db.commit()
 

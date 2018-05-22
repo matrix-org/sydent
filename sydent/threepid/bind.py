@@ -87,6 +87,8 @@ class ThreepidBinder:
 
     def removeBinding(self, threepid, mxid):
         localAssocStore = LocalAssociationStore(self.sydent)
+        localAssocStore.removeAssociation(threepid, mxid)
+        self.sydent.pusher.doLocalPush()
 
     @defer.inlineCallbacks
     def _notify(self, assoc, attempt):
