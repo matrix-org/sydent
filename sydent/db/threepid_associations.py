@@ -60,6 +60,19 @@ class LocalAssociationStore:
 
         return (assocs, maxId)
 
+    def removeAssociations(self, medium, address, mxid):
+        cur = self.sydent.db.cursor()
+        cur.execute(
+            "DELETE FROM local_threepid_associations WHERE "
+            "medium = ? AND address = ? AND mxid = ?",
+            (medium, address, mxid),
+        )
+        logger.info(
+            "Deleted %d rows from local associations for %s/%s/%s",
+            cur.rowcount, medium, address, mxid,
+        )
+        self.sydent.db.commit()
+
 
 class GlobalAssociationStore:
     def __init__(self, sydent):
@@ -164,3 +177,16 @@ class GlobalAssociationStore:
             return None
 
         return row[0]
+
+    def removeAssociations(self, medium, address, mxid):
+        cur = self.sydent.db.cursor()
+        cur.execute(
+            "DELETE FROM global_threepid_associations WHERE "
+            "medium = ? AND address = ? AND mxid = ?",
+            (medium, address, mxid),
+        )
+        logger.info(
+            "Deleted %d rows from global associations for %s/%s/%s",
+            cur.rowcount, medium, address, mxid,
+        )
+        self.sydent.db.commit()
