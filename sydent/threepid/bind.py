@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@ import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.db.threepid_associations import LocalAssociationStore
+from sydent.db.threepid_associations import LocalAssociationStore, GlobalAssociationStore
 
 from sydent.util import time_msec
 from sydent.threepid.assocsigner import AssociationSigner
@@ -83,6 +84,9 @@ class ThreepidBinder:
         self._notify(sgassoc, 0)
 
         return sgassoc
+
+    def removeBinding(self, threepid, mxid):
+        localAssocStore = LocalAssociationStore(self.sydent)
 
     @defer.inlineCallbacks
     def _notify(self, assoc, attempt):

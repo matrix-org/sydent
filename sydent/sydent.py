@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,9 +41,12 @@ from http.servlets.lookupservlet import LookupServlet
 from http.servlets.bulklookupservlet import BulkLookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
+from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
+
+from db.version import VersionStore
 
 from threepid.bind import ThreepidBinder
 
@@ -118,6 +122,8 @@ class Sydent:
         observer.start()
 
         self.db = SqliteDatabase(self).db
+        verStore = VersionStore(self)
+        verStore.upgradeSchema()
 
         self.server_name = self.cfg.get('general', 'server.name')
         if self.server_name == '':
@@ -147,6 +153,7 @@ class Sydent:
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
         self.servlets.threepidBind = ThreePidBindServlet(self)
+        self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
