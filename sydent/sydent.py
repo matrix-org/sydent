@@ -179,7 +179,7 @@ class Sydent:
                 self.cfg.add_section(sect)
             except ConfigParser.DuplicateSectionError:
                 pass
-        self.cfg.read("sydent.conf")
+        self.cfg.read(os.environ.get('SYDENT_CONF', "sydent.conf"))
 
     def save_config(self):
         fp = open("sydent.conf", 'w')
