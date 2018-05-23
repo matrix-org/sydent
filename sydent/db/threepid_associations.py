@@ -19,6 +19,10 @@ from sydent.util import time_msec
 from sydent.threepid import ThreepidAssociation, threePidAssocFromDict
 
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class LocalAssociationStore:
@@ -65,13 +69,13 @@ class LocalAssociationStore:
         ts = time_msec()
         cur.execute(
             "REPLACE INTO local_threepid_associations "
-            "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter') ",
-            " values (?, ?, ?, ?, null, null)"
-            (medium, address, null, ts, mxid),
+            "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter') "
+            " values (?, ?, ?, ?, null, null)",
+            (threepid['medium'], threepid['address'], mxid, ts),
         )
         logger.info(
             "Deleting local assoc for %s/%s/%s replaced %d rows",
-            medium, address, mxid, cur.rowcount,
+            threepid['medium'], threepid['address'], mxid, cur.rowcount,
         )
         self.sydent.db.commit()
 

@@ -32,6 +32,7 @@ from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
 from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
+from hs_federation.verifier import Verifier
 
 from sign.ed25519 import SydentEd25519
 
@@ -141,6 +142,8 @@ class Sydent:
         self.keyring = Keyring()
         self.keyring.ed25519 = SydentEd25519(self).signing_key
         self.keyring.ed25519.alg = 'ed25519'
+
+        self.sig_verifier = Verifier(self)
 
         self.servlets = Servlets()
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
