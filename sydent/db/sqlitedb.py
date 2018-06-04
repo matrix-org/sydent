@@ -91,7 +91,8 @@ class SqliteDatabase:
             )
             cur.execute("DROP TABLE old_local_threepid_associations")
 
-            # same for global_threepid_associations
+            # same autoincrement for global_threepid_associations (fields stay non-nullable because we don't need
+            # entries in this table for deletions, we can just delete the rows)
             cur.execute("DROP INDEX IF EXISTS global_threepid_medium_address")
             cur.execute("DROP INDEX IF EXISTS global_threepid_medium_lower_address")
             cur.execute("DROP INDEX IF EXISTS global_threepid_originServer_originId")
