@@ -67,7 +67,8 @@ class SqliteDatabase:
 
             # add auto_increment to the primary key of local_threepid_associations to ensure ids are never re-used,
             # allow the mxid column to be null to represent the deletion of a binding
-            # and remove not null constraints on ts, notBefore and notAfter
+            # and remove not null constraints on ts, notBefore and notAfter (again for when a binding has been deleted
+            # and these wouldn't be very meaningful)
             logger.info("Migrating schema from v0 to v1")
             cur.execute("DROP INDEX IF EXISTS medium_address")
             cur.execute("DROP INDEX IF EXISTS local_threepid_medium_address")
