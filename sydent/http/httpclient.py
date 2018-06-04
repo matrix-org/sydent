@@ -84,8 +84,8 @@ class FederationPolicyForHTTPS(object):
     def creatorForNetloc(self, hostname, port):
         context = SSL.Context(SSL.SSLv23_METHOD)
         try:
-            _ecCurve = _OpenSSLECCurve(_defaultCurveName)
-            _ecCurve.addECKeyToContext(context)
+            _ecCurve = crypto.get_elliptic_curve(_defaultCurveName)
+            context.set_tmp_ecdh(_ecCurve)
         except Exception:
             logger.exception("Failed to enable elliptic curve for TLS")
         context.set_options(SSL.OP_NO_SSLv2 | SSL.OP_NO_SSLv3)
