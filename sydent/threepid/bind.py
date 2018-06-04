@@ -23,7 +23,7 @@ import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.db.threepid_associations import LocalAssociationStore, GlobalAssociationStore
+from sydent.db.threepid_associations import LocalAssociationStore
 
 from sydent.util import time_msec
 from sydent.threepid.assocsigner import AssociationSigner
