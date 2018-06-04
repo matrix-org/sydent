@@ -17,13 +17,13 @@
 
 import json
 
-from twisted.web.resource import Resource
-from twisted.web import server
-from twisted.internet import defer
-
 from sydent.http.servlets import get_args, jsonwrap
 from sydent.hs_federation.verifier import NoAuthenticationError
 from signedjson.sign import SignatureVerifyException
+
+from twisted.web.resource import Resource
+from twisted.web import server
+from twisted.internet import defer
 
 class ThreePidUnbindServlet(Resource):
     def __init__(self, sydent):
