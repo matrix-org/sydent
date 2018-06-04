@@ -47,8 +47,6 @@ from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 
-from db.version import VersionStore
-
 from threepid.bind import ThreepidBinder
 
 from replication.pusher import Pusher
@@ -123,8 +121,6 @@ class Sydent:
         observer.start()
 
         self.db = SqliteDatabase(self).db
-        verStore = VersionStore(self)
-        verStore.upgradeSchema()
 
         self.server_name = self.cfg.get('general', 'server.name')
         if self.server_name == '':
