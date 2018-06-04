@@ -103,7 +103,9 @@ class RemotePeer(Peer):
                                                                   body)
 
         # XXX: We'll also need to prune the deleted associations out of the
-        # local associations table once they've been replicated to all peers.
+        # local associations table once they've been replicated to all peers
+        # (ie. remove the record we kept in order to propagate the deletion to
+        # other peers).
 
         updateDeferred = twisted.internet.defer.Deferred()
 
