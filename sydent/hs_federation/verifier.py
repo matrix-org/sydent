@@ -95,7 +95,7 @@ class Verifier(object):
         client = FederationHttpClient(self.sydent)
         result = yield client.get_json("https://%s:%s/_matrix/key/v2/server/" % host_port)
         if 'verify_keys' not in result:
-            raise Exception("No key found in response")
+            raise SignatureVerifyException("No key found in response")
 
         if 'valid_until_ts' in result:
             # Don't cache anything without a valid_until_ts or we wouldn't
