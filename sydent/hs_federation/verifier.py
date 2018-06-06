@@ -33,6 +33,9 @@ logger = logging.getLogger(__name__)
 
 
 class NoAuthenticationError(Exception):
+    """
+    Raised when no signature is provided that could be authenticated
+    """
     pass
 
 
