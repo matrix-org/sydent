@@ -67,6 +67,11 @@ class LocalAssociationStore:
     def removeAssociation(self, threepid, mxid):
         cur = self.sydent.db.cursor()
 
+        # check to see if we have any matching associations first.
+        # We use a REPLACE INTO because we need the resulting row to have
+        # a new ID (such that we know it's a new change that needs to be
+        # replicated) so there's no need to insert a deletion row if there's
+        # nothing to delete.
         cur.execute(
             "SELECT COUNT(*) FROM local_threepid_associations "
             "WHERE medium = ? AND address = ? AND mxid = ?",
