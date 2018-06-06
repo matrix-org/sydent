@@ -36,48 +36,53 @@ class ThreePidUnbindServlet(Resource):
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
         try:
-            body = json.load(request.content)
-        except ValueError:
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
-            request.finish()
-            return
+            try:
+                body = json.load(request.content)
+            except ValueError:
+                request.setResponseCode(400)
+                request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
+                request.finish()
+                return
 
-        missing = [k for k in ("threepid", "mxid") if k not in body]
-        if len(missing) > 0:
-            request.setResponseCode(400)
-            msg = "Missing parameters: "+(",".join(missing))
-            request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': msg}))
-            request.finish()
-            return
+            missing = [k for k in ("threepid", "mxid") if k not in body]
+            if len(missing) > 0:
+                request.setResponseCode(400)
+                msg = "Missing parameters: "+(",".join(missing))
+                request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': msg}))
+                request.finish()
+                return
 
-        threepid = body['threepid']
-        mxid = body['mxid']
+            threepid = body['threepid']
+            mxid = body['mxid']
 
-        if 'medium' not in threepid or 'address' not in threepid:
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': 'Threepid lacks medium / address'}))
-            request.finish()
-            return
+            if 'medium' not in threepid or 'address' not in threepid:
+                request.setResponseCode(400)
+                request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': 'Threepid lacks medium / address'}))
+                request.finish()
+                return
 
-        try:
-            origin_server_name = yield self.sydent.sig_verifier.authenticate_request(request, body)
-        except SignatureVerifyException as ex:
-            request.setResponseCode(401)
-            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
-            request.finish()
-            return
-        except NoAuthenticationError as ex:
-            request.setResponseCode(401)
-            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
-            request.finish()
-            return
+            try:
+                origin_server_name = yield self.sydent.sig_verifier.authenticate_request(request, body)
+            except SignatureVerifyException as ex:
+                request.setResponseCode(401)
+                request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                request.finish()
+                return
+            except NoAuthenticationError as ex:
+                request.setResponseCode(401)
+                request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                request.finish()
+                return
 
-        if not mxid.endswith(':' + origin_server_name):
-            request.setResponseCode(403)
-            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'Origin server name does not match mxid'}))
-            request.finish()
+            if not mxid.endswith(':' + origin_server_name):
+                request.setResponseCode(403)
+                request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'Origin server name does not match mxid'}))
+                request.finish()
 
-        res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
-        request.write(json.dumps({}))
-        request.finish()
+            res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
+            request.write(json.dumps({}))
+            request.finish()
+        except Exception as ex:
+            request.setResponseCode(500)
+            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': ex.message}))
+            request.finish()
