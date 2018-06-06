@@ -36,12 +36,12 @@ class NoAuthenticationError(Exception):
     pass
 
 
-"""
-Verifies signed json blobs from Matrix Homeservers by finding the
-Homeserver's address, contacting it, requesting its keys and
-verifying that the signature on the json blob matches.
-"""
 class Verifier(object):
+    """
+    Verifies signed json blobs from Matrix Homeservers by finding the
+    Homeserver's address, contacting it, requesting its keys and
+    verifying that the signature on the json blob matches.
+    """
     def __init__(self, sydent):
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
