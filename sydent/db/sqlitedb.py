@@ -33,7 +33,8 @@ class SqliteDatabase:
 
         # We always run the schema files if the version is zero: either the db is
         # completely empty and schema-less or it has the v0 schema, which is safe to
-        # replay the schema files.
+        # replay the schema files. The files in the sql directory are the v0 schema, so
+        # a new installations will start as v0 then be upgraded to the current version.
         if curVer == 0:
             self._createSchema()
         self._upgradeSchema()
