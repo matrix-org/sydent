@@ -158,6 +158,10 @@ class Verifier(object):
     def authenticate_request(self, request, content):
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
+
+        :param request: The request object to authenticate
+        :param content: The content of the request, if any
+        :type content: bytes or None
         """
         json_request = {
             "method": request.method,
