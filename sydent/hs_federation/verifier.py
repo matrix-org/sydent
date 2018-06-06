@@ -42,7 +42,7 @@ class NoAuthenticationError(Exception):
 class Verifier(object):
     """
     Verifies signed json blobs from Matrix Homeservers by finding the
-    Homeserver's address, contacting it, requesting its keys and
+    homeserver's address, contacting it, requesting its keys and
     verifying that the signature on the json blob matches.
     """
     def __init__(self, sydent):
