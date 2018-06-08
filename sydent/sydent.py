@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +32,7 @@ from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
 from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
+from hs_federation.verifier import Verifier
 
 from sign.ed25519 import SydentEd25519
 
@@ -40,6 +42,7 @@ from http.servlets.lookupservlet import LookupServlet
 from http.servlets.bulklookupservlet import BulkLookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
+from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
@@ -136,6 +139,8 @@ class Sydent:
         self.keyring.ed25519 = SydentEd25519(self).signing_key
         self.keyring.ed25519.alg = 'ed25519'
 
+        self.sig_verifier = Verifier(self)
+
         self.servlets = Servlets()
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
@@ -147,6 +152,7 @@ class Sydent:
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
         self.servlets.threepidBind = ThreePidBindServlet(self)
+        self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
@@ -169,7 +175,7 @@ class Sydent:
                 self.cfg.add_section(sect)
             except ConfigParser.DuplicateSectionError:
                 pass
-        self.cfg.read("sydent.conf")
+        self.cfg.read(os.environ.get('SYDENT_CONF', "sydent.conf"))
 
     def save_config(self):
         fp = open("sydent.conf", 'w')

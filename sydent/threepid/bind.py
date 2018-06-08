@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -83,6 +84,11 @@ class ThreepidBinder:
         self._notify(sgassoc, 0)
 
         return sgassoc
+
+    def removeBinding(self, threepid, mxid):
+        localAssocStore = LocalAssociationStore(self.sydent)
+        localAssocStore.removeAssociation(threepid, mxid)
+        self.sydent.pusher.doLocalPush()
 
     @defer.inlineCallbacks
     def _notify(self, assoc, attempt):
