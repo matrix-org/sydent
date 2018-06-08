@@ -132,6 +132,8 @@ class Verifier(object):
         :param request: The request object to authenticate
         :param content: The content of the request, if any
         :type content: bytes or None
+
+        :returns: The origin of the server whose signature was validated
         """
         json_request = {
             "method": request.method,
