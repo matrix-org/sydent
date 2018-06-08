@@ -175,7 +175,7 @@ class Verifier(object):
                 json_request["signatures"].setdefault(origin, {})[key] = sig
 
         if not json_request["signatures"]:
-            raise NoAuthenticationError("Missing Authorization headers")
+            raise NoAuthenticationError("Missing X-Matrix Authorization header")
 
         yield self.verifyServerSignedJson(json_request, [origin])
 
