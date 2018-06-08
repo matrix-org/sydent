@@ -60,7 +60,6 @@ class ClientApiHttpServer:
         matrix.putChild('identity', identity)
         identity.putChild('api', api)
         api.putChild('v1', v1)
-        v1.putChild('', self.sydent.servlets.v1)
 
         v1.putChild('validate', validate)
         validate.putChild('email', email)
