@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import json
+import logging
 
 from sydent.http.servlets import get_args, jsonwrap
 from sydent.hs_federation.verifier import NoAuthenticationError
@@ -24,6 +25,8 @@ from signedjson.sign import SignatureVerifyException
 from twisted.web.resource import Resource
 from twisted.web import server
 from twisted.internet import defer
+
+logger = logging.getLogger(__name__)
 
 class ThreePidUnbindServlet(Resource):
     def __init__(self, sydent):
@@ -73,6 +76,12 @@ class ThreePidUnbindServlet(Resource):
                 request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
                 request.finish()
                 return
+            except:
+                logger.exception("Exception whilst authenticating unbind request")
+                request.setResponseCode(500)
+                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
+                request.finish()
+                return
 
             if not mxid.endswith(':' + origin_server_name):
                 request.setResponseCode(403)
@@ -83,6 +92,7 @@ class ThreePidUnbindServlet(Resource):
             request.write(json.dumps({}))
             request.finish()
         except Exception as ex:
+            logger.exception("Exception whilst handling unbind")
             request.setResponseCode(500)
             request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': ex.message}))
             request.finish()

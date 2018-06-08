@@ -54,32 +54,6 @@ class Verifier(object):
         }
 
     @defer.inlineCallbacks
-    def _getEndpointForServer(self, server_name):
-        if ':' in server_name:
-            defer.returnValue(tuple(server_name.rsplit(':', 1)))
-
-        service_name = "%s.%s.%s" % ('_matrix', '_tcp', server_name)
-
-        default = server_name, 8448
-
-        try:
-            answers, _, _ = yield twisted.names.client.lookupService(service_name)
-        except DNSNameError:
-            logger.info("DNSNameError doing SRV lookup for %s - using default", service_name)
-            defer.returnValue(default)
-
-        for answer in answers:
-            if answer.type != twisted.names.dns.SRV or not answer.payload:
-                continue
-
-            # XXX we just use the first
-            logger.info("Got SRV answer: %r / %d for %s", str(answer.payload.target), answer.payload.port, service_name)
-            defer.returnValue((str(answer.payload.target), answer.payload.port))
-
-        logger.info("No valid answers found in response from %s (%r)", server_name, answers)
-        defer.returnValue(default)
-
-    @defer.inlineCallbacks
     def _getKeysForServer(self, server_name):
         """Get the signing key data from a home server.
         """
@@ -90,10 +64,8 @@ class Verifier(object):
             if cached['valid_until_ts'] > now:
                 defer.returnValue(self.cache[server_name]['verify_keys'])
 
-        host_port = yield self._getEndpointForServer(server_name)
-        logger.info("Got host/port %s/%s for %s", host_port[0], host_port[1], server_name)
         client = FederationHttpClient(self.sydent)
-        result = yield client.get_json("https://%s:%s/_matrix/key/v2/server/" % host_port)
+        result = yield client.get_json("https://%s/_matrix/key/v2/server/" % server_name)
         if 'verify_keys' not in result:
             raise SignatureVerifyException("No key found in response")
 
@@ -109,10 +81,8 @@ class Verifier(object):
     def verifyServerSignedJson(self, signed_json, acceptable_server_names=None):
         """Given a signed json object, try to verify any one
         of the signatures on it
-        XXX: This contains a very noddy version of the home server
-        SRV lookup and signature verification. It forms HTTPS URLs
-        from the result of the SRV lookup which will mean the Host:
-        parameter in the request will be wrong. It only looks at
+        XXX: This contains a fairly noddy version of the home server
+        SRV lookup and signature verification. It only looks at
         the first SRV result. It does no caching (just fetches the
         signature each time and does not contact any other servers
         to do perspectives checks.
