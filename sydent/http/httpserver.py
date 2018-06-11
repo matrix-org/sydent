@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,6 +49,7 @@ class ClientApiHttpServer:
 
         threepid = Resource()
         bind = self.sydent.servlets.threepidBind
+        unbind = self.sydent.servlets.threepidUnbind
 
         pubkey = Resource()
         ephemeralPubkey = Resource()
@@ -74,6 +76,7 @@ class ClientApiHttpServer:
 
         v1.putChild('3pid', threepid)
         threepid.putChild('bind', bind)
+        threepid.putChild('unbind', unbind)
         threepid.putChild('getValidated3pid', getValidated3pid)
 
         email.putChild('requestToken', emailReqCode)

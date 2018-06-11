@@ -79,7 +79,11 @@ class ReplicationPushServlet(Resource):
 
                 assocObj = threePidAssocFromDict(sgAssoc)
 
-                globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
+                if assocObj.mxid is not None:
+                    globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
+                else:
+                    logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
+                    globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
                 logger.info("Stored association origin ID %s from %s", originId, peer.servername)
             except:
                 failedIds.append(originId)

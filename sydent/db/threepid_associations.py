@@ -19,6 +19,10 @@ from sydent.util import time_msec
 from sydent.threepid import ThreepidAssociation, threePidAssocFromDict
 
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class LocalAssociationStore:
@@ -59,6 +63,39 @@ class LocalAssociationStore:
             maxId = row[0]
 
         return (assocs, maxId)
+
+    def removeAssociation(self, threepid, mxid):
+        cur = self.sydent.db.cursor()
+
+        # check to see if we have any matching associations first.
+        # We use a REPLACE INTO because we need the resulting row to have
+        # a new ID (such that we know it's a new change that needs to be
+        # replicated) so there's no need to insert a deletion row if there's
+        # nothing to delete.
+        cur.execute(
+            "SELECT COUNT(*) FROM local_threepid_associations "
+            "WHERE medium = ? AND address = ? AND mxid = ?",
+            (threepid['medium'], threepid['address'], mxid)
+        )
+        row = cur.fetchone()
+        if row[0] > 0:
+            ts = time_msec()
+            cur.execute(
+                "REPLACE INTO local_threepid_associations "
+                "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter') "
+                " values (?, ?, NULL, ?, null, null)",
+                (threepid['medium'], threepid['address'], ts),
+            )
+            logger.info(
+                "Deleting local assoc for %s/%s/%s replaced %d rows",
+                threepid['medium'], threepid['address'], mxid, cur.rowcount,
+            )
+            self.sydent.db.commit()
+        else:
+            logger.info(
+                "No local assoc found for %s/%s/%s",
+                threepid['medium'], threepid['address'], mxid,
+            )
 
 
 class GlobalAssociationStore:
@@ -164,3 +201,16 @@ class GlobalAssociationStore:
             return None
 
         return row[0]
+
+    def removeAssociation(self, medium, address):
+        cur = self.sydent.db.cursor()
+        cur.execute(
+            "DELETE FROM global_threepid_associations WHERE "
+            "medium = ? AND address = ?",
+            (medium, address),
+        )
+        logger.info(
+            "Deleted %d rows from global associations for %s/%s",
+            cur.rowcount, medium, address,
+        )
+        self.sydent.db.commit()
