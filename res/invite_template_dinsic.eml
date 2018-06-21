@@ -13,20 +13,21 @@ Content-Disposition: inline
 
 Bonjour,
 
-%(sender_display_name)s vous a invité sur Tchap. %(bracketed_room_name)s
+%(sender_display_name)s vous a invité sur Tchap.
 
-Pour rejoindre la conversation, suivez le lien ci dessous:
+Tchap n'est pour l'instant accessible qu'à partir des téléphones sécurisés ERCOM de l'Etat. 
+Si vous êtes équipés d'un téléphone ERCOM, retrouvez Tchap dans le magasin d'application de votre téléphone. Lancez l'application et inscrivez vous avec votre adresse mail professionnelle. Vous pourrez ensuite rejoindre la conversation.
 
-https://chat.i.tchap.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
+Merci d'utiliser Tchap! 
 
-Merci d'utiliser Tchap!
+Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
 
-Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
+Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public. 
+Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.
 
-Tchap est une déclinaison du projet open source Riot/Matrix.
+Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart (voix et SMS sécurisés).
 
-Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
-
+Tchap est une déclinaison du projet open source Riot/Matrix qui utilise le standard Matrix.org.
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
 Content-Type: multipart/related;
@@ -100,29 +101,19 @@ pre, code {
 
     <p>Bonjour,</p>
 
-    <p>%(sender_display_name)s vous a invité sur Tchap. %(bracketed_room_name)s
+    <p>%(sender_display_name)s vous a invité sur Tchap.</p>
+	<p>Tchap n'est pour l'instant accessible qu'à partir des téléphones sécurisés ERCOM de l'Etat. 
+	Si vous êtes équipés d'un téléphone ERCOM, retrouvez Tchap dans le magasin d'application de votre téléphone. Lancez l'application et inscrivez vous avec votre adresse mail professionnelle. Vous pourrez ensuite rejoindre la conversation.
     </p>
-
-    <p>
-        <a
-        href="https://chat.i.tchap.gouv.fr/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Rejoindre la conversation</a>
-    </p>
-
-    <p>
-    Merci d'utiliser Tchap!
-    </p>
-
-    <p>
-    Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
-    </p>
-
-    <p>
-    Tchap est une déclinaison du projet open source Riot/Matrix.
-    </p>
-
-    <p>
-    Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
-    </p>
+	
+	<p>Merci d'utiliser Tchap!</p>
+	<p>Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.</p>
+	
+	<p>Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public.</p>
+	<p>Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.</p>
+	
+	<p>Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart voix et SMS sécurisés).</p>
+	<p>Tchap est une déclinaison du projet open source Riot/Matrix qui utilise le standard Matrix.org.</p>
 
                 </td>
                 <td> </td>
