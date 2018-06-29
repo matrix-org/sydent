@@ -2,7 +2,7 @@ Date: %(date)s
 From: %(from)s
 To: %(to)s
 Message-ID: %(messageid)s
-Subject: =?UTF-8?Q?V=C3=A9rifiez votre addresse email sur tchap?=
+Subject: =?UTF-8?Q?V=C3=A9rifiez votre adresse email sur tchap?=
 MIME-Version: 1.0
 Content-Type: multipart/alternative; 
 	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
@@ -15,24 +15,23 @@ Bonjour,
 
 Vous avez fait une demande d'enregistrement avec cette adresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.
 
-CE SERVICE EST ACTUELLEMENT EN CONSTRUCTION, il est ouvert uniquement à titre expérimental, et s'appuie sur une VERSION BETA du logiciel qui est en cours de développement.
-
 Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:
 
 %(link)s
 
 Si vous n'avez pas fait de demande d'accès à tchap, vous pouvez ignorer cet email.
 
+
 Merci d'utiliser Tchap!
 
+Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
 
-Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
+Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public.
+Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.
+ 
+Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart (voix et SMS sécurisés).
 
-Tchap est une déclinaison du projet open source Riot/Matrix.
-
-Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
-
-
+Tchap est une déclinaison du projet open source Riot/Matrix qui utilise le standard Matrix.org.
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
 Content-Type: multipart/related;
@@ -109,26 +108,30 @@ pre, code {
 
                     <p>Vous avez fait une demande d'enregistrement avec cette adresse email sur tchap, l'application de messagerie instantanée de l'Etat Français.</p>
 
-		    <p>CE SERVICE EST ACTUELLEMENT EN CONSTRUCTION, il est ouvert uniquement à titre expérimental, et s'appuie sur une VERSION BETA du logiciel qui est en cours de développement.</p>
-
                     <p>Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:</p>
 
                     <p><a href="%(link)s">Terminer la validation de l'email</a></p>
 
                     <p>Si vous n'avez pas fait de demande d'accès à tchap, vous pouvez ignorer cet email.</p>
-
+					
+					<br/>
                     <p>Merci d'utiliser Tchap!</p>
 
                     <p>
-                    Tchap est une messagerie instantanée sécurisée dédiée aux communications entre les hautes autorités de l'Etat Français, les agents de l'administration Française, et les partenaires externes (sur invitation).
+                    Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
                     </p>
 
                     <p>
-                    Tchap est une déclinaison du projet open source Riot/Matrix.
+					Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public.
+					Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.
                     </p>
 
                     <p>
-                    Il utilise le standard Matrix.org pour des communications interopérables incluant le chat, les transferts de fichier, la voix, la vidéo et l'integration à d'autres systemes de communication.
+                    Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart (voix et SMS sécurisés).
+                    </p>
+					
+                    <p>
+                    Tchap est une déclinaison du projet open source Riot/Matrix qui utilise le standard Matrix.org.
                     </p>
                 </td>
                 <td> </td>
