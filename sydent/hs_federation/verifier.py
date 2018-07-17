@@ -32,12 +32,19 @@ from sydent.http.httpclient import FederationHttpClient
 logger = logging.getLogger(__name__)
 
 
-"""
-Verifies signed json blobs from Matrix Homeservers by finding the
-Homeserver's address, contacting it, requesting its keys and
-verifying that the signature on the json blob matches.
-"""
+class NoAuthenticationError(Exception):
+    """
+    Raised when no signature is provided that could be authenticated
+    """
+    pass
+
+
 class Verifier(object):
+    """
+    Verifies signed json blobs from Matrix Homeservers by finding the
+    homeserver's address, contacting it, requesting its keys and
+    verifying that the signature on the json blob matches.
+    """
     def __init__(self, sydent):
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
@@ -45,32 +52,6 @@ class Verifier(object):
         self.cache = {
             # server_name: <result from keys query>,
         }
-
-    @defer.inlineCallbacks
-    def _getEndpointForServer(self, server_name):
-        if ':' in server_name:
-            defer.returnValue(tuple(server_name.rsplit(':', 1)))
-
-        service_name = "%s.%s.%s" % ('_matrix', '_tcp', server_name)
-
-        default = server_name, 8448
-
-        try:
-            answers, _, _ = yield twisted.names.client.lookupService(service_name)
-        except DNSNameError:
-            logger.info("DNSNameError doing SRV lookup for %s - using default", service_name)
-            defer.returnValue(default)
-
-        for answer in answers:
-            if answer.type != twisted.names.dns.SRV or not answer.payload:
-                continue
-
-            # XXX we just use the first
-            logger.info("Got SRV answer: %r / %d for %s", str(answer.payload.target), answer.payload.port, service_name)
-            defer.returnValue((str(answer.payload.target), answer.payload.port))
-
-        logger.info("No valid answers found in response from %s (%r)", server_name, answers)
-        defer.returnValue(default)
 
     @defer.inlineCallbacks
     def _getKeysForServer(self, server_name):
@@ -83,12 +64,10 @@ class Verifier(object):
             if cached['valid_until_ts'] > now:
                 defer.returnValue(self.cache[server_name]['verify_keys'])
 
-        host_port = yield self._getEndpointForServer(server_name)
-        logger.info("Got host/port %s/%s for %s", host_port[0], host_port[1], server_name)
         client = FederationHttpClient(self.sydent)
-        result = yield client.get_json("https://%s:%s/_matrix/key/v2/server/" % host_port)
+        result = yield client.get_json("https://%s/_matrix/key/v2/server/" % server_name)
         if 'verify_keys' not in result:
-            raise Exception("No key found in response")
+            raise SignatureVerifyException("No key found in response")
 
         if 'valid_until_ts' in result:
             # Don't cache anything without a valid_until_ts or we wouldn't
@@ -102,23 +81,22 @@ class Verifier(object):
     def verifyServerSignedJson(self, signed_json, acceptable_server_names=None):
         """Given a signed json object, try to verify any one
         of the signatures on it
-        XXX: This contains a very noddy version of the home server
-        SRV lookup and signature verification. It forms HTTPS URLs
-        from the result of the SRV lookup which will mean the Host:
-        parameter in the request will be wrong. It only looks at
+        XXX: This contains a fairly noddy version of the home server
+        SRV lookup and signature verification. It only looks at
         the first SRV result. It does no caching (just fetches the
         signature each time and does not contact any other servers
         to do perspectives checks.
 
-        :param acceptable_server_names If provided and not None,
+        :param acceptable_server_names: If provided and not None,
         only signatures from servers in this list will be accepted.
+        :type acceptable_server_names: list of strings
 
         :return a tuple of the server name and key name that was
         successfully verified. If the json cannot be verified,
         raises SignatureVerifyException.
         """
         if 'signatures' not in signed_json:
-            raise SignatureVerifyException()
+            raise SignatureVerifyException("Signature missing")
         for server_name, sigs in signed_json['signatures'].items():
             if acceptable_server_names is not None:
                 if server_name not in acceptable_server_names:
@@ -132,6 +110,7 @@ class Verifier(object):
                         continue
                     key_bytes = decode_base64(server_keys[key_name]['key'])
                     verify_key = signedjson.key.decode_verify_key_bytes(key_name, key_bytes)
+                    logger.info("verifying sig from key %r", key_name)
                     signedjson.sign.verify_signed_json(signed_json, server_name, verify_key)
                     logger.info("Verified signature with key %s from %s", key_name, server_name)
                     defer.returnValue((server_name, key_name))
@@ -143,4 +122,65 @@ class Verifier(object):
             "Unable to verify any signatures from block %r. Acceptable server names: %r",
             signed_json['signatures'], acceptable_server_names,
         )
-        raise SignatureVerifyException()
+        raise SignatureVerifyException("No matching signature found")
+
+    @defer.inlineCallbacks
+    def authenticate_request(self, request, content):
+        """Authenticates a Matrix federation request based on the X-Matrix header
+        XXX: Copied largely from synapse
+
+        :param request: The request object to authenticate
+        :param content: The content of the request, if any
+        :type content: bytes or None
+
+        :returns: The origin of the server whose signature was validated
+        """
+        json_request = {
+            "method": request.method,
+            "uri": request.uri,
+            "destination_is": self.sydent.server_name,
+            "signatures": {},
+        }
+
+        if content is not None:
+            json_request["content"] = content
+
+        origin = None
+
+        def parse_auth_header(header_str):
+            try:
+                params = auth.split(" ")[1].split(",")
+                param_dict = dict(kv.split("=") for kv in params)
+
+                def strip_quotes(value):
+                    if value.startswith("\""):
+                        return value[1:-1]
+                    else:
+                        return value
+
+                origin = strip_quotes(param_dict["origin"])
+                key = strip_quotes(param_dict["key"])
+                sig = strip_quotes(param_dict["sig"])
+                return (origin, key, sig)
+            except Exception:
+                raise SignatureVerifyException("Malformed Authorization header")
+
+        auth_headers = request.requestHeaders.getRawHeaders(b"Authorization")
+
+        if not auth_headers:
+            raise NoAuthenticationError("Missing Authorization headers")
+
+        for auth in auth_headers:
+            if auth.startswith("X-Matrix"):
+                (origin, key, sig) = parse_auth_header(auth)
+                json_request["origin"] = origin
+                json_request["signatures"].setdefault(origin, {})[key] = sig
+
+        if not json_request["signatures"]:
+            raise NoAuthenticationError("Missing X-Matrix Authorization header")
+
+        yield self.verifyServerSignedJson(json_request, [origin])
+
+        logger.info("Verified request from HS %s", origin)
+
+        defer.returnValue(origin)

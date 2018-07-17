@@ -51,6 +51,7 @@ class ClientApiHttpServer:
 
         threepid = Resource()
         bind = self.sydent.servlets.threepidBind
+        unbind = self.sydent.servlets.threepidUnbind
 
         pubkey = Resource()
         ephemeralPubkey = Resource()
@@ -81,6 +82,7 @@ class ClientApiHttpServer:
 
         v1.putChild('3pid', threepid)
         threepid.putChild('bind', bind)
+        threepid.putChild('unbind', unbind)
         threepid.putChild('getValidated3pid', getValidated3pid)
 
         email.putChild('requestToken', emailReqCode)
