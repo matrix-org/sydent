@@ -42,6 +42,7 @@ from http.servlets.lookupservlet import LookupServlet
 from http.servlets.bulklookupservlet import BulkLookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
+from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
@@ -166,6 +167,7 @@ class Sydent:
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
         self.servlets.threepidBind = ThreePidBindServlet(self)
+        self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
@@ -191,7 +193,7 @@ class Sydent:
                 self.cfg.add_section(sect)
             except ConfigParser.DuplicateSectionError:
                 pass
-        self.cfg.read("sydent.conf")
+        self.cfg.read(os.environ.get('SYDENT_CONF', "sydent.conf"))
 
     def save_config(self):
         fp = open("sydent.conf", 'w')
