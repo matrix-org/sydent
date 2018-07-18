@@ -44,7 +44,7 @@ class BlindlySignStuffServlet(Resource):
             request.setResponseCode(404)
             return json.dumps({
                 "errcode": "M_UNRECOGNIZED",
-                "error": "Didn't recognized token",
+                "error": "Didn't recognize token",
             })
 
         to_sign = {
