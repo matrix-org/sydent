@@ -132,6 +132,14 @@ class SqliteDatabase:
             self.db.commit()
             logger.info("v0 -> v1 schema migration complete")
             self._setSchemaVersion(1)
+        if curVer < 2:
+            cur = self.db.cursor()
+
+            logger.info("Migrating schema from v1 to v2")
+            cur.execute("ALTER TABLE profiles ADD COLUMN active BOOLEAN DEFAULT 1 NOT NULL")
+            self.db.commit()
+            logger.info("v1 -> v2 schema migration complete")
+            self._setSchemaVersion(2)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()

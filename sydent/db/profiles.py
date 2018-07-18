@@ -29,12 +29,17 @@ class ProfileStore:
     def addBatch(self, host, batchnum, batch):
         cur = self.sydent.db.cursor()
 
-        vals = [(k, v['display_name'], v['avatar_url'], host, batchnum) for k, v in batch.items()]
+        vals = []
+        for userid, val in batch.items():
+            if val is None:
+                vals.append((userid, None, None, False, host, batchnum))
+            else:
+                vals.append((userid, val['display_name'], val['avatar_url'], True, host, batchnum))
 
         cur.executemany(
             "INSERT OR REPLACE INTO profiles "
-            "('user_id', 'display_name', 'avatar_url', 'origin_server', 'batch')"
-            " values (?, ?, ?, ?, ?)",
+            "('user_id', 'display_name', 'avatar_url', 'active', 'origin_server', 'batch')"
+            " values (?, ?, ?, ?, ?, ?)",
             vals,
         )
         self.sydent.db.commit()
@@ -44,8 +49,10 @@ class ProfileStore:
 
         sql = (
             "SELECT user_id, display_name, avatar_url FROM profiles WHERE "
-            "user_id LIKE LOWER(?) OR "
-            "LOWER(display_name) LIKE LOWER(?) "
+            "active = 1 and ("
+            "    user_id LIKE LOWER(?) OR "
+            "    LOWER(display_name) LIKE LOWER(?) "
+            ")"
             "LIMIT ?"
         )
 
