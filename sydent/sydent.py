@@ -97,8 +97,8 @@ class Sydent:
 
         logPath = self.cfg.get('general', "log.path")
         if logPath != '':
-            handler = logging.handlers.RotatingFileHandler(
-                logPath, maxBytes=(1000 * 1000 * 100), backupCount=3
+            handler = logging.handlers.TimedRotatingFileHandler(
+                logPath, when='midnight', backupCount=365
             )
             handler.setFormatter(formatter)
             def sighup(signum, stack):
