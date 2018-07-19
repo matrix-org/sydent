@@ -96,7 +96,7 @@ class ProfileReplicationServlet(Resource):
                 
             bad_uids = []
             for uid, info in batch.items():
-                if 'display_name' not in info or 'avatar_url' not in info:
+                if info is not None and ('display_name' not in info or 'avatar_url' not in info):
                     bad_uids.append(uid)
             if len(bad_uids) > 0:
                 logger.warn("Host %s sent batch with missing fields", origin_server)
