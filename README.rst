@@ -30,6 +30,11 @@ Where country code is the numeric country code, or 'default' to specify the orig
     originators.44 = short:12345
     originators.default = alpha:Matrix
 
+Docker
+======
+
+A Dockerfile is provided for sydent. To use it, run ``docker build -t sydent .`` in a sydent checkout. To run it, use ``docker run -v /path/to/mount:/data sydent``.
+
 Requests
 ========
 
