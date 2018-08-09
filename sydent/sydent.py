@@ -178,7 +178,7 @@ class Sydent:
         self.cfg.read(os.environ.get('SYDENT_CONF', "sydent.conf"))
 
     def save_config(self):
-        fp = open("sydent.conf", 'w')
+        fp = open(os.environ.get('SYDENT_CONF', "sydent.conf"), 'w')
         self.cfg.write(fp)
         fp.close()
 
