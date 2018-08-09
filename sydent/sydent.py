@@ -62,7 +62,7 @@ class Sydent:
         'log.path': '',
         'pidfile.path': 'sydent.pid',
         # db
-        'db.file': 'sydent.db',
+        'db.file': os.environ.get("SYDENT_DB_PATH", "sydent.db"),
         # http
         'clientapi.http.port': '8090',
         'replication.https.certfile': '',
