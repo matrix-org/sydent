@@ -115,7 +115,7 @@ class Sydent:
 
         logger.info("Starting Sydent server")
 
-        self.pidfile = self.cfg.get('general', "pidfile.path");
+        self.pidfile = self.cfg.get('general', "pidfile.path")
 
         observer = log.PythonLoggingObserver()
         observer.start()
