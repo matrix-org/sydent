@@ -2,7 +2,7 @@ Date: %(date)s
 From: %(from)s
 To: %(to)s
 Message-ID: %(messageid)s
-Subject: Your Riot Validation Token
+Subject: Confirm your email address for Riot
 MIME-Version: 1.0
 Content-Type: multipart/alternative; 
 	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
