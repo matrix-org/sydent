@@ -26,6 +26,7 @@ class SqliteDatabase:
         self.sydent = syd
 
         dbFilePath = self.sydent.cfg.get("db", "db.file")
+        dbFilePath = os.environ.get("SYDENT_DB_PATH", dbFilePath)
         logger.info("Using DB file %s", dbFilePath)
 
         self.db = sqlite3.connect(dbFilePath)
@@ -145,4 +146,3 @@ class SqliteDatabase:
         # NB. pragma doesn't support variable substitution so we
         # do it in python (as a decimal so we don't risk SQL injection)
         res = cur.execute("PRAGMA user_version = %d" % (ver,))
-
