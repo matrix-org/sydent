@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2018 Travis Ralston
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,13 +21,20 @@ from sydent.http.servlets import jsonwrap, send_cors
 
 
 class V1Servlet(Resource):
-    isLeaf = True
+    isLeaf = False
 
     def __init__(self, syd):
+        Resource.__init__(self)
         self.sydent = syd
 
     @jsonwrap
     def render_GET(self, request):
         send_cors(request)
+        request.setResponseCode(200)
+        return {}
 
+    @jsonwrap
+    def render_OPTIONS(self, request):
+        send_cors(request)
+        request.setResponseCode(200)
         return {}

@@ -33,7 +33,7 @@ class ClientApiHttpServer:
         matrix = Resource()
         identity = Resource()
         api = Resource()
-        v1 = Resource()
+        v1 = self.sydent.servlets.v1
 
         validate = Resource()
         email = Resource()
@@ -59,7 +59,7 @@ class ClientApiHttpServer:
         root.putChild('_matrix', matrix)
         matrix.putChild('identity', identity)
         identity.putChild('api', api)
-        api.putChild('v1', self.sydent.servlets.v1)
+        api.putChild('v1', v1)
 
         v1.putChild('validate', validate)
         validate.putChild('email', email)
