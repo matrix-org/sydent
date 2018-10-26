@@ -20,6 +20,8 @@ from sydent.http.servlets import jsonwrap, send_cors
 
 
 class V1Servlet(Resource):
+    isLeaf = True
+
     def __init__(self, syd):
         self.sydent = syd
 
