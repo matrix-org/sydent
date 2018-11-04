@@ -95,6 +95,8 @@ class Sydent:
         'ed25519.signingkey': '',
         # user directory
         'userdir.allowed_homeservers': '',
+        # shadowing to another IS network
+        'shadow.server.name': '',
     }
 
     def __init__(self):
@@ -141,6 +143,8 @@ class Sydent:
                         + "the config file.") % (self.server_name,))
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
+
+        self.shadow_server_name = self.cfg.get('general', 'shadow.server.name')
 
         self.user_dir_allowed_hses = set(list_from_comma_sep_string(
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')

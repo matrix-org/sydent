@@ -34,11 +34,12 @@ class Peer(object):
     def __init__(self, servername, pubkeys):
         self.servername = servername
         self.pubkeys = pubkeys
+        self.shadow = False
 
     def pushUpdates(self, sgAssocs):
         """
-        :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
-                        sgAssoc is the json object of the signed association
+        :param sgAssocs: Sequence of (originId, (sgAssoc, shadowSgAssoc)) tuples where originId
+            is the id on the creating server and sgAssoc is the json object of the signed association
         :return a deferred
         """
         pass
@@ -61,13 +62,23 @@ class LocalPeer(Peer):
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
             if localId > self.lastId:
-                assocObj = threePidAssocFromDict(sgAssocs[localId])
+                assocObj = threePidAssocFromDict(sgAssocs[localId][0])
                 if assocObj.mxid is not None:
                     # We can probably skip verification for the local peer (although it could be good as a sanity check)
-                    globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
+                    globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId][0]),
                                                     self.sydent.server_name, localId)
                 else:
                     globalAssocStore.removeAssociation(assocObj.medium, assocObj.address)
+
+                # inject the shadow association, if any.
+                if sgAssocs[localId][1] is not None:
+                    shadowAssocObj = threePidAssocFromDict(sgAssocs[localId][1])
+                    if shadowAssocObj.mxid is not None:
+                        # we deliberately identify this as originating from us rather than the shadow IS
+                        globalAssocStore.addAssociation(shadowAssocObj, json.dumps(sgAssocs[localId][1]),
+                                                        self.sydent.server_name, localId)
+                    else:
+                        globalAssocStore.removeAssociation(shadowAssocObj.medium, shadowAssocObj.address)
 
                 # if this is an association that matches one of our invite_tokens then we should call the onBind callback
                 # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
@@ -99,7 +110,10 @@ class RemotePeer(Peer):
         signedjson.sign.verify_signed_json(jsonMessage, self.servername, verifyKey)
 
     def pushUpdates(self, sgAssocs):
-        body = {'sgAssocs': sgAssocs}
+        if self.shadow:
+            body = {'sgAssocs': { k: v[1] for k, v in sgAssocs.items()}}
+        else:
+            body = {'sgAssocs': { k: v[0] for k, v in sgAssocs.items()}}
 
         reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
                                                                   self.port,

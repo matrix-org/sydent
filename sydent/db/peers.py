@@ -23,7 +23,7 @@ class PeerStore:
 
     def getPeerByName(self, name):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+        res = cur.execute("select p.name, p.port, p.lastSentVersion, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
 
         serverName = None
@@ -35,13 +35,15 @@ class PeerStore:
             serverName = row[0]
             port = row[1]
             lastSentVer = row[2]
-            pubkeys[row[3]] = row[4]
+            shadow = row[3]
+            pubkeys[row[4]] = row[5]
 
         if len(pubkeys) == 0:
             return None
 
         p = RemotePeer(self.sydent, serverName, pubkeys)
         p.lastSentVersion = lastSentVer
+        p.shadow = True if shadow else False
         if port:
             p.port = port
 
@@ -49,7 +51,7 @@ class PeerStore:
 
     def getAllPeers(self):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+        res = cur.execute("select p.name, p.port, p.lastSentVersion, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where pk.peername = p.name and p.active = 1")
 
         peers = []
@@ -71,11 +73,13 @@ class PeerStore:
                 peername = row[0]
                 port = row[1]
                 lastSentVer = row[2]
-            pubkeys[row[3]] = row[4]
+                shadow = row[3]
+            pubkeys[row[4]] = row[5]
 
         if len(pubkeys) > 0:
             p = RemotePeer(self.sydent, peername, pubkeys)
             p.lastSentVersion = lastSentVer
+            p.shadow = True if shadow else False
             if port:
                 p.port = port
             peers.append(p)

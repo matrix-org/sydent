@@ -14,8 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-CREATE TABLE IF NOT EXISTS peers (id integer primary key, name varchar(255) not null, port integer default null, lastSentVersion integer, lastPokeSucceededAt integer, active integer not null default 0);
+CREATE TABLE IF NOT EXISTS peers (
+	id integer primary key,
+	name varchar(255) not null,
+	port integer default null,
+	lastSentVersion integer,
+	lastPokeSucceededAt integer,
+	active integer not null default 0,
+	shadow integer not null default 0
+);
 CREATE UNIQUE INDEX IF NOT EXISTS name on peers(name);
 
-CREATE TABLE IF NOT EXISTS peer_pubkeys (id integer primary key, peername varchar(255) not null, alg varchar(16) not null, key text not null, foreign key (peername) references peers (peername));
+CREATE TABLE IF NOT EXISTS peer_pubkeys (
+	id integer primary key,
+	peername varchar(255) not null,
+	alg varchar(16) not null,
+	key text not null,
+	foreign key (peername) references peers (peername)
+);
 CREATE UNIQUE INDEX IF NOT EXISTS peername_alg on peer_pubkeys(peername, alg);
