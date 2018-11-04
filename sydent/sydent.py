@@ -70,6 +70,8 @@ class Sydent:
         'server.name': '',
         'log.path': '',
         'pidfile.path': 'sydent.pid',
+        'shadow.hs.master': '',
+        'shadow.hs.slave': '',
         # db
         'db.file': 'sydent.db',
         # http
@@ -95,9 +97,6 @@ class Sydent:
         'ed25519.signingkey': '',
         # user directory
         'userdir.allowed_homeservers': '',
-        # shadowing bindings for one HS to another
-        'shadow.hs.master': '',
-        'shadow.hs.slave': '',
     }
 
     def __init__(self):
