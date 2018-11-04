@@ -50,11 +50,11 @@ class Pusher:
             sgAssoc = assocSigner.signedThreePidAssociation(localAssocs[localId])
             shadowSgAssoc = None
 
-            if self.sydent.shadow_server_name:
+            if self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
                 shadowAssoc = copy.deepcopy(localAssocs[localId])
                 shadowAssoc.mxid = shadowAssoc.mxid.replace(
-                    ":" + self.sydent.server_name,
-                    ":" + self.sydent.shadow_server_name
+                    ":" + self.sydent.shadow_hs_master,
+                    ":" + self.sydent.shadow_hs_slave
                 )
                 shadowSgAssoc = assocSigner.signedThreePidAssociation(shadowAssoc)
 
