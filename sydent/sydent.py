@@ -25,6 +25,8 @@ from twisted.python import log
 
 from db.sqlitedb import SqliteDatabase
 
+from netaddr import IPSet, IPNetwork
+
 from http.httpcommon import SslComponents
 from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
 from http.httpsclient import ReplicationHttpsClient
@@ -70,6 +72,7 @@ class Sydent:
         'server.name': '',
         'log.path': '',
         'pidfile.path': 'sydent.pid',
+        'ips.nonshadow': '',  # \n separated list of CIDR ranges which /info will return non-shadow HS to.
         # db
         'db.file': 'sydent.db',
         # http
@@ -127,6 +130,14 @@ class Sydent:
         logger.info("Starting Sydent server")
 
         self.pidfile = self.cfg.get('general', "pidfile.path");
+
+        self.nonshadow_ips = None
+        ips = self.cfg.get('general', "ips.nonshadow");
+        if ips:
+            self.nonshadow_ips = IPSet()
+            ips = ips.splitlines()
+            for ip in ips:
+                self.nonshadow_ips.add(IPNetwork(ip))
 
         observer = log.PythonLoggingObserver()
         observer.start()
