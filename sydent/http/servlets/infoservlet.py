@@ -90,8 +90,7 @@ class InfoServlet(Resource):
             ip = IPAddress(self.sydent.ip_from_request(request))
             if (ip not in self.sydent.nonshadow_ips):
                 result['hs'] = result['shadow_hs']
-
-        result.pop('shadow_hs', None)
+                result.pop('shadow_hs', None)
 
         result['invited'] = True if pendingJoinTokens else False
         return json.dumps(result)
