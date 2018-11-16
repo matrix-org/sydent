@@ -46,6 +46,7 @@ from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
+from http.servlets.v1_servlet import V1Servlet
 
 from threepid.bind import ThreepidBinder
 
@@ -142,6 +143,7 @@ class Sydent:
         self.sig_verifier = Verifier(self)
 
         self.servlets = Servlets()
+        self.servlets.v1 = V1Servlet(self)
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)

@@ -33,7 +33,7 @@ class ClientApiHttpServer:
         matrix = Resource()
         identity = Resource()
         api = Resource()
-        v1 = Resource()
+        v1 = self.sydent.servlets.v1
 
         validate = Resource()
         email = Resource()
