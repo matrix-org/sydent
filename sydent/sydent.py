@@ -26,7 +26,10 @@ from twisted.python import log
 from db.sqlitedb import SqliteDatabase
 
 from http.httpcommon import SslComponents
-from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
+from http.httpserver import (
+    ClientApiHttpServer, ReplicationHttpsServer,
+    InternalApiHttpServer,
+)
 from http.httpsclient import ReplicationHttpsClient
 from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
@@ -66,6 +69,7 @@ class Sydent:
         'db.file': 'sydent.db',
         # http
         'clientapi.http.port': '8090',
+        'internalapi.http.port': '',
         'replication.https.certfile': '',
         'replication.https.cacert': '', # This should only be used for testing
         'replication.https.port': '4434',
@@ -188,6 +192,15 @@ class Sydent:
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
+
+        internalport = self.cfg.get('http', 'internalapi.http.port')
+        if internalport:
+            try:
+                interface = self.cfg.get('http', 'internalapi.http.bind_address')
+            except ConfigParser.NoOptionError:
+                interface = '::1'
+            self.internalApiHttpServer = InternalApiHttpServer(self)
+            self.internalApiHttpServer.setup(interface, int(internalport))
 
         if self.pidfile:
             with open(self.pidfile, 'w') as pidfile:
