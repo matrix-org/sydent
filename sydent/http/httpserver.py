@@ -22,8 +22,9 @@ import logging
 import twisted.internet.reactor
 import twisted.internet.ssl
 
-from sydent.http.servlets.authenticated_bind_threepid_servlet import \
-    AuthenticatedBindThreePidServlet
+from sydent.http.servlets.authenticated_bind_threepid_servlet import (
+    AuthenticatedBindThreePidServlet,
+)
 
 logger = logging.getLogger(__name__)
 
