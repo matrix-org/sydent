@@ -1,12 +1,10 @@
 Installation
 ============
 
-Dependencies can be installed using setup.py in the same way as synapse: see synapse/README.rst.  For instance:
+Dependencies can be installed using setup.py in the same way as synapse: see synapse/README.rst.  For instance::
 
     sudo apt-get install build-essential python2.7-dev libffi-dev \
-                         python-pip python-setuptools sqlite3 \
-                         libssl-dev python-virtualenv libjpeg-dev libxslt1-dev
-
+                         sqlite3 libssl-dev python-virtualenv libxslt1-dev
 
     virtualenv -p python2.7 ~/.sydent
     source ~/.sydent/bin/activate
@@ -16,7 +14,7 @@ Dependencies can be installed using setup.py in the same way as synapse: see syn
 
 Having installed dependencies, you can run sydent using::
 
-    $ python -m sydent.sydent
+    python -m sydent.sydent
 
 This will create a configuration file in sydent.conf with some defaults. You'll most likely want to change the server name and specify a mail relay.
 
@@ -35,29 +33,27 @@ Requests
 
 The requests that synapse servers and clients submit to the identity server are, briefly, as follows:
 
-Request the validation of your email address:
+Request the validation of your email address::
 
-curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/requestToken' -H "Content-Type: application/json" -d '{"email": "matthew@arasphere.net", "client_secret": "abcd", "send_attempt": 1}'
-{"success": true, "sid": "1"}
+    curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/requestToken' -H "Content-Type: application/json" -d '{"email": "matthew@arasphere.net", "client_secret": "abcd", "send_attempt": 1}'
+    {"success": true, "sid": "1"}
 
-# receive 943258 by mail
+(Receive 943258 by mail)
 
-Use this code to validate your email address:
+Use this code to validate your email address::
 
-curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/submitToken' -H "Content-Type: application/json" -d '{"token": "943258", "sid": "1", "client_secret": "abcd"}'
-{"success": true}
+    curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/submitToken' -H "Content-Type: application/json" -d '{"token": "943258", "sid": "1", "client_secret": "abcd"}'
+    {"success": true}
 
-Use the validated email address to bind it to a matrix ID:
+Use the validated email address to bind it to a matrix ID::
 
-curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/3pid/bind' -H "Content-Type: application/json" -d '{"sid": "1", "client_secret": "abcd", "mxid": "%40matthew%3amatrix.org"}'
+    curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/3pid/bind' -H "Content-Type: application/json" -d '{"sid": "1", "client_secret": "abcd", "mxid": "%40matthew%3amatrix.org"}'
 
-# lookup:
+Lookup::
 
-curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=henry%40matrix.org'
+    curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=henry%40matrix.org'
 
-# fetch pubkey key for a server
-
-curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519
+Fetch pubkey key for a server::
 
     curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519:0
 
