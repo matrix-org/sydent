@@ -72,6 +72,6 @@ To enable it, configure the port in the config file. For example::
 
 To use it::
 
-    curl -XPOST 'http://localhost:8090/_matrix/identity/internal/bind' -H "Content-Type: application/json" -d '{"address": "matthew@arasphere.net", "medium": "email", "mxid": "@matthew:matrix.org"}'
+    curl -XPOST 'http://localhost:8091/_matrix/identity/internal/bind' -H "Content-Type: application/json" -d '{"address": "matthew@arasphere.net", "medium": "email", "mxid": "@matthew:matrix.org"}'
 
 The response has the same format as ``/_matrix/identity/api/v1/3pid/bind``.
