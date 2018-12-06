@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014 OpenMarket Ltd
+# Copyright 2014 OpenMarket Ltd.
+# Copyright 2018 New Vector Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import os
 from setuptools import setup, find_packages
 
+def read_version():
+    fn = os.path.join(os.path.dirname(__file__), 'sydent', '__init__.py')
+    with open(fn) as fp:
+        f = fp.read()
+    return re.search(r"^__version__ = '(.*)'", f).group(1)
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -26,25 +33,22 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name="SynapseIdentityServer",
-    version="0.1",
-    packages=find_packages(exclude=["tests"]),
-    description="Reference Synapse Identity Verification and Lookup Server",
+    name="matrix-sydent",
+    version=read_version(),
+    packages=find_packages(),
+    description="Reference Matrix Identity Verification and Lookup Server",
     install_requires=[
         "signedjson==1.0.0",
         "unpaddedbase64==1.1.0",
         "Twisted>=16.0.0",
+
+        # twisted warns about about the absence of this
         "service_identity>=1.0.0",
-        "pyasn1",
-        "pynacl",
-        "daemonize",
+
         "phonenumbers",
+        "pyopenssl",
     ],
-    setup_requires=[
-        "setuptools_trial",
-        "setuptools>=1.0.0", # Needs setuptools that supports git+ssh. It's not obvious when support for this was introduced.
-        "mock"
-    ],
+    # make sure we package the sql files
     include_package_data=True,
     long_description=read("README.rst"),
 )
