@@ -1,0 +1,21 @@
+# Example systemd configuration file for sydent. Copy to
+# /etc/systemd/system/matrix-sydent.service, update the paths if necessary,
+# then:
+#
+#    systemctl enable matrix-sydent
+#    systemctl start matrix-sydent
+
+
+[Unit]
+Description="Matrix identity server"
+
+[Service]
+WorkingDirectory=/opt/sydent
+ExecStart=/opt/sydent/env/bin/python -m sydent.sydent
+
+User=sydent
+Group=nogroup
+Restart=always
+
+[Install]
+WantedBy=default.target
