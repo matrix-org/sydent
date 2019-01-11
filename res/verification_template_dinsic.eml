@@ -24,12 +24,12 @@ Si vous n'avez pas fait de demande d'accès à tchap, vous pouvez ignorer cet em
 
 Merci d'utiliser Tchap!
 
-Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
+Tchap est une messagerie instantanée qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
 
 Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public.
-Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.
+
  
-Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart (voix et SMS sécurisés).
+Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR").
 
 Tchap est une déclinaison du projet open source Riot/Matrix qui utilise le standard Matrix.org.
 
@@ -118,16 +118,15 @@ pre, code {
                     <p>Merci d'utiliser Tchap!</p>
 
                     <p>
-                    Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
+                    Tchap est une messagerie instantanée qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
                     </p>
 
                     <p>
 					Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public.
-					Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.
                     </p>
 
                     <p>
-                    Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart (voix et SMS sécurisés).
+                    Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). 
                     </p>
 					
                     <p>

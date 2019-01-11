@@ -15,17 +15,14 @@ Bonjour,
 
 %(sender_display_name)s vous a invité sur Tchap.
 
-Tchap n'est pour l'instant accessible qu'à partir des téléphones sécurisés ERCOM de l'Etat. 
-Si vous êtes équipés d'un téléphone ERCOM, retrouvez Tchap dans le magasin d'application de votre téléphone. Lancez l'application et inscrivez vous avec votre adresse mail professionnelle. Vous pourrez ensuite rejoindre la conversation.
+Téléchargez Tchap sur votre téléphone.
+Lancez l'application et inscrivez vous avec votre adresse mail professionnelle. Vous pourrez ensuite rejoindre la conversation.
 
 Merci d'utiliser Tchap! 
 
-Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
+Tchap est une messagerie instantanée qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.
 
 Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public. 
-Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.
-
-Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart (voix et SMS sécurisés).
 
 Tchap est une déclinaison du projet open source Riot/Matrix qui utilise le standard Matrix.org.
 
@@ -105,16 +102,16 @@ pre, code {
 </p>
 <p>Tchap n'est pour l'instant accessible qu'à partir des téléphones sécurisés ERCOM de l'Etat.
 </p>
-<p>Si vous êtes équipés d'un téléphone ERCOM, retrouvez Tchap dans le magasin d'application de votre téléphone. Lancez l'application et inscrivez vous avec votre adresse mail professionnelle. Vous pourrez ensuite rejoindre la conversation.
+<p>Téléchargez Tchap sur votre téléphone.
+Lancez l'application et inscrivez vous avec votre adresse mail professionnelle. Vous pourrez ensuite rejoindre la conversation.
 </p>
 <br/>
 <p>Merci d'utiliser Tchap!</p>
-<p>Tchap est une messagerie instantanée compatible avec votre téléphone sécurisé qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.</p>
+<p>Tchap est une messagerie instantanée qui vous permet d’échanger des messages textes et multimédia, en bilatéral ou dans des conversations de groupe.</p>
 	
 <p>Elle est opérée par l’administration pour apporter à vos communications professionnelles un niveau de confidentialité et de sécurité maîtrisé, que n’offrent pas des applications grand public.</p>
-<p>Dans cette version, l’application mobile Tchap est mise à disposition uniquement sur les téléphones mobiles sécurisés Cryptosmart des hautes autorités.</p>
 	
-<p>Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR"). Pour l’échange d’informations "DR", il vous revient d’utiliser les moyens mis à disposition avec votre téléphone Cryptosmart voix et SMS sécurisés).</p>
+<p>Attention, si Tchap apporte de meilleures garanties par rapport à des applications grand public, Tchap n’est pas qualifié à un niveau de sécurité « Diffusion Restreinte » ("DR").</p>
 <p>Tchap est une déclinaison du projet open source Riot/Matrix qui utilise le standard Matrix.org.</p>
 
                 </td>
