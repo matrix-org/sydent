@@ -40,6 +40,7 @@ setup(
         "pyyaml",
         "daemonize",
         "phonenumbers",
+        "netaddr",
     ],
     setup_requires=[
         "setuptools_trial",
