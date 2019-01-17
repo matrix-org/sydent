@@ -72,6 +72,8 @@ class Sydent:
         'server.name': '',
         'log.path': '',
         'pidfile.path': 'sydent.pid',
+        'shadow.hs.master': '',
+        'shadow.hs.slave': '',
         'ips.nonshadow': '',  # \n separated list of CIDR ranges which /info will return non-shadow HS to.
         # db
         'db.file': 'sydent.db',
@@ -152,6 +154,9 @@ class Sydent:
                         + "the config file.") % (self.server_name,))
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
+
+        self.shadow_hs_master = self.cfg.get('general', 'shadow.hs.master')
+        self.shadow_hs_slave  = self.cfg.get('general', 'shadow.hs.slave')
 
         self.user_dir_allowed_hses = set(list_from_comma_sep_string(
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
