@@ -22,6 +22,7 @@ import re
 import copy
 import yaml
 
+from netaddr import *
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
