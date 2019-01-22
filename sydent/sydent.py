@@ -74,7 +74,7 @@ class Sydent:
         'pidfile.path': 'sydent.pid',
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
-        'ips.nonshadow': '',  # \n separated list of CIDR ranges which /info will return non-shadow HS to.
+        'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
         # db
         'db.file': 'sydent.db',
         # http
@@ -137,7 +137,7 @@ class Sydent:
         ips = self.cfg.get('general', "ips.nonshadow");
         if ips:
             self.nonshadow_ips = IPSet()
-            ips = ips.splitlines()
+            ips = ips.split(',')
             for ip in ips:
                 self.nonshadow_ips.add(IPNetwork(ip))
 
