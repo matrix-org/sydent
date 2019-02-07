@@ -36,6 +36,7 @@ setup(
         "Twisted>=16.0.0",
         "service_identity>=1.0.0",
         "pyasn1",
+        "pyopenssl"
         "pynacl",
         "pyyaml",
         "daemonize",
