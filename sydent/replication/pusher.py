@@ -22,11 +22,15 @@ import twisted.internet.task
 from sydent.util import time_msec
 from sydent.replication.peer import LocalPeer
 from sydent.db.threepid_associations import LocalAssociationStore
+from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.peers import PeerStore
 from sydent.threepid.assocsigner import AssociationSigner
 
 logger = logging.getLogger(__name__)
 
+EPHEMERAL_KEYS_PUSH_LIMIT = 100
+INVITE_TOKENS_PUSH_LIMIT = 100
+ASSOCIATIONS_PUSH_LIMIT = 100
 
 class Pusher:
     def __init__(self, sydent):
@@ -65,6 +69,22 @@ class Pusher:
 
         return (signedAssocs, maxId)
 
+    def getInviteTokensAfterId(self, afterId, limit):
+        join_token_store = JoinTokenStore(self.sydent)
+        (invite_tokens, maxId) = join_token_store.getTokensAfterId(afterId, limit)
+
+        # TODO: Do something for shadow servers?
+
+        return (invite_tokens, maxId)
+
+    def getEphemeralKeysAfterId(self, afterId, limit):
+        join_token_store = JoinTokenStore(self.sydent)
+        (ephemeral_keys, maxId) = join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
+
+        # TODO: Do something for shadow servers?
+
+        return (ephemeral_keys, maxId)
+
     def doLocalPush(self):
         """
         Synchronously push local associations to this server (ie. copy them to globals table)
@@ -89,29 +109,43 @@ class Pusher:
             peers = self.peerStore.getAllPeers()
 
             for p in peers:
-                logger.debug("Looking for update after %d to push to %s", p.lastSentVersion, p.servername)
-                (signedAssocTuples, maxId) = self.getSignedAssociationsAfterId(p.lastSentVersion, 100)
-                logger.debug("%d updates to push to %s", len(signedAssocTuples), p.servername)
-                if len(signedAssocTuples) > 0:
-                    logger.info("Pushing %d updates to %s", len(signedAssocTuples), p.servername)
-                    updateDeferred = p.pushUpdates(signedAssocTuples)
-                    updateDeferred.addCallback(self._pushSucceeded, peer=p, maxId=maxId)
+                logger.debug("Looking for updates to push to %s", p.servername)
+
+                # Dictionary for holding all data to push
+                push_data = {}
+                ids = {}
+                total_updates = 0
+
+                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT)
+                total_updates += len(push_data["sg_assocs"])
+
+                if True: # TODO: Require a specific flag for invite replication
+                    (push_data["invite_tokens"], ids["invite_tokens"]) = self.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
+                    (push_data["ephemeral_keys"], ids["ephemeral_keys"]) = self.getEphemeralKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_KEYS_PUSH_LIMIT)
+                    total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_keys"])
+
+                logger.debug("%d updates to push to %s", total_updates, p.servername)
+                if total_updates:
+                    logger.info("Pushing %d updates to %s", total_updates, p.servername)
+                    logger.info("Sending: %s", str(push_data))
+                    updateDeferred = p.pushUpdates(push_data)
+                    updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
                     updateDeferred.addErrback(self._pushFailed, peer=p)
                     break
         finally:
             if not updateDeferred:
                 self.pushing = False
 
-    def _pushSucceeded(self, result, peer, maxId):
-        logger.info("Pushed updates up to %d to %s with result %d %s",
-                    maxId, peer.servername, result.code, result.phrase)
+    def _pushSucceeded(self, result, peer, ids):
+        logger.info("Pushed updates to %s with result %d %s",
+                    peer.servername, result.code, result.phrase)
 
-        self.peerStore.setLastSentVersionAndPokeSucceeded(peer.servername, maxId, time_msec())
+        self.peerStore.setLastSentIdAndPokeSucceeded(peer.servername, ids, time_msec())
 
         self.pushing = False
         self.scheduledPush()
 
     def _pushFailed(self, failure, peer):
-        logger.info("Failed to push updates to %s: %s", peer.servername, failure)
+        logger.info("Failed to push updates to %s:%s: %s", peer.servername, peer.port, failure)
         self.pushing = False
         return None

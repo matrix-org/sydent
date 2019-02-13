@@ -23,26 +23,32 @@ class PeerStore:
 
     def getPeerByName(self, name):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
+        res = cur.execute("select p.name, p.port, p.lastSentAssocsId, p.InviteTokensId, p.EphemeralKeysId, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
 
         serverName = None
         port = None
-        lastSentVer = None
+        lastSentAssocsId = None
+        lastSentInviteTokensId = None
+        lastSentEphemeralKeysId = None
         pubkeys = {}
 
         for row in res.fetchall():
             serverName = row[0]
             port = row[1]
-            lastSentVer = row[2]
-            shadow = row[3]
-            pubkeys[row[4]] = row[5]
+            lastSentAssocsId = row[2]
+            lastSentInviteTokensId = row[3]
+            lastSentEphemeralKeysId = row[4]
+            shadow = row[5]
+            pubkeys[row[6]] = row[7]
 
         if len(pubkeys) == 0:
             return None
 
         p = RemotePeer(self.sydent, serverName, pubkeys)
-        p.lastSentVersion = lastSentVer
+        p.lastSentAssocsId = lastSentAssocsId
+        p.lastSentInviteTokensId = lastSentInviteTokensId
+        p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
         p.shadow = True if shadow else False
         if port:
             p.port = port
@@ -51,34 +57,42 @@ class PeerStore:
 
     def getAllPeers(self):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
+        res = cur.execute("select p.name, p.port, p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where pk.peername = p.name and p.active = 1")
 
         peers = []
 
         peername = None
         port = None
-        lastSentVer = None
+        lastSentAssocsId = 0
+        lastSentInviteTokensId = 0
+        lastSentEphemeralKeysId = 0
         pubkeys = {}
 
         for row in res.fetchall():
             if row[0] != peername:
                 if len(pubkeys) > 0:
                     p = RemotePeer(self.sydent, peername, pubkeys)
-                    p.lastSentVersion = lastSentVer
+                    p.lastSentAssocsId = lastSentAssocsId
+                    p.lastSentInviteTokensId = lastSentInviteTokensId
+                    p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
                     if port:
                         p.port = port
                     peers.append(p)
                     pubkeys = {}
                 peername = row[0]
                 port = row[1]
-                lastSentVer = row[2]
-                shadow = row[3]
-            pubkeys[row[4]] = row[5]
+                lastSentAssocsId = row[2]
+                lastSentInviteTokensId = row[3]
+                lastSentEphemeralKeysId = row[4]
+                shadow = row[5]
+            pubkeys[row[6]] = row[7]
 
         if len(pubkeys) > 0:
             p = RemotePeer(self.sydent, peername, pubkeys)
-            p.lastSentVersion = lastSentVer
+            p.lastSentAssocsId = lastSentAssocsId
+            p.lastSentInviteTokensId = lastSentInviteTokensId
+            p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
             p.shadow = True if shadow else False
             if port:
                 p.port = port
@@ -87,8 +101,8 @@ class PeerStore:
 
         return peers
 
-    def setLastSentVersionAndPokeSucceeded(self, peerName, lastSentVersion, lastPokeSucceeded):
+    def setLastSentIdAndPokeSucceeded(self, peerName, ids, lastPokeSucceeded):
         cur = self.sydent.db.cursor()
-        res = cur.execute("update peers set lastSentVersion = ?, lastPokeSucceededAt = ? "
-                          "where name = ?", (lastSentVersion, lastPokeSucceeded, peerName))
+        res = cur.execute("update peers set lastSentAssocsId = ?, lastSentInviteTokensId = ?, lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
+                          "where name = ?", (ids["sg_assocs"], ids["invite_tokens"], ids["ephemeral_keys"], lastPokeSucceeded, peerName))
         self.sydent.db.commit()
