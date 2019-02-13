@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS peers (
 	id integer primary key,
 	name varchar(255) not null,
 	port integer default null,
-	lastSentAssocsId integer not null default 0,
-	lastSentInviteTokensId integer not null default 0,
-	lastSentEphemeralKeysId integer not null default 0,
+	lastSentAssocsId integer,
+	lastSentInviteTokensId integer,
+	lastSentEphemeralKeysId integer,
 	lastPokeSucceededAt integer,
 	active integer not null default 0,
 	shadow integer not null default 0
