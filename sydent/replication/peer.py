@@ -109,16 +109,17 @@ class RemotePeer(Peer):
         verifyKey.alg = 'ed25519'
         signedjson.sign.verify_signed_json(jsonMessage, self.servername, verifyKey)
 
-    def pushUpdates(self, sgAssocs):
+    def pushUpdates(self, data):
+        # sgAssocs is comprised of tuples (sgAssoc, shadowSgAssoc)
         if self.shadow:
-            body = {'sgAssocs': { k: v[1] for k, v in sgAssocs.items()}}
+            data["sg_assocs"] = { k: v[1] for k, v in data["sg_assocs"].items() }
         else:
-            body = {'sgAssocs': { k: v[0] for k, v in sgAssocs.items()}}
+            data["sg_assocs"] = { k: v[0] for k, v in data["sg_assocs"].items() }
 
         reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
                                                                   self.port,
                                                                   '/_matrix/identity/replicate/v1/push',
-                                                                  body)
+                                                                  data)
 
         # XXX: We'll also need to prune the deleted associations out of the
         # local associations table once they've been replicated to all peers
