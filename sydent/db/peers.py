@@ -23,7 +23,7 @@ class PeerStore:
 
     def getPeerByName(self, name):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentAssocsId, p.InviteTokensId, p.EphemeralKeysId, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
+        res = cur.execute("select p.name, p.port, p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
 
         serverName = None
