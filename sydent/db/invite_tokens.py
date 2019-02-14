@@ -83,7 +83,7 @@ class JoinTokenStore(object):
     def getLastTokensIdFromServer(self, server):
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(origin_id),count(origin_id) from invite_tokens"
-                          "where origin_server = ?", (server,))
+                          " where origin_server = ?", (server,))
         row = res.fetchone()
 
         if row[1] == 0:
@@ -151,7 +151,7 @@ class JoinTokenStore(object):
     def getLastEphemeralKeysIdFromServer(self, server):
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(origin_id),count(origin_id) from ephemeral_keys"
-                          "where origin_server = ?", (server,))
+                          " where origin_server = ?", (server,))
         row = res.fetchone()
 
         if row[1] == 0:
