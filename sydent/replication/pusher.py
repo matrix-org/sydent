@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import logging
+import copy
 
 import twisted.internet.reactor
 import twisted.internet.task
