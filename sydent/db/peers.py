@@ -103,6 +103,13 @@ class PeerStore:
 
     def setLastSentIdAndPokeSucceeded(self, peerName, ids, lastPokeSucceeded):
         cur = self.sydent.db.cursor()
-        res = cur.execute("update peers set lastSentAssocsId = ?, lastSentInviteTokensId = ?, lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
-                          "where name = ?", (ids["sg_assocs"], ids["invite_tokens"], ids["ephemeral_keys"], lastPokeSucceeded, peerName))
+        if "sg_assocs" in ids:
+            cur.execute("update peers set lastSentAssocsId = ?, lastPokeSucceededAt = ? "
+                        "where name = ?", (ids["sg_assocs"], lastPokeSucceeded, peerName))
+        if "invite_tokens" in ids:
+            cur.execute("update peers set lastSentInviteTokensId = ?, lastPokeSucceededAt = ? "
+                        "where name = ?", (ids["invite_tokens"], lastPokeSucceeded, peerName))
+        if "ephemeral_kers" in ids:
+            cur.execute("update peers set lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
+                        "where name = ?", (ids["ephemeral_keys"], lastPokeSucceeded, peerName))
         self.sydent.db.commit()
