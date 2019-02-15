@@ -20,14 +20,15 @@ class JoinTokenStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None):
+    def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, commit=True):
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
                     " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts', 'origin_server', 'origin_id')"
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     (medium, address, roomId, sender, token, int(time.time()), originServer, originId))
-        self.sydent.db.commit()
+        if commit:
+            self.sydent.db.commit()
 
     def getTokens(self, medium, address):
         cur = self.sydent.db.cursor()
@@ -101,7 +102,7 @@ class JoinTokenStore(object):
         )
         self.sydent.db.commit()
 
-    def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None):
+    def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None, commit=True):
         if not persistenceTs:
             persistenceTs = int(time.time())
         cur = self.sydent.db.cursor()
@@ -111,7 +112,8 @@ class JoinTokenStore(object):
             " VALUES (?, ?, ?, ?)",
             (publicKey, persistenceTs, originServer, originId)
         )
-        self.sydent.db.commit()
+        if commit:
+            self.sydent.db.commit()
 
     def validateEphemeralPublicKey(self, publicKey):
         cur = self.sydent.db.cursor()

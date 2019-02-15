@@ -113,29 +113,34 @@ class ReplicationPushServlet(Resource):
                 # Have some sort of verify function in peer/invite_tokens?
 
             if 'invite_tokens' in inJson and len(inJson['invite_tokens']) > 0:
-                first_origin_id = inJson["invite_tokens"].keys()[0]
                 last_processed_id = tokensStore.getLastTokensIdFromServer(peer.servername)
-                if last_processed_id < first_origin_id:
-                    # New tokens, import
-                    for originId, inviteToken in inJson["invite_tokens"].items():
-                        tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
-                                            inviteToken['sender'], inviteToken['token'], originServer=peer.servername, originId=originId)
-                        logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
-                else:
-                    request.setResponseCode(400)
-                    return {'errcode': 'M_UNKNOWN', 'error': 'Already processed token ID %s', str(first_origin_id)}
+                for originId, inviteToken in inJson["invite_tokens"].items():
+                    # Make sure we haven't processed this token already
+                    # If so, back out of all incoming tokens and return an error
+                    if originId >= last_processed_id:
+                        self.sydent.db.rollback()
+                        request.setResponseCode(400)
+                        return {'errcode': 'M_UNKNOWN', 'error': 'Already processed token ID %s', str(first_origin_id)}
+
+                    tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
+                                        inviteToken['sender'], inviteToken['token'],
+                                        originServer=peer.servername, originId=originId, commit=False)
+                    logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
             if 'ephemeral_keys' in inJson and len(inJson['ephemeral_keys']) > 0:
-                first_origin_id = inJson["invite_tokens"].keys()[0]
-                last_seen_id = tokensStore.getLastEphemeralKeysIdFromServer(peer.servername)
-                if last_seen_id < first_origin_id:
-                    # New keys, import
-                    for originId, ephemeralKey in inJson["ephemeral_keys"].items():
-                        tokensStore.storeEphemeralPublicKey(ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'], originServer=peer.servername, originId=originId)
-                        logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
-                else:
-                    request.setResponseCode(400)
-                    return {'errcode': 'M_UNKNOWN', 'error': 'Already processed key ID %s', str(first_origin_id)}
+                last_processed_id = tokensStore.getLastEphemeralKeysIdFromServer(peer.servername)
+                for originId, ephemeralKey in inJson["ephemeral_keys"].items():
+                    # Make sure we haven't processed this token already
+                    # If so, back out of all incoming tokens and return an error
+                    if originId >= last_processed_id:
+                        self.sydent.db.rollback()
+                        request.setResponseCode(400)
+                        return {'errcode': 'M_UNKNOWN', 'error': 'Already processed key ID %s', str(originId)}
+
+                    tokensStore.storeEphemeralPublicKey(
+                        ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'],
+                        originServer=peer.servername, originId=originId, commit=False)
+                    logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
 
 
         self.sydent.db.commit()
