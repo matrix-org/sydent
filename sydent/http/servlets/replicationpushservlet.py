@@ -114,20 +114,29 @@ class ReplicationPushServlet(Resource):
 
             if 'invite_tokens' in inJson and len(inJson['invite_tokens']) > 0:
                 first_origin_id = inJson["invite_tokens"].keys()[0]
-                if tokensStore.getLastTokensIdFromServer(peer.servername) < first_origin_id:
+                last_processed_id = tokensStore.getLastTokensIdFromServer(peer.servername)
+                if last_processed_id < first_origin_id:
                     # New tokens, import
                     for originId, inviteToken in inJson["invite_tokens"].items():
                         tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                             inviteToken['sender'], inviteToken['token'], originServer=peer.servername, originId=originId)
                         logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
+                else:
+                    request.setResponseCode(400)
+                    return {'errcode': 'M_UNKNOWN', 'error': 'Already processed token ID %s', str(first_origin_id)}
 
             if 'ephemeral_keys' in inJson and len(inJson['ephemeral_keys']) > 0:
                 first_origin_id = inJson["invite_tokens"].keys()[0]
-                if tokensStore.getLastTokensIdFromServer(peer.servername) < first_origin_id:
+                last_seen_id = tokensStore.getLastEphemeralKeysIdFromServer(peer.servername)
+                if last_seen_id < first_origin_id:
                     # New keys, import
                     for originId, ephemeralKey in inJson["ephemeral_keys"].items():
                         tokensStore.storeEphemeralPublicKey(ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'], originServer=peer.servername, originId=originId)
                         logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
+                else:
+                    request.setResponseCode(400)
+                    return {'errcode': 'M_UNKNOWN', 'error': 'Already processed key ID %s', str(first_origin_id)}
+
 
         self.sydent.db.commit()
         return {'success':True}
