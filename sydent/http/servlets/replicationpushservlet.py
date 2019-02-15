@@ -120,7 +120,7 @@ class ReplicationPushServlet(Resource):
                     if originId >= last_processed_id:
                         self.sydent.db.rollback()
                         request.setResponseCode(400)
-                        return {'errcode': 'M_UNKNOWN', 'error': 'Already processed token ID %s' % str(first_origin_id)}
+                        return {'errcode': 'M_UNKNOWN', 'error': 'Already processed token ID %s' % str(originId)}
 
                     tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                         inviteToken['sender'], inviteToken['token'],
