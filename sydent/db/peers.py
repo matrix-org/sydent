@@ -111,5 +111,5 @@ class PeerStore:
                         "where name = ?", (ids["invite_tokens"], lastPokeSucceeded, peerName))
         if "ephemeral_kers" in ids:
             cur.execute("update peers set lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
-                        "where name = ?", (ids["ephemeral_keys"], lastPokeSucceeded, peerName))
+                        "where name = ?", (ids["ephemeral_public_keys"], lastPokeSucceeded, peerName))
         self.sydent.db.commit()

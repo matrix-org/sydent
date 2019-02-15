@@ -59,9 +59,9 @@ class ReplicationPushServlet(Resource):
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
             return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
 
-        if 'sg_assocs' not in inJson and 'invite_tokens' not in inJson and 'ephemeral_keys' not in inJson:
-            logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_keys' keys in JSON", peer.servername)
-            return {'errcode': 'M_BAD_JSON', 'error': 'No "sg_assocs", "invite_tokens" or "ephemeral_keys" key in JSON'}
+        if 'sg_assocs' not in inJson and 'invite_tokens' not in inJson and 'ephemeral_public_keys' not in inJson:
+            logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_public_keys' keys in JSON", peer.servername)
+            return {'errcode': 'M_BAD_JSON', 'error': 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON'}
 
         if 'sg_assocs' in inJson:
             failedIds = []
@@ -105,7 +105,7 @@ class ReplicationPushServlet(Resource):
                 return {'errcode': 'M_VERIFICATION_FAILED', 'error': 'Verification failed for one or more associations',
                         'failed_ids':failedIds}
 
-        if 'invite_tokens' in inJson or 'ephemeral_keys' in inJson:
+        if 'invite_tokens' in inJson or 'ephemeral_public_keys' in inJson:
             tokensStore = JoinTokenStore(self.sydent)
 
             # TODO: Peer verification (kinda important lest someone just sends something to this endpoint!!)
@@ -127,9 +127,9 @@ class ReplicationPushServlet(Resource):
                                         originServer=peer.servername, originId=originId, commit=False)
                     logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
-            if 'ephemeral_keys' in inJson and len(inJson['ephemeral_keys']) > 0:
+            if 'ephemeral_public_keys' in inJson and len(inJson['ephemeral_public_keys']) > 0:
                 last_processed_id = tokensStore.getLastEphemeralKeysIdFromServer(peer.servername)
-                for originId, ephemeralKey in inJson["ephemeral_keys"].items():
+                for originId, ephemeralKey in inJson["ephemeral_public_keys"].items():
                     # Make sure we haven't processed this token already
                     # If so, back out of all incoming tokens and return an error
                     if originId >= last_processed_id:
