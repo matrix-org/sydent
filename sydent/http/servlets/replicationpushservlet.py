@@ -119,8 +119,8 @@ class ReplicationPushServlet(Resource):
                     # If so, back out of all incoming tokens and return an error
                     if originId >= last_processed_id:
                         self.sydent.db.rollback()
-                        request.setResponseCode(400)
-                        return {'errcode': 'M_UNKNOWN', 'error': 'Already processed token ID %s' % str(originId)}
+                        request.setResponseCode(200)
+                        return {'success': True, 'message': 'Already processed key ID %s' % str(originId)}
 
                     tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                         inviteToken['sender'], inviteToken['token'],
@@ -134,8 +134,8 @@ class ReplicationPushServlet(Resource):
                     # If so, back out of all incoming tokens and return an error
                     if originId >= last_processed_id:
                         self.sydent.db.rollback()
-                        request.setResponseCode(400)
-                        return {'errcode': 'M_UNKNOWN', 'error': 'Already processed key ID %s' % str(originId)}
+                        request.setResponseCode(200)
+                        return {'success': True, 'message': 'Already processed key ID %s' % str(originId)}
 
                     tokensStore.storeEphemeralPublicKey(
                         ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'],
