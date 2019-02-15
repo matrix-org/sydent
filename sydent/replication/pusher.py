@@ -29,7 +29,7 @@ from sydent.threepid.assocsigner import AssociationSigner
 
 logger = logging.getLogger(__name__)
 
-EPHEMERAL_KEYS_PUSH_LIMIT = 100
+EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT = 100
 INVITE_TOKENS_PUSH_LIMIT = 100
 ASSOCIATIONS_PUSH_LIMIT = 100
 
@@ -77,11 +77,11 @@ class Pusher:
 
     def getEphemeralKeysAfterId(self, afterId, limit):
         join_token_store = JoinTokenStore(self.sydent)
-        (ephemeral_keys, maxId) = join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
+        (ephemeral_public_keys, maxId) = join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
 
         # TODO: Do something for shadow servers?
 
-        return (ephemeral_keys, maxId)
+        return (ephemeral_public_keys, maxId)
 
     def doLocalPush(self):
         """
@@ -119,8 +119,8 @@ class Pusher:
 
                 if True: # TODO: Require a specific flag for invite replication
                     (push_data["invite_tokens"], ids["invite_tokens"]) = self.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
-                    (push_data["ephemeral_keys"], ids["ephemeral_keys"]) = self.getEphemeralKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_KEYS_PUSH_LIMIT)
-                    total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_keys"])
+                    (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = self.getEphemeralKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
+                    total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
 
                 logger.debug("%d updates to push to %s", total_updates, p.servername)
                 if total_updates:

@@ -152,7 +152,7 @@ class JoinTokenStore(object):
 
     def getLastEphemeralKeysIdFromServer(self, server):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select max(origin_id),count(origin_id) from ephemeral_keys"
+        res = cur.execute("select max(origin_id),count(origin_id) from ephemeral_public_keys"
                           " where origin_server = ?", (server,))
         row = res.fetchone()
 
