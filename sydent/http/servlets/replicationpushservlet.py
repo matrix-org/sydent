@@ -27,6 +27,10 @@ import json
 
 logger = logging.getLogger(__name__)
 
+MAX_SG_ASSOCS_LIMIT = 100
+MAX_INVITE_TOKENS_LIMIT = 100
+MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT = 100
+
 class ReplicationPushServlet(Resource):
     def __init__(self, sydent):
         self.sydent = sydent
@@ -63,7 +67,11 @@ class ReplicationPushServlet(Resource):
             logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_public_keys' keys in JSON", peer.servername)
             return {'errcode': 'M_BAD_JSON', 'error': 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON'}
 
-        if 'sg_assocs' in inJson:
+        if 'sg_assocs' in inJson and len(inJson['sg_assocs']) > 0:
+            if len(inJson['invite_tokens']) > MAX_SG_ASSOCS_LIMIT:
+                request.setResponseCode(400)
+                return {'errcode': 'M_BAD_JSON', 'error': '"sg_assocs" has more than %d keys' % MAX_SG_ASSOCS_LIMIT}
+
             failedIds = []
 
             globalAssocsStore = GlobalAssociationStore(self.sydent)
@@ -109,10 +117,13 @@ class ReplicationPushServlet(Resource):
             tokensStore = JoinTokenStore(self.sydent)
 
             # TODO: Peer verification (kinda important lest someone just sends something to this endpoint!!)
-            # TODO: Ensure they aren't going over 100 tokens/keys
-                # Have some sort of verify function in peer/invite_tokens?
 
             if 'invite_tokens' in inJson and len(inJson['invite_tokens']) > 0:
+                if len(inJson['invite_tokens']) > MAX_INVITE_TOKENS_LIMIT:
+                    self.sydent.db.rollback()
+                    request.setResponseCode(400)
+                    return {'errcode': 'M_BAD_JSON', 'error': '"invite_tokens" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}
+
                 last_processed_id = tokensStore.getLastTokensIdFromServer(peer.servername)
                 for originId, inviteToken in inJson["invite_tokens"].items():
                     # Make sure we haven't processed this token already
@@ -128,10 +139,15 @@ class ReplicationPushServlet(Resource):
                     logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
             if 'ephemeral_public_keys' in inJson and len(inJson['ephemeral_public_keys']) > 0:
+                if len(inJson['invite_tokens']) > MAX_INVITE_TOKENS_LIMIT:
+                    self.sydent.db.rollback()
+                    request.setResponseCode(400)
+                    return {'errcode': 'M_BAD_JSON', 'error': '"ephemeral_public_keys" has more than %d keys' % MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT})
+
                 last_processed_id = tokensStore.getLastEphemeralKeysIdFromServer(peer.servername)
                 for originId, ephemeralKey in inJson["ephemeral_public_keys"].items():
-                    # Make sure we haven't processed this token already
-                    # If so, back out of all incoming tokens and return an error
+                    # Make sure we haven't processed this key already
+                    # If so, back out of all incoming keys and return an error
                     if originId >= last_processed_id:
                         self.sydent.db.rollback()
                         request.setResponseCode(200)
