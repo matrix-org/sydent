@@ -52,10 +52,13 @@ class Pusher:
 
             if self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
                 shadowAssoc = copy.deepcopy(localAssocs[localId])
-                shadowAssoc.mxid = shadowAssoc.mxid.replace(
-                    ":" + self.sydent.shadow_hs_master,
-                    ":" + self.sydent.shadow_hs_slave
-                )
+
+                # mxid is null if 3pid has been unbound
+                if shadowAssoc.mxid:
+                    shadowAssoc.mxid = shadowAssoc.mxid.replace(
+                        ":" + self.sydent.shadow_hs_master,
+                        ":" + self.sydent.shadow_hs_slave
+                    )
                 shadowSgAssoc = assocSigner.signedThreePidAssociation(shadowAssoc)
 
             signedAssocs[localId] = (sgAssoc, shadowSgAssoc)
