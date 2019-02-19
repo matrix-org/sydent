@@ -16,7 +16,7 @@
 
 import signedjson.sign
 
-class AssociationSigner:
+class Signer:
     def __init__(self, sydent):
         self.sydent = sydent
 
