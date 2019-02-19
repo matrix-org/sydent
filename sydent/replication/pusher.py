@@ -25,7 +25,7 @@ from sydent.replication.peer import LocalPeer
 from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.peers import PeerStore
-from sydent.threepid.assocsigner import AssociationSigner
+from sydent.threepid.signer import Signer
 
 logger = logging.getLogger(__name__)
 
@@ -43,17 +43,14 @@ class Pusher:
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
         cb.start(10.0)
 
-    def getSignedAssociationsAfterId(self, afterId, limit):
-        signedAssocs = {}
+    def getAssociationsAfterId(self, afterId, limit):
+        assocs = {}
 
         localAssocStore = LocalAssociationStore(self.sydent)
         (localAssocs, maxId) = localAssocStore.getAssociationsAfterId(afterId, limit)
 
-        assocSigner = AssociationSigner(self.sydent)
-
         for localId in localAssocs:
-            sgAssoc = assocSigner.signedThreePidAssociation(localAssocs[localId])
-            shadowSgAssoc = None
+            shadowAssoc = None
 
             if self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
                 shadowAssoc = copy.deepcopy(localAssocs[localId])
@@ -64,11 +61,10 @@ class Pusher:
                         ":" + self.sydent.shadow_hs_master,
                         ":" + self.sydent.shadow_hs_slave
                     )
-                shadowSgAssoc = assocSigner.signedThreePidAssociation(shadowAssoc)
 
-            signedAssocs[localId] = (sgAssoc, shadowSgAssoc)
+            assocs[localId] = (localAssocs[localId], shadowAssoc)
 
-        return (signedAssocs, maxId)
+        return (assocs, maxId)
 
     def getInviteTokensAfterId(self, afterId, limit):
         join_token_store = JoinTokenStore(self.sydent)
@@ -117,17 +113,22 @@ class Pusher:
                 ids = {}
                 total_updates = 0
 
-                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT)
+                # Push associations (called sg_assocs for legacy reasons)
+                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT)
                 total_updates += len(push_data["sg_assocs"])
 
-                if True: # TODO: Require a specific flag for invite replication
-                    (push_data["invite_tokens"], ids["invite_tokens"]) = self.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
-                    (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = self.getEphemeralKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
-                    total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
+                # Push invite tokens and ephemeral public keys
+                (push_data["invite_tokens"], ids["invite_tokens"]) = self.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
+                (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = self.getEphemeralKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
+                total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
+
+                # Sign push data
+                signer = Signer(self.sydent)
+                push_data = signer.signReplication(push_data)
 
                 logger.debug("%d updates to push to %s", total_updates, p.servername)
                 if total_updates:
-                    logger.info("Pushing %d updates to %s", total_updates, p.servername)
+                    logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
                     logger.info("Sending: %s", str(push_data))
                     updateDeferred = p.pushUpdates(push_data)
                     updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)

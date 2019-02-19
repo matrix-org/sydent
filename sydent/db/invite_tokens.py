@@ -88,7 +88,7 @@ class JoinTokenStore(object):
         row = res.fetchone()
 
         if row[1] == 0:
-            return None
+            return 0
 
         return row[0]
 
@@ -157,7 +157,7 @@ class JoinTokenStore(object):
         row = res.fetchone()
 
         if row[1] == 0:
-            return None
+            return 0
 
         return row[0]
 
