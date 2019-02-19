@@ -86,6 +86,10 @@ class InfoServlet(Resource):
 
         result = copy.deepcopy(result)
 
+        # Remove 'requires_invite' if found
+        if 'requires_invite' in result:
+            result.pop('requires_invite')
+
         if self.sydent.nonshadow_ips:
             ip = IPAddress(self.sydent.ip_from_request(request))
 
