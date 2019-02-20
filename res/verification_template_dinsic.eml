@@ -18,6 +18,9 @@ Vous avez fait une demande d'enregistrement avec cette adresse email sur tchap, 
 Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:
 
 %(link)s
+En cliquant sur ce lien vous acceptez les conditions générales d'utilisation consultables à l'adresse suivante: 
+https://www.tchap.gouv.fr/tac.html
+
 
 Si vous n'avez pas fait de demande d'accès à tchap, vous pouvez ignorer cet email.
 
@@ -111,6 +114,10 @@ pre, code {
                     <p>Si c'est vraiment vous qui avez fait cette demande, vous pouvez cliquer sur le lien suivant pour achever la vérification:</p>
 
                     <p><a href="%(link)s">Terminer la validation de l'email</a></p>
+
+		    <p>En cliquant sur ce lien vous acceptez les <a href="https://www.tchap.gouv.fr/tac.html">conditions générales d'utilisation</a></p>
+
+
 
                     <p>Si vous n'avez pas fait de demande d'accès à tchap, vous pouvez ignorer cet email.</p>
 					
