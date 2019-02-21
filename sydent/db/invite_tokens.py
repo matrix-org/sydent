@@ -58,7 +58,7 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "SELECT id, medium, address, room_id, sender, token FROM invite_tokens"
-            " WHERE id > ? LIMIT ?",
+            " WHERE id > ? AND origin_id = NULL LIMIT ?",
             (afterId, limit,)
         )
         rows = res.fetchall()
@@ -130,7 +130,7 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "SELECT id, public_key, verify_count, persistence_ts FROM ephemeral_public_keys"
-            " WHERE id > ? LIMIT ?",
+            " WHERE id > ? AND origin_id = NULL LIMIT ?",
             (afterId, limit,)
         )
         rows = res.fetchall()
