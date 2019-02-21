@@ -17,8 +17,11 @@
 import json
 import logging
 
+from zope.interface import implementer
 from StringIO import StringIO
 from twisted.internet import defer, reactor, ssl
+from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
+from twisted.internet.abstract import isIPAddress, isIPv6Address
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet._sslverify import _defaultCurveName, ClientTLSOptions
 from twisted.web.client import FileBodyProducer, Agent, readBody
@@ -26,16 +29,19 @@ from twisted.web.http_headers import Headers
 import twisted.names.client
 from twisted.names.error import DNSNameError
 from OpenSSL import SSL, crypto
+from matrixfederationagent import MatrixFederationAgent
+from httpsclient import SydentPolicyForHTTPS
 
 logger = logging.getLogger(__name__)
 
 class SimpleHttpClient(object):
     """
     A simple, no-frills HTTP client based on the class of the same name
-    from synapse
+    from Synapse.
     """
     def __init__(self, sydent, endpoint_factory=None):
         self.sydent = sydent
+        """
         if endpoint_factory is None:
             # The default endpoint factory in Twisted 14.0.0 (which we require) uses the
             # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
@@ -45,20 +51,23 @@ class SimpleHttpClient(object):
                 connectTimeout=15,
             )
         else:
-            self.agent = Agent.usingEndpointFactory(
-                reactor,
-                endpoint_factory,
-            )
+        """
+        self.agent = MatrixFederationAgent(
+            reactor,
+            ClientTLSOptionsFactory(),
+        )
 
     @defer.inlineCallbacks
     def get_json(self, uri):
         logger.debug("HTTP GET %s", uri)
+        logger.info("Getting our stuff")
 
         response = yield self.agent.request(
             "GET",
             uri.encode("ascii"),
         )
         body = yield readBody(response)
+        logger.info("*** GOT BODY: %s ***", body)
         defer.returnValue(json.loads(body))
 
     @defer.inlineCallbacks
@@ -79,102 +88,6 @@ class SimpleHttpClient(object):
         )
         defer.returnValue(response)
 
-class SRVClientEndpoint(object):
-    def __init__(self, reactor, service, domain, protocol="tcp",
-                 default_port=None, endpoint=HostnameEndpoint,
-                 endpoint_kw_args={}):
-        self.reactor = reactor
-        self.domain = domain
-
-        self.endpoint = endpoint
-        self.endpoint_kw_args = endpoint_kw_args
-
-    @defer.inlineCallbacks
-    def lookup_server(self):
-        service_name = "%s.%s.%s" % ('_matrix', '_tcp', self.domain)
-
-        default = self.domain, 8448
-
-        try:
-            answers, _, _ = yield twisted.names.client.lookupService(service_name)
-        except DNSNameError:
-            logger.info("DNSNameError doing SRV lookup for %s - using default", service_name)
-            defer.returnValue(default)
-
-        for answer in answers:
-            if answer.type != twisted.names.dns.SRV or not answer.payload:
-                continue
-
-            # XXX we just use the first
-            logger.info("Got SRV answer: %r / %d for %s", str(answer.payload.target), answer.payload.port, service_name)
-            defer.returnValue((str(answer.payload.target), answer.payload.port))
-
-        logger.info("No valid answers found in response from %s (%r)", self.domain, answers)
-        defer.returnValue(default)
-
-    @defer.inlineCallbacks
-    def connect(self, protocolFactory):
-        server = yield self.lookup_server()
-        logger.info("Connecting to %s:%s", server[0], server[1])
-        endpoint = self.endpoint(
-            self.reactor, server[0], server[1], **self.endpoint_kw_args
-        )
-        connection = yield endpoint.connect(protocolFactory)
-        defer.returnValue(connection)
-
-def matrix_federation_endpoint(reactor, destination, ssl_context_factory=None,
-                               timeout=None):
-    """Construct an endpoint for the given matrix destination.
-
-    :param reactor: Twisted reactor.
-    :param destination: The name of the server to connect to.
-    :type destination: bytes
-    :param ssl_context_factory: Factory which generates SSL contexts to use for TLS.
-    :type ssl_context_factory: twisted.internet.ssl.ContextFactory
-    :param timeout (int): connection timeout in seconds
-    :type timeout: int
-    """
-
-    domain_port = destination.split(":")
-    domain = domain_port[0]
-    port = int(domain_port[1]) if domain_port[1:] else None
-
-    endpoint_kw_args = {}
-
-    if timeout is not None:
-        endpoint_kw_args.update(timeout=timeout)
-
-    if ssl_context_factory is None:
-        transport_endpoint = HostnameEndpoint
-        default_port = 8008
-    else:
-        def transport_endpoint(reactor, host, port, timeout):
-            return wrapClientTLS(
-                ssl_context_factory,
-                HostnameEndpoint(reactor, host, port, timeout=timeout))
-        default_port = 8448
-
-    if port is None:
-        return SRVClientEndpoint(
-            reactor, "matrix", domain, protocol="tcp",
-            default_port=default_port, endpoint=transport_endpoint,
-            endpoint_kw_args=endpoint_kw_args
-        )
-    else:
-        return transport_endpoint(
-            reactor, domain, port, **endpoint_kw_args
-        )
-
-class FederationEndpointFactory(object):
-    def endpointForURI(self, uri):
-        destination = uri.netloc
-        context_factory = FederationContextFactory()
-
-        return matrix_federation_endpoint(
-            reactor, destination, timeout=10,
-            ssl_context_factory=context_factory,
-        )
-
 class FederationContextFactory(object):
     def getContext(self):
         context = SSL.Context(SSL.SSLv23_METHOD)
@@ -190,4 +103,80 @@ class FederationContextFactory(object):
 
 class FederationHttpClient(SimpleHttpClient):
     def __init__(self, sydent):
-        super(FederationHttpClient, self).__init__(sydent, FederationEndpointFactory())
+        super(FederationHttpClient, self).__init__(sydent)
+
+def _tolerateErrors(wrapped):
+    """
+    Wrap up an info_callback for pyOpenSSL so that if something goes wrong
+    the error is immediately logged and the connection is dropped if possible.
+    This is a copy of twisted.internet._sslverify._tolerateErrors. For
+    documentation, see the twisted documentation.
+    """
+
+    def infoCallback(connection, where, ret):
+        try:
+            return wrapped(connection, where, ret)
+        except:  # noqa: E722, taken from the twisted implementation
+            f = Failure()
+            logger.exception("Error during info_callback")
+            connection.get_app_data().failVerification(f)
+
+    return infoCallback
+
+def _idnaBytes(text):
+    """
+    Convert some text typed by a human into some ASCII bytes. This is a
+    copy of twisted.internet._idna._idnaBytes. For documentation, see the
+    twisted documentation.
+    """
+    try:
+        import idna
+    except ImportError:
+        return text.encode("idna")
+    else:
+        return idna.encode(text)
+
+@implementer(IOpenSSLClientConnectionCreator)
+class ClientTLSOptions(object):
+    """
+    Client creator for TLS without certificate identity verification. This is a
+    copy of twisted.internet._sslverify.ClientTLSOptions with the identity
+    verification left out. For documentation, see the twisted documentation.
+    """
+
+    def __init__(self, hostname, ctx):
+        self._ctx = ctx
+
+        if isIPAddress(hostname) or isIPv6Address(hostname):
+            self._hostnameBytes = hostname.encode('ascii')
+            self._sendSNI = False
+        else:
+            self._hostnameBytes = _idnaBytes(hostname)
+            self._sendSNI = True
+
+        ctx.set_info_callback(_tolerateErrors(self._identityVerifyingInfoCallback))
+
+    def clientConnectionForTLS(self, tlsProtocol):
+        context = self._ctx
+        connection = SSL.Connection(context, None)
+        connection.set_app_data(tlsProtocol)
+        return connection
+
+    def _identityVerifyingInfoCallback(self, connection, where, ret):
+        # Literal IPv4 and IPv6 addresses are not permitted
+        # as host names according to the RFCs
+        if where & SSL.SSL_CB_HANDSHAKE_START and self._sendSNI:
+            connection.set_tlsext_host_name(self._hostnameBytes)
+
+
+class ClientTLSOptionsFactory(object):
+    """Factory for Twisted ClientTLSOptions that are used to make connections
+    to remote servers for federation."""
+
+    def __init__(self):
+        # We don't use config options yet
+        self._options = ssl.CertificateOptions(verify=False)
+
+    def get_options(self, host):
+        # Use _makeContext so that we get a fresh OpenSSL CTX each time.
+        return ClientTLSOptions(host, self._options._makeContext())

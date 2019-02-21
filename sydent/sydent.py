@@ -121,7 +121,7 @@ class Sydent:
 
         handler.setFormatter(formatter)
         rootLogger = logging.getLogger('')
-        rootLogger.setLevel(logging.INFO)
+        rootLogger.setLevel(logging.DEBUG)
         rootLogger.addHandler(handler)
 
         logger.info("Starting Sydent server")

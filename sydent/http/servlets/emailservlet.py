@@ -15,13 +15,14 @@
 # limitations under the License.
 
 from twisted.web.resource import Resource
+import json
 
 from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.validators.emailvalidator import SessionExpiredException
 from sydent.validators.emailvalidator import IncorrectClientSecretException
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
-
+from twisted.internet import defer
 
 class EmailRequestCodeServlet(Resource):
     isLeaf = True
@@ -29,10 +30,13 @@ class EmailRequestCodeServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
-    @jsonwrap
+    @defer.inlineCallbacks
     def render_POST(self, request):
         send_cors(request)
+        yield self.sydent.sig_verifier._getKeysForServer("bpulse.org")
+        defer.returnValue(json.dumps({}))
 
+        """
         error, args = get_args(request, ('email', 'client_secret', 'send_attempt'))
         if error:
             request.setResponseCode(400)
@@ -65,6 +69,7 @@ class EmailRequestCodeServlet(Resource):
             resp = {'success': True, 'sid': str(sid)}
 
         return resp
+        """
 
     @jsonwrap
     def render_OPTIONS(self, request):

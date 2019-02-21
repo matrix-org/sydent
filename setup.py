@@ -47,6 +47,8 @@ setup(
 
         "phonenumbers",
         "pyopenssl",
+        "netaddr>=0.7.0",
+        "sortedcontainers>=2.1.0",
     ],
     # make sure we package the sql files
     include_package_data=True,

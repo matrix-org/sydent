@@ -75,6 +75,9 @@ class Verifier(object):
             logger.info("Got keys for %s: caching until %s", server_name, result['valid_until_ts'])
             self.cache[server_name] = result
 
+        logger.info("*** GOT SERVER KEYS ***")
+        logger.info(result['verify_keys'])
+
         defer.returnValue(result['verify_keys'])
 
     @defer.inlineCallbacks
@@ -83,9 +86,7 @@ class Verifier(object):
         of the signatures on it
         XXX: This contains a fairly noddy version of the home server
         SRV lookup and signature verification. It only looks at
-        the first SRV result. It does no caching (just fetches the
-        signature each time and does not contact any other servers
-        to do perspectives checks.
+        the first SRV result.
 
         :param acceptable_server_names: If provided and not None,
         only signatures from servers in this list will be accepted.
@@ -131,7 +132,7 @@ class Verifier(object):
 
         :param request: The request object to authenticate
         :param content: The content of the request, if any
-        :type content: bytes or None
+        :type content: bytes, None
 
         :returns: The origin of the server whose signature was validated
         """
