@@ -41,7 +41,7 @@ class Peer(object):
         """
         :param sgAssocs: Sequence of (originId, (sgAssoc, shadowSgAssoc)) tuples where originId
             is the id on the creating server and sgAssoc is the json object of the signed association
-        :return a deferred
+        :return:
         """
         pass
 
@@ -125,7 +125,7 @@ class RemotePeer(Peer):
         """Push updates to a remote peer.
 
         :param data: A dictionary of possible `sg_assocs`, `invite_tokens` and `ephemeral_public_keys` keys.
-        :return a deferred
+        :returns a deferred.
         """
 
         # sgAssocs is comprised of tuples (sgAssoc, shadowSgAssoc)
