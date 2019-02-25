@@ -22,6 +22,10 @@ import logging
 import twisted.internet.reactor
 import twisted.internet.ssl
 
+from sydent.http.servlets.authenticated_bind_threepid_servlet import (
+    AuthenticatedBindThreePidServlet,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +37,7 @@ class ClientApiHttpServer:
         matrix = Resource()
         identity = Resource()
         api = Resource()
-        v1 = Resource()
+        v1 = self.sydent.servlets.v1
 
         validate = Resource()
         email = Resource()
@@ -107,6 +111,30 @@ class ClientApiHttpServer:
         httpPort = int(self.sydent.cfg.get('http', 'clientapi.http.port'))
         logger.info("Starting Client API HTTP server on port %d", httpPort)
         twisted.internet.reactor.listenTCP(httpPort, self.factory)
+
+
+class InternalApiHttpServer(object):
+    def __init__(self, sydent):
+        self.sydent = sydent
+
+    def setup(self, interface, port):
+        logger.info("Starting Internal API HTTP server on %s:%d", interface, port)
+        root = Resource()
+
+        matrix = Resource()
+        root.putChild('_matrix', matrix)
+
+        identity = Resource()
+        matrix.putChild('identity', identity)
+
+        internal = Resource()
+        identity.putChild('internal', internal)
+
+        authenticated_bind = AuthenticatedBindThreePidServlet(self.sydent)
+        internal.putChild('bind', authenticated_bind)
+
+        factory = Site(root)
+        twisted.internet.reactor.listenTCP(port, factory)
 
 
 class ReplicationHttpsServer:
