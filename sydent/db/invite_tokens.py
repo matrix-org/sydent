@@ -184,7 +184,8 @@ class JoinTokenStore(object):
         
         :param afterId: A database id to act as an offset. Keys after this id are returned.
         :param limit: Max amount of database rows to return.
-        :returns a deferred
+        :returns a tuple consisting of a list of ephemeral public keys and
+        the maximum table id that was extracted.
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
