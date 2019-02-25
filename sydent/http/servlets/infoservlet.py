@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 New Vector Ltd
+# Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,8 +33,9 @@ logger = logging.getLogger(__name__)
 class InfoServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd, internal=False):
         self.sydent = syd
+        self.internal = internal
 
         try:
             file = open('info.yaml')
@@ -53,10 +54,12 @@ class InfoServlet(Resource):
 
     def render_GET(self, request):
         """
-        Maps a threepid to the responsible HS domain. For use by clients.
+        Maps a threepid to the responsible HS domain, and optionally gives invitation status.
+        For use by Synapse instances.
         Params: 'medium': the medium of the threepid
                 'address': the address of the threepid
-        Returns: { hs: ..., [shadow_hs: ...]}
+                'internal': whether invitation status should be returned (for access by Synapse instances)
+        Returns: { hs: ..., [shadow_hs: ..., invited: true/false, requires_invite: true/false] }
         """
 
         send_cors(request)
@@ -66,6 +69,9 @@ class InfoServlet(Resource):
 
         medium = args['medium']
         address = args['address']
+
+        joinTokenStore = JoinTokenStore(self.sydent)
+        pendingJoinTokens = joinTokenStore.getTokens(medium, address)
 
         result = {}
 
@@ -83,8 +89,13 @@ class InfoServlet(Resource):
 
         result = copy.deepcopy(result)
 
-        # Remove 'requires_invite' if found
-        result.pop('requires_invite', None)
+        if not self.internal:
+            # Remove 'requires_invite' from responses
+            result.pop('requires_invite', None)
+        else if 'requires_invite' not in result:
+            # If internal api and 'requires_invite' has not been specified,
+            # infer False
+            result['requires_invite'] = False
 
         if self.sydent.nonshadow_ips:
             ip = IPAddress(self.sydent.ip_from_request(request))
@@ -95,6 +106,10 @@ class InfoServlet(Resource):
                 result.pop('shadow_hs', None)
             else:
                 result.setdefault('shadow_hs', '')
+
+        if self.internal:
+            # Only show if internal api
+            result['invited'] = True if pendingJoinTokens else False
 
         return json.dumps(result)
 
