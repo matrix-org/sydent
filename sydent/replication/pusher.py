@@ -23,7 +23,7 @@ from sydent.util import time_msec
 from sydent.replication.peer import LocalPeer
 from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.db.peers import PeerStore
-from sydent.threepid.assocsigner import AssociationSigner
+from sydent.threepid.signer import Signer
 
 logger = logging.getLogger(__name__)
 
@@ -39,15 +39,15 @@ class Pusher:
         cb.start(10.0)
 
     def getSignedAssociationsAfterId(self, afterId, limit):
-        signedAssocs = {}
+        assocs = {}
 
         localAssocStore = LocalAssociationStore(self.sydent)
         (localAssocs, maxId) = localAssocStore.getAssociationsAfterId(afterId, limit)
 
-        assocSigner = AssociationSigner(self.sydent)
+        signer = Signer(self.sydent)
 
         for localId in localAssocs:
-            sgAssoc = assocSigner.signedThreePidAssociation(localAssocs[localId])
+            sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
             shadowSgAssoc = None
 
             if self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
@@ -59,7 +59,7 @@ class Pusher:
                         ":" + self.sydent.shadow_hs_master,
                         ":" + self.sydent.shadow_hs_slave
                     )
-                shadowSgAssoc = assocSigner.signedThreePidAssociation(shadowAssoc)
+                shadowSgAssoc = signer.signedThreePidAssociation(shadowAssoc)
 
             signedAssocs[localId] = (sgAssoc, shadowSgAssoc)
 

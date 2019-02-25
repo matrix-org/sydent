@@ -25,7 +25,7 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import LocalAssociationStore
 
 from sydent.util import time_msec
-from sydent.threepid.assocsigner import AssociationSigner
+from sydent.threepid.signer import Signer
 
 from sydent.threepid import ThreepidAssociation
 
@@ -88,8 +88,8 @@ class ThreepidBinder:
             assoc.extra_fields["invites"] = invites
             joinTokenStore.markTokensAsSent(assoc.medium, assoc.address)
 
-        assocSigner = AssociationSigner(self.sydent)
-        sgassoc = assocSigner.signedThreePidAssociation(assoc)
+        signer = Signer(self.sydent)
+        sgassoc = signer.signedThreePidAssociation(assoc)
 
         self._notify(sgassoc, 0)
 
