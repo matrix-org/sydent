@@ -44,6 +44,14 @@ class Pusher:
         cb.start(10.0)
 
     def getAssociationsAfterId(self, afterId, limit):
+        """Return max `limit` associations from the database after a given
+        DB table id.
+
+        :param afterId: A database id to act as an offset. Rows after this id are returned.
+        :param limit: Max amount of database rows to return.
+        :returns a tuple with the first item being a list of associations, and the
+        second being the maximum table id of the returned associations.
+        """
         assocs = {}
 
         localAssocStore = LocalAssociationStore(self.sydent)
@@ -69,6 +77,11 @@ class Pusher:
     def getInviteTokensAfterId(self, afterId, limit):
         """Return max `limit` invite tokens from the database after a given
         DB table id.
+
+        :param afterId: A database id to act as an offset. Rows after this id are returned.
+        :param limit: Max amount of database rows to return.
+        :returns a tuple with the first item being a list of tokens, and the
+        second being the maximum table id of the returned tokens.
         """
         join_token_store = JoinTokenStore(self.sydent)
         (invite_tokens, maxId) = join_token_store.getTokensAfterId(afterId, limit)
@@ -78,8 +91,13 @@ class Pusher:
         return (invite_tokens, maxId)
 
     def getEphemeralPublicKeysAfterId(self, afterId, limit):
-        """Return max `limit` ephemerate keys from the database after a given
-        DB table id.
+        """Return max `limit` ephemeral keys from the database after a given
+        table id.
+
+        :param afterId: A database id to act as an offset. Rows after this id are returned.
+        :param limit: Max amount of database rows to return.
+        :returns a tuple with the first item being a list of keys, and the
+        second being the maximum table id of the returned keys.
         """
         join_token_store = JoinTokenStore(self.sydent)
         (ephemeral_public_keys, maxId) = join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
@@ -102,6 +120,7 @@ class Pusher:
         localPeer.pushUpdates(signedAssocs)
 
     def scheduledPush(self):
+        """Push pending updates to a remote peer. To be called regularly."""
         if self.pushing:
             return
         self.pushing = True
@@ -145,6 +164,7 @@ class Pusher:
                 self.pushing = False
 
     def _pushSucceeded(self, result, peer, ids):
+        """To be called after a successful push to a remote peer."""
         logger.info("Pushed updates to %s with result %d %s",
                     peer.servername, result.code, result.phrase)
 
@@ -154,6 +174,7 @@ class Pusher:
         self.scheduledPush()
 
     def _pushFailed(self, failure, peer):
+        """To be called after an unsuccessful push to a remote peer."""
         logger.info("Failed to push updates to %s:%s: %s", peer.servername, peer.port, failure)
         self.pushing = False
         return None
