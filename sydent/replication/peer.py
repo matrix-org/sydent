@@ -13,18 +13,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import twisted.internet.defer
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 
 import signedjson.sign
+import signedjson.key
 
 import logging
 import json
 
 import twisted.internet.reactor
-import twisted.internet.defer
+from twisted.internet import defer
 from twisted.web.client import readBody
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ class LocalPeer(Peer):
                 else:
                     globalAssocStore.removeAssociation(assocObj.medium, assocObj.address)
 
-        d = twisted.internet.defer.succeed(True)
+        d = defer.succeed(True)
         return d
 
 
@@ -79,20 +79,29 @@ class RemotePeer(Peer):
         self.sydent = sydent
         self.port = 1001
 
+        # Get verify key from signing key
+        signing_key = signedjson.key.decode_signing_key_base64(alg, "0", self.pubkeys[alg])
+        self.verify_key = signing_key.verify_key
+
+        # Attach metadata
+        self.verify_key.alg = alg
+        self.verify_key.version = 0
+
     def verifyMessage(self, jsonMessage):
         if not 'signatures' in jsonMessage:
             raise NoSignaturesException()
 
+        alg = 'ed25519'
+
         key_ids = signedjson.sign.signature_ids(jsonMessage, self.servername)
-        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith("ed25519:"):
+        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith(alg + ":"):
             e = NoMatchingSignatureException()
             e.foundSigs = jsonMessage['signatures'].keys()
             e.requiredServername = self.servername
             raise e
-        verify_key = yield self.get_server_verify_key(server_name, key_ids)
-        verifyKey = nacl.signing.VerifyKey(self.pubkeys['ed25519'], encoder=nacl.encoding.HexEncoder)
-        verifyKey.alg = 'ed25519'
-        signedjson.sign.verify_signed_json(jsonMessage, self.servername, verifyKey)
+
+        # Verify the JSON
+        signedjson.sign.verify_signed_json(jsonMessage, self.servername, self.verify_key)
 
     def pushUpdates(self, sgAssocs):
         body = {'sgAssocs': sgAssocs}
@@ -107,7 +116,7 @@ class RemotePeer(Peer):
         # (ie. remove the record we kept in order to propagate the deletion to
         # other peers).
 
-        updateDeferred = twisted.internet.defer.Deferred()
+        updateDeferred = defer.Deferred()
 
         reqDeferred.addCallback(self._pushSuccess, updateDeferred=updateDeferred)
         reqDeferred.addErrback(self._pushFailed, updateDeferred=updateDeferred)
