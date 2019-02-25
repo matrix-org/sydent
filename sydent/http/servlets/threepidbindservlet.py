@@ -16,6 +16,7 @@
 
 from twisted.web.resource import Resource
 
+from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
@@ -41,8 +42,8 @@ class ThreePidBindServlet(Resource):
                         'error': "No valid session was found matching that sid and client secret"}
 
         try:
-            res = self.sydent.threepidBinder.addBinding(sid, clientSecret, mxid)
-            return res
+            valSessionStore = ThreePidValSessionStore(self.sydent)
+            s = valSessionStore.getValidatedSession(sid, clientSecret)
         except IncorrectClientSecretException:
             return noMatchError
         except SessionExpiredException:
@@ -54,6 +55,8 @@ class ThreePidBindServlet(Resource):
             return {'errcode': 'M_SESSION_NOT_VALIDATED',
                     'error': "This validation session has not yet been completed"}
 
+        res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
+        return res
 
     @jsonwrap
     def render_OPTIONS(self, request):
