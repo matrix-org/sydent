@@ -92,15 +92,16 @@ class InfoServlet(Resource):
         if not self.internal:
             # Remove 'requires_invite' from responses
             result.pop('requires_invite', None)
-        else if 'requires_invite' not in result:
+        elif 'requires_invite' not in result:
             # If internal api and 'requires_invite' has not been specified,
             # infer False
             result['requires_invite'] = False
 
-        if self.sydent.nonshadow_ips:
+        if not self.internal and self.sydent.nonshadow_ips:
+            # If non-internal API, determine which hs to show a client
             ip = IPAddress(self.sydent.ip_from_request(request))
 
-            # Remove shadow_hs from response if user is from a shadow server
+            # Present shadow_hs as hs if user is from a shadow server
             if (ip not in self.sydent.nonshadow_ips):
                 result['hs'] = result['shadow_hs']
                 result.pop('shadow_hs', None)
@@ -108,8 +109,11 @@ class InfoServlet(Resource):
                 result.setdefault('shadow_hs', '')
 
         if self.internal:
-            # Only show if internal api
+            # Only show 'invited' if internal api
             result['invited'] = True if pendingJoinTokens else False
+
+            # Remove `shadow_hs` if internal
+            result.pop('shadow_hs', None)
 
         return json.dumps(result)
 
