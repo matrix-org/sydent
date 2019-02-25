@@ -51,6 +51,41 @@ class InfoServlet(Resource):
         except Exception as e:
             logger.error(e)
 
+    def info_match_user_id(medium, address):
+        """Return information for a given medium/address combination.
+
+        :param medium: The medium of the address.
+        :type medium: str
+        :param address: The address of the 3PID.
+        :type address: str
+        """
+        result = {}
+
+        # Find an entry in the info file matching this user's ID
+        if address in self.config['medium']['email']['entries']:
+            result = self.config['medium']['email']['entries'][address]
+        else:
+            for pattern_group in self.config['medium']['email']['patterns']:
+                for pattern in pattern_group:
+                    if (re.match("^" + pattern + "$", address)):
+                        result = pattern_group[pattern]
+                        break
+                if result:
+                    break
+
+        # Change output if user is from a shadow homeserver
+        if self.sydent.nonshadow_ips:
+            ip = IPAddress(self.sydent.ip_from_request(request))
+
+            # Present shadow_hs as hs if user is from a shadow server
+            if (ip not in self.sydent.nonshadow_ips):
+                result['hs'] = result['shadow_hs']
+                result.pop('shadow_hs', None)
+            else:
+                result.setdefault('shadow_hs', '')
+
+        return result
+
     def render_GET(self, request):
         """
         Maps a threepid to the responsible HS domain. For use by clients.
@@ -67,34 +102,11 @@ class InfoServlet(Resource):
         medium = args['medium']
         address = args['address']
 
-        result = {}
-
         # Find an entry in the info file matching this user's ID
-        if address in self.config['medium']['email']['entries']:
-            result = self.config['medium']['email']['entries'][address]
-        else:
-            for pattern_group in self.config['medium']['email']['patterns']:
-                for pattern in pattern_group:
-                    if (re.match("^" + pattern + "$", address)):
-                        result = pattern_group[pattern]
-                        break
-                if result:
-                    break
+        result = info_match_user_id(medium, address)
 
-        result = copy.deepcopy(result)
-
-        # Remove 'requires_invite' if found
+        # Non-internal. Remove 'requires_invite' if found
         result.pop('requires_invite', None)
-
-        if self.sydent.nonshadow_ips:
-            ip = IPAddress(self.sydent.ip_from_request(request))
-
-            # Remove shadow_hs from response if user is from a shadow server
-            if (ip not in self.sydent.nonshadow_ips):
-                result['hs'] = result['shadow_hs']
-                result.pop('shadow_hs', None)
-            else:
-                result.setdefault('shadow_hs', '')
 
         return json.dumps(result)
 

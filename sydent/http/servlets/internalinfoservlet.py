@@ -25,6 +25,7 @@ import yaml
 from netaddr import IPAddress
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets.infoservlet import info_match_user_id
 
 
 logger = logging.getLogger(__name__)
@@ -68,39 +69,13 @@ class InternalInfoServlet(Resource):
         medium = args['medium']
         address = args['address']
 
+        # Find an entry in the info file matching this user's ID
+        result = info_match_user_id(medium, address)
+
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(medium, address)
 
-        result = {}
-
-        # Find an entry in the info file matching this user's ID
-        if address in self.config['medium']['email']['entries']:
-            result = self.config['medium']['email']['entries'][address]
-        else:
-            for pattern_group in self.config['medium']['email']['patterns']:
-                for pattern in pattern_group:
-                    if (re.match("^" + pattern + "$", address)):
-                        result = pattern_group[pattern]
-                        break
-                if result:
-                    break
-
-        result = copy.deepcopy(result)
-
-        # If 'requires_invite' has not been specified, infer False
-        if 'requires_invite' not in result:
-            result['requires_invite'] = False
-
-        if self.sydent.nonshadow_ips:
-            ip = IPAddress(self.sydent.ip_from_request(request))
-
-            # Remove shadow_hs from response if user is from a shadow server
-            if (ip not in self.sydent.nonshadow_ips):
-                result['hs'] = result['shadow_hs']
-                result.pop('shadow_hs', None)
-            else:
-                result.setdefault('shadow_hs', '')
-
+        # Report whether this user has been invited to a room
         result['invited'] = True if pendingJoinTokens else False
         return json.dumps(result)
 
