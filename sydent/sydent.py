@@ -49,6 +49,7 @@ from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.infoservlet import InfoServlet
+from http.servlets.internalinfoservlet import InternalInfoServlet
 from http.servlets.profilereplicationservlet import ProfileReplicationServlet
 from http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
 
@@ -190,7 +191,7 @@ class Sydent:
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
         self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.info = InfoServlet(self)
-        self.servlets.internalInfo = InfoServlet(self, internal=True)
+        self.servlets.internalInfo = InternalInfoServlet(self)
         self.servlets.userDirectorySearchServlet = UserDirectorySearchServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
