@@ -67,9 +67,6 @@ class InfoServlet(Resource):
         medium = args['medium']
         address = args['address']
 
-        joinTokenStore = JoinTokenStore(self.sydent)
-        pendingJoinTokens = joinTokenStore.getTokens(medium, address)
-
         result = {}
 
         # Find an entry in the info file matching this user's ID
@@ -87,8 +84,7 @@ class InfoServlet(Resource):
         result = copy.deepcopy(result)
 
         # Remove 'requires_invite' if found
-        if 'requires_invite' in result:
-            result.pop('requires_invite')
+        result.pop('requires_invite', None)
 
         if self.sydent.nonshadow_ips:
             ip = IPAddress(self.sydent.ip_from_request(request))
