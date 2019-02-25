@@ -46,12 +46,11 @@ class ReplicationPushServlet(Resource):
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
 
-        #peerCert = request.transport.getPeerCertificate()
-        #peerCertCn = peerCert.get_subject().commonName
+        peerCert = request.transport.getPeerCertificate()
+        peerCertCn = peerCert.get_subject().commonName
 
         peerStore = PeerStore(self.sydent)
 
-        peerCertCn = "localhost"
         peer = peerStore.getPeerByName(peerCertCn)
 
         if not peer:
@@ -90,7 +89,6 @@ class ReplicationPushServlet(Resource):
 
         # Verify signature of message JSON
         try:
-            logger.debug("VERIFYING")
             yield peer.verifyMessage(inJson)
             logger.debug("Signed replication JSON from %s verified", peer.servername)
         except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
@@ -141,7 +139,7 @@ class ReplicationPushServlet(Resource):
                     request.finish()
                     return
 
-                last_processed_id = tokensStore.getLastTokensIdFromServer(peer.servername)
+                last_processed_id = tokensStore.getLastTokenIdFromServer(peer.servername)
                 for originId, inviteToken in inJson["invite_tokens"].items():
                     # Make sure we haven't processed this token already
                     # If so, back out of all incoming tokens and return an error
@@ -165,7 +163,7 @@ class ReplicationPushServlet(Resource):
                     request.finish()
                     return
 
-                last_processed_id = tokensStore.getLastEphemeralKeysIdFromServer(peer.servername)
+                last_processed_id = tokensStore.getLastEphemeralPublicKeyIdFromServer(peer.servername)
                 for originId, ephemeralKey in inJson["ephemeral_public_keys"].items():
                     # Make sure we haven't processed this key already
                     # If so, back out of all incoming keys and return an error

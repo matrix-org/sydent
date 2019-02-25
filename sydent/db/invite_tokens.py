@@ -21,6 +21,7 @@ class JoinTokenStore(object):
         self.sydent = sydent
 
     def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, commit=True):
+        """Stores an invite token."""
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
@@ -31,6 +32,7 @@ class JoinTokenStore(object):
             self.sydent.db.commit()
 
     def getTokens(self, medium, address):
+        """Retrieve the invite token(s) for a given 3PID medium and address."""
         cur = self.sydent.db.cursor()
 
         res = cur.execute(
@@ -55,6 +57,7 @@ class JoinTokenStore(object):
         return ret
 
     def getTokensAfterId(self, afterId, limit):
+        """Retrieves max `limit` invite tokens after a given DB id."""
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "SELECT id, medium, address, room_id, sender, token FROM invite_tokens"
@@ -81,7 +84,10 @@ class JoinTokenStore(object):
 
         return (invite_tokens, maxId)
 
-    def getLastTokensIdFromServer(self, server):
+    def getLastTokenIdFromServer(self, server):
+        """Returns the last known invite token that was received from the
+        given server.
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(origin_id),count(origin_id) from invite_tokens"
                           " where origin_server = ?", (server,))
@@ -103,6 +109,7 @@ class JoinTokenStore(object):
         self.sydent.db.commit()
 
     def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None, commit=True):
+        """Stores an ephemeral public key in the database."""
         if not persistenceTs:
             persistenceTs = int(time.time())
         cur = self.sydent.db.cursor()
@@ -116,6 +123,7 @@ class JoinTokenStore(object):
             self.sydent.db.commit()
 
     def validateEphemeralPublicKey(self, publicKey):
+        """Mark an ephemeral public key as validated."""
         cur = self.sydent.db.cursor()
         cur.execute(
             "UPDATE ephemeral_public_keys"
@@ -127,6 +135,7 @@ class JoinTokenStore(object):
         return cur.rowcount > 0
 
     def getEphemeralPublicKeysAfterId(self, afterId, limit):
+        """Retrieves max `limit` ephemeral public keys after a given DB id."""
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "SELECT id, public_key, verify_count, persistence_ts FROM ephemeral_public_keys"
@@ -150,7 +159,10 @@ class JoinTokenStore(object):
 
         return (epheremal_keys, maxId)
 
-    def getLastEphemeralKeysIdFromServer(self, server):
+    def getLastEphemeralPublicKeyIdFromServer(self, server):
+        """Returns the last known ephemeral public key that was received from
+        the given server.
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(origin_id),count(origin_id) from ephemeral_public_keys"
                           " where origin_server = ?", (server,))
@@ -162,6 +174,7 @@ class JoinTokenStore(object):
         return row[0]
 
     def getSenderForToken(self, token):
+        """Returns the sender for a given invite token."""
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "SELECT sender FROM invite_tokens WHERE token = ?",

@@ -60,6 +60,7 @@ class LocalPeer(Peer):
             self.lastId = -1
 
     def pushUpdates(self, sgAssocs):
+        """Push updates from local associations table to the global one."""
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
             if localId > self.lastId:
@@ -96,6 +97,7 @@ class RemotePeer(Peer):
         self.port = 1001
 
     def verifyMessage(self, jsonMessage):
+        """Verify a JSON structure has a valid signature from the remote peer."""
         if not 'signatures' in jsonMessage:
             raise NoSignaturesException()
 
@@ -120,6 +122,12 @@ class RemotePeer(Peer):
         signedjson.sign.verify_signed_json(jsonMessage, self.servername, verify_key)
 
     def pushUpdates(self, data):
+        """Push updates to a remote peer.
+
+        :param data: A dictionary of possible `sg_assocs`, `invite_tokens` and `ephemeral_public_keys` keys.
+        :return a deferred
+        """
+
         # sgAssocs is comprised of tuples (sgAssoc, shadowSgAssoc)
         if self.shadow:
             data["sg_assocs"] = { k: v[1] for k, v in data["sg_assocs"].items() }

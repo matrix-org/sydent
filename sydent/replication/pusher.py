@@ -67,6 +67,9 @@ class Pusher:
         return (assocs, maxId)
 
     def getInviteTokensAfterId(self, afterId, limit):
+        """Return max `limit` invite tokens from the database after a given
+        DB table id.
+        """
         join_token_store = JoinTokenStore(self.sydent)
         (invite_tokens, maxId) = join_token_store.getTokensAfterId(afterId, limit)
 
@@ -74,7 +77,10 @@ class Pusher:
 
         return (invite_tokens, maxId)
 
-    def getEphemeralKeysAfterId(self, afterId, limit):
+    def getEphemeralPublicKeysAfterId(self, afterId, limit):
+        """Return max `limit` ephemerate keys from the database after a given
+        DB table id.
+        """
         join_token_store = JoinTokenStore(self.sydent)
         (ephemeral_public_keys, maxId) = join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
 
@@ -119,7 +125,7 @@ class Pusher:
 
                 # Push invite tokens and ephemeral public keys
                 (push_data["invite_tokens"], ids["invite_tokens"]) = self.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
-                (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = self.getEphemeralKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
+                (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = self.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
                 total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
 
                 # Sign push data
