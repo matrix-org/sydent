@@ -57,8 +57,11 @@ class Pusher:
         localAssocStore = LocalAssociationStore(self.sydent)
         (localAssocs, maxId) = localAssocStore.getAssociationsAfterId(afterId, limit)
 
+        signer = Signer(self.sydent)
+
         for localId in localAssocs:
-            shadowAssoc = None
+            sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
+            shadowSgAssoc = None
 
             if self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
                 shadowAssoc = copy.deepcopy(localAssocs[localId])
@@ -71,6 +74,7 @@ class Pusher:
                     )
 
             assocs[localId] = (localAssocs[localId], shadowAssoc)
+
 
         return (assocs, maxId)
 
@@ -115,7 +119,7 @@ class Pusher:
         """
         localPeer = LocalPeer(self.sydent)
 
-        signedAssocs = self.getSignedAssociationsAfterId(localPeer.lastId, None)[0]
+        signedAssocs = self.getAssociationsAfterId(localPeer.lastId, None)[0]
 
         localPeer.pushUpdates(signedAssocs)
 

@@ -18,6 +18,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 
 import signedjson.sign
+import signedjson.key
 
 import logging
 import json
@@ -86,7 +87,7 @@ class LocalPeer(Peer):
                 # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
                 self.sydent.threepidBinder.notifyPendingInvites(assocObj)
 
-        d = twisted.internet.defer.succeed(True)
+        d = defer.succeed(True)
         return d
 
 
@@ -95,6 +96,14 @@ class RemotePeer(Peer):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = 1001
+
+        # Get verify key from signing key
+        signing_key = signedjson.key.decode_signing_key_base64(alg, "0", self.pubkeys[alg])
+        self.verify_key = signing_key.verify_key
+
+        # Attach metadata
+        self.verify_key.alg = alg
+        self.verify_key.version = 0
 
     def verifyMessage(self, jsonMessage):
         """Verify a JSON structure has a valid signature from the remote peer."""
@@ -119,7 +128,7 @@ class RemotePeer(Peer):
         verify_key.version = 0
 
         # Verify the JSON
-        signedjson.sign.verify_signed_json(jsonMessage, self.servername, verify_key)
+        signedjson.sign.verify_signed_json(jsonMessage, self.servername, self.verify_key)
 
     def pushUpdates(self, data):
         """Push updates to a remote peer.
@@ -144,7 +153,7 @@ class RemotePeer(Peer):
         # (ie. remove the record we kept in order to propagate the deletion to
         # other peers).
 
-        updateDeferred = twisted.internet.defer.Deferred()
+        updateDeferred = defer.Deferred()
 
         reqDeferred.addCallback(self._pushSuccess, updateDeferred=updateDeferred)
         reqDeferred.addErrback(self._pushFailed, updateDeferred=updateDeferred)

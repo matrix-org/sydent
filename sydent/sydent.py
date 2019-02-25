@@ -62,11 +62,20 @@ from replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
 
+def list_from_comma_sep_string(rawstr):
+    if rawstr == '':
+        return []
+    return [x.strip() for x in rawstr.split(',')]
+
+
 CONFIG_DEFAULTS = {
     'general': {
         'server.name': '',
         'log.path': '',
         'pidfile.path': 'sydent.pid',
+        'shadow.hs.master': '',
+        'shadow.hs.slave': '',
+        'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
     },
     'db': {
         'db.file': 'sydent.db',
@@ -96,6 +105,9 @@ CONFIG_DEFAULTS = {
     },
     'crypto': {
         'ed25519.signingkey': '',
+    },
+    'userdir': {
+        'userdir.allowed_homeservers': '',
     },
 }
 

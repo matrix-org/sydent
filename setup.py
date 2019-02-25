@@ -44,6 +44,7 @@ setup(
 
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
+<<<<<<< HEAD
         "pyasn1",
         "pynacl",
         "pyyaml",
@@ -52,6 +53,14 @@ setup(
 
         "phonenumbers",
         "pyopenssl",
+=======
+
+        "phonenumbers",
+        "pyopenssl",
+
+        "pyyaml",
+        "netaddr",
+>>>>>>> dinsic
     ],
     # make sure we package the sql files
     include_package_data=True,
