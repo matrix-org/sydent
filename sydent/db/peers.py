@@ -111,6 +111,7 @@ class PeerStore:
         table ids that were replicated to this peer.
         :param lastPokeSucceeded: The time of when the last successful
         replication succeeded (even if no actual replication of data was necessary).
+        :type lastPokeSucceeded: int
         :return:
         """
 

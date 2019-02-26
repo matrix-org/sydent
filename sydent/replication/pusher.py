@@ -48,7 +48,9 @@ class Pusher:
         DB table id.
 
         :param afterId: A database id to act as an offset. Rows after this id are returned.
+        :type afterId: int
         :param limit: Max amount of database rows to return.
+        :type limit: int
         :returns a tuple with the first item being a list of associations, and the
         second being the maximum table id of the returned associations.
         """
