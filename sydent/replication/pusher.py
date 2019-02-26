@@ -48,9 +48,9 @@ class Pusher:
 
         for localId in localAssocs:
             sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
-            signedAssocs[localId] = sgAssoc
+            assocs[localId] = sgAssoc
 
-        return (signedAssocs, maxId)
+        return (assocs, maxId)
 
     def doLocalPush(self):
         """
