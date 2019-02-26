@@ -1,31 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 New Vector Ltd
+# copyright 2019 new vector ltd
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# licensed under the apache license, version 2.0 (the "license");
+# you may not use this file except in compliance with the license.
+# you may obtain a copy of the license at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/license-2.0
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# unless required by applicable law or agreed to in writing, software
+# distributed under the license is distributed on an "as is" basis,
+# without warranties or conditions of any kind, either express or implied.
+# see the license for the specific language governing permissions and
+# limitations under the license.
 
 from twisted.web.resource import Resource
 
 import logging
 import json
-import re
-import copy
-import yaml
 
-from netaddr import IPAddress
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
-from sydent.http.servlets.infoservlet import info_match_user_id
+from sydent.http.info import Info
 
 
 logger = logging.getLogger(__name__)
@@ -36,21 +32,7 @@ class InternalInfoServlet(Resource):
 
     def __init__(self, syd):
         self.sydent = syd
-
-        try:
-            file = open('info.yaml')
-            self.config = yaml.load(file)
-            file.close()
-
-            # medium:
-            #   email:
-            #     entries:
-            #       matthew@matrix.org: { hs: 'matrix.org', shadow_hs: 'shadow-matrix.org' }
-            #     patterns:
-            #       - .*@matrix.org: { hs: 'matrix.org', shadow_hs: 'shadow-matrix.org' }
-
-        except Exception as e:
-            logger.error(e)
+        self.info = Info(syd)
 
     def render_GET(self, request):
         """
@@ -70,7 +52,7 @@ class InternalInfoServlet(Resource):
         address = args['address']
 
         # Find an entry in the info file matching this user's ID
-        result = info_match_user_id(medium, address)
+        result = self.info.match_user_id(medium, address)
 
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(medium, address)
