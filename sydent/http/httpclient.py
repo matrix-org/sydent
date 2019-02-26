@@ -130,9 +130,10 @@ def matrix_federation_endpoint(reactor, destination, ssl_context_factory=None,
     :param reactor: Twisted reactor.
     :param destination: The name of the server to connect to.
     :type destination: bytes
-    :param ssl_context_factory: Factory which generates SSL contexts to use for TLS.
+    :param ssl_context_factory: Factory which generates SSL contexts to use
+        for TLS.
     :type ssl_context_factory: twisted.internet.ssl.ContextFactory
-    :param timeout (int): connection timeout in seconds
+    :param timeout: connection timeout in seconds
     :type timeout: int
     """
 

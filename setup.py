@@ -44,11 +44,13 @@ setup(
 
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
+
+        "phonenumbers",
+        "pyopenssl",
+
         "pynacl",
         "pyyaml",
         "netaddr",
-        "phonenumbers",
-        "pyopenssl",
     ],
     # make sure we package the sql files
     include_package_data=True,

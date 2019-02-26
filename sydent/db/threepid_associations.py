@@ -178,9 +178,9 @@ class GlobalAssociationStore:
 
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
-        :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
-        :param sgAssoc The original raw bytes of the signed association
-        :return:
+        :param assoc: (sydent.threepid.GlobalThreepidAssociation) The
+            association to add as a high level object.
+        :param sgAssoc: The original raw bytes of the signed association.
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("insert or ignore into global_threepid_associations "

@@ -21,10 +21,10 @@ CREATE TABLE IF NOT EXISTS invite_tokens (
     room_id varchar(256) not null,
     sender varchar(256) not null,
     token varchar(256) not null,
-    origin_id INTEGER, -- original id in homeserver's DB that this was replicated from (if applicable)
-    origin_server TEXT, -- homeserver this was replicated from (if applicable)
-    received_ts BIGINT, -- When the invite was received by us from the homeserver
-    sent_ts BIGINT -- When the token was sent by us to the user
+    received_ts bigint, -- When the invite was received by us from the homeserver
+    sent_ts bigint, -- When the token was sent by us to the user
+    origin_id integer, -- original id in homeserver's DB that this was replicated from (if applicable)
+    origin_server text -- homeserver this was replicated from (if applicable)
 );
 CREATE INDEX IF NOT EXISTS invite_token_medium_address on invite_tokens(medium, address);
 CREATE INDEX IF NOT EXISTS invite_token_token on invite_tokens(token);

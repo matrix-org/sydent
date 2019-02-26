@@ -47,12 +47,15 @@ class Pusher:
         """Return max `limit` associations from the database after a given
         DB table id.
 
-        :param afterId: A database id to act as an offset. Rows after this id are returned.
+        :param afterId: A database id to act as an offset. Rows after this id
+            are returned.
         :type afterId: int
         :param limit: Max amount of database rows to return.
         :type limit: int
-        :returns a tuple with the first item being a list of associations, and the
-        second being the maximum table id of the returned associations.
+        :returns a tuple with the first item being a list of associations,
+            and the second being the maximum table id of the returned
+            associations.
+        :rtype: Tuple[list[Tuple[Dict, Dict]], int|None]
         """
         assocs = {}
 
@@ -84,37 +87,37 @@ class Pusher:
         """Return max `limit` invite tokens from the database after a given
         DB table id.
 
-        :param afterId: A database id to act as an offset. Rows after this id are returned.
+        :param afterId: A database id to act as an offset. Rows after this id
+            are returned.
         :type afterId: int
         :param limit: Max amount of database rows to return.
         :type limit: int
         :returns a tuple with the first item being a list of tokens, and the
-        second being the maximum table id of the returned tokens.
+            second being the maximum table id of the returned tokens.
+        :rtype: Tuple[Dict[int, Dict], int|None]
         """
-        join_token_store = JoinTokenStore(self.sydent)
-        (invite_tokens, maxId) = join_token_store.getTokensAfterId(afterId, limit)
-
         # TODO: Do something for shadow servers?
 
-        return (invite_tokens, maxId)
+        join_token_store = JoinTokenStore(self.sydent)
+        return join_token_store.getInviteTokensAfterId(afterId, limit)
 
     def getEphemeralPublicKeysAfterId(self, afterId, limit):
         """Return max `limit` ephemeral keys from the database after a given
         table id.
 
-        :param afterId: A database id to act as an offset. Rows after this id are returned.
+        :param afterId: A database id to act as an offset. Rows after this id
+            are returned.
         :type afterId: int
         :param limit: Max amount of database rows to return.
         :type limit: int
         :returns a tuple with the first item being a list of keys, and the
-        second being the maximum table id of the returned keys.
+            second being the maximum table id of the returned keys.
+        :rtype: Tuple[Dict[int, Dict], int|None]
         """
-        join_token_store = JoinTokenStore(self.sydent)
-        (ephemeral_public_keys, maxId) = join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
-
         # TODO: Do something for shadow servers?
 
-        return (ephemeral_public_keys, maxId)
+        join_token_store = JoinTokenStore(self.sydent)
+        return join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
 
     def doLocalPush(self):
         """

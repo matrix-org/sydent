@@ -88,11 +88,11 @@ class Verifier(object):
         to do perspectives checks.
 
         :param acceptable_server_names: If provided and not None,
-        only signatures from servers in this list will be accepted.
-        :type acceptable_server_names: list of strings
+            only signatures from servers in this list will be accepted.
+        :type acceptable_server_names: list[str]
 
         :return a tuple of the server name and key name that was
-        successfully verified. If the json cannot be verified,
+            successfully verified. If the json cannot be verified,
         raises SignatureVerifyException.
         """
         if 'signatures' not in signed_json:

@@ -33,14 +33,15 @@ class JoinTokenStore(object):
         :type sender: str
         :param token: The token itself.
         :type token: str
-        :param originServer: The server this invite originated from (if coming from replication).
-        :type originServer: str
+        :param originServer: The server this invite originated from (if
+            coming from replication).
+        :type originServer: str, None
         :param originId: The id of the token in the DB of originServer. Used
         for determining if we've already received a token or not.
-        :type originId: int
-        :param commit: Whether DB changes should be committed by this function (or an external one).
+        :type originId: int, None
+        :param commit: Whether DB changes should be committed by this
+            function (or an external one).
         :type commit: bool
-        :return:
         """
         cur = self.sydent.db.cursor()
 
@@ -58,7 +59,8 @@ class JoinTokenStore(object):
         :type medium: str
         :param address: The address of the 3PID.
         :type address: str
-        :return a list of invite tokens.
+        :returns a list of invite tokens, or an empty list if no tokens found.
+        :rtype: list[Dict[str, str]]
         """
         cur = self.sydent.db.cursor()
 
@@ -83,14 +85,18 @@ class JoinTokenStore(object):
 
         return ret
 
-    def getTokensAfterId(self, afterId, limit):
+    def getInviteTokensAfterId(self, afterId, limit):
         """Retrieves max `limit` invite tokens after a given DB id.
         
-        :param afterId: A database id to act as an offset. Tokens after this id are returned.
+        :param afterId: A database id to act as an offset. Tokens after this
+            id are returned.
         :type afterId: int
         :param limit: Max amount of database rows to return.
-        :type limit: int
-        :returns a tuple consisting of a list of invite tokens and the maximum DB id that was extracted.
+        :type limit: int, None
+        :returns a tuple consisting of a dict of invite tokens (with key
+            being the token's DB id) and the maximum DB id that was extracted.
+            Otherwise returns ({}, None) if no tokens are found.
+        :rtype: Tuple[Dict[int, Dict], int|None]
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -103,7 +109,7 @@ class JoinTokenStore(object):
         # Dict of "id": {content}
         invite_tokens = {}
 
-        maxId = 0
+        maxId = None
 
         for row in rows:
             maxId, medium, address, room_id, sender, token = row
@@ -125,14 +131,16 @@ class JoinTokenStore(object):
         :param server: The name of the origin server.
         :type server: str
         :returns a database id marking the last known invite token received
-        from the given server.
+            from the given server. Returns 0 if no tokens have been received from
+            this server.
+        :rtype: int
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(origin_id), count(origin_id) from invite_tokens"
                           " where origin_server = ?", (server,))
         row = res.fetchone()
 
-        if row[1] == 0:
+        if not row or row[1] == 0:
             return 0
 
         return row[0]
@@ -145,7 +153,6 @@ class JoinTokenStore(object):
         :type medium: str
         :param address: The address of the token.
         :type address: str
-        :return:
         """
         cur = self.sydent.db.cursor()
 
@@ -162,14 +169,15 @@ class JoinTokenStore(object):
         :type publicKey: str
         :param persistenceTs: 
         :type persistenceTs: int
-        :param originServer: the server this key was received from (if retrieved through replication).
+        :param originServer: the server this key was received from (if
+            retrieved through replication).
         :type originServer: str
         :param originId: The id of the key in the DB of originServer. Used
+            for determining if we've already received a key or not.
         :type originId: int
-        for determining if we've already received a key or not.
-        :param commit: Whether DB changes should be committed by this function (or an external one).
+        :param commit: Whether DB changes should be committed by this
+            function (or an external one).
         :type commit: bool
-        :return:
         """
         if not persistenceTs:
             persistenceTs = int(time.time())
@@ -188,7 +196,9 @@ class JoinTokenStore(object):
         
         :param publicKey: An ephemeral public key.
         :type publicKey: str
-        :returns true or false depending on whether validation was successful.
+        :returns true or false depending on whether validation was
+            successful.
+        :rtype: bool
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -203,12 +213,15 @@ class JoinTokenStore(object):
     def getEphemeralPublicKeysAfterId(self, afterId, limit):
         """Retrieves max `limit` ephemeral public keys after a given DB id.
         
-        :param afterId: A database id to act as an offset. Keys after this id are returned.
+        :param afterId: A database id to act as an offset. Keys after this id
+            are returned.
         :type afterId: int
         :param limit: Max amount of database rows to return.
         :type limit: int
-        :returns a tuple consisting of a list of ephemeral public keys and
-        the maximum table id that was extracted.
+        :returns a tuple consisting of a list of ephemeral public keys (with
+            key being the token's DB id) and the maximum table id that was
+            extracted. Otherwise returns ({}, None) if no keys are found.
+        :rtype: Tuple[Dict[int, Dict], int|None]
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -219,19 +232,19 @@ class JoinTokenStore(object):
         rows = res.fetchall()
 
         # Dict of "id": {content}
-        epheremal_keys = {}
+        ephemeral_keys = {}
 
-        maxId = 0
+        maxId = None
 
         for row in rows:
             maxId, public_key, verify_count, persistence_ts = row
-            epheremal_keys[maxId] = {
+            ephemeral_keys[maxId] = {
                 "public_key": public_key,
                 "verify_count": verify_count,
                 "persistence_ts": persistence_ts,
             }
 
-        return (epheremal_keys, maxId)
+        return (ephemeral_keys, maxId)
 
     def getLastEphemeralPublicKeyIdFromServer(self, server):
         """Returns the last known ephemeral public key that was received from
@@ -239,14 +252,16 @@ class JoinTokenStore(object):
 
         :param server: The name of the origin server.
         :type server: str
-        :returns the last known public key id received from the given server.
+        :returns the last known DB id received from the given server, or 0 if
+            none have been received.
+        :rtype: int
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(origin_id),count(origin_id) from ephemeral_public_keys"
                           " where origin_server = ?", (server,))
         row = res.fetchone()
 
-        if row[1] == 0:
+        if not row or row[1] == 0:
             return 0
 
         return row[0]
@@ -256,7 +271,9 @@ class JoinTokenStore(object):
         
         :param token: The invite token.
         :type token: str
-        :returns the sender of a given invite token or None if there isn't one.
+        :returns the sender of a given invite token or None if there isn't
+            one.
+        :rtype: str, None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(

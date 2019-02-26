@@ -23,7 +23,9 @@ class PeerStore:
 
     def getPeerByName(self, name):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
+        res = cur.execute("select p.name, p.port, "
+                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, "
+                          "p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
 
         serverName = None
@@ -57,7 +59,9 @@ class PeerStore:
 
     def getAllPeers(self):
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
+        res = cur.execute("select p.name, p.port, "
+                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, "
+                          "p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where pk.peername = p.name and p.active = 1")
 
         peers = []
@@ -104,25 +108,28 @@ class PeerStore:
     def setLastSentIdAndPokeSucceeded(self, peerName, ids, lastPokeSucceeded):
         """Set last successful replication of data to this peer.
 
+        If an id for a replicated database table is None, the last sent value
+        will not be updated.
+
         :param peerName: The name of the peer.
         :type peerName: str
         :param ids: A Dictionary of ids that represent the last database
-        :type ids: dict
-        table ids that were replicated to this peer.
+            table ids that were replicated to this peer.
+        :type ids: Dict[str, int]
         :param lastPokeSucceeded: The time of when the last successful
-        replication succeeded (even if no actual replication of data was necessary).
+            replication succeeded (even if no actual replication of data was
+            necessary).
         :type lastPokeSucceeded: int
-        :return:
         """
 
         cur = self.sydent.db.cursor()
-        if "sg_assocs" in ids and ids["sg_assocs"] != 0:
+        if "sg_assocs" in ids and ids["sg_assocs"]:
             cur.execute("update peers set lastSentAssocsId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["sg_assocs"], lastPokeSucceeded, peerName))
-        if "invite_tokens" in ids and ids["invite_tokens"] != 0:
+        if "invite_tokens" in ids and ids["invite_tokens"]:
             cur.execute("update peers set lastSentInviteTokensId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["invite_tokens"], lastPokeSucceeded, peerName))
-        if "ephemeral_public_keys" in ids and ids["ephemeral_public_keys"] != 0:
+        if "ephemeral_public_keys" in ids and ids["ephemeral_public_keys"]:
             cur.execute("update peers set lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["ephemeral_public_keys"], lastPokeSucceeded, peerName))
         self.sydent.db.commit()
