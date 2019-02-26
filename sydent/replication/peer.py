@@ -36,14 +36,6 @@ class Peer(object):
         self.pubkeys = pubkeys
         self.shadow = False
 
-    def pushUpdates(self, sgAssocs):
-        """
-        :param sgAssocs: Sequence of (originId, (sgAssoc, shadowSgAssoc)) tuples where originId
-            is the id on the creating server and sgAssoc is the json object of the signed association
-        :return a deferred
-        """
-        pass
-
 
 class LocalPeer(Peer):
     """

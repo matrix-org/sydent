@@ -20,7 +20,6 @@ import logging
 import json
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
-from sydent.http.info import Info
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +27,9 @@ logger = logging.getLogger(__name__)
 class InfoServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd, info):
         self.sydent = syd
-        self.info = Info(syd)
+        self.info = info
 
     def render_GET(self, request):
         """
