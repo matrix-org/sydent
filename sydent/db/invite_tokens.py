@@ -24,14 +24,22 @@ class JoinTokenStore(object):
         """Stores an invite token.
         
         :param medium: The medium of the token.
+        :type medium: str
         :param address: The address of the token.
+        :type address: str
         :param roomId: The room ID this token is tied to.
+        :type roomId: str
         :param sender: The sender of the invite.
+        :type sender: str
         :param token: The token itself.
+        :type token: str
         :param originServer: The server this invite originated from (if coming from replication).
+        :type originServer: str
         :param originId: The id of the token in the DB of originServer. Used
         for determining if we've already received a token or not.
+        :type originId: int
         :param commit: Whether DB changes should be committed by this function (or an external one).
+        :type commit: bool
         :return:
         """
         cur = self.sydent.db.cursor()
@@ -47,7 +55,9 @@ class JoinTokenStore(object):
         """Retrieve the invite token(s) for a given 3PID medium and address.
         
         :param medium: The medium of the 3PID.
+        :type medium: str
         :param address: The address of the 3PID.
+        :type address: str
         :return a list of invite tokens.
         """
         cur = self.sydent.db.cursor()
@@ -77,7 +87,9 @@ class JoinTokenStore(object):
         """Retrieves max `limit` invite tokens after a given DB id.
         
         :param afterId: A database id to act as an offset. Tokens after this id are returned.
+        :type afterId: int
         :param limit: Max amount of database rows to return.
+        :type limit: int
         :returns a tuple consisting of a list of invite tokens and the maximum DB id that was extracted.
         """
         cur = self.sydent.db.cursor()
@@ -111,6 +123,7 @@ class JoinTokenStore(object):
         given server.
 
         :param server: The name of the origin server.
+        :type server: str
         :returns a database id marking the last known invite token received
         from the given server.
         """
@@ -129,7 +142,9 @@ class JoinTokenStore(object):
         """Mark invite tokens as sent.
         
         :param medium: The medium of the token.
+        :type medium: str
         :param address: The address of the token.
+        :type address: str
         :return:
         """
         cur = self.sydent.db.cursor()
@@ -144,11 +159,16 @@ class JoinTokenStore(object):
         """Stores an ephemeral public key in the database.
         
         :param publicKey: the ephemeral public key to store.
+        :type publicKey: str
         :param persistenceTs: 
+        :type persistenceTs: int
         :param originServer: the server this key was received from (if retrieved through replication).
+        :type originServer: str
         :param originId: The id of the key in the DB of originServer. Used
+        :type originId: int
         for determining if we've already received a key or not.
         :param commit: Whether DB changes should be committed by this function (or an external one).
+        :type commit: bool
         :return:
         """
         if not persistenceTs:
@@ -167,6 +187,7 @@ class JoinTokenStore(object):
         """Mark an ephemeral public key as validated.
         
         :param publicKey: An ephemeral public key.
+        :type publicKey: str
         :returns true or false depending on whether validation was successful.
         """
         cur = self.sydent.db.cursor()
@@ -183,7 +204,9 @@ class JoinTokenStore(object):
         """Retrieves max `limit` ephemeral public keys after a given DB id.
         
         :param afterId: A database id to act as an offset. Keys after this id are returned.
+        :type afterId: int
         :param limit: Max amount of database rows to return.
+        :type limit: int
         :returns a tuple consisting of a list of ephemeral public keys and
         the maximum table id that was extracted.
         """
@@ -215,6 +238,7 @@ class JoinTokenStore(object):
         the given server.
 
         :param server: The name of the origin server.
+        :type server: str
         :returns the last known public key id received from the given server.
         """
         cur = self.sydent.db.cursor()
@@ -231,6 +255,7 @@ class JoinTokenStore(object):
         """Returns the sender for a given invite token.
         
         :param token: The invite token.
+        :type token: str
         :returns the sender of a given invite token or None if there isn't one.
         """
         cur = self.sydent.db.cursor()

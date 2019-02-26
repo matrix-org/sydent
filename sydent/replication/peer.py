@@ -134,6 +134,7 @@ class RemotePeer(Peer):
         """Push updates to a remote peer.
 
         :param data: A dictionary of possible `sg_assocs`, `invite_tokens` and `ephemeral_public_keys` keys.
+        :type data: dict
         :returns a deferred.
         """
 

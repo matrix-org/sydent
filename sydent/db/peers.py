@@ -105,11 +105,14 @@ class PeerStore:
         """Set last successful replication of data to this peer.
 
         :param peerName: The name of the peer.
+        :type peerName: str
         :param ids: A Dictionary of ids that represent the last database
+        :type ids: dict
         table ids that were replicated to this peer.
         :param lastPokeSucceeded: The time of when the last successful
         replication succeeded (even if no actual replication of data was necessary).
         :return:
+        """
 
         cur = self.sydent.db.cursor()
         if "sg_assocs" in ids and ids["sg_assocs"] != 0:
