@@ -46,7 +46,6 @@ setup(
         "service_identity>=1.0.0",
         "pynacl",
         "pyyaml",
-        "daemonize",
         "netaddr",
         "phonenumbers",
         "pyopenssl",
