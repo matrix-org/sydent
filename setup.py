@@ -44,7 +44,6 @@ setup(
 
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
-        "pyasn1",
         "pynacl",
         "pyyaml",
         "daemonize",
