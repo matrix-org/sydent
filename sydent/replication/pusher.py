@@ -62,9 +62,9 @@ class Pusher:
                     )
                 shadowSgAssoc = signer.signedThreePidAssociation(shadowAssoc)
 
-            signedAssocs[localId] = (sgAssoc, shadowSgAssoc)
+            assocs[localId] = (sgAssoc, shadowSgAssoc)
 
-        return (signedAssocs, maxId)
+        return (assocs, maxId)
 
     def doLocalPush(self):
         """
@@ -75,7 +75,7 @@ class Pusher:
         """
         localPeer = LocalPeer(self.sydent)
 
-        signedAssocs = self.getSignedAssociationsAfterId(localPeer.lastId, None)[0]
+        (signedAssocs, _) = self.getSignedAssociationsAfterId(localPeer.lastId, None)
 
         localPeer.pushUpdates(signedAssocs)
 
@@ -90,7 +90,10 @@ class Pusher:
             peers = self.peerStore.getAllPeers()
 
             for p in peers:
-                logger.debug("Looking for update after %d to push to %s", p.lastSentVersion, p.servername)
+                if p.lastSentVersion:
+                    logger.debug("Looking for update after %d to push to %s", p.lastSentVersion, p.servername)
+                else:
+                    logger.debug("Looking for update to push to %s", p.servername)
                 (signedAssocTuples, maxId) = self.getSignedAssociationsAfterId(p.lastSentVersion, 100)
                 logger.debug("%d updates to push to %s", len(signedAssocTuples), p.servername)
                 if len(signedAssocTuples) > 0:
