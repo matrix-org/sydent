@@ -22,11 +22,10 @@ import random
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 
-from sydent.db.valsession import ThreePidValSessionStore
 from sydent.db.threepid_associations import LocalAssociationStore
 
 from sydent.util import time_msec
-from sydent.threepid.assocsigner import AssociationSigner
+from sydent.threepid.signer import Signer
 
 from sydent.threepid import ThreepidAssociation
 
@@ -41,6 +40,7 @@ from twisted.web.http_headers import Headers
 
 logger = logging.getLogger(__name__)
 
+
 class ThreepidBinder:
     # the lifetime of a 3pid association
     THREEPID_ASSOCIATION_LIFETIME_MS = 100 * 365 * 24 * 60 * 60 * 1000
@@ -48,16 +48,22 @@ class ThreepidBinder:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def addBinding(self, valSessionId, clientSecret, mxid):
-        valSessionStore = ThreePidValSessionStore(self.sydent)
-        localAssocStore = LocalAssociationStore(self.sydent)
+    def addBinding(self, medium, address, mxid):
+        """Binds the given 3pid to the given mxid.
 
-        s = valSessionStore.getValidatedSession(valSessionId, clientSecret)
+        It's assumed that we have somehow validated that the given user owns
+        the given 3pid
+
+        Args:
+            medium (str): the type of 3pid
+            address (str): the 3pid
+            mxid (str): the mxid to bind it to
+        """
+        localAssocStore = LocalAssociationStore(self.sydent)
 
         createdAt = time_msec()
         expires = createdAt + ThreepidBinder.THREEPID_ASSOCIATION_LIFETIME_MS
-
-        assoc = ThreepidAssociation(s.medium, s.address, mxid, createdAt, createdAt, expires)
+        assoc = ThreepidAssociation(medium, address, mxid, createdAt, createdAt, expires)
 
         localAssocStore.addOrUpdateAssociation(assoc)
 
@@ -82,8 +88,8 @@ class ThreepidBinder:
             assoc.extra_fields["invites"] = invites
             joinTokenStore.markTokensAsSent(assoc.medium, assoc.address)
 
-        assocSigner = AssociationSigner(self.sydent)
-        sgassoc = assocSigner.signedThreePidAssociation(assoc)
+        signer = Signer(self.sydent)
+        sgassoc = signer.signedThreePidAssociation(assoc)
 
         self._notify(sgassoc, 0)
 
