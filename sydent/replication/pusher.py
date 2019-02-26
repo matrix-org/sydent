@@ -61,7 +61,7 @@ class Pusher:
         """
         localPeer = LocalPeer(self.sydent)
 
-        signedAssocs = self.getSignedAssociationsAfterId(localPeer.lastId, None)[0]
+        (signedAssocs, _) = self.getSignedAssociationsAfterId(localPeer.lastId, None)
 
         localPeer.pushUpdates(signedAssocs)
 
