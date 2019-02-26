@@ -58,6 +58,7 @@ class InfoServlet(Resource):
         :type medium: str
         :param address: The address of the 3PID.
         :type address: str
+        :returns a dict
         """
         result = {}
 
