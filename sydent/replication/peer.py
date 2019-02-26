@@ -44,6 +44,7 @@ class Peer(object):
         """
         pass
 
+
 class LocalPeer(Peer):
     """
     The local peer (ourselves: essentially copying from the local associations table to the global one)
