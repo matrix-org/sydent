@@ -88,13 +88,13 @@ class RemotePeer(Peer):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = 1001
+        self.alg = "ed25519"
 
-        # Get verify key from signing key
-        signing_key = signedjson.key.decode_signing_key_base64(alg, "0", self.pubkeys[alg])
-        self.verify_key = signing_key.verify_key
+        # Get verify key for this peer
+        self.verify_key = self.pubkeys[self.alg]
 
         # Attach metadata
-        self.verify_key.alg = alg
+        self.verify_key.alg = self.alg
         self.verify_key.version = 0
 
     def verifySignedAssociation(self, assoc):
@@ -106,10 +106,8 @@ class RemotePeer(Peer):
         if not 'signatures' in assoc:
             raise NoSignaturesException()
 
-        alg = 'ed25519'
-
         key_ids = signedjson.sign.signature_ids(assoc, self.servername)
-        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith(alg + ":"):
+        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith(self.alg + ":"):
             e = NoMatchingSignatureException()
             e.foundSigs = assoc['signatures'].keys()
             e.requiredServername = self.servername
