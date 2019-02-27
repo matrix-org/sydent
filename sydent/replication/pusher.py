@@ -111,6 +111,8 @@ class Pusher:
 
                 # Dictionary for holding all data to push
                 push_data = {}
+
+                # Dictionary for holding all the ids of db tables we've successfully replicated up to
                 ids = {}
                 total_updates = 0
 

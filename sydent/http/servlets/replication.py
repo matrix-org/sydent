@@ -119,14 +119,14 @@ class ReplicationPushServlet(Resource):
                     yield peer.verifySignedAssociation(sgAssoc)
                 except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
                     self.sydent.db.rollback()
-                    logger.warn("Failed to verify JSON from %s", peer.servername)
+                    logger.warn("Failed to verify signed association from %s", peer.servername)
                     request.setResponseCode(400)
                     request.write(json.dumps({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}))
                     request.finish()
                     return
                 except Exception:
                     self.sydent.db.rollback()
-                    logger.exception("Failed to verify JSON from %s", peer.servername)
+                    logger.exception("Failed to verify signed association from %s", peer.servername)
                     request.setResponseCode(500)
                     request.write(json.dumps({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}))
                     request.finish()
