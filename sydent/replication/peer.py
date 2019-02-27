@@ -97,21 +97,16 @@ class RemotePeer(Peer):
         self.verify_key.alg = alg
         self.verify_key.version = 0
 
-    def verifySignedAssociation(self, assoc):
-        """Verifies a signature on a signed association.
-
-        :param assoc: A signed association.
-        :type assoc: Dict
-        """
-        if not 'signatures' in assoc:
+    def verifyMessage(self, jsonMessage):
+        if not 'signatures' in jsonMessage:
             raise NoSignaturesException()
 
         alg = 'ed25519'
 
-        key_ids = signedjson.sign.signature_ids(assoc, self.servername)
+        key_ids = signedjson.sign.signature_ids(jsonMessage, self.servername)
         if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith(alg + ":"):
             e = NoMatchingSignatureException()
-            e.foundSigs = assoc['signatures'].keys()
+            e.foundSigs = jsonMessage['signatures'].keys()
             e.requiredServername = self.servername
             raise e
 
@@ -124,7 +119,7 @@ class RemotePeer(Peer):
         verify_key.version = 0
 
         # Verify the JSON
-        signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
+        signedjson.sign.verify_signed_json(jsonMessage, self.servername, self.verify_key)
 
     def pushUpdates(self, data):
         """Push updates to a remote peer.
