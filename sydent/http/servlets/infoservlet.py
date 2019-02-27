@@ -34,8 +34,12 @@ class InfoServlet(Resource):
     def render_GET(self, request):
         """
         Maps a threepid to the responsible HS domain. For use by clients.
-        Params: 'medium': the medium of the threepid
-                'address': the address of the threepid
+
+        Clients who are "whitelisted" should receive both hs and shadow_hs in
+        their response JSON. Clients that are not whitelisted should only
+        receive hs, and it's contents should be that of shadow_hs in the
+        config file.
+
         Returns: { hs: ..., [shadow_hs: ...]}
         """
 
@@ -49,6 +53,15 @@ class InfoServlet(Resource):
 
         # Find an entry in the info file matching this user's ID
         result = self.info.match_user_id(medium, address)
+
+        # Check if this user is from a shadow hs/not whitelisted
+        ip = IPAddress(self.sydent.ip_from_request(request))
+        if self.sydent.nonshadow_ips and ip not in self.sydent.nonshadow_ips:
+            # This user is not whitelisted, present shadow_hs at their only hs
+            result['hs'] = result.pop('shadow_hs', None)
+        else:
+            # This user is whitelisted, ensure shadow_hs exists even if empty
+            result['shadow_hs'] = result.get('shadow_hs', '')
 
         # Non-internal. Remove 'requires_invite' if found
         result.pop('requires_invite', None)

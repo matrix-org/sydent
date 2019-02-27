@@ -19,12 +19,10 @@ import re
 import copy
 import yaml
 
-from netaddr import IPAddress
-from sydent.db.invite_tokens import JoinTokenStore
-
 logger = logging.getLogger(__name__)
 
 class Info(object):
+    """Returns information from info.yaml, which contains user-specific metadata."""
 
     def __init__(self, syd):
         self.sydent = syd
@@ -69,15 +67,5 @@ class Info(object):
                 if result:
                     break
 
-        # Change output if user is from a shadow homeserver
-        if self.sydent.nonshadow_ips:
-            ip = IPAddress(self.sydent.ip_from_request(request))
-
-            # Present shadow_hs as hs if user is from a shadow server
-            if (ip not in self.sydent.nonshadow_ips):
-                result['hs'] = result['shadow_hs']
-                result.pop('shadow_hs', None)
-            else:
-                result.setdefault('shadow_hs', '')
-
-        return result
+        # Copy before changing elements
+        return copy.deepcopy(result)
