@@ -43,7 +43,7 @@ class Pusher:
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
         cb.start(10.0)
 
-    def getAssociationsAfterId(self, afterId, limit):
+    def getAssociationsAfterId(self, afterId, limit, signed=False):
         """Return max `limit` associations from the database after a given
         DB table id.
 
@@ -65,8 +65,12 @@ class Pusher:
         signer = Signer(self.sydent)
 
         for localId in localAssocs:
-            sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
-            shadowSgAssoc = None
+            assoc = localAssocs[localId]
+
+            if signed:
+                assoc = signer.signedThreePidAssociation(localAssocs[localId])
+
+            shadowAssoc = None
 
             if self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
                 shadowAssoc = copy.deepcopy(localAssocs[localId])
@@ -78,7 +82,10 @@ class Pusher:
                         ":" + self.sydent.shadow_hs_slave
                     )
 
-            assocs[localId] = (localAssocs[localId], shadowAssoc)
+                if signed:
+                    shadowAssoc = signer.signedThreePidAssociation(shadowAssoc)
+
+            assocs[localId] = (assoc, shadowAssoc)
 
 
         return (assocs, maxId)
@@ -162,7 +169,7 @@ class Pusher:
 
                 # Sign push data
                 signer = Signer(self.sydent)
-                push_data = signer.signReplication(push_data)
+                push_data = signer.signReplicationJSON(push_data)
 
                 logger.debug("%d updates to push to %s", total_updates, p.servername)
                 if total_updates:
