@@ -43,7 +43,7 @@ class Pusher:
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
         cb.start(10.0)
 
-    def getAssociationsAfterId(self, afterId, limit, signed=False):
+    def getSignedAssociationsAfterId(self, afterId, limit):
         """Return max `limit` associations from the database after a given
         DB table id.
 
@@ -65,10 +65,7 @@ class Pusher:
         signer = Signer(self.sydent)
 
         for localId in localAssocs:
-            assoc = localAssocs[localId]
-
-            if signed:
-                assoc = signer.signedThreePidAssociation(localAssocs[localId])
+            assoc = signer.signedThreePidAssociation(localAssocs[localId])
 
             shadowAssoc = None
 
@@ -82,8 +79,7 @@ class Pusher:
                         ":" + self.sydent.shadow_hs_slave
                     )
 
-                if signed:
-                    shadowAssoc = signer.signedThreePidAssociation(shadowAssoc)
+                shadowAssoc = signer.signedThreePidAssociation(shadowAssoc)
 
             assocs[localId] = (assoc, shadowAssoc)
 
@@ -158,8 +154,8 @@ class Pusher:
                 ids = {}
                 total_updates = 0
 
-                # Push associations (called sg_assocs for legacy reasons)
-                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT)
+                # Push associations
+                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT)
                 total_updates += len(push_data["sg_assocs"])
 
                 # Push invite tokens and ephemeral public keys
@@ -167,14 +163,9 @@ class Pusher:
                 (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = self.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
                 total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
 
-                # Sign push data
-                signer = Signer(self.sydent)
-                push_data = signer.signReplicationJSON(push_data)
-
                 logger.debug("%d updates to push to %s", total_updates, p.servername)
                 if total_updates:
                     logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
-                    logger.info("Sending: %s", str(push_data))
                     updateDeferred = p.pushUpdates(push_data)
                     updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
                     updateDeferred.addErrback(self._pushFailed, peer=p)

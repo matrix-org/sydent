@@ -95,7 +95,7 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        # Ensure there is data we are able process
+        # Ensure there is data we are able to process
         if 'sg_assocs' not in inJson and 'invite_tokens' not in inJson and 'ephemeral_public_keys' not in inJson:
             logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_public_keys' keys in JSON", peer.servername)
             request.setResponseCode(400)
@@ -118,12 +118,14 @@ class ReplicationPushServlet(Resource):
                 try:
                     yield peer.verifySignedAssociation(sgAssoc)
                 except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
+                    self.sydent.db.rollback()
                     logger.warn("Failed to verify JSON from %s", peer.servername)
                     request.setResponseCode(400)
                     request.write(json.dumps({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}))
                     request.finish()
                     return
                 except Exception:
+                    self.sydent.db.rollback()
                     logger.exception("Failed to verify JSON from %s", peer.servername)
                     request.setResponseCode(500)
                     request.write(json.dumps({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}))
@@ -133,10 +135,13 @@ class ReplicationPushServlet(Resource):
                 assocObj = threePidAssocFromDict(sgAssoc)
 
                 if assocObj.mxid is not None:
+                    # Add the association components and the original signed
+                    # object (as assocs must be signed when requested by clients)
                     globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
                 else:
                     logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
                     globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
+
                 logger.info("Stored association with origin ID %s from %s", originId, peer.servername)
 
                 # if this is an association that matches one of our invite_tokens then we should call the onBind callback
