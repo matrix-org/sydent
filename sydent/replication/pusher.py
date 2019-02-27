@@ -80,42 +80,6 @@ class Pusher:
 
         return (assocs, maxId)
 
-    def getInviteTokensAfterId(self, afterId, limit):
-        """Return max `limit` invite tokens from the database after a given
-        DB table id.
-
-        :param afterId: A database id to act as an offset. Rows after this id
-            are returned.
-        :type afterId: int
-        :param limit: Max amount of database rows to return.
-        :type limit: int
-        :returns a tuple with the first item being a list of tokens, and the
-            second being the maximum table id of the returned tokens.
-        :rtype: Tuple[Dict[int, Dict], int|None]
-        """
-        # TODO: Do something for shadow servers?
-
-        join_token_store = JoinTokenStore(self.sydent)
-        return join_token_store.getInviteTokensAfterId(afterId, limit)
-
-    def getEphemeralPublicKeysAfterId(self, afterId, limit):
-        """Return max `limit` ephemeral keys from the database after a given
-        table id.
-
-        :param afterId: A database id to act as an offset. Rows after this id
-            are returned.
-        :type afterId: int
-        :param limit: Max amount of database rows to return.
-        :type limit: int
-        :returns a tuple with the first item being a list of keys, and the
-            second being the maximum table id of the returned keys.
-        :rtype: Tuple[Dict[int, Dict], int|None]
-        """
-        # TODO: Do something for shadow servers?
-
-        join_token_store = JoinTokenStore(self.sydent)
-        return join_token_store.getEphemeralPublicKeysAfterId(afterId, limit)
-
     def doLocalPush(self):
         """
         Synchronously push local associations to this server (ie. copy them to globals table)
@@ -137,6 +101,8 @@ class Pusher:
 
         updateDeferred = None
 
+        join_token_store = JoinTokenStore(self.sydent)
+
         try:
             peers = self.peerStore.getAllPeers()
 
@@ -153,8 +119,8 @@ class Pusher:
                 total_updates += len(push_data["sg_assocs"])
 
                 # Push invite tokens and ephemeral public keys
-                (push_data["invite_tokens"], ids["invite_tokens"]) = self.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
-                (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = self.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
+                (push_data["invite_tokens"], ids["invite_tokens"]) = join_token_store.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
+                (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = join_token_store.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
                 total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
 
                 logger.debug("%d updates to push to %s", total_updates, p.servername)
