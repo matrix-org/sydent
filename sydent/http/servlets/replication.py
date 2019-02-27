@@ -68,7 +68,7 @@ class ReplicationPushServlet(Resource):
 
         for originId,sgAssoc in inJson['sgAssocs'].items():
             try:
-                peer.verifyMessage(sgAssoc)
+                peer.verifySignedAssociation(sgAssoc)
                 logger.debug("Signed association from %s with origin ID %s verified", peer.servername, originId)
 
                 # Don't bother adding if one has already failed: we add all of them or none so we're only going to
