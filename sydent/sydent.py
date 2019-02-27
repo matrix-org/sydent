@@ -48,7 +48,7 @@ from http.servlets.bulklookupservlet import BulkLookupServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
 from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
-from http.servlets.replicationpushservlet import ReplicationPushServlet
+from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.infoservlet import InfoServlet
