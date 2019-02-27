@@ -29,6 +29,8 @@ from twisted.web.client import readBody
 
 logger = logging.getLogger(__name__)
 
+SIGNING_KEY_ALGORITHM = "ed25519"
+
 
 class Peer(object):
     def __init__(self, servername, pubkeys):
@@ -94,29 +96,31 @@ class RemotePeer(Peer):
         self.sydent = sydent
         self.port = 1001
 
-        # Get verify key from signing key
-        signing_key = signedjson.key.decode_signing_key_base64(alg, "0", self.pubkeys[alg])
-        self.verify_key = signing_key.verify_key
+        # Get verify key for this peer
+        self.verify_key = self.pubkeys[SIGNING_KEY_ALGORITHM]
 
         # Attach metadata
-        self.verify_key.alg = alg
+        self.verify_key.alg = SIGNING_KEY_ALGORITHM
         self.verify_key.version = 0
 
-    def verifyMessage(self, jsonMessage):
-        if not 'signatures' in jsonMessage:
+    def verifySignedAssociation(self, assoc):
+        """Verifies a signature on a signed association.
+
+        :param assoc: A signed association.
+        :type assoc: Dict
+        """
+        if not 'signatures' in assoc:
             raise NoSignaturesException()
 
-        alg = 'ed25519'
-
-        key_ids = signedjson.sign.signature_ids(jsonMessage, self.servername)
-        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith(alg + ":"):
+        key_ids = signedjson.sign.signature_ids(assoc, self.servername)
+        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith(SIGNING_KEY_ALGORITHM + ":"):
             e = NoMatchingSignatureException()
-            e.foundSigs = jsonMessage['signatures'].keys()
+            e.foundSigs = assoc['signatures'].keys()
             e.requiredServername = self.servername
             raise e
 
         # Verify the JSON
-        signedjson.sign.verify_signed_json(jsonMessage, self.servername, self.verify_key)
+        signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
     def pushUpdates(self, sgAssocs):
         if self.shadow:
