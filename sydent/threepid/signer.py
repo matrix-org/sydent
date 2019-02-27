@@ -31,6 +31,3 @@ class Signer:
         sgassoc.update(assoc.extra_fields)
         sgassoc = signedjson.sign.sign_json(sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519)
         return sgassoc
-
-    def signedReplicationJSON(self, data):
-        return signedjson.sign.sign_json(data, self.sydent.server_name, self.sydent.keyring.ed25519)

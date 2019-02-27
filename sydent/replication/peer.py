@@ -135,12 +135,6 @@ class RemotePeer(Peer):
         :rtype: Deferred
         """
 
-        # sgAssocs is comprised of tuples (sgAssoc, shadowSgAssoc)
-        if self.shadow:
-            data["sg_assocs"] = { k: v[1] for k, v in data["sg_assocs"].items() }
-        else:
-            data["sg_assocs"] = { k: v[0] for k, v in data["sg_assocs"].items() }
-
         reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
                                                                   self.port,
                                                                   '/_matrix/identity/replicate/v1/push',

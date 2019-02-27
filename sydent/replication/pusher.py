@@ -43,7 +43,7 @@ class Pusher:
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
         cb.start(10.0)
 
-    def getSignedAssociationsAfterId(self, afterId, limit):
+    def getSignedAssociationsAfterId(self, afterId, limit, shadow=False):
         """Return max `limit` associations from the database after a given
         DB table id.
 
@@ -52,10 +52,13 @@ class Pusher:
         :type afterId: int
         :param limit: Max amount of database rows to return.
         :type limit: int
-        :returns a tuple with the first item being a list of associations,
+        :param shadow: Whether these associations are intended for a shadow
+            server.
+        :type shadow: bool
+        :returns a tuple with the first item being a dict of associations,
             and the second being the maximum table id of the returned
             associations.
-        :rtype: Tuple[list[Tuple[Dict, Dict]], int|None]
+        :rtype: Tuple[Dict[Dict, Dict], int|None]
         """
         assocs = {}
 
@@ -64,25 +67,16 @@ class Pusher:
 
         signer = Signer(self.sydent)
 
-        for localId in localAssocs:
-            assoc = signer.signedThreePidAssociation(localAssocs[localId])
-
-            shadowAssoc = None
-
-            if self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
-                shadowAssoc = copy.deepcopy(localAssocs[localId])
-
+        for localId, assoc in localAssocs.items():
+            if shadow and self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
                 # mxid is null if 3pid has been unbound
-                if shadowAssoc.mxid:
-                    shadowAssoc.mxid = shadowAssoc.mxid.replace(
+                if assoc.mxid:
+                    assoc.mxid = assoc.mxid.replace(
                         ":" + self.sydent.shadow_hs_master,
                         ":" + self.sydent.shadow_hs_slave
                     )
 
-                shadowAssoc = signer.signedThreePidAssociation(shadowAssoc)
-
-            assocs[localId] = (assoc, shadowAssoc)
-
+            assocs[localId] = signer.signedThreePidAssociation(assoc)
 
         return (assocs, maxId)
 
@@ -155,7 +149,7 @@ class Pusher:
                 total_updates = 0
 
                 # Push associations
-                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT)
+                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT, p.shadow)
                 total_updates += len(push_data["sg_assocs"])
 
                 # Push invite tokens and ephemeral public keys
