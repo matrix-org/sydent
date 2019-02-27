@@ -140,7 +140,7 @@ class JoinTokenStore(object):
                           " where origin_server = ?", (server,))
         row = res.fetchone()
 
-        if not row or row[1] == 0:
+        if row[1] == 0:
             return 0
 
         return row[0]

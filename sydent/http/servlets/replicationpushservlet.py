@@ -45,6 +45,21 @@ class ReplicationPushServlet(Resource):
 
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
+        """Verify and store replicated information from trusted peer identity servers.
+
+        To prevent data sent from erroneous servers from being stored, we
+        initially verify that the sender's certificate contains a commonName
+        that we trust. This is checked against the peers stored in the local
+        DB. Data is then ingested.
+
+        Replicated associations must each be individually signed by the
+        signing key of the remote peer, which we verify using the verifykey
+        stored in the local DB.
+
+        Other data does not need to be signed.
+
+        :params request: The HTTPS request.
+        """
 
         peerCert = request.transport.getPeerCertificate()
         peerCertCn = peerCert.get_subject().commonName
@@ -80,6 +95,7 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
+        # Ensure there is data we are able process
         if 'sg_assocs' not in inJson and 'invite_tokens' not in inJson and 'ephemeral_public_keys' not in inJson:
             logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_public_keys' keys in JSON", peer.servername)
             request.setResponseCode(400)
@@ -87,23 +103,7 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        # Verify signature of message JSON
-        try:
-            yield peer.verifyMessage(inJson)
-            logger.debug("Signed replication JSON from %s verified", peer.servername)
-        except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
-            logger.warn("Failed to verify JSON from %s", peer.servername)
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}))
-            request.finish()
-            return
-        except Exception:
-            logger.exception("Failed to verify JSON from %s", peer.servername)
-            request.setResponseCode(500)
-            request.write(json.dumps({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}))
-            request.finish()
-            return
-
+        # Check for any signed associations
         if 'sg_assocs' in inJson and len(inJson['sg_assocs']) > 0:
             if len(inJson['sg_assocs']) > MAX_SG_ASSOCS_LIMIT:
                 request.setResponseCode(400)
@@ -115,6 +115,21 @@ class ReplicationPushServlet(Resource):
 
             # Check that this message is signed by one of our trusted associated peers
             for originId, sgAssoc in inJson['sg_assocs'].items():
+                try:
+                    yield peer.verifySignedAssociation(sgAssoc)
+                except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
+                    logger.warn("Failed to verify JSON from %s", peer.servername)
+                    request.setResponseCode(400)
+                    request.write(json.dumps({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}))
+                    request.finish()
+                    return
+                except Exception:
+                    logger.exception("Failed to verify JSON from %s", peer.servername)
+                    request.setResponseCode(500)
+                    request.write(json.dumps({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}))
+                    request.finish()
+                    return
+
                 assocObj = threePidAssocFromDict(sgAssoc)
 
                 if assocObj.mxid is not None:
@@ -128,6 +143,7 @@ class ReplicationPushServlet(Resource):
                 # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
                 self.sydent.threepidBinder.notifyPendingInvites(assocObj)
 
+        # Check for any invite tokens
         if 'invite_tokens' in inJson or 'ephemeral_public_keys' in inJson:
             tokensStore = JoinTokenStore(self.sydent)
 
@@ -155,6 +171,7 @@ class ReplicationPushServlet(Resource):
                                         originServer=peer.servername, originId=originId, commit=False)
                     logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
+            # Check for any ephemeral public keys
             if 'ephemeral_public_keys' in inJson and len(inJson['ephemeral_public_keys']) > 0:
                 if len(inJson['ephemeral_public_keys']) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
                     self.sydent.db.rollback()

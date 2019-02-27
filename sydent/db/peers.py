@@ -123,13 +123,13 @@ class PeerStore:
         """
 
         cur = self.sydent.db.cursor()
-        if "sg_assocs" in ids and ids["sg_assocs"]:
+        if ids["sg_assocs"]:
             cur.execute("update peers set lastSentAssocsId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["sg_assocs"], lastPokeSucceeded, peerName))
-        if "invite_tokens" in ids and ids["invite_tokens"]:
+        if ids["invite_tokens"]:
             cur.execute("update peers set lastSentInviteTokensId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["invite_tokens"], lastPokeSucceeded, peerName))
-        if "ephemeral_public_keys" in ids and ids["ephemeral_public_keys"]:
+        if ids["ephemeral_public_keys"]:
             cur.execute("update peers set lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["ephemeral_public_keys"], lastPokeSucceeded, peerName))
         self.sydent.db.commit()
