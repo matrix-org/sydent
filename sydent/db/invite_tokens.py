@@ -43,6 +43,13 @@ class JoinTokenStore(object):
             function (or an external one).
         :type commit: bool
         """
+        if originId and originServer:
+            # Check if we've already seen this association from this server
+            last_processed_id = tokensStore.getLastTokenIdFromServer(originServer)
+            if int(originId) <= int(last_processed_id):
+                logger.info("We have already seen token ID %s from %s. Ignoring.", originId, originServer)
+                return
+
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
@@ -179,6 +186,13 @@ class JoinTokenStore(object):
             function (or an external one).
         :type commit: bool
         """
+        if originId and originServer:
+            # Check if we've already seen this association from this server
+            last_processed_id = tokensStore.getLastEphemeralPublicKeyIdFromServer(originServer)
+            if int(originId) <= int(last_processed_id):
+                logger.info("We have already seen key ID %s from %s. Ignoring.", originId, originServer)
+                return
+
         if not persistenceTs:
             persistenceTs = int(time.time())
         cur = self.sydent.db.cursor()

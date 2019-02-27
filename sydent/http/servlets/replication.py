@@ -69,7 +69,7 @@ class ReplicationPushServlet(Resource):
         peer = peerStore.getPeerByName(peerCertCn)
 
         if not peer:
-            logger.exception("Got connection from %s but no peer found by that name", peerCertCn)
+            logger.warn("Got connection from %s but no peer found by that name", peerCertCn)
             request.setResponseCode(403)
             request.write(json.dumps({'errcode': 'M_UNKNOWN_PEER', 'error': 'This peer is not known to this server'}))
             request.finish()
@@ -103,103 +103,85 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        # Check for any signed associations
-        if 'sg_assocs' in inJson and len(inJson['sg_assocs']) > 0:
-            if len(inJson['sg_assocs']) > MAX_SG_ASSOCS_LIMIT:
+        # Process signed associations
+        sg_assocs = inJson.get('sg_assocs', {})
+        if len(inJson['sg_assocs']) > MAX_SG_ASSOCS_LIMIT:
+            request.setResponseCode(400)
+            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"sg_assocs" has more than %d keys' % MAX_SG_ASSOCS_LIMIT}))
+            request.finish()
+            return
+
+        globalAssocsStore = GlobalAssociationStore(self.sydent)
+
+        # Check that this message is signed by one of our trusted associated peers
+        for originId, sgAssoc in sg_assocs.items():
+            try:
+                yield peer.verifySignedAssociation(sgAssoc)
+                logger.debug("Signed association from %s with origin ID %s verified", peer.servername, originId)
+            except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
+                self.sydent.db.rollback()
+                logger.warn("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
                 request.setResponseCode(400)
-                request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"sg_assocs" has more than %d keys' % MAX_SG_ASSOCS_LIMIT}))
+                request.write(json.dumps({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}))
+                request.finish()
+                return
+            except Exception:
+                self.sydent.db.rollback()
+                logger.error("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
+                request.setResponseCode(500)
+                request.write(json.dumps({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}))
                 request.finish()
                 return
 
-            globalAssocsStore = GlobalAssociationStore(self.sydent)
+            assocObj = threePidAssocFromDict(sgAssoc)
 
-            # Check that this message is signed by one of our trusted associated peers
-            for originId, sgAssoc in inJson['sg_assocs'].items():
-                try:
-                    yield peer.verifySignedAssociation(sgAssoc)
-                except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
-                    self.sydent.db.rollback()
-                    logger.warn("Failed to verify signed association from %s", peer.servername)
-                    request.setResponseCode(400)
-                    request.write(json.dumps({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}))
-                    request.finish()
-                    return
-                except Exception:
-                    self.sydent.db.rollback()
-                    logger.exception("Failed to verify signed association from %s", peer.servername)
-                    request.setResponseCode(500)
-                    request.write(json.dumps({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}))
-                    request.finish()
-                    return
+            if assocObj.mxid is not None:
+                # Add the association components and the original signed
+                # object (as assocs must be signed when requested by clients)
+                globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
+            else:
+                logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
+                globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
 
-                assocObj = threePidAssocFromDict(sgAssoc)
+            logger.info("Stored association with origin ID %s from %s", originId, peer.servername)
 
-                if assocObj.mxid is not None:
-                    # Add the association components and the original signed
-                    # object (as assocs must be signed when requested by clients)
-                    globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
-                else:
-                    logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
-                    globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
+            # if this is an association that matches one of our invite_tokens then we should call the onBind callback
+            # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
+            self.sydent.threepidBinder.notifyPendingInvites(assocObj)
 
-                logger.info("Stored association with origin ID %s from %s", originId, peer.servername)
+        tokensStore = JoinTokenStore(self.sydent)
 
-                # if this is an association that matches one of our invite_tokens then we should call the onBind callback
-                # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
-                self.sydent.threepidBinder.notifyPendingInvites(assocObj)
+        # Process any invite tokens
 
-        # Check for any invite tokens
-        if 'invite_tokens' in inJson or 'ephemeral_public_keys' in inJson:
-            tokensStore = JoinTokenStore(self.sydent)
+        invite_tokens = inJson.get('invite_tokens', {})
+        if len(invite_tokens) > MAX_INVITE_TOKENS_LIMIT:
+            self.sydent.db.rollback()
+            request.setResponseCode(400)
+            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}))
+            request.finish()
+            return
 
-            if 'invite_tokens' in inJson and len(inJson['invite_tokens']) > 0:
-                if len(inJson['invite_tokens']) > MAX_INVITE_TOKENS_LIMIT:
-                    self.sydent.db.rollback()
-                    request.setResponseCode(400)
-                    request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}))
-                    request.finish()
-                    return
+        for originId, inviteToken in inJson["invite_tokens"].items():
+            tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
+                                inviteToken['sender'], inviteToken['token'],
+                                originServer=peer.servername, originId=originId, commit=False)
+            logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
-                last_processed_id = tokensStore.getLastTokenIdFromServer(peer.servername)
-                for originId, inviteToken in inJson["invite_tokens"].items():
-                    # Make sure we haven't processed this token already
-                    # If so, back out of all incoming tokens and return an error
-                    if int(originId) <= int(last_processed_id):
-                        self.sydent.db.rollback()
-                        request.setResponseCode(200)
-                        request.write(json.dumps({'success': True, 'message': 'Already processed token ID %s' % str(originId)}))
-                        request.finish()
-                        return
+        # Process any ephemeral public keys
 
-                    tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
-                                        inviteToken['sender'], inviteToken['token'],
-                                        originServer=peer.servername, originId=originId, commit=False)
-                    logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
+        ephemeral_public_keys = inJson.get('ephemeral_public_keys', {})
+        if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
+            self.sydent.db.rollback()
+            request.setResponseCode(400)
+            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"ephemeral_public_keys" has more than %d keys' % MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT}))
+            request.finish()
+            return
 
-            # Check for any ephemeral public keys
-            if 'ephemeral_public_keys' in inJson and len(inJson['ephemeral_public_keys']) > 0:
-                if len(inJson['ephemeral_public_keys']) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
-                    self.sydent.db.rollback()
-                    request.setResponseCode(400)
-                    request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"ephemeral_public_keys" has more than %d keys' % MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT}))
-                    request.finish()
-                    return
-
-                last_processed_id = tokensStore.getLastEphemeralPublicKeyIdFromServer(peer.servername)
-                for originId, ephemeralKey in inJson["ephemeral_public_keys"].items():
-                    # Make sure we haven't processed this key already
-                    # If so, back out of all incoming keys and return an error
-                    if int(originId) <= int(last_processed_id):
-                        self.sydent.db.rollback()
-                        request.setResponseCode(200)
-                        request.write(json.dumps({'success': True, 'message': 'Already processed key ID %s' % str(originId)}))
-                        request.finish()
-                        return
-
-                    tokensStore.storeEphemeralPublicKey(
-                        ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'],
-                        originServer=peer.servername, originId=originId, commit=False)
-                    logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
+        for originId, ephemeralKey in inJson["ephemeral_public_keys"].items():
+            tokensStore.storeEphemeralPublicKey(
+                ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'],
+                originServer=peer.servername, originId=originId, commit=False)
+            logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
 
         self.sydent.db.commit()
         request.write(json.dumps({'success':True}))
