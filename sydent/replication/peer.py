@@ -16,6 +16,7 @@
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
+from unpaddedbase64 import decode_base64
 
 import signedjson.sign
 import signedjson.key
@@ -82,7 +83,8 @@ class RemotePeer(Peer):
         self.port = 1001
 
         # Get verify key for this peer
-        self.verify_key = self.pubkeys[SIGNING_KEY_ALGORITHM]
+        key_bytes = decode_base64(self.pubkeys[SIGNING_KEY_ALGORITHM])
+        self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", key_bytes)
 
         # Attach metadata
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
