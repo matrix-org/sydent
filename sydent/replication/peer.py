@@ -16,12 +16,15 @@
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
+from unpaddedbase64 import decode_base64
 
 import signedjson.sign
 import signedjson.key
 
 import logging
 import json
+
+import nacl
 
 import twisted.internet.reactor
 from twisted.internet import defer
@@ -38,14 +41,6 @@ class Peer(object):
         self.pubkeys = pubkeys
         self.shadow = False
 
-    def pushUpdates(self, sgAssocs):
-        """
-        :param sgAssocs: Sequence of (originId, (sgAssoc, shadowSgAssoc)) tuples where originId
-            is the id on the creating server and sgAssoc is the json object of the signed association
-        :return a deferred
-        """
-        pass
-
 
 class LocalPeer(Peer):
     """
@@ -61,6 +56,7 @@ class LocalPeer(Peer):
             self.lastId = -1
 
     def pushUpdates(self, sgAssocs):
+        """Push updates from local associations table to the global one."""
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
             if localId > self.lastId:
@@ -97,7 +93,8 @@ class RemotePeer(Peer):
         self.port = 1001
 
         # Get verify key for this peer
-        self.verify_key = self.pubkeys[SIGNING_KEY_ALGORITHM]
+        key_bytes = decode_base64(self.pubkeys[SIGNING_KEY_ALGORITHM])
+        self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", key_bytes)
 
         # Attach metadata
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
@@ -122,16 +119,20 @@ class RemotePeer(Peer):
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
-    def pushUpdates(self, sgAssocs):
-        if self.shadow:
-            body = {'sgAssocs': { k: v[1] for k, v in sgAssocs.items()}}
-        else:
-            body = {'sgAssocs': { k: v[0] for k, v in sgAssocs.items()}}
+    def pushUpdates(self, data):
+        """Push updates to a remote peer.
+
+        :param data: A dictionary of possible `sg_assocs`, `invite_tokens`
+            and `ephemeral_public_keys` keys.
+        :type data: Dict
+        :returns a deferred.
+        :rtype: Deferred
+        """
 
         reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
                                                                   self.port,
                                                                   '/_matrix/identity/replicate/v1/push',
-                                                                  body)
+                                                                  data)
 
         # XXX: We'll also need to prune the deleted associations out of the
         # local associations table once they've been replicated to all peers

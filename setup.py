@@ -48,6 +48,7 @@ setup(
         "phonenumbers",
         "pyopenssl",
 
+        "pynacl",
         "pyyaml",
         "netaddr",
     ],

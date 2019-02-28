@@ -21,12 +21,20 @@ def threePidAssocFromDict(d):
 class ThreepidAssociation:
     def __init__(self, medium, address, mxid, ts, not_before, not_after):
         """
-        :param medium: The medium of the 3pid (eg. email)
-        :param address: The identifier (eg. email address)
-        :param mxid: The matrix ID the 3pid is associated with
-        :param ts: The creation timestamp of this association, ms
-        :param not_before: The timestamp, in ms, at which this association becomes valid
-        :param not_after: The timestamp, in ms, at which this association ceases to be valid
+        :param medium: The medium of the 3pid (eg. email).
+        :type medium: str
+        :param address: The identifier (eg. email address).
+        :type address: str
+        :param mxid: The matrix ID the 3pid is associated with.
+        :type mxid: str
+        :param ts: The creation timestamp of this association, ms.
+        :type ts: int
+        :param not_before: The timestamp, in ms, at which this association
+            becomes valid.
+        :type not_before: int
+        :param not_after: The timestamp, in ms, at which this association
+            ceases to be valid.
+        :type not_after: int
         """
         self.medium = medium
         self.address = address

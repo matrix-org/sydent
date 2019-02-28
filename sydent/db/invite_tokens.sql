@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS invite_tokens (
     sender varchar(256) not null,
     token varchar(256) not null,
     received_ts bigint, -- When the invite was received by us from the homeserver
-    sent_ts bigint -- When the token was sent by us to the user
+    sent_ts bigint, -- When the token was sent by us to the user
+    origin_id integer, -- original id in homeserver's DB that this was replicated from (if applicable)
+    origin_server text -- homeserver this was replicated from (if applicable)
 );
 CREATE INDEX IF NOT EXISTS invite_token_medium_address on invite_tokens(medium, address);
 CREATE INDEX IF NOT EXISTS invite_token_token on invite_tokens(token);
@@ -31,7 +33,9 @@ CREATE TABLE IF NOT EXISTS ephemeral_public_keys(
     id integer primary key,
     public_key varchar(256) not null,
     verify_count bigint default 0,
-    persistence_ts bigint
+    persistence_ts bigint,
+    origin_server text, -- homeserver this was replicated from (if applicable)
+    origin_id integer -- original id in homeserver's DB that this was replicated from (if applicable)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ephemeral_public_keys_index on ephemeral_public_keys(public_key);
