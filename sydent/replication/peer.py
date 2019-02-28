@@ -116,14 +116,6 @@ class RemotePeer(Peer):
             e.requiredServername = self.servername
             raise e
 
-        # Get verify key from signing key
-        signing_key = signedjson.key.decode_signing_key_base64(alg, "0", self.pubkeys[alg])
-        verify_key = signing_key.verify_key
-
-        # Attach metadata
-        verify_key.alg = alg
-        verify_key.version = 0
-
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
