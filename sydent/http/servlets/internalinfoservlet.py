@@ -27,6 +27,14 @@ logger = logging.getLogger(__name__)
 
 
 class InternalInfoServlet(Resource):
+    """Maps a threepid to the responsible HS domain, and gives invitation status.
+    For use by homeserver instances.
+
+    :param syd: A sydent instance.
+    :type syd: Sydent
+    :param info: An instance of Info.
+    :type info: Sydent.http.Info
+    """
     isLeaf = True
 
     def __init__(self, syd, info):
@@ -35,9 +43,6 @@ class InternalInfoServlet(Resource):
 
     def render_GET(self, request):
         """
-        Maps a threepid to the responsible HS domain, and gives invitation status.
-        For use by homeserver instances.
-
         Returns: { hs: ..., [shadow_hs: ...], invited: true/false, requires_invite: true/false }
         """
 

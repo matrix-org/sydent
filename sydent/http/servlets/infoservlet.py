@@ -25,6 +25,14 @@ logger = logging.getLogger(__name__)
 
 
 class InfoServlet(Resource):
+    """Maps a threepid to the responsible HS domain. For use by clients.
+
+    :param syd: A sydent instance.
+    :type syd: Sydent
+    :param info: An instance of Info.
+    :type info: Sydent.http.Info
+    """
+
     isLeaf = True
 
     def __init__(self, syd, info):
@@ -32,10 +40,7 @@ class InfoServlet(Resource):
         self.info = info
 
     def render_GET(self, request):
-        """
-        Maps a threepid to the responsible HS domain. For use by clients.
-
-        Clients who are "whitelisted" should receive both hs and shadow_hs in
+        """Clients who are "whitelisted" should receive both hs and shadow_hs in
         their response JSON. Clients that are not whitelisted should only
         receive hs, and it's contents should be that of shadow_hs in the
         config file.
