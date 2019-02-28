@@ -19,20 +19,22 @@ from twisted.web.resource import Resource
 import logging
 import json
 
+from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+
 
 logger = logging.getLogger(__name__)
 
 
-class InfoServlet(Resource):
-    """Maps a threepid to the responsible HS domain. For use by clients.
+class InternalInfoServlet(Resource):
+    """Maps a threepid to the responsible HS domain, and gives invitation status.
+    For use by homeserver instances.
 
     :param syd: A sydent instance.
     :type syd: Sydent
     :param info: An instance of Info.
     :type info: Sydent.http.Info
     """
-
     isLeaf = True
 
     def __init__(self, syd, info):
@@ -40,12 +42,8 @@ class InfoServlet(Resource):
         self.info = info
 
     def render_GET(self, request):
-        """Clients who are "whitelisted" should receive both hs and shadow_hs in
-        their response JSON. Clients that are not whitelisted should only
-        receive hs, and it's contents should be that of shadow_hs in the
-        config file.
-
-        Returns: { hs: ..., [shadow_hs: ...]}
+        """
+        Returns: { hs: ..., [shadow_hs: ...], invited: true/false, requires_invite: true/false }
         """
 
         send_cors(request)
@@ -59,18 +57,11 @@ class InfoServlet(Resource):
         # Find an entry in the info file matching this user's ID
         result = self.info.match_user_id(medium, address)
 
-        # Check if this user is from a shadow hs/not whitelisted
-        ip = IPAddress(self.sydent.ip_from_request(request))
-        if self.sydent.nonshadow_ips and ip not in self.sydent.nonshadow_ips:
-            # This user is not whitelisted, present shadow_hs at their only hs
-            result['hs'] = result.pop('shadow_hs', None)
-        else:
-            # This user is whitelisted, ensure shadow_hs exists even if empty
-            result['shadow_hs'] = result.get('shadow_hs', '')
+        joinTokenStore = JoinTokenStore(self.sydent)
+        pendingJoinTokens = joinTokenStore.getTokens(medium, address)
 
-        # Non-internal. Remove 'requires_invite' if found
-        result.pop('requires_invite', None)
-
+        # Report whether this user has been invited to a room
+        result['invited'] = True if pendingJoinTokens else False
         return json.dumps(result)
 
     @jsonwrap
