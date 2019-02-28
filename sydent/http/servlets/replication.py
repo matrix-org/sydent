@@ -105,7 +105,8 @@ class ReplicationPushServlet(Resource):
 
         # Process signed associations
         sg_assocs = inJson.get('sg_assocs', {})
-        if len(inJson['sg_assocs']) > MAX_SG_ASSOCS_LIMIT:
+        if len(sg_assocs) > MAX_SG_ASSOCS_LIMIT:
+            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(sg_assocs), MAX_SG_ASSOCS_LIMIT)
             request.setResponseCode(400)
             request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"sg_assocs" has more than %d keys' % MAX_SG_ASSOCS_LIMIT}))
             request.finish()
@@ -156,6 +157,7 @@ class ReplicationPushServlet(Resource):
         invite_tokens = inJson.get('invite_tokens', {})
         if len(invite_tokens) > MAX_INVITE_TOKENS_LIMIT:
             self.sydent.db.rollback()
+            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(invite_tokens), MAX_INVITE_TOKENS_LIMIT)
             request.setResponseCode(400)
             request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}))
             request.finish()
@@ -172,6 +174,7 @@ class ReplicationPushServlet(Resource):
         ephemeral_public_keys = inJson.get('ephemeral_public_keys', {})
         if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
             self.sydent.db.rollback()
+            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(ephemeral_public_keys), MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT)
             request.setResponseCode(400)
             request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"ephemeral_public_keys" has more than %d keys' % MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT}))
             request.finish()
