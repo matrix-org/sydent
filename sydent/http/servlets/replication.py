@@ -163,7 +163,7 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        for originId, inviteToken in inJson["invite_tokens"].items():
+        for originId, inviteToken in invite_tokens.items():
             tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                 inviteToken['sender'], inviteToken['token'],
                                 originServer=peer.servername, originId=originId, commit=False)
@@ -180,7 +180,7 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        for originId, ephemeralKey in inJson["ephemeral_public_keys"].items():
+        for originId, ephemeralKey in ephemeral_public_keys.items():
             tokensStore.storeEphemeralPublicKey(
                 ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'],
                 originServer=peer.servername, originId=originId, commit=False)
