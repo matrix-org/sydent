@@ -124,11 +124,6 @@ class MatrixFederationAgent(object):
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
         res = yield self._route_matrix_uri(parsed_uri)
-        logger.info("[request] ROUTE_MATRIX_URI RESULT: %s", res)
-
-        logger.info("Gotten URI: %s", uri)
-        #uri = "https://" + res.target_host + ":" + str(res.target_port) + '/' + '/'.join(uri.split('.')[-1].split('/')[1:])
-        logger.info("New URI: %s", uri)
 
         # set up the TLS connection params
         #
@@ -154,13 +149,11 @@ class MatrixFederationAgent(object):
         class EndpointFactory(object):
             @staticmethod
             def endpointForURI(_uri):
-                logger.info("Factory res stats: %s:%d", res.target_host, res.target_port)
                 ep = LoggingHostnameEndpoint(
                     self._reactor, res.target_host, res.target_port,
                 )
                 if tls_options is not None:
                     ep = wrapClientTLS(tls_options, ep)
-                logger.info("*** RETURNING EP ***")
                 return ep
 
         agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
@@ -179,7 +172,6 @@ class MatrixFederationAgent(object):
         Returns:
             Deferred[_RoutingResult]
         """
-        logger.info("ROUTING URI: %s:%d", parsed_uri.host.decode("ascii"), parsed_uri.port)
         # check for an IP literal
         try:
             ip_address = IPAddress(parsed_uri.host.decode("ascii"))
@@ -187,7 +179,6 @@ class MatrixFederationAgent(object):
             # not an IP address
             ip_address = None
 
-        logger.info("IP ADDRESS? %s", ip_address is not None)
         if ip_address:
             port = parsed_uri.port
             if port == -1:
@@ -200,7 +191,6 @@ class MatrixFederationAgent(object):
             ))
 
         if parsed_uri.port != -1:
-            logger.info("GOING WITH PORT")
             # there is an explicit port
             defer.returnValue(_RoutingResult(
                 host_header=parsed_uri.netloc,
@@ -211,11 +201,9 @@ class MatrixFederationAgent(object):
 
         if lookup_well_known:
             # try a .well-known lookup
-            logger.info("is %s in the cache? %s", parsed_uri.host, parsed_uri.host in self._well_known_cache)
             well_known_server = yield self._get_well_known(parsed_uri.host)
 
             if well_known_server:
-                logger.info("WE GOT A WELL-KNOWN: %s", well_known_server)
                 # if we found a .well-known, start again, but don't do another
                 # .well-known lookup.
 
@@ -245,14 +233,11 @@ class MatrixFederationAgent(object):
                 )
 
                 res = yield self._route_matrix_uri(new_uri, lookup_well_known=False)
-                logger.info("[well-known] ROUTE_MATRIX_URI RESULT: %s", res)
                 defer.returnValue(res)
 
         # try a SRV lookup
-        logger.info("TRYING SRV")
         service_name = b"_matrix._tcp.%s" % (parsed_uri.host,)
         server_list = yield self._srv_resolver.resolve_service(service_name)
-        logger.info("SRV? %s", server_list)
 
         if not server_list:
             target_host = parsed_uri.host
@@ -313,7 +298,6 @@ class MatrixFederationAgent(object):
         logger.info("Fetching %s", uri_str)
         try:
             response = yield self._well_known_agent.request(b"GET", uri)
-            logger.info("RESPONSE IS %s", response)
             body = yield readBody(response)
             if response.code != 200:
                 raise Exception("Non-200 response %s" % (response.code, ))

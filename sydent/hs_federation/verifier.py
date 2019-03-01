@@ -75,9 +75,6 @@ class Verifier(object):
             logger.info("Got keys for %s: caching until %s", server_name, result['valid_until_ts'])
             self.cache[server_name] = result
 
-        logger.info("*** GOT SERVER KEYS ***")
-        logger.info(result['verify_keys'])
-
         defer.returnValue(result['verify_keys'])
 
     @defer.inlineCallbacks

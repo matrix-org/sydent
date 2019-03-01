@@ -38,19 +38,17 @@ class HTTPClient(object):
     @defer.inlineCallbacks
     def get_json(self, uri):
         logger.debug("HTTP GET %s", uri)
-        logger.info("Getting our stuff")
 
         response = yield self.agent.request(
             "GET",
             uri.encode("ascii"),
         )
         body = yield readBody(response)
-        logger.info("*** GOT BODY: %s ***", body)
         try:
             json_body = json.loads(body)
         except Exception as e:
-            logger.warn("Error parsing JSON from %s: %s", uri, e)
-            json_body = "{}"
+            logger.exception("Error parsing JSON from %s", uri)
+            json_body = None
         defer.returnValue(json_body)
 
     @defer.inlineCallbacks
