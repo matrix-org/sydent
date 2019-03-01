@@ -42,13 +42,13 @@ class EmailRequestCodeServlet(Resource):
     def _async_render_POST(self, request):
         send_cors(request)
         try:
-            yield self.sydent.sig_verifier._getKeysForServer("bpulse.org")
+            res = yield self.sydent.sig_verifier._getKeysForServer("bpulse.org")
         except Exception as e:
             logger.warn("ERROR:")
             logger.warn(e)
             pass
         request.setResponseCode(200)
-        request.write(json.dumps({}))
+        request.write(json.dumps(res))
         request.finish()
         return
 
