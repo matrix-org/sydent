@@ -52,19 +52,25 @@ class MatrixFederationAgent(object):
     """An Agent-like thing which provides a `request` method which will look up a matrix
     server and send an HTTP request to it.
     Doesn't implement any retries. (Those are done in MatrixFederationHttpClient.)
-    Args:
-        reactor (IReactor): twisted reactor to use for underlying requests
-        tls_client_options_factory (ClientTLSOptionsFactory|None):
-            factory to use for fetching client tls options, or none to disable TLS.
-        _well_known_tls_policy (IPolicyForHTTPS|None):
-            TLS policy to use for fetching .well-known files. None to use a default
-            (browser-like) implementation.
-        _srv_resolver (SrvResolver|None):
-            SRVResolver impl to use for looking up SRV records. None to use a default
-            implementation.
-        _well_known_cache (TTLCache|None):
-            TTLCache impl for storing cached well-known lookups. None to use a default
-            implementation.
+
+    :param reactor: twisted reactor to use for underlying requests
+    :type reactor: IReactor
+
+    :param tls_client_options_factory: Factory to use for fetching client tls
+        options, or none to disable TLS.
+    :type tls_client_options_factory: ClientTLSOptionsFactory, None
+
+    :param _well_known_tls_policy: TLS policy to use for fetching .well-known
+        files. None to use a default (browser-like) implementation.
+    :type _well_known_tls_policy: IPolicyForHTTPS, None
+
+    :param _srv_resolver: SRVResolver impl to use for looking up SRV records.
+        None to use a default implementation.
+    :type _srv_resolver: SrvResolver, None
+
+    :param _well_known_cache: TTLCache impl for storing cached well-known
+        lookups. None to use a default implementation.
+    :type _well_known_cache: TTLCache, None
     """
 
     def __init__(
@@ -104,23 +110,27 @@ class MatrixFederationAgent(object):
     @defer.inlineCallbacks
     def request(self, method, uri, headers=None, bodyProducer=None):
         """
-        Args:
-            method (bytes): HTTP method: GET/POST/etc
-            uri (bytes): Absolute URI to be retrieved
-            headers (twisted.web.http_headers.Headers|None):
-                HTTP headers to send with the request, or None to
-                send no extra headers.
-            bodyProducer (twisted.web.iweb.IBodyProducer|None):
-                An object which can generate bytes to make up the
-                body of this request (for example, the properly encoded contents of
-                a file for a file upload).  Or None if the request is to have
-                no body.
-        Returns:
-            Deferred[twisted.web.iweb.IResponse]:
-                fires when the header of the response has been received (regardless of the
-                response status code). Fails if there is any problem which prevents that
-                response from being received (including problems that prevent the request
-                from being sent).
+        :param method: HTTP method (GET/POST/etc).
+        :type method: bytes
+
+        :param uri: Absolute URI to be retrieved.
+        :type uri: bytes
+
+        :param headers: HTTP headers to send with the request, or None to
+            send no extra headers.
+        :type headers: twisted.web.http_headers.Headers, None
+
+        :param bodyProducer: An object which can generate bytes to make up the
+            body of this request (for example, the properly encoded contents of
+            a file for a file upload).  Or None if the request is to have
+            no body.
+        :type bodyProducer: twisted.web.iweb.IBodyProducer, None
+
+        :returns a deferred that fires when the header of the response has
+            been received (regardless of the response status code). Fails if
+            there is any problem which prevents that response from being received
+            (including problems that prevent the request from being sent).
+        :rtype: Deferred[twisted.web.iweb.IResponse]
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
         res = yield self._route_matrix_uri(parsed_uri)
@@ -163,14 +173,18 @@ class MatrixFederationAgent(object):
     @defer.inlineCallbacks
     def _route_matrix_uri(self, parsed_uri, lookup_well_known=True):
         """Helper for `request`: determine the routing for a Matrix URI
-        Args:
-            parsed_uri (twisted.web.client.URI): uri to route. Note that it should be
-                parsed with URI.fromBytes(uri, defaultPort=-1) to set the `port` to -1
-                if there is no explicit port given.
-            lookup_well_known (bool): True if we should look up the .well-known file if
-                there is no SRV record.
-        Returns:
-            Deferred[_RoutingResult]
+
+        :params parsed_uri: uri to route. Note that it should be parsed with
+            URI.fromBytes(uri, defaultPort=-1) to set the `port` to -1 if there
+            is no explicit port given.
+        :type parsed_uri: twisted.web.client.URI
+
+        :params lookup_well_known: True if we should look up the .well-known
+            file if there is no SRV record.
+        :type lookup_well_known: bool
+
+        :returns a routing result.
+        :rtype: Deferred[_RoutingResult]
         """
         # check for an IP literal
         try:
@@ -263,11 +277,13 @@ class MatrixFederationAgent(object):
     @defer.inlineCallbacks
     def _get_well_known(self, server_name):
         """Attempt to fetch and parse a .well-known file for the given server
-        Args:
-            server_name (bytes): name of the server, from the requested url
-        Returns:
-            Deferred[bytes|None]: either the new server name, from the .well-known, or
-                None if there was no .well-known file.
+
+        :param server_name: Name of the server, from the requested url.
+        :type server_name: bytes
+
+        :returns either the new server name, from the .well-known, or None if
+            there was no .well-known file.
+        :rtype: Deferred[bytes|None]
         """
         try:
             result = self._well_known_cache[server_name]
@@ -284,14 +300,15 @@ class MatrixFederationAgent(object):
     @defer.inlineCallbacks
     def _do_get_well_known(self, server_name):
         """Actually fetch and parse a .well-known, without checking the cache
-        Args:
-            server_name (bytes): name of the server, from the requested url
-        Returns:
-            Deferred[Tuple[bytes|None|object],int]:
-                result, cache period, where result is one of:
-                 - the new server name from the .well-known (as a `bytes`)
-                 - None if there was no .well-known file.
-                 - INVALID_WELL_KNOWN if the .well-known was invalid
+
+        :param server_name: Name of the server, from the requested url
+        :type server_name: bytes
+
+        :returns a tuple of (result, cache period), where result is one of:
+            - the new server name from the .well-known (as a `bytes`)
+            - None if there was no .well-known file.
+            - INVALID_WELL_KNOWN if the .well-known was invalid
+        :rtype: Deferred[Tuple[bytes|None|object],int]
         """
         uri = b"https://%s/.well-known/matrix/server" % (server_name, )
         uri_str = uri.decode("ascii")

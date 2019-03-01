@@ -50,11 +50,13 @@ class Server(object):
 
 
 def pick_server_from_list(server_list):
-    """Randomly choose a server from the server list
-    Args:
-        server_list (list[Server]): list of candidate servers
-    Returns:
-        Tuple[bytes, int]: (host, port) pair for the chosen server
+    """Randomly choose a server from the server list.
+
+    :param server_list: List of candidate servers.
+    :type server_list: list[Server]
+
+    :returns a (host, port) pair for the chosen server.
+    :rtype: Tuple[bytes, int]
     """
     if not server_list:
         raise RuntimeError("pick_server_from_list called with empty list")
@@ -83,10 +85,15 @@ class SrvResolver(object):
     """Interface to the dns client to do SRV lookups, with result caching.
     The default resolver in twisted.names doesn't do any caching (it has a CacheResolver,
     but the cache never gets populated), so we add our own caching layer here.
-    Args:
-        dns_client (twisted.internet.interfaces.IResolver): twisted resolver impl
-        cache (dict): cache object
-        get_time (callable): clock implementation. Should return seconds since the epoch
+
+    :param dns_client: Twisted resolver impl
+    :type dns_client: twisted.internet.interfaces.IResolver
+
+    :param cache: cache object
+    :type cache: Dict
+
+    :param get_time: Clock implementation. Should return seconds since the epoch.
+    :type get_time: callable
     """
     def __init__(self, dns_client=client, cache=SERVER_CACHE, get_time=time.time):
         self._dns_client = dns_client
@@ -96,11 +103,12 @@ class SrvResolver(object):
     @defer.inlineCallbacks
     def resolve_service(self, service_name):
         """Look up a SRV record
-        Args:
-            service_name (bytes): record to look up
-        Returns:
-            Deferred[list[Server]]:
-                a list of the SRV records, or an empty list if none found
+
+        :param service_name: The record to look up.
+        :type service_name: bytes
+
+        :returns a list of the SRV records, or an empty list if none found.
+        :rtype: Deferred[list[Server]]
         """
         now = int(self._get_time())
 

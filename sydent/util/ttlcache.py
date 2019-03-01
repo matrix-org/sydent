@@ -39,10 +39,12 @@ class TTLCache(object):
     def set(self, key, value, ttl):
         """Add/update an entry in the cache
 
-        Args:
-            key: key for this entry
-            value: value for this entry
-            ttl (float): TTL for this entry, in seconds
+        :param key: Key for this entry.
+
+        :param value: Value for this entry.
+
+        :param paramttl: TTL for this entry, in seconds.
+        :type paramttl: float
         """
         expiry = self._timer() + ttl
 
@@ -58,13 +60,11 @@ class TTLCache(object):
     def get(self, key, default=SENTINEL):
         """Get a value from the cache
 
-        Args:
-            key: key to look up
-            default: default value to return, if key is not found. If not set, and the
-                key is not found, a KeyError will be raised
+        :param key: The key to look up.
+        :param default: default value to return, if key is not found. If not
+            set, and the key is not found, a KeyError will be raised.
 
-        Returns:
-            value from the cache, or the default
+        :returns a value from the cache, or the default.
         """
         self.expire()
         e = self._data.get(key, SENTINEL)
@@ -77,11 +77,10 @@ class TTLCache(object):
     def get_with_expiry(self, key):
         """Get a value, and its expiry time, from the cache
 
-        Args:
-            key: key to look up
+        :param key: key to look up
 
-        Returns:
-            Tuple[Any, float]: the value from the cache, and the expiry time
+        :returns The value from the cache, and the expiry time.
+        :rtype: Tuple[Any, float]
 
         Raises:
             KeyError if the entry is not found
@@ -99,13 +98,11 @@ class TTLCache(object):
         If key is in the cache, remove it and return its value, else return default.
         If default is not given and key is not in the cache, a KeyError is raised.
 
-        Args:
-            key: key to look up
-            default: default value to return, if key is not found. If not set, and the
-                key is not found, a KeyError will be raised
+        :param key: key to look up
+        :param default: default value to return, if key is not found. If not
+            set, and the key is not found, a KeyError will be raised
 
-        Returns:
-            value from the cache, or the default
+        :returns a value from the cache, or the default
         """
         self.expire()
         e = self._data.pop(key, SENTINEL)
