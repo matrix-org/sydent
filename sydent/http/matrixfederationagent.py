@@ -124,6 +124,7 @@ class MatrixFederationAgent(object):
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
         res = yield self._route_matrix_uri(parsed_uri)
+        logger.info("[request] ROUTE_MATRIX_URI RESULT: %s", res)
 
         # set up the TLS connection params
         #
@@ -158,7 +159,7 @@ class MatrixFederationAgent(object):
                 logger.info("*** RETURNING EP ***")
                 return ep
 
-        agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), None)
+        agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
         res = yield agent.request(method, uri, headers, bodyProducer)
         defer.returnValue(res)
 
@@ -240,6 +241,7 @@ class MatrixFederationAgent(object):
                 )
 
                 res = yield self._route_matrix_uri(new_uri, lookup_well_known=False)
+                logger.info("[well-known] ROUTE_MATRIX_URI RESULT: %s", res)
                 defer.returnValue(res)
 
         # try a SRV lookup
