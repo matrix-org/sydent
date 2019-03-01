@@ -65,7 +65,7 @@ class Verifier(object):
                 defer.returnValue(self.cache[server_name]['verify_keys'])
 
         client = FederationHttpClient(self.sydent)
-        result = yield client.get_json("https://%s/_matrix/key/v2/server/" % server_name)
+        result = yield client.get_json("matrix://%s/_matrix/key/v2/server/" % server_name)
         if 'verify_keys' not in result:
             raise SignatureVerifyException("No key found in response")
 

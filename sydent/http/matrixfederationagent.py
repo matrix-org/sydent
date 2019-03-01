@@ -127,7 +127,7 @@ class MatrixFederationAgent(object):
         logger.info("[request] ROUTE_MATRIX_URI RESULT: %s", res)
 
         logger.info("Gotten URI: %s", uri)
-        uri = "https://" + res.target_host + ":" + str(res.target_port) + '/' + '/'.join(uri.split('.')[-1].split('/')[1:])
+        #uri = "https://" + res.target_host + ":" + str(res.target_port) + '/' + '/'.join(uri.split('.')[-1].split('/')[1:])
         logger.info("New URI: %s", uri)
 
         # set up the TLS connection params
