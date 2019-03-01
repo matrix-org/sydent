@@ -34,29 +34,7 @@ from httpsclient import SydentPolicyForHTTPS
 
 logger = logging.getLogger(__name__)
 
-class SimpleHttpClient(object):
-    """
-    A simple, no-frills HTTP client based on the class of the same name
-    from Synapse.
-    """
-    def __init__(self, sydent, endpoint_factory=None):
-        self.sydent = sydent
-        """
-        if endpoint_factory is None:
-            # The default endpoint factory in Twisted 14.0.0 (which we require) uses the
-            # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
-            # 'like a browser'
-            self.agent = Agent(
-                reactor,
-                connectTimeout=15,
-            )
-        else:
-        """
-        self.agent = MatrixFederationAgent(
-            reactor,
-            ClientTLSOptionsFactory(),
-        )
-
+class HTTPClient(object):
     @defer.inlineCallbacks
     def get_json(self, uri):
         logger.debug("HTTP GET %s", uri)
@@ -93,6 +71,27 @@ class SimpleHttpClient(object):
         )
         defer.returnValue(response)
 
+class SimpleHttpClient(HTTPClient):
+    """
+    A simple, no-frills HTTP client based on the class of the same name
+    from Synapse.
+    """
+    def __init__(self, sydent, endpoint_factory=None):
+        self.sydent = sydent
+        if endpoint_factory is None:
+            # The default endpoint factory in Twisted 14.0.0 (which we require) uses the
+            # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
+            # 'like a browser'
+            self.agent = Agent(
+                reactor,
+                connectTimeout=15,
+            )
+        else:
+            self.agent = Agent.usingEndpointFactory(
+                reactor,
+                endpoint_factory,
+            )
+
 class FederationContextFactory(object):
     def getContext(self):
         context = SSL.Context(SSL.SSLv23_METHOD)
@@ -106,9 +105,13 @@ class FederationContextFactory(object):
         context.set_cipher_list("!ADH:HIGH+kEDH:!AECDH:HIGH+kEECDH")
         return context
 
-class FederationHttpClient(SimpleHttpClient):
+class FederationHttpClient(HTTPClient):
     def __init__(self, sydent):
-        super(FederationHttpClient, self).__init__(sydent)
+        self.sydent = sydent
+        self.agent = MatrixFederationAgent(
+            reactor,
+            ClientTLSOptionsFactory(),
+        )
 
 def _tolerateErrors(wrapped):
     """

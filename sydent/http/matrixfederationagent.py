@@ -155,9 +155,10 @@ class MatrixFederationAgent(object):
                 )
                 if tls_options is not None:
                     ep = wrapClientTLS(tls_options, ep)
+                logger.info("*** RETURNING EP ***")
                 return ep
 
-        agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
+        agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), None)
         res = yield agent.request(method, uri, headers, bodyProducer)
         defer.returnValue(res)
 
@@ -205,6 +206,7 @@ class MatrixFederationAgent(object):
 
         if lookup_well_known:
             # try a .well-known lookup
+            logger.info("is %s in the cache? %s", parsed_uri.host, parsed_uri.host in self._well_known_cache)
             well_known_server = yield self._get_well_known(parsed_uri.host)
 
             if well_known_server:
@@ -349,6 +351,7 @@ class LoggingHostnameEndpoint(object):
         self.host = host
         self.port = port
         self.ep = HostnameEndpoint(reactor, host, port, *args, **kwargs)
+        logger.info("Endpoint created with %s:%d", host, port)
 
     def connect(self, protocol_factory):
         logger.info("Connecting to %s:%i", self.host.decode("ascii"), self.port)

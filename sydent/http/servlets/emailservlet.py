@@ -16,6 +16,7 @@
 
 from twisted.web.resource import Resource
 import json
+import logging
 
 from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.validators.emailvalidator import SessionExpiredException
@@ -24,6 +25,8 @@ from sydent.validators.emailvalidator import IncorrectClientSecretException
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from twisted.internet import defer
 from twisted.web import server
+
+logger = logging.getLogger(__name__)
 
 class EmailRequestCodeServlet(Resource):
     isLeaf = True
@@ -39,8 +42,10 @@ class EmailRequestCodeServlet(Resource):
     def _async_render_POST(self, request):
         send_cors(request)
         try:
-            yield self.sydent.sig_verifier._getKeysForServer("abolivier.bzh")
-        except:
+            yield self.sydent.sig_verifier._getKeysForServer("bpulse.org")
+        except Exception as e:
+            logger.warn("ERROR:")
+            logger.warn(e)
             pass
         request.setResponseCode(200)
         request.write(json.dumps({}))
