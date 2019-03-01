@@ -30,7 +30,6 @@ import twisted.names.client
 from twisted.names.error import DNSNameError
 from OpenSSL import SSL, crypto
 from matrixfederationagent import MatrixFederationAgent
-from httpsclient import SydentPolicyForHTTPS
 
 logger = logging.getLogger(__name__)
 

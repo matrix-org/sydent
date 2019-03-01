@@ -22,12 +22,14 @@ from sydent.validators.emailvalidator import IncorrectClientSecretException
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
+
 class EmailRequestCodeServlet(Resource):
     isLeaf = True
 
     def __init__(self, syd):
         self.sydent = syd
 
+    @jsonwrap
     def render_POST(self, request):
         send_cors(request)
 
