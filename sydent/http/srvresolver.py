@@ -25,8 +25,6 @@ from twisted.internet.error import ConnectError
 from twisted.names import client, dns
 from twisted.names.error import DNSNameError, DomainError
 
-from sydent.util.logcontext import make_deferred_yieldable
-
 logger = logging.getLogger(__name__)
 
 SERVER_CACHE = {}
@@ -116,9 +114,7 @@ class SrvResolver(object):
                 defer.returnValue(servers)
 
         try:
-            answers, _, _ = yield make_deferred_yieldable(
-                self._dns_client.lookupService(service_name),
-            )
+            answers, _, _ = yield self._dns_client.lookupService(service_name)
         except DNSNameError:
             # TODO: cache this. We can get the SOA out of the exception, and use
             # the negative-TTL value.

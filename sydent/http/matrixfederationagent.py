@@ -30,9 +30,7 @@ from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent
 
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
-from sydent.util import Clock
 from sydent.util.ttlcache import TTLCache
-from sydent.util.logcontext import make_deferred_yieldable
 
 # period to cache .well-known results for by default
 WELL_KNOWN_DEFAULT_CACHE_PERIOD = 24 * 3600
@@ -76,7 +74,6 @@ class MatrixFederationAgent(object):
         _well_known_cache=well_known_cache,
     ):
         self._reactor = reactor
-        self._clock = Clock(reactor)
 
         self._tls_client_options_factory = tls_client_options_factory
         if _srv_resolver is None:
@@ -161,9 +158,7 @@ class MatrixFederationAgent(object):
                 return ep
 
         agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
-        res = yield make_deferred_yieldable(
-            agent.request(method, uri, headers, bodyProducer)
-        )
+        res = yield agent.request(method, uri, headers, bodyProducer)
         defer.returnValue(res)
 
     @defer.inlineCallbacks
@@ -309,10 +304,9 @@ class MatrixFederationAgent(object):
         uri_str = uri.decode("ascii")
         logger.info("Fetching %s", uri_str)
         try:
-            response = yield make_deferred_yieldable(
-                self._well_known_agent.request(b"GET", uri),
-            )
-            body = yield make_deferred_yieldable(readBody(response))
+            response = yield self._well_known_agent.request(b"GET", uri)
+            logger.info("RESPONSE IS %s", response)
+            body = yield readBody(response)
             if response.code != 200:
                 raise Exception("Non-200 response %s" % (response.code, ))
 

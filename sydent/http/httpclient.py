@@ -68,7 +68,12 @@ class SimpleHttpClient(object):
         )
         body = yield readBody(response)
         logger.info("*** GOT BODY: %s ***", body)
-        defer.returnValue(json.loads(body))
+        try:
+            json_body = json.loads(body)
+        except Exception as e:
+            logger.warn("Error parsing JSON from %s: %s", uri, e)
+            json_body = "{}"
+        defer.returnValue(json_body)
 
     @defer.inlineCallbacks
     def post_json_get_nothing(self, uri, post_json, opts):

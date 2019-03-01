@@ -23,6 +23,7 @@ from sydent.validators.emailvalidator import IncorrectClientSecretException
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from twisted.internet import defer
+from twisted.web import server
 
 class EmailRequestCodeServlet(Resource):
     isLeaf = True
@@ -30,11 +31,21 @@ class EmailRequestCodeServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
-    @defer.inlineCallbacks
     def render_POST(self, request):
+        self._async_render_POST(request)
+        return server.NOT_DONE_YET
+
+    @defer.inlineCallbacks
+    def _async_render_POST(self, request):
         send_cors(request)
-        yield self.sydent.sig_verifier._getKeysForServer("bpulse.org")
-        defer.returnValue(json.dumps({}))
+        try:
+            yield self.sydent.sig_verifier._getKeysForServer("abolivier.bzh")
+        except:
+            pass
+        request.setResponseCode(200)
+        request.write(json.dumps({}))
+        request.finish()
+        return
 
         """
         error, args = get_args(request, ('email', 'client_secret', 'send_attempt'))
