@@ -81,9 +81,11 @@ class Verifier(object):
     def verifyServerSignedJson(self, signed_json, acceptable_server_names=None):
         """Given a signed json object, try to verify any one
         of the signatures on it
+
         XXX: This contains a fairly noddy version of the home server
-        SRV lookup and signature verification. It only looks at
-        the first SRV result.
+        SRV lookup and signature verification. It does no caching (just
+        fetches the signature each time and does not contact any other
+        servers to do perspective checks).
 
         :param acceptable_server_names: If provided and not None,
         only signatures from servers in this list will be accepted.
