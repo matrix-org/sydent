@@ -21,7 +21,7 @@ from StringIO import StringIO
 from twisted.internet import defer, reactor
 from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers
-from matrixfederationagent import MatrixFederationAgent
+from sydent.http.matrixfederationagent import MatrixFederationAgent
 
 from sydent.utils.tls import ClientTLSOptionsFactory
 
