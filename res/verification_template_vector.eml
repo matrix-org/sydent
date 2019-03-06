@@ -117,7 +117,7 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://riot.im/img/riot-logo-email.png" width="64" height="64" alt="Riot"/>
+                                    <img src="https://riot.im/img/external/riot-logo-email-small.png" width="64" height="64" alt="Riot"/>
                             </td>
                         </tr>
                     </table>

@@ -24,15 +24,15 @@ body {
     margin-left: auto;
     margin-right: auto;
     margin-top: 50px;
-    
+
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    
+
     -webkit-box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
     -moz-box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
-    
+
     background-color: #f8f8f8;
     border: 1px #ccc solid;
 }
@@ -40,7 +40,7 @@ body {
 </head>
 <body>
 <div id="vectorlogo">
-<img src="//riot.im/app/themes/riot/img/logos/riot-logo.svg" alt="riot.im" width="256" height="256" />
+<img src="//riot.im/img/external/riot-logo.svg" alt="riot.im" width="256" height="256" />
 </div>
 <div id="message">
 <p>%(message)s</p>
