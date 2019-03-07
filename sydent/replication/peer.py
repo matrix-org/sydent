@@ -16,6 +16,7 @@
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
+from sydent.config import ConfigError
 from unpaddedbase64 import decode_base64
 
 import signedjson.sign
@@ -96,7 +97,7 @@ class RemotePeer(Peer):
                 pubkey_decoded = decode_base64(pubkey)
             except Exception as e:
                 logger.fatal("Unable to decode peer %s public key: %s", server_name, e)
-                raise SystemExit
+                raise ConfigError
 
         self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", pubkey_decoded)
 
