@@ -83,8 +83,22 @@ class RemotePeer(Peer):
         self.port = 1001
 
         # Get verify key for this peer
-        key_bytes = decode_base64(self.pubkeys[SIGNING_KEY_ALGORITHM])
-        self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", key_bytes)
+
+        # Check if their key is base64 or hex encoded
+        pubkey = self.pubkeys[SIGNING_KEY_ALGORITHM]
+        try:
+            # Check for hex encoding
+            pubkey_decoded = int(pubkey, 16)
+            logger.warn("Peer %s public key is hex encoded. Please update to base64 encoding", server_name)
+        except:
+            # Check for base64 encoding
+            try:
+                pubkey_decoded = decode_base64(pubkey)
+            except Exception as e:
+                logger.fatal("Unable to decode peer %s public key: %s", server_name, e)
+                raise SystemExit
+
+        self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", pubkey_decoded)
 
         # Attach metadata
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
