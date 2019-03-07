@@ -23,7 +23,7 @@ from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers
 from sydent.http.matrixfederationagent import MatrixFederationAgent
 
-from sydent.utils.tls import ClientTLSOptionsFactory
+from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 
 logger = logging.getLogger(__name__)
 
@@ -89,8 +89,7 @@ class HTTPClient(object):
         defer.returnValue(response)
 
 class SimpleHttpClient(HTTPClient):
-    """
-    A simple, no-frills HTTP client based on the class of the same name
+    """A simple, no-frills HTTP client based on the class of the same name
     from Synapse.
     """
     def __init__(self, sydent):
@@ -104,6 +103,9 @@ class SimpleHttpClient(HTTPClient):
         )
 
 class FederationHttpClient(HTTPClient):
+    """HTTP client for federation requests to homeservers. Uses a
+    MatrixFederationAgent.
+    """
     def __init__(self, sydent):
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
