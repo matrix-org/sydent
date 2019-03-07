@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from twisted.web.resource import Resource
+from netaddr import IPAddress
 
 import logging
 import json
