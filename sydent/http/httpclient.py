@@ -51,7 +51,7 @@ class HTTPClient(object):
             json_body = json.loads(body)
         except Exception as e:
             logger.exception("Error parsing JSON from %s", uri)
-            raise e
+            raise
         defer.returnValue(json_body)
 
     @defer.inlineCallbacks
