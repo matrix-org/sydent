@@ -42,7 +42,7 @@ class Info(object):
         except Exception as e:
             logger.error(e)
 
-    def match_user_id(medium, address):
+    def match_user_id(self, medium, address):
         """Return information for a given medium/address combination.
 
         :param medium: The medium of the address.
