@@ -24,6 +24,7 @@ import signedjson.key
 
 import logging
 import json
+import binascii
 
 import twisted.internet.reactor
 from twisted.internet import defer
@@ -92,8 +93,7 @@ class RemotePeer(Peer):
             int(pubkey, 16)
 
             # Decode hex into bytes
-            # For python3 this line will need to be `bytes.fromhex(pubkey)``
-            pubkey_decoded = pubkey.decode('hex')
+            pubkey_decoded = binascii.unhexlify(pubkey)
 
             logger.warn("Peer public key of %s is hex encoded. Please update to base64 encoding", server_name)
         except ValueError:
