@@ -15,6 +15,9 @@
 # limitations under the License.
 
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 class JoinTokenStore(object):
     def __init__(self, sydent):
