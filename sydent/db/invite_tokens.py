@@ -45,7 +45,7 @@ class JoinTokenStore(object):
         """
         if originId and originServer:
             # Check if we've already seen this association from this server
-            last_processed_id = tokensStore.getLastTokenIdFromServer(originServer)
+            last_processed_id = self.getLastTokenIdFromServer(originServer)
             if int(originId) <= int(last_processed_id):
                 logger.info("We have already seen token ID %s from %s. Ignoring.", originId, originServer)
                 return
@@ -188,7 +188,7 @@ class JoinTokenStore(object):
         """
         if originId and originServer:
             # Check if we've already seen this association from this server
-            last_processed_id = tokensStore.getLastEphemeralPublicKeyIdFromServer(originServer)
+            last_processed_id = self.getLastEphemeralPublicKeyIdFromServer(originServer)
             if int(originId) <= int(last_processed_id):
                 logger.info("We have already seen key ID %s from %s. Ignoring.", originId, originServer)
                 return
