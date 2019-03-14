@@ -40,10 +40,8 @@ class PeerStore:
         if len(pubkeys) == 0:
             return None
 
-        p = RemotePeer(self.sydent, serverName, pubkeys)
+        p = RemotePeer(self.sydent, serverName, port, pubkeys)
         p.lastSentVersion = lastSentVer
-        if port:
-            p.port = port
 
         return p
 
@@ -62,10 +60,8 @@ class PeerStore:
         for row in res.fetchall():
             if row[0] != peername:
                 if len(pubkeys) > 0:
-                    p = RemotePeer(self.sydent, peername, pubkeys)
+                    p = RemotePeer(self.sydent, peername, port, pubkeys)
                     p.lastSentVersion = lastSentVer
-                    if port:
-                        p.port = port
                     peers.append(p)
                     pubkeys = {}
                 peername = row[0]
@@ -74,10 +70,8 @@ class PeerStore:
             pubkeys[row[3]] = row[4]
 
         if len(pubkeys) > 0:
-            p = RemotePeer(self.sydent, peername, pubkeys)
+            p = RemotePeer(self.sydent, peername, port, pubkeys)
             p.lastSentVersion = lastSentVer
-            if port:
-                p.port = port
             peers.append(p)
             pubkeys = {}
 
