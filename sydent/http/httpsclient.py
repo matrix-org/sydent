@@ -49,13 +49,13 @@ class ReplicationHttpsClient:
             #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
             self.agent = Agent(twisted.internet.reactor, SydentPolicyForHTTPS(self.sydent))
 
-    def postJson(self, host, port, path, jsonObject):
+    def postJson(self, uri, jsonObject):
+        logger.debug("POSTing request to %s", uri)
         if not self.agent:
             logger.error("HTTPS post attempted but HTTPS is not configured")
             return
 
         headers = Headers({'Content-Type': ['application/json'], 'User-Agent': ['Sydent']})
-        uri = "https://%s:%s%s" % (host, port, path)
         reqDeferred = self.agent.request('POST', uri.encode('utf8'), headers,
                                          FileBodyProducer(StringIO(json.dumps(jsonObject))))
 

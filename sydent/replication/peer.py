@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import ConfigParser
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
@@ -26,7 +28,6 @@ import json
 
 import nacl
 
-import twisted.internet.reactor
 from twisted.internet import defer
 from twisted.web.client import readBody
 
@@ -87,10 +88,25 @@ class LocalPeer(Peer):
 
 
 class RemotePeer(Peer):
-    def __init__(self, sydent, server_name, pubkeys):
+    def __init__(self, sydent, server_name, port, pubkeys):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
-        self.port = 1001
+
+        # look up or build the replication URL
+        try:
+            replication_url = sydent.cfg.get(
+                "peer.%s" % server_name, "base_replication_url",
+            )
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if not port:
+                port = 1001
+            replication_url = "https://%s:%i" % (server_name, port)
+
+        if replication_url[-1:] != '/':
+            replication_url += "/"
+
+        replication_url += "_matrix/identity/replicate/v1/push"
+        self.replication_url = replication_url
 
         # Get verify key for this peer
         key_bytes = decode_base64(self.pubkeys[SIGNING_KEY_ALGORITHM])
@@ -129,10 +145,9 @@ class RemotePeer(Peer):
         :rtype: Deferred
         """
 
-        reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
-                                                                  self.port,
-                                                                  '/_matrix/identity/replicate/v1/push',
-                                                                  data)
+        reqDeferred = self.sydent.replicationHttpsClient.postJson(
+            self.replication_url, data
+        )
 
         # XXX: We'll also need to prune the deleted associations out of the
         # local associations table once they've been replicated to all peers
