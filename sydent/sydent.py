@@ -68,10 +68,13 @@ CONFIG_DEFAULTS = {
         'db.file': 'sydent.db',
     },
     'http': {
+        'clientapi.http.bind_address': '::',
         'clientapi.http.port': '8090',
+        # internalapi.http.bind_address defaults to '::1'
         'internalapi.http.port': '',
         'replication.https.certfile': '',
         'replication.https.cacert': '', # This should only be used for testing
+        'replication.https.bind_address': '::',
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
     },
