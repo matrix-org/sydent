@@ -91,7 +91,7 @@ class ClientTLSOptionsFactory(object):
 
     def __init__(self):
         # We don't use config options yet
-        self._options = ssl.CertificateOptions(verify=False)
+        self._options = ssl.CertificateOptions()
 
     def get_options(self, host):
         # Use _makeContext so that we get a fresh OpenSSL CTX each time.
