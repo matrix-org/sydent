@@ -26,7 +26,10 @@ from twisted.python import log
 from db.sqlitedb import SqliteDatabase
 
 from http.httpcommon import SslComponents
-from http.httpserver import ClientApiHttpServer, ReplicationHttpsServer
+from http.httpserver import (
+    ClientApiHttpServer, ReplicationHttpsServer,
+    InternalApiHttpServer,
+)
 from http.httpsclient import ReplicationHttpsClient
 from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
@@ -46,6 +49,7 @@ from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
+from http.servlets.v1_servlet import V1Servlet
 
 from threepid.bind import ThreepidBinder
 
@@ -53,23 +57,28 @@ from replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
 
-
-class Sydent:
-    CONFIG_SECTIONS = ['general', 'db', 'http', 'email', 'crypto', 'sms']
-    CONFIG_DEFAULTS = {
-        # general
+CONFIG_DEFAULTS = {
+    'general': {
         'server.name': '',
         'log.path': '',
+        'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
-        # db
+    },
+    'db': {
         'db.file': 'sydent.db',
-        # http
+    },
+    'http': {
+        'clientapi.http.bind_address': '::',
         'clientapi.http.port': '8090',
+        # internalapi.http.bind_address defaults to '::1'
+        'internalapi.http.port': '',
         'replication.https.certfile': '',
         'replication.https.cacert': '', # This should only be used for testing
+        'replication.https.bind_address': '::',
         'replication.https.port': '4434',
-        'obey_x_forwarded_for': False,
-        # email
+        'obey_x_forwarded_for': 'False',
+    },
+    'email': {
         'email.template': 'res/email.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
@@ -80,14 +89,20 @@ class Sydent:
         'email.smtppassword': '',
         'email.hostname': '',
         'email.tlsmode': '0',
-        # sms
+    },
+    'sms': {
         'bodyTemplate': 'Your code is {token}',
-        # crypto
+    },
+    'crypto': {
         'ed25519.signingkey': '',
-    }
+    },
+}
 
+
+class Sydent:
     def __init__(self):
-        self.parse_config()
+        self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
+        self.cfg = parse_config(self.config_file)
 
         log_format = (
             "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
@@ -110,7 +125,7 @@ class Sydent:
 
         handler.setFormatter(formatter)
         rootLogger = logging.getLogger('')
-        rootLogger.setLevel(logging.INFO)
+        rootLogger.setLevel(self.cfg.get('general', 'log.level'))
         rootLogger.addHandler(handler)
 
         logger.info("Starting Sydent server")
@@ -142,6 +157,7 @@ class Sydent:
         self.sig_verifier = Verifier(self)
 
         self.servlets = Servlets()
+        self.servlets.v1 = V1Servlet(self)
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
@@ -168,17 +184,8 @@ class Sydent:
 
         self.pusher = Pusher(self)
 
-    def parse_config(self):
-        self.cfg = ConfigParser.SafeConfigParser(Sydent.CONFIG_DEFAULTS)
-        for sect in Sydent.CONFIG_SECTIONS:
-            try:
-                self.cfg.add_section(sect)
-            except ConfigParser.DuplicateSectionError:
-                pass
-        self.cfg.read(os.environ.get('SYDENT_CONF', "sydent.conf"))
-
     def save_config(self):
-        fp = open(os.environ.get('SYDENT_CONF', "sydent.conf"), 'w')
+        fp = open(self.config_file, 'w')
         self.cfg.write(fp)
         fp.close()
 
@@ -186,6 +193,15 @@ class Sydent:
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
+
+        internalport = self.cfg.get('http', 'internalapi.http.port')
+        if internalport:
+            try:
+                interface = self.cfg.get('http', 'internalapi.http.bind_address')
+            except ConfigParser.NoOptionError:
+                interface = '::1'
+            self.internalApiHttpServer = InternalApiHttpServer(self)
+            self.internalApiHttpServer.setup(interface, int(internalport))
 
         if self.pidfile:
             with open(self.pidfile, 'w') as pidfile:
@@ -211,6 +227,36 @@ class Servlets:
 class Keyring:
     pass
 
+
+def parse_config(config_file):
+    """Parse the given config file, populating missing items and sections
+
+    Args:
+        config_file (str): the file to be parsed
+    """
+
+    cfg = ConfigParser.SafeConfigParser()
+
+    # if the config file doesn't exist, prepopulate the config object
+    # with the defaults, in the right section.
+    if not os.path.exists(config_file):
+        for sect, entries in CONFIG_DEFAULTS.items():
+            cfg.add_section(sect)
+            for k, v in entries.items():
+                cfg.set(sect, k, v)
+    else:
+        # otherwise, we have to put the defaults in the DEFAULT section,
+        # to ensure that they don't override anyone's settings which are
+        # in their config file in the default section (which is likely,
+        # because sydent used to be braindead).
+        for sect, entries in CONFIG_DEFAULTS.items():
+            cfg.add_section(sect)
+            for k, v in entries.items():
+                cfg.set(ConfigParser.DEFAULTSECT, k, v)
+
+        cfg.read(config_file)
+
+    return cfg
 
 if __name__ == '__main__':
     syd = Sydent()

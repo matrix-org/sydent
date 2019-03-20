@@ -23,7 +23,7 @@ from sydent.util import time_msec
 from sydent.replication.peer import LocalPeer
 from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.db.peers import PeerStore
-from sydent.threepid.assocsigner import AssociationSigner
+from sydent.threepid.signer import Signer
 
 logger = logging.getLogger(__name__)
 
@@ -39,18 +39,18 @@ class Pusher:
         cb.start(10.0)
 
     def getSignedAssociationsAfterId(self, afterId, limit):
-        signedAssocs = {}
+        assocs = {}
 
         localAssocStore = LocalAssociationStore(self.sydent)
         (localAssocs, maxId) = localAssocStore.getAssociationsAfterId(afterId, limit)
 
-        assocSigner = AssociationSigner(self.sydent)
+        signer = Signer(self.sydent)
 
         for localId in localAssocs:
-            sgAssoc = assocSigner.signedThreePidAssociation(localAssocs[localId])
-            signedAssocs[localId] = sgAssoc
+            sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
+            assocs[localId] = sgAssoc
 
-        return (signedAssocs, maxId)
+        return (assocs, maxId)
 
     def doLocalPush(self):
         """
@@ -61,7 +61,7 @@ class Pusher:
         """
         localPeer = LocalPeer(self.sydent)
 
-        signedAssocs = self.getSignedAssociationsAfterId(localPeer.lastId, None)[0]
+        (signedAssocs, _) = self.getSignedAssociationsAfterId(localPeer.lastId, None)
 
         localPeer.pushUpdates(signedAssocs)
 
@@ -76,7 +76,10 @@ class Pusher:
             peers = self.peerStore.getAllPeers()
 
             for p in peers:
-                logger.debug("Looking for update after %d to push to %s", p.lastSentVersion, p.servername)
+                if p.lastSentVersion:
+                    logger.debug("Looking for update after %d to push to %s", p.lastSentVersion, p.servername)
+                else:
+                    logger.debug("Looking for update to push to %s", p.servername)
                 (signedAssocTuples, maxId) = self.getSignedAssociationsAfterId(p.lastSentVersion, 100)
                 logger.debug("%d updates to push to %s", len(signedAssocTuples), p.servername)
                 if len(signedAssocTuples) > 0:

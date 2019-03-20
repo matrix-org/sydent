@@ -22,6 +22,10 @@ import logging
 import twisted.internet.reactor
 import twisted.internet.ssl
 
+from sydent.http.servlets.authenticated_bind_threepid_servlet import (
+    AuthenticatedBindThreePidServlet,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +37,7 @@ class ClientApiHttpServer:
         matrix = Resource()
         identity = Resource()
         api = Resource()
-        v1 = Resource()
+        v1 = self.sydent.servlets.v1
 
         validate = Resource()
         email = Resource()
@@ -93,8 +97,35 @@ class ClientApiHttpServer:
 
     def setup(self):
         httpPort = int(self.sydent.cfg.get('http', 'clientapi.http.port'))
-        logger.info("Starting Client API HTTP server on port %d", httpPort)
-        twisted.internet.reactor.listenTCP(httpPort, self.factory)
+        interface = self.sydent.cfg.get('http', 'clientapi.http.bind_address')
+        logger.info("Starting Client API HTTP server on %s:%d", interface, httpPort)
+        twisted.internet.reactor.listenTCP(
+            httpPort, self.factory, interface=interface,
+        )
+
+
+class InternalApiHttpServer(object):
+    def __init__(self, sydent):
+        self.sydent = sydent
+
+    def setup(self, interface, port):
+        logger.info("Starting Internal API HTTP server on %s:%d", interface, port)
+        root = Resource()
+
+        matrix = Resource()
+        root.putChild('_matrix', matrix)
+
+        identity = Resource()
+        matrix.putChild('identity', identity)
+
+        internal = Resource()
+        identity.putChild('internal', internal)
+
+        authenticated_bind = AuthenticatedBindThreePidServlet(self.sydent)
+        internal.putChild('bind', authenticated_bind)
+
+        factory = Site(root)
+        twisted.internet.reactor.listenTCP(port, factory, interface=interface)
 
 
 class ReplicationHttpsServer:
@@ -119,6 +150,7 @@ class ReplicationHttpsServer:
 
     def setup(self):
         httpPort = int(self.sydent.cfg.get('http', 'replication.https.port'))
+        interface = self.sydent.cfg.get('http', 'replication.https.bind_address')
 
         if self.sydent.sslComponents.myPrivateCertificate:
             # We will already have logged a warn if this is absent, so don't do it again
@@ -128,6 +160,6 @@ class ReplicationHttpsServer:
                                                                   trustRoot=self.sydent.sslComponents.trustRoot)
 
             logger.info("Loaded server private key and certificate!")
-            logger.info("Starting Replication HTTPS server on port %d", httpPort)
+            logger.info("Starting Replication HTTPS server on %s:%d", interface, httpPort)
 
-            twisted.internet.reactor.listenSSL(httpPort, self.factory, certOptions)
+            twisted.internet.reactor.listenSSL(httpPort, self.factory, certOptions, interface=interface)

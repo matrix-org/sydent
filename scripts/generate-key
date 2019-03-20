@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Run example
+# ./scripts/generate-key
+
 # Use this to generate a signing key and verify key for use in sydent
 # configurations.
 
