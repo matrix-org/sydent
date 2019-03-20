@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import ConfigParser
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
+from sydent.config import ConfigError
 from unpaddedbase64 import decode_base64
 
 import signedjson.sign
@@ -23,8 +26,8 @@ import signedjson.key
 
 import logging
 import json
+import binascii
 
-import twisted.internet.reactor
 from twisted.internet import defer
 from twisted.web.client import readBody
 
@@ -77,10 +80,25 @@ class LocalPeer(Peer):
 
 
 class RemotePeer(Peer):
-    def __init__(self, sydent, server_name, pubkeys):
+    def __init__(self, sydent, server_name, port, pubkeys):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
-        self.port = 1001
+
+        # look up or build the replication URL
+        try:
+            replication_url = sydent.cfg.get(
+                "peer.%s" % server_name, "base_replication_url",
+            )
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if not port:
+                port = 1001
+            replication_url = "https://%s:%i" % (server_name, port)
+
+        if replication_url[-1:] != '/':
+            replication_url += "/"
+
+        replication_url += "_matrix/identity/replicate/v1/push"
+        self.replication_url = replication_url
 
         # Get verify key for this peer
 
@@ -88,15 +106,20 @@ class RemotePeer(Peer):
         pubkey = self.pubkeys[SIGNING_KEY_ALGORITHM]
         try:
             # Check for hex encoding
-            pubkey_decoded = int(pubkey, 16)
-            logger.warn("Peer %s public key is hex encoded. Please update to base64 encoding", server_name)
-        except:
+            int(pubkey, 16)
+
+            # Decode hex into bytes
+            pubkey_decoded = binascii.unhexlify(pubkey)
+
+            logger.warn("Peer public key of %s is hex encoded. Please update to base64 encoding", server_name)
+        except ValueError:
             # Check for base64 encoding
             try:
                 pubkey_decoded = decode_base64(pubkey)
             except Exception as e:
-                logger.fatal("Unable to decode peer %s public key: %s", server_name, e)
-                raise SystemExit
+                raise ConfigError(
+                    "Unable to decode public key for peer %s: %s" % (server_name, e),
+                )
 
         self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", pubkey_decoded)
 
@@ -126,10 +149,9 @@ class RemotePeer(Peer):
     def pushUpdates(self, sgAssocs):
         body = {'sgAssocs': sgAssocs}
 
-        reqDeferred = self.sydent.replicationHttpsClient.postJson(self.servername,
-                                                                  self.port,
-                                                                  '/_matrix/identity/replicate/v1/push',
-                                                                  body)
+        reqDeferred = self.sydent.replicationHttpsClient.postJson(
+            self.replication_url, body
+        )
 
         # XXX: We'll also need to prune the deleted associations out of the
         # local associations table once they've been replicated to all peers

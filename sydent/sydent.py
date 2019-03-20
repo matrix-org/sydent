@@ -61,16 +61,20 @@ CONFIG_DEFAULTS = {
     'general': {
         'server.name': '',
         'log.path': '',
+        'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
     },
     'db': {
         'db.file': 'sydent.db',
     },
     'http': {
+        'clientapi.http.bind_address': '::',
         'clientapi.http.port': '8090',
+        # internalapi.http.bind_address defaults to '::1'
         'internalapi.http.port': '',
         'replication.https.certfile': '',
         'replication.https.cacert': '', # This should only be used for testing
+        'replication.https.bind_address': '::',
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
     },
@@ -121,7 +125,7 @@ class Sydent:
 
         handler.setFormatter(formatter)
         rootLogger = logging.getLogger('')
-        rootLogger.setLevel(logging.INFO)
+        rootLogger.setLevel(self.cfg.get('general', 'log.level'))
         rootLogger.addHandler(handler)
 
         logger.info("Starting Sydent server")
