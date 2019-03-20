@@ -89,9 +89,8 @@ class ClientTLSOptionsFactory(object):
     """Factory for Twisted ClientTLSOptions that are used to make connections
     to remote servers for federation."""
 
-    def __init__(self):
-        # We don't use config options yet
-        self._options = ssl.CertificateOptions()
+    def __init__(self, sydent):
+        self._options = ssl.CertificateOptions(verify=sydent.cfg.get("http", "federation.verifycerts", False))
 
     def get_options(self, host):
         # Use _makeContext so that we get a fresh OpenSSL CTX each time.
