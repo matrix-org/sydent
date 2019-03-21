@@ -110,5 +110,5 @@ class FederationHttpClient(HTTPClient):
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
             reactor,
-            ClientTLSOptionsFactory(),
+            ClientTLSOptionsFactory(sydent.cfg),
         )
