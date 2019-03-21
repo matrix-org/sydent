@@ -90,7 +90,7 @@ class ClientTLSOptionsFactory(object):
     to remote servers for federation."""
 
     def __init__(self, config):
-        self._options = ssl.CertificateOptions(verify=config.getBoolean("http", "federation.verifycerts"))
+        self._options = ssl.CertificateOptions(verify=config.getboolean("http", "federation.verifycerts"))
 
     def get_options(self, host):
         # Use _makeContext so that we get a fresh OpenSSL CTX each time.
