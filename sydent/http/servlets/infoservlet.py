@@ -65,9 +65,12 @@ class InfoServlet(Resource):
         if self.sydent.nonshadow_ips and ip not in self.sydent.nonshadow_ips:
             # This user is not whitelisted, present shadow_hs at their only hs
             result['hs'] = result.pop('shadow_hs', None)
-        else:
-            # This user is whitelisted, ensure shadow_hs exists even if empty
-            result['shadow_hs'] = result.get('shadow_hs', '')
+# 
+# Temporary removal of this code, we want the ability to not set a shadow_hs at all.
+# 
+#        else:
+#            # This user is whitelisted, ensure shadow_hs exists even if empty
+#            result['shadow_hs'] = result.get('shadow_hs', '')
 
         # Non-internal. Remove 'requires_invite' if found
         result.pop('requires_invite', None)
