@@ -60,23 +60,13 @@ class LocalPeer(Peer):
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
             if localId > self.lastId:
-                assocObj = threePidAssocFromDict(sgAssocs[localId][0])
+                assocObj = threePidAssocFromDict(sgAssocs[localId])
                 if assocObj.mxid is not None:
                     # We can probably skip verification for the local peer (although it could be good as a sanity check)
-                    globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId][0]),
+                    globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
                                                     self.sydent.server_name, localId)
                 else:
                     globalAssocStore.removeAssociation(assocObj.medium, assocObj.address)
-
-                # inject the shadow association, if any.
-                if sgAssocs[localId][1] is not None:
-                    shadowAssocObj = threePidAssocFromDict(sgAssocs[localId][1])
-                    if shadowAssocObj.mxid is not None:
-                        # we deliberately identify this as originating from us rather than the shadow IS
-                        globalAssocStore.addAssociation(shadowAssocObj, json.dumps(sgAssocs[localId][1]),
-                                                        self.sydent.server_name, localId)
-                    else:
-                        globalAssocStore.removeAssociation(shadowAssocObj.medium, shadowAssocObj.address)
 
                 # if this is an association that matches one of our invite_tokens then we should call the onBind callback
                 # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
