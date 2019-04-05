@@ -100,7 +100,8 @@ class ThreepidBinder:
 
             self._notify(sgassoc, 0)
 
-        return sgassoc
+            return sgassoc
+        return None
 
     def removeBinding(self, threepid, mxid):
         localAssocStore = LocalAssociationStore(self.sydent)
