@@ -78,7 +78,11 @@ class ThreepidBinder:
         invites = []
         for token in pendingJoinTokens:
             # only notify for join tokens we created ourselves,
-            # not replicated ones
+            # not replicated ones: the HS can only claim the 3pid
+            # invite if it has a signature from the IS whose public
+            # key is in the 3pid invite event. This will only be us
+            # if we created the invite, not if the invite was replicated
+            # to us.
             if token['origin_server'] is None:
                 token["mxid"] = assoc.mxid
                 token["signed"] = {
