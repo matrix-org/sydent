@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
-# Copyright 2018 New Vector Ltd
+# Copyright 2018, 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,21 +77,28 @@ class ThreepidBinder:
         pendingJoinTokens = joinTokenStore.getTokens(assoc.medium, assoc.address)
         invites = []
         for token in pendingJoinTokens:
-            token["mxid"] = assoc.mxid
-            token["signed"] = {
-                "mxid": assoc.mxid,
-                "token": token["token"],
-            }
-            token["signed"] = signedjson.sign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
-            invites.append(token)
-        if invites:
+            # only notify for join tokens we created ourselves,
+            # not replicated ones: the HS can only claim the 3pid
+            # invite if it has a signature from the IS whose public
+            # key is in the 3pid invite event. This will only be us
+            # if we created the invite, not if the invite was replicated
+            # to us.
+            if token['origin_server'] is None:
+                token["mxid"] = assoc.mxid
+                token["signed"] = {
+                    "mxid": assoc.mxid,
+                    "token": token["token"],
+                }
+                token["signed"] = signedjson.sign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
+                invites.append(token)
+        if len(invites) > 0:
             assoc.extra_fields["invites"] = invites
             joinTokenStore.markTokensAsSent(assoc.medium, assoc.address)
 
-        signer = Signer(self.sydent)
-        sgassoc = signer.signedThreePidAssociation(assoc)
+            signer = Signer(self.sydent)
+            sgassoc = signer.signedThreePidAssociation(assoc)
 
-        self._notify(sgassoc, 0)
+            self._notify(sgassoc, 0)
 
         return sgassoc
 
