@@ -132,9 +132,8 @@ class Pusher:
                         updateDeferred = p.pushUpdates(push_data)
                         updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
                         updateDeferred.addErrback(self._pushFailed, peer=p)
-                        break
                     except Exception as e:
-                        logger.exception("Error pushing updates to %s: %s", p.servername, e)
+                        logger.exception("Error pushing updates to %s", p.servername)
         finally:
             if not updateDeferred:
                 self.pushing = False
