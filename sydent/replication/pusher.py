@@ -128,10 +128,13 @@ class Pusher:
                 logger.debug("%d updates to push to %s", total_updates, p.servername)
                 if total_updates:
                     logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
-                    updateDeferred = p.pushUpdates(push_data)
-                    updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
-                    updateDeferred.addErrback(self._pushFailed, peer=p)
-                    break
+                    try:
+                        updateDeferred = p.pushUpdates(push_data)
+                        updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
+                        updateDeferred.addErrback(self._pushFailed, peer=p)
+                        break
+                    except Exception as e:
+                        logger.exception("Error pushing updates to %s: %s", p.servername, e)
         finally:
             if not updateDeferred:
                 self.pushing = False
