@@ -99,8 +99,6 @@ class Pusher:
             return
         self.pushing = True
 
-        updateDeferred = None
-
         join_token_store = JoinTokenStore(self.sydent)
 
         try:
@@ -135,8 +133,7 @@ class Pusher:
                     except Exception as e:
                         logger.exception("Error pushing updates to %s", p.servername)
         finally:
-            if not updateDeferred:
-                self.pushing = False
+            self.pushing = False
 
     def _pushSucceeded(self, result, peer, ids):
         """To be called after a successful push to a remote peer."""
@@ -145,11 +142,6 @@ class Pusher:
 
         self.peerStore.setLastSentIdAndPokeSucceeded(peer.servername, ids, time_msec())
 
-        self.pushing = False
-        self.scheduledPush()
-
     def _pushFailed(self, failure, peer):
         """To be called after an unsuccessful push to a remote peer."""
         logger.info("Failed to push updates to %s:%s: %s", peer.servername, peer.port, failure)
-        self.pushing = False
-        return None
