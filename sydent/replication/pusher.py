@@ -100,49 +100,55 @@ class Pusher:
         peers = self.peerStore.getAllPeers()
 
         for p in peers:
-            if p.is_being_pushed_to:
-                logger.debug("Waiting for %s to finish pushing...", p.servername)
-                continue
-
             logger.debug("Looking for updates to push to %s", p.servername)
+            # Fire off a separate routine for each peer simultaneously.
+            # Only one pushing operating can be active at a time as _push_to_peer
+            # will exit if the peer is currently being pushed to
+            _push_to_peer(p)
+                
+    @defer.inlineCallbacks
+    def _push_to_peer(p, ):
+        # Check if a push operation is already active. If so, don't start another
+        if p.is_being_pushed_to:
+            logger.debug("Waiting for %s to finish pushing...", p.servername)
+            continue
 
-            # Dictionary for holding all data to push
-            push_data = {}
+        p.is_being_pushed_to = True
 
-            # Dictionary for holding all the ids of db tables we've successfully replicated up to
-            ids = {}
-            total_updates = 0
+        try:
+            # Keep looping until we're sure that there's no updates left to send
+            while True:
+                # Dictionary for holding all data to push
+                push_data = {}
 
-            # Push associations
-            (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT, p.shadow)
-            total_updates += len(push_data["sg_assocs"])
+                # Dictionary for holding all the ids of db tables we've successfully replicated up to
+                ids = {}
+                total_updates = 0
 
-            # Push invite tokens and ephemeral public keys
-            (push_data["invite_tokens"], ids["invite_tokens"]) = join_token_store.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
-            (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = join_token_store.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
-            total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
+                # Push associations
+                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT, p.shadow)
+                total_updates += len(push_data["sg_assocs"])
 
-            logger.debug("%d updates to push to %s", total_updates, p.servername)
-            if total_updates:
+                # Push invite tokens and ephemeral public keys
+                (push_data["invite_tokens"], ids["invite_tokens"]) = join_token_store.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
+                (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = join_token_store.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
+                total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
+
+                logger.debug("%d updates to push to %s", total_updates, p.servername)
+
+                # If there are no updates left to send, break the loop
+                if not total_updates:
+                    break
+
                 logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
-                try:
-                    p.is_being_pushed_to = True
-                    updateDeferred = p.pushUpdates(push_data)
-                    updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
-                    updateDeferred.addErrback(self._pushFailed, peer=p)
-                except Exception as e:
-                    logger.exception("Error pushing updates to %s", p.servername)
-                    p.is_being_pushed_to = False
+                result = yield p.pushUpdates(push_data)
 
-    def _pushSucceeded(self, result, peer, ids):
-        """To be called after a successful push to a remote peer."""
-        logger.info("Pushed updates to %s with result %d %s",
-                    peer.servername, result.code, result.phrase)
+                logger.info("Pushed updates to %s with result %d %s",
+                            p.servername, result.code, result.phrase)
 
-        self.peerStore.setLastSentIdAndPokeSucceeded(peer.servername, ids, time_msec())
-        peer.is_being_pushed_to = False
-
-    def _pushFailed(self, failure, peer):
-        """To be called after an unsuccessful push to a remote peer."""
-        logger.info("Failed to push updates to %s:%s: %s", peer.servername, peer.port, failure)
-        peer.is_being_pushed_to = False
+                yield self.peerStore.setLastSentIdAndPokeSucceeded(p.servername, ids, time_msec())
+        except Exception as e:
+            logger.exception("Error pushing updates to %s", p.servername)
+        finally:
+            # Whether pushing completed or an error occurred, signal that pushing has finished
+            p.is_being_pushed_to = False
