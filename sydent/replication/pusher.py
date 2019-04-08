@@ -134,7 +134,7 @@ class Pusher:
                 (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = join_token_store.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
                 total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
 
-                logger.debug("%d updates to push to %s", total_updates, p.servername)
+                logger.debug("%d updates to push to %s:%d", total_updates, p.servername, p.port)
 
                 # If there are no updates left to send, break the loop
                 if not total_updates:
@@ -143,12 +143,12 @@ class Pusher:
                 logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
                 result = yield p.pushUpdates(push_data)
 
-                logger.info("Pushed updates to %s with result %d %s",
-                            p.servername, result.code, result.phrase)
+                logger.info("Pushed updates to %s:%d with result %d %s",
+                            p.servername, p.port, result.code, result.phrase)
 
                 yield self.peerStore.setLastSentIdAndPokeSucceeded(p.servername, ids, time_msec())
         except Exception as e:
-            logger.exception("Error pushing updates to %s", p.servername)
+            logger.exception("Error pushing updates to %s:%d", p.servername, p.port)
         finally:
             # Whether pushing completed or an error occurred, signal that pushing has finished
             p.is_being_pushed_to = False
