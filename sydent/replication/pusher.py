@@ -104,10 +104,10 @@ class Pusher:
             # Fire off a separate routine for each peer simultaneously.
             # Only one pushing operating can be active at a time as _push_to_peer
             # will exit if the peer is currently being pushed to
-            _push_to_peer(p)
+            self._push_to_peer(p)
                 
     @defer.inlineCallbacks
-    def _push_to_peer(p, ):
+    def _push_to_peer(self, p):
         # Check if a push operation is already active. If so, don't start another
         if p.is_being_pushed_to:
             logger.debug("Waiting for %s to finish pushing...", p.servername)
