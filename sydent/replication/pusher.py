@@ -107,7 +107,7 @@ class Pusher:
             _push_to_peer(p)
                 
     @defer.inlineCallbacks
-    def _push_to_peer(p, ):
+    def _push_to_peer(self, p):
         # Check if a push operation is already active. If so, don't start another
         if p.is_being_pushed_to:
             logger.debug("Waiting for %s to finish pushing...", p.servername)
