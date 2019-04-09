@@ -95,20 +95,29 @@ class Pusher:
 
     def scheduledPush(self):
         """Push pending updates to a remote peer. To be called regularly."""
-        if self.pushing:
-            return
-        self.pushing = True
-
-        updateDeferred = None
-
         join_token_store = JoinTokenStore(self.sydent)
 
+        peers = self.peerStore.getAllPeers()
+
+        for p in peers:
+            logger.debug("Looking for updates to push to %s", p.servername)
+            # Fire off a separate routine for each peer simultaneously.
+            # Only one pushing operating can be active at a time as _push_to_peer
+            # will exit if the peer is currently being pushed to
+            self._push_to_peer(p)
+                
+    @defer.inlineCallbacks
+    def _push_to_peer(self, p):
+        # Check if a push operation is already active. If so, don't start another
+        if p.is_being_pushed_to:
+            logger.debug("Waiting for %s to finish pushing...", p.servername)
+            continue
+
+        p.is_being_pushed_to = True
+
         try:
-            peers = self.peerStore.getAllPeers()
-
-            for p in peers:
-                logger.debug("Looking for updates to push to %s", p.servername)
-
+            # Keep looping until we're sure that there's no updates left to send
+            while True:
                 # Dictionary for holding all data to push
                 push_data = {}
 
@@ -125,29 +134,21 @@ class Pusher:
                 (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = join_token_store.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
                 total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
 
-                logger.debug("%d updates to push to %s", total_updates, p.servername)
-                if total_updates:
-                    logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
-                    updateDeferred = p.pushUpdates(push_data)
-                    updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
-                    updateDeferred.addErrback(self._pushFailed, peer=p)
+                logger.debug("%d updates to push to %s:%d", total_updates, p.servername, p.port)
+
+                # If there are no updates left to send, break the loop
+                if not total_updates:
                     break
+
+                logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
+                result = yield p.pushUpdates(push_data)
+
+                logger.info("Pushed updates to %s:%d with result %d %s",
+                            p.servername, p.port, result.code, result.phrase)
+
+                yield self.peerStore.setLastSentIdAndPokeSucceeded(p.servername, ids, time_msec())
+        except Exception as e:
+            logger.exception("Error pushing updates to %s:%d", p.servername, p.port)
         finally:
-            if not updateDeferred:
-                self.pushing = False
-
-    def _pushSucceeded(self, result, peer, ids):
-        """To be called after a successful push to a remote peer."""
-        logger.info("Pushed updates to %s with result %d %s",
-                    peer.servername, result.code, result.phrase)
-
-        self.peerStore.setLastSentIdAndPokeSucceeded(peer.servername, ids, time_msec())
-
-        self.pushing = False
-        self.scheduledPush()
-
-    def _pushFailed(self, failure, peer):
-        """To be called after an unsuccessful push to a remote peer."""
-        logger.info("Failed to push updates to %s:%s: %s", peer.servername, peer.port, failure)
-        self.pushing = False
-        return None
+            # Whether pushing completed or an error occurred, signal that pushing has finished
+            p.is_being_pushed_to = False
