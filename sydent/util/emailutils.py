@@ -62,6 +62,10 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
             logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
             raise EmailAddressException()
 
+        if parsedTo != mailTo:
+            logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
+            raise EmailAddressException()
+
         mailServer = sydent.cfg.get('email', 'email.smtphost')
         mailPort = sydent.cfg.get('email', 'email.smtpport')
         mailUsername = sydent.cfg.get('email', 'email.smtpusername')
