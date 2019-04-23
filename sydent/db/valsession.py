@@ -22,10 +22,13 @@ from sydent.validators import ValidationSession, IncorrectClientSecretException,
     SessionExpiredException, SessionNotValidatedException
 from sydent.util import time_msec
 
+from random import SystemRandom
+
 
 class ThreePidValSessionStore:
     def __init__(self, syd):
         self.sydent = syd
+        self.random = SystemRandom()
 
         # Clean up old sessions every N minutes
         cb = task.LoopingCall(self.deleteOldSessions)
@@ -62,11 +65,15 @@ class ThreePidValSessionStore:
     def addValSession(self, medium, address, clientSecret, mtime, commit=True):
         cur = self.sydent.db.cursor()
 
-        cur.execute("insert into threepid_validation_sessions ('medium', 'address', 'clientSecret', 'mtime')" +
-            " values (?, ?, ?, ?)", (medium, address, clientSecret, mtime))
+        # Let's make up a random sid rather than using sequential ones. This
+        # should be safe enough given we reap old sessions.
+        sid = self.random.randint(0, 2 ** 31)
+
+        cur.execute("insert into threepid_validation_sessions ('id', medium', 'address', 'clientSecret', 'mtime')" +
+            " values (?, ?, ?, ?)", (sid, medium, address, clientSecret, mtime))
         if commit:
             self.sydent.db.commit()
-        return cur.lastrowid
+        return sid
 
     def setSendAttemptNumber(self, sid, attemptNo):
         cur = self.sydent.db.cursor()
