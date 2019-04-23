@@ -132,6 +132,12 @@ class SqliteDatabase:
             self.db.commit()
             logger.info("v0 -> v1 schema migration complete")
             self._setSchemaVersion(1)
+        if curVer < 2:
+            cur = self.db.cursor()
+            cur.execute("CREATE INDEX threepid_validation_sessions_mtime ON threepid_validation_sessions(mtime)")
+            self.db.commit()
+            logger.info("v1 -> v2 schema migration complete")
+            self._setSchemaVersion(2)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
@@ -144,4 +150,3 @@ class SqliteDatabase:
         # NB. pragma doesn't support variable substitution so we
         # do it in python (as a decimal so we don't risk SQL injection)
         res = cur.execute("PRAGMA user_version = %d" % (ver,));
-
