@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from twisted.internet import task
+
 import sydent.util.tokenutils
 
 from sydent.validators import ValidationSession, IncorrectClientSecretException, InvalidSessionIdException, \
@@ -24,6 +26,10 @@ from sydent.util import time_msec
 class ThreePidValSessionStore:
     def __init__(self, syd):
         self.sydent = syd
+
+        # Clean up old sessions every N minutes
+        cb = task.LoopingCall(self.deleteOldSessions)
+        cb.start(10 * 60.0)
 
     def getOrCreateTokenSession(self, medium, address, clientSecret):
         cur = self.sydent.db.cursor()
@@ -127,3 +133,27 @@ class ThreePidValSessionStore:
             raise SessionNotValidatedException()
 
         return s
+
+    def deleteOldSessions(self):
+        """Delete old threepid validation sessions that are long expired.
+        """
+
+        cur = self.sydent.db.cursor()
+
+        delete_before_ts = time_msec() - 5 * ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS
+
+        sql = """
+            DELETE FROM threepid_validation_sessions
+            WHERE mtime < ?
+        """
+        cur.execute(sql, (delete_before_ts,))
+
+        sql = """
+            DELETE FROM threepid_token_auths
+            WHERE validationSession NOT IN (
+                SELECT id FROM threepid_validation_sessions
+            )
+        """
+        cur.execute(sql, (delete_before_ts,))
+
+        self.sydent.db.commit()
