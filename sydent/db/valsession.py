@@ -69,8 +69,8 @@ class ThreePidValSessionStore:
         # should be safe enough given we reap old sessions.
         sid = self.random.randint(0, 2 ** 31)
 
-        cur.execute("insert into threepid_validation_sessions ('id', medium', 'address', 'clientSecret', 'mtime')" +
-            " values (?, ?, ?, ?)", (sid, medium, address, clientSecret, mtime))
+        cur.execute("insert into threepid_validation_sessions ('id', 'medium', 'address', 'clientSecret', 'mtime')" +
+            " values (?, ?, ?, ?, ?)", (sid, medium, address, clientSecret, mtime))
         if commit:
             self.sydent.db.commit()
         return sid
@@ -161,6 +161,6 @@ class ThreePidValSessionStore:
                 SELECT id FROM threepid_validation_sessions
             )
         """
-        cur.execute(sql, (delete_before_ts,))
+        cur.execute(sql)
 
         self.sydent.db.commit()
