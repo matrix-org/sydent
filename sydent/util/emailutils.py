@@ -56,11 +56,16 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
             allSubstitutions[k+"_forurl"] = urllib.quote(v)
 
         mailString = open(mailTemplateFile).read().decode('utf8') % allSubstitutions
-        rawFrom = email.utils.parseaddr(mailFrom)[1]
-        rawTo = email.utils.parseaddr(mailTo)[1]
-        if rawFrom == '' or rawTo == '':
+        parsedFrom = email.utils.parseaddr(mailFrom)[1]
+        parsedTo = email.utils.parseaddr(mailTo)[1]
+        if parsedFrom == '' or parsedTo == '':
             logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
             raise EmailAddressException()
+
+        if parsedTo != mailTo:
+            logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
+            raise EmailAddressException()
+
         mailServer = sydent.cfg.get('email', 'email.smtphost')
         mailPort = sydent.cfg.get('email', 'email.smtpport')
         mailUsername = sydent.cfg.get('email', 'email.smtpusername')
@@ -77,7 +82,12 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
                 smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
             if mailUsername != '':
                 smtp.login(mailUsername, mailPassword)
-            smtp.sendmail(rawFrom, rawTo, mailString.encode('utf-8'))
+
+            # We're using the parsing above to do basic validation, but instead of
+            # failing it may munge the address it returns. So we should *not* use
+            # that parsed address, as it may not match any validation done
+            # elsewhere.
+            smtp.sendmail(mailFrom, mailTo, mailString.encode('utf-8'))
             smtp.quit()
         except Exception as origException:
             twisted.python.log.err()
