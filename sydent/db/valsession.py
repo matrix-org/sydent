@@ -14,16 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from twisted.internet import task
+
 import sydent.util.tokenutils
 
 from sydent.validators import ValidationSession, IncorrectClientSecretException, InvalidSessionIdException, \
     SessionExpiredException, SessionNotValidatedException
 from sydent.util import time_msec
 
+from random import SystemRandom
+
 
 class ThreePidValSessionStore:
     def __init__(self, syd):
         self.sydent = syd
+        self.random = SystemRandom()
+
+        # Clean up old sessions every N minutes
+        cb = task.LoopingCall(self.deleteOldSessions)
+        cb.start(10 * 60.0)
 
     def getOrCreateTokenSession(self, medium, address, clientSecret):
         cur = self.sydent.db.cursor()
@@ -56,11 +65,15 @@ class ThreePidValSessionStore:
     def addValSession(self, medium, address, clientSecret, mtime, commit=True):
         cur = self.sydent.db.cursor()
 
-        cur.execute("insert into threepid_validation_sessions ('medium', 'address', 'clientSecret', 'mtime')" +
-            " values (?, ?, ?, ?)", (medium, address, clientSecret, mtime))
+        # Let's make up a random sid rather than using sequential ones. This
+        # should be safe enough given we reap old sessions.
+        sid = self.random.randint(0, 2 ** 31)
+
+        cur.execute("insert into threepid_validation_sessions ('id', 'medium', 'address', 'clientSecret', 'mtime')" +
+            " values (?, ?, ?, ?, ?)", (sid, medium, address, clientSecret, mtime))
         if commit:
             self.sydent.db.commit()
-        return cur.lastrowid
+        return sid
 
     def setSendAttemptNumber(self, sid, attemptNo):
         cur = self.sydent.db.cursor()
@@ -127,3 +140,27 @@ class ThreePidValSessionStore:
             raise SessionNotValidatedException()
 
         return s
+
+    def deleteOldSessions(self):
+        """Delete old threepid validation sessions that are long expired.
+        """
+
+        cur = self.sydent.db.cursor()
+
+        delete_before_ts = time_msec() - 5 * ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS
+
+        sql = """
+            DELETE FROM threepid_validation_sessions
+            WHERE mtime < ?
+        """
+        cur.execute(sql, (delete_before_ts,))
+
+        sql = """
+            DELETE FROM threepid_token_auths
+            WHERE validationSession NOT IN (
+                SELECT id FROM threepid_validation_sessions
+            )
+        """
+        cur.execute(sql)
+
+        self.sydent.db.commit()
