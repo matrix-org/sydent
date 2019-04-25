@@ -94,6 +94,7 @@ class ClientApiHttpServer:
         v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
 
         self.factory = Site(root)
+        self.factory.displayTracebacks = False
 
     def setup(self):
         httpPort = int(self.sydent.cfg.get('http', 'clientapi.http.port'))
@@ -122,6 +123,8 @@ class InternalApiHttpServer(object):
         internal.putChild('bind', authenticated_bind)
 
         factory = Site(root)
+        factory.displayTracebacks = False
+
         twisted.internet.reactor.listenTCP(port, factory)
 
 
@@ -144,6 +147,7 @@ class ReplicationHttpsServer:
         replV1.putChild('push', self.sydent.servlets.replicationPush)
 
         self.factory = Site(root)
+        self.factory.displayTracebacks = False
 
     def setup(self):
         httpPort = int(self.sydent.cfg.get('http', 'replication.https.port'))
