@@ -52,7 +52,7 @@ class InfoServlet(Resource):
         send_cors(request)
         err, args = get_args(request, ('medium', 'address'))
         if err:
-            return err
+            return json.dumps(err)
 
         medium = args['medium']
         address = args['address']
