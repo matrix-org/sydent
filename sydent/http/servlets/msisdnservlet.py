@@ -107,17 +107,17 @@ class MsisdnValidateCodeServlet(Resource):
 
         err, args = get_args(request, ('token', 'sid', 'client_secret'))
         if err:
-            return err
-
-        resp = self.do_validate_request(args)
-        if 'success' in resp and resp['success']:
-            msg = "Verification successful! Please return to your Matrix client to continue."
-            if 'next_link' in args:
-                next_link = args['next_link']
-                request.setResponseCode(302)
-                request.setHeader("Location", next_link)
+            msg: "Verification failed: Your request was invalid."
         else:
-            msg = "Verification failed: you may need to request another verification text"
+            resp = self.do_validate_request(args)
+            if 'success' in resp and resp['success']:
+                msg = "Verification successful! Please return to your Matrix client to continue."
+                if 'next_link' in args:
+                    next_link = args['next_link']
+                    request.setResponseCode(302)
+                    request.setHeader("Location", next_link)
+            else:
+                msg = "Verification failed: you may need to request another verification text"
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
 

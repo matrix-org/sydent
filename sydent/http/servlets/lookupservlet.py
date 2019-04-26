@@ -43,7 +43,7 @@ class LookupServlet(Resource):
         send_cors(request)
         err, args = get_args(request, ('medium', 'address'))
         if err:
-            return err
+            return json.dumps(err)
 
         medium = args['medium']
         address = args['address']
@@ -93,7 +93,7 @@ class LookupServlet(Resource):
         send_cors(request)
         err, args = get_args(request, ('threepids',))
         if err:
-            return err
+            return json.dumps(err)
 
         threepids = args['threepids']
         if not isinstance(threepids, list):
