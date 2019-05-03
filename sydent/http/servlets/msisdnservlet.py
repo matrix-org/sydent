@@ -107,7 +107,7 @@ class MsisdnValidateCodeServlet(Resource):
 
         err, args = get_args(request, ('token', 'sid', 'client_secret'))
         if err:
-            msg: "Verification failed: Your request was invalid."
+            msg = "Verification failed: Your request was invalid."
         else:
             resp = self.do_validate_request(args)
             if 'success' in resp and resp['success']:
