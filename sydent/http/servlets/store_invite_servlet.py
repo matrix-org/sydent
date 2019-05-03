@@ -32,6 +32,7 @@ from sydent.util.emailutils import sendEmail
 class StoreInviteServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
+        self.random = random.SystemRandom()
 
     def render_POST(self, request):
         send_cors(request)
@@ -137,4 +138,4 @@ class StoreInviteServlet(Resource):
             return "..."
 
     def _randomString(self, length):
-        return ''.join(random.choice(string.ascii_letters) for _ in xrange(length))
+        return ''.join(self.random.choice(string.ascii_letters) for _ in xrange(length))
