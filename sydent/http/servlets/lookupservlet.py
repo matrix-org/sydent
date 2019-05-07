@@ -100,7 +100,7 @@ class LookupServlet(Resource):
             request.setResponseCode(400)
             return {'errcode': 'M_INVALID_PARAM', 'error': 'threepids must be a list'}, None
 
-        logger.info("Bulk lookup of %d threepids: %r", len(threepids), threepids)
+        logger.info("Bulk lookup of %d threepids (deprecated endpoint)", len(threepids))
             
         globalAssocStore = GlobalAssociationStore(self.sydent)
         results = globalAssocStore.getMxids(threepids)
