@@ -40,13 +40,30 @@ from twisted.web.http_headers import Headers
 
 logger = logging.getLogger(__name__)
 
+def parseMxid(mxid):
+    if len(mxid) > 255:
+        raise Exception("This mxid is too long")
+
+    if len(mxid) == 0 or mxid[0:1] != "@":
+        raise Exception("mxid does not start with '@'")
+
+    parts = mxid[1:].split(':', 1)
+    if len(parts) != 2:
+        raise Exception("Not enough colons in mxid")
+
+    return parts
+
+class BindingNotPermittedExceotion(Exception):
+    pass
 
 class ThreepidBinder:
     # the lifetime of a 3pid association
     THREEPID_ASSOCIATION_LIFETIME_MS = 100 * 365 * 24 * 60 * 60 * 1000
 
-    def __init__(self, sydent):
+    def __init__(self, sydent, info):
         self.sydent = sydent
+        self._info = info
+
 
     def addBinding(self, medium, address, mxid):
         """Binds the given 3pid to the given mxid.
@@ -59,6 +76,18 @@ class ThreepidBinder:
             address (str): the 3pid
             mxid (str): the mxid to bind it to
         """
+        mxidParts = parseMxid(mxid)
+        result = self._info.match_user_id(medium, address)
+        possible_hses = []
+        if 'hs' in result:
+            possible_hses.append(result['hs'])
+        if 'shadow_hs' in result:
+            possible_hses.append(result['shadow_hs'])
+
+        if mxidParts[1] not in possible_hses:
+            logger.info("Denying bind of %r/%r -> %r (info result: %r)", medium, address, mxid, result)
+            raise BindingNotPermittedExceotion()
+
         localAssocStore = LocalAssociationStore(self.sydent)
 
         createdAt = time_msec()
@@ -68,6 +97,10 @@ class ThreepidBinder:
         localAssocStore.addOrUpdateAssociation(assoc)
 
         self.sydent.pusher.doLocalPush()
+
+        signer = Signer(self.sydent)
+        sgassoc = signer.signedThreePidAssociation(assoc)
+        return sgassoc
 
     def notifyPendingInvites(self, assoc):
         # this is called back by the replication code once we see new bindings
