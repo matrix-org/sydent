@@ -184,18 +184,3 @@ class ThreepidBinder:
 
         servers.sort()
         defer.returnValue(servers)
-
-
-class InsecureInterceptableContextFactory(ssl.ContextFactory):
-    """
-    Factory for PyOpenSSL SSL contexts which accepts any certificate for any domain.
-
-    Do not use this since it allows an attacker to intercept your communications.
-    """
-
-    def __init__(self):
-        self._context = SSL.Context(SSL.SSLv23_METHOD)
-        self._context.set_verify(VERIFY_NONE, lambda *_: None)
-
-    def getContext(self, hostname, port):
-        return self._context
