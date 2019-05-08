@@ -26,6 +26,7 @@ from sydent.db.threepid_associations import LocalAssociationStore
 
 from sydent.util import time_msec
 from sydent.threepid.signer import Signer
+from sydent.http.httpclient import FederationHttpClient
 
 from sydent.threepid import ThreepidAssociation
 
@@ -101,29 +102,27 @@ class ThreepidBinder:
         mxid = assoc["mxid"]
         domain = mxid.split(":")[-1]
         server = yield self._pickServer(domain)
-        callbackUrl = "https://%s/_matrix/federation/v1/3pid/onbind" % (
+
+        post_url = "https://%s/_matrix/federation/v1/3pid/onbind" % (
             server,
         )
 
         logger.info("Making bind callback to: %s", callbackUrl)
-        # TODO: Not be woefully insecure
-        agent = Agent(reactor, InsecureInterceptableContextFactory())
-        reqDeferred = agent.request(
-            "POST",
-            callbackUrl.encode("utf8"),
-            Headers({
+
+        # Make a POST to the chosen Synapse server
+        http_client = FederationHttpClient()
+        response = yield http_client.post_json_get_nothing(post_url, assoc, {
+            'headers': {
                 "Content-Type": ["application/json"],
                 "User-Agent": ["Sydent"],
-            }),
-            FileBodyProducer(StringIO(json.dumps(assoc)))
-        )
-        reqDeferred.addCallback(
-            lambda _: logger.info("Successfully notified on bind for %s" % (mxid,))
-        )
+            }
+        })
 
-        reqDeferred.addErrback(
-            lambda err: self._notifyErrback(assoc, attempt, err)
-        )
+        # If the request failed, try again with exponential backoff
+        if response.code != 200:
+            self._notifyErrback(assoc, attempt, err)
+        else:
+            logger.info("Successfully notified on bind for %s" % (mxid,))
 
     def _notifyErrback(self, assoc, attempt, error):
         logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
