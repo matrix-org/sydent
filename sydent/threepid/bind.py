@@ -75,6 +75,7 @@ class ThreepidBinder:
             medium (str): the type of 3pid
             address (str): the 3pid
             mxid (str): the mxid to bind it to
+        Returns: The resulting signed association
         """
         mxidParts = parseMxid(mxid)
         result = self._info.match_user_id(medium, address)
