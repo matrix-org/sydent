@@ -53,7 +53,7 @@ def parseMxid(mxid):
 
     return parts
 
-class BindingNotPermittedExceotion(Exception):
+class BindingNotPermittedException(Exception):
     pass
 
 class ThreepidBinder:
@@ -87,7 +87,7 @@ class ThreepidBinder:
 
         if mxidParts[1] not in possible_hses:
             logger.info("Denying bind of %r/%r -> %r (info result: %r)", medium, address, mxid, result)
-            raise BindingNotPermittedExceotion()
+            raise BindingNotPermittedException()
 
         localAssocStore = LocalAssociationStore(self.sydent)
 
