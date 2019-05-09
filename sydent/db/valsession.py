@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from twisted.internet import task
-
 import sydent.util.tokenutils
 
 from sydent.validators import ValidationSession, IncorrectClientSecretException, InvalidSessionIdException, \
@@ -29,10 +27,6 @@ class ThreePidValSessionStore:
     def __init__(self, syd):
         self.sydent = syd
         self.random = SystemRandom()
-
-        # Clean up old sessions every N minutes
-        cb = task.LoopingCall(self.deleteOldSessions)
-        cb.start(10 * 60.0)
 
     def getOrCreateTokenSession(self, medium, address, clientSecret):
         cur = self.sydent.db.cursor()
