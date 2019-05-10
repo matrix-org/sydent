@@ -86,6 +86,12 @@ class HTTPClient(object):
             headers,
             bodyProducer=FileBodyProducer(StringIO(json_str))
         )
+
+        # Ensure the body object is read otherwise we'll leak HTTP connections
+        # as per
+        # https://twistedmatrix.com/documents/current/web/howto/client.html
+        yield readBody(response)
+
         defer.returnValue(response)
 
 class SimpleHttpClient(HTTPClient):

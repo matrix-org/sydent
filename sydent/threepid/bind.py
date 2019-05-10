@@ -107,22 +107,21 @@ class ThreepidBinder:
             server,
         )
 
-        logger.info("Making bind callback to: %s", callbackUrl)
+        logger.info("Making bind callback to: %s", post_url)
 
         # Make a POST to the chosen Synapse server
-        http_client = FederationHttpClient()
-        response = yield http_client.post_json_get_nothing(post_url, assoc, {
-            'headers': {
-                "Content-Type": ["application/json"],
-                "User-Agent": ["Sydent"],
-            }
-        })
-
-        # If the request failed, try again with exponential backoff
-        if response.code != 200:
-            self._notifyErrback(assoc, attempt, err)
-        else:
-            logger.info("Successfully notified on bind for %s" % (mxid,))
+        http_client = FederationHttpClient(self.sydent)
+        try:
+            response = yield http_client.post_json_get_nothing(post_url, assoc, {})
+            # If the request failed, try again with exponential backoff
+            if response.code != 200:
+                self._notifyErrback(
+                    assoc, attempt, "Non-OK error code received (%d)" % response.code
+                )
+            else:
+                logger.info("Successfully notified on bind for %s" % (mxid,))
+        except Exception as e:
+            self._notifyErrback(assoc, attempt, e)
 
     def _notifyErrback(self, assoc, attempt, error):
         logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
