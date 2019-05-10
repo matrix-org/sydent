@@ -113,15 +113,16 @@ class ThreepidBinder:
         http_client = FederationHttpClient(self.sydent)
         try:
             response = yield http_client.post_json_get_nothing(post_url, assoc, {})
-            # If the request failed, try again with exponential backoff
-            if response.code != 200:
-                self._notifyErrback(
-                    assoc, attempt, "Non-OK error code received (%d)" % response.code
-                )
-            else:
-                logger.info("Successfully notified on bind for %s" % (mxid,))
         except Exception as e:
             self._notifyErrback(assoc, attempt, e)
+
+        # If the request failed, try again with exponential backoff
+        if response.code != 200:
+            self._notifyErrback(
+                assoc, attempt, "Non-OK error code received (%d)" % response.code
+            )
+        else:
+            logger.info("Successfully notified on bind for %s" % (mxid,))
 
     def _notifyErrback(self, assoc, attempt, error):
         logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
