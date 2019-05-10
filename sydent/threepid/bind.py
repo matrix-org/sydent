@@ -115,6 +115,7 @@ class ThreepidBinder:
             response = yield http_client.post_json_get_nothing(post_url, assoc, {})
         except Exception as e:
             self._notifyErrback(assoc, attempt, e)
+            return
 
         # If the request failed, try again with exponential backoff
         if response.code != 200:
