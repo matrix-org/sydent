@@ -20,6 +20,7 @@ from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
+from sydent.threepid.bind import BindingNotPermittedException
 
 class ThreePidBindServlet(Resource):
     def __init__(self, sydent):
@@ -55,7 +56,13 @@ class ThreePidBindServlet(Resource):
             return {'errcode': 'M_SESSION_NOT_VALIDATED',
                     'error': "This validation session has not yet been completed"}
 
-        res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
+        try:
+            res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
+        except BindingNotPermittedException:
+            return {
+                'errcode': 'M_BINDING_NOT_PERMITTED',
+                'error': "This threepid may not be bound to this mxid",
+            }
         return res
 
     @jsonwrap

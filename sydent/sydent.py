@@ -210,7 +210,7 @@ class Sydent:
         self.servlets.info = InfoServlet(self, info)
         self.servlets.internalInfo = InternalInfoServlet(self, info)
 
-        self.threepidBinder = ThreepidBinder(self)
+        self.threepidBinder = ThreepidBinder(self, info)
 
         self.sslComponents = SslComponents(self)
 
