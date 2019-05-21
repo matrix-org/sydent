@@ -130,7 +130,17 @@ class ThreePidUnbindServlet(Resource):
                     request.finish()
                     return
 
-            res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
+            try:
+                res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
+            except ValueError:
+                # User could have provided correct 3PID/sid/client_secret
+                # details but not the correct mxid, which would cause the
+                # binding removal to fail
+                request.setResponseCode(400)
+                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': "Association between provided mxid and 3pid not found"}))
+                request.finish()
+                return
+
             request.write(json.dumps({}))
             request.finish()
         except Exception as ex:
