@@ -21,6 +21,9 @@ import logging
 from sydent.http.servlets import get_args, jsonwrap
 from sydent.hs_federation.verifier import NoAuthenticationError
 from signedjson.sign import SignatureVerifyException
+from sydent.db.valsession import ThreePidValSessionStore
+from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
+    SessionNotValidatedException
 
 from twisted.web.resource import Resource
 from twisted.web import server
@@ -64,29 +67,68 @@ class ThreePidUnbindServlet(Resource):
                 request.finish()
                 return
 
-            try:
-                origin_server_name = yield self.sydent.sig_verifier.authenticate_request(request, body)
-            except SignatureVerifyException as ex:
-                request.setResponseCode(401)
-                request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
-                request.finish()
-                return
-            except NoAuthenticationError as ex:
-                request.setResponseCode(401)
-                request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
-                request.finish()
-                return
-            except:
-                logger.exception("Exception whilst authenticating unbind request")
-                request.setResponseCode(500)
-                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
-                request.finish()
-                return
+            if 'sid' in body and 'client_secret' in body:
+                sid = body['sid']
+                client_secret = body['client_secret']
 
-            if not mxid.endswith(':' + origin_server_name):
-                request.setResponseCode(403)
-                request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'Origin server name does not match mxid'}))
-                request.finish()
+                valSessionStore = ThreePidValSessionStore(self.sydent)
+
+                noMatchError = {'errcode': 'M_NO_VALID_SESSION',
+                                'error': "No valid session was found matching that sid and client secret"}
+
+                try:
+                    s = valSessionStore.getValidatedSession(sid, client_secret)
+                except IncorrectClientSecretException:
+                    request.setResponseCode(401)
+                    request.write(json.dumps(noMatchError))
+                    request.finish()
+                    return
+                except InvalidSessionIdException:
+                    request.setResponseCode(401)
+                    request.write(json.dumps(noMatchError))
+                    request.finish()
+                    return
+                except SessionNotValidatedException:
+                    request.setResponseCode(403)
+                    request.write(json.dumps({
+                        'errcode': 'M_SESSION_NOT_VALIDATED',
+                        'error': "This validation session has not yet been completed"
+                    }))
+                    return
+                
+                if s.medium != threepid['medium'] or s.address != threepid['address']:
+                    request.setResponseCode(403)
+                    request.write(json.dumps({
+                        'errcode': 'M_FORBIDDEN',
+                        'error': 'Provided session information does not match medium/address combo',
+                    }))
+                    request.finish()
+                    return
+            else:
+                try:
+                    origin_server_name = yield self.sydent.sig_verifier.authenticate_request(request, body)
+                except SignatureVerifyException as ex:
+                    request.setResponseCode(401)
+                    request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                    request.finish()
+                    return
+                except NoAuthenticationError as ex:
+                    request.setResponseCode(401)
+                    request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                    request.finish()
+                    return
+                except:
+                    logger.exception("Exception whilst authenticating unbind request")
+                    request.setResponseCode(500)
+                    request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
+                    request.finish()
+                    return
+
+                if not mxid.endswith(':' + origin_server_name):
+                    request.setResponseCode(403)
+                    request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'Origin server name does not match mxid'}))
+                    request.finish()
+                    return
 
             res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
             request.write(json.dumps({}))
