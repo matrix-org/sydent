@@ -67,6 +67,20 @@ class ThreePidUnbindServlet(Resource):
                 request.finish()
                 return
 
+            # We now check for authentication in two different ways, depending
+            # on the contents of the request. If the user has supplied "sid"
+            # (the Session ID returned by Sydent during the original binding)
+            # and "client_secret" fields, they are trying to provie that they
+            # were the original author of the bind. We then check that what
+            # they supply matches and if it does, allow the unbind.
+            # 
+            # However if these fields are not supplied, we instead check
+            # whether the request originated from a homeserver, and if so the
+            # same homeserver that originally created the bind. We do this by
+            # checking the signature of the request. If it all matches up, we
+            # allow the unbind.
+            #
+            # Only one method of authentication is required.
             if 'sid' in body and 'client_secret' in body:
                 sid = body['sid']
                 client_secret = body['client_secret']
