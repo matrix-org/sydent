@@ -66,6 +66,10 @@ CONFIG_DEFAULTS = {
         'log.path': '',
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
+        # Uncomment the following to enable prometheus and/or sentry support
+        # 'promtheus_port': '8080',
+        # 'prometheus_addr': '',  # Optional, defaults to binding on *
+        # 'sentry_dsn': 'https://...'
     },
     'db': {
         'db.file': 'sydent.db',
@@ -150,20 +154,18 @@ class Sydent:
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
 
-        sentry = self.cfg.get("sentry")
-        if sentry:
+        if self.cfg.has_option("general", "sentry_dsn"):
             # Only import and start sentry SDK if configured.
             import sentry_sdk
             sentry_sdk.init(
-                dsn=sentry["dsn"],
+                dsn=self.cfg.get("general", "sentry_dsn"),
             )
 
-        metrics_addr = self.cfg.get("metrics_addr")
-        if metrics_addr:
+        if self.cfg.has_option("general", "prometheus_port"):
             import prometheus_client
             prometheus_client.start_http_server(
-                port=metrics_addr["port"],
-                addr=metrics_addr.get("addr", ""),
+                port=self.cfg.getint("general", "prometheus_port"),
+                addr=self.cfg.get("general", "prometheus_addr", fallback=""),
             )
 
         self.validators = Validators()
