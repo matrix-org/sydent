@@ -66,10 +66,14 @@ CONFIG_DEFAULTS = {
         'log.path': '',
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
-        # Uncomment the following to enable prometheus and/or sentry support
-        # 'promtheus_port': '8080',
-        # 'prometheus_addr': '',  # Optional, defaults to binding on *
-        # 'sentry_dsn': 'https://...'
+
+        # The following can be added to your local config file to enable prometheus
+        # support.
+        # 'promtheus_port': '8080',  # The port to serve metrics on
+        # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
+
+        # The following can be added to your local config file to enable sentry support.
+        # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
     },
     'db': {
         'db.file': 'sydent.db',
