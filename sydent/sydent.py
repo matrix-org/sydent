@@ -169,7 +169,7 @@ class Sydent:
             import prometheus_client
             prometheus_client.start_http_server(
                 port=self.cfg.getint("general", "prometheus_port"),
-                addr=self.cfg.get("general", "prometheus_addr", fallback=""),
+                addr=self.cfg.get("general", "prometheus_addr"),
             )
 
         self.validators = Validators()
