@@ -150,6 +150,22 @@ class Sydent:
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
 
+        sentry = self.cfg.get("sentry")
+        if sentry:
+            # Only import and start sentry SDK if configured.
+            import sentry_sdk
+            sentry_sdk.init(
+                dsn=sentry["dsn"],
+            )
+
+        metrics_addr = self.cfg.get("metrics_addr")
+        if metrics_addr:
+            import prometheus_client
+            prometheus_client.start_http_server(
+                port=metrics_addr["port"],
+                addr=metrics_addr.get("addr", ""),
+            )
+
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
         self.validators.msisdn = MsisdnValidator(self)
