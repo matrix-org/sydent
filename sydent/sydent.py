@@ -69,7 +69,7 @@ CONFIG_DEFAULTS = {
 
         # The following can be added to your local config file to enable prometheus
         # support.
-        # 'promtheus_port': '8080',  # The port to serve metrics on
+        # 'prometheus_port': '8080',  # The port to serve metrics on
         # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
 
         # The following can be added to your local config file to enable sentry support.
@@ -164,6 +164,8 @@ class Sydent:
             sentry_sdk.init(
                 dsn=self.cfg.get("general", "sentry_dsn"),
             )
+            with sentry_sdk.configure_scope() as scope:
+                scope.set_tag("server_name", self.server_name)
 
         if self.cfg.has_option("general", "prometheus_port"):
             import prometheus_client
