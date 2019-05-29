@@ -66,6 +66,14 @@ CONFIG_DEFAULTS = {
         'log.path': '',
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
+
+        # The following can be added to your local config file to enable prometheus
+        # support.
+        # 'promtheus_port': '8080',  # The port to serve metrics on
+        # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
+
+        # The following can be added to your local config file to enable sentry support.
+        # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
     },
     'db': {
         'db.file': 'sydent.db',
@@ -149,6 +157,20 @@ class Sydent:
                         + "the config file.") % (self.server_name,))
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
+
+        if self.cfg.has_option("general", "sentry_dsn"):
+            # Only import and start sentry SDK if configured.
+            import sentry_sdk
+            sentry_sdk.init(
+                dsn=self.cfg.get("general", "sentry_dsn"),
+            )
+
+        if self.cfg.has_option("general", "prometheus_port"):
+            import prometheus_client
+            prometheus_client.start_http_server(
+                port=self.cfg.getint("general", "prometheus_port"),
+                addr=self.cfg.get("general", "prometheus_addr"),
+            )
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
