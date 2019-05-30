@@ -165,7 +165,7 @@ class Sydent:
                 dsn=self.cfg.get("general", "sentry_dsn"),
             )
             with sentry_sdk.configure_scope() as scope:
-                scope.set_tag("server_name", self.server_name)
+                scope.set_tag("sydent_server_name", self.server_name)
 
         if self.cfg.has_option("general", "prometheus_port"):
             import prometheus_client
