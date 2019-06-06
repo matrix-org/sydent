@@ -29,7 +29,7 @@ class Info(object):
 
         try:
             file = open('info.yaml')
-            self.config = yaml.load(file)
+            self.config = yaml.safe_load(file)
             file.close()
 
             # medium:
