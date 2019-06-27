@@ -78,6 +78,7 @@ CONFIG_DEFAULTS = {
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
         'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
+        'invites.validity_period': 0,
     },
     'db': {
         'db.file': 'sydent.db',
@@ -175,6 +176,8 @@ class Sydent:
         self.user_dir_allowed_hses = set(list_from_comma_sep_string(
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
         ))
+
+        self.invites_validity_period = self.cfg.get("invites.validity_period", 0)
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
