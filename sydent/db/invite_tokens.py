@@ -78,7 +78,7 @@ class JoinTokenStore(object):
 
         res = cur.execute(
             "SELECT medium, address, room_id, sender, token, origin_server, received_ts FROM invite_tokens"
-            " WHERE medium = ? AND address = ?",
+            " WHERE medium = ? AND address = ? AND sent_ts IS NULL",
             (medium, address,)
         )
         rows = res.fetchall()
