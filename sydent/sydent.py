@@ -179,7 +179,7 @@ class Sydent:
         ))
 
         self.invites_validity_period = parse_duration(
-            self.cfg.get("invites.validity_period", 0),
+            self.cfg.get('general', 'invites.validity_period', 0),
         )
 
         self.validators = Validators()
