@@ -48,6 +48,9 @@ class JoinTokenStore(object):
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
+        :param expire_ts_ms: The expiration date to set to this invite on this server. Not
+            replicated. 0 if no expiration date.
+        :type expire_ts_ms: int
         """
         if originId and originServer:
             # Check if we've already seen this association from this server
