@@ -178,7 +178,9 @@ class Sydent:
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
         ))
 
-        self.invites_validity_period = self.cfg.get("invites.validity_period", 0)
+        self.invites_validity_period = parse_duration(
+            self.cfg.get("invites.validity_period", 0),
+        )
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
@@ -297,6 +299,25 @@ def parse_config(config_file):
         cfg.read(config_file)
 
     return cfg
+
+
+def parse_duration(value):
+    if isinstance(value, int):
+        return value
+    second = 1000
+    minute = 60 * second
+    hour = 60 * minute
+    day = 24 * hour
+    week = 7 * day
+    year = 365 * day
+    sizes = {"s": second, "m": minute, "h": hour, "d": day, "w": week, "y": year}
+    size = 1
+    suffix = value[-1]
+    if suffix in sizes:
+        value = value[:-1]
+        size = sizes[suffix]
+    return int(value) * size
+
 
 if __name__ == '__main__':
     syd = Sydent()
