@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +29,7 @@ from signedjson.sign import SignatureVerifyException
 
 import logging
 import json
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -163,10 +165,13 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
+        now_ms = int(time.time() * 1000)
+
         for originId, inviteToken in invite_tokens.items():
             tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                 inviteToken['sender'], inviteToken['token'],
-                                originServer=peer.servername, originId=originId, commit=False)
+                                originServer=peer.servername, originId=originId, commit=False,
+                                expire_ts_ms=now_ms + self.sydent.invites_validity_period if self.sydent.invites_validity_period else 0)
             logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
         # Process any ephemeral public keys

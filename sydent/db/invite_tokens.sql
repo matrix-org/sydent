@@ -1,5 +1,6 @@
 /*
 Copyright 2015 OpenMarket Ltd
+Copyright 2019 New Vector Ltd
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +25,8 @@ CREATE TABLE IF NOT EXISTS invite_tokens (
     received_ts bigint, -- When the invite was received by us from the homeserver
     sent_ts bigint, -- When the token was sent by us to the user
     origin_id integer, -- original id in homeserver's DB that this was replicated from (if applicable)
-    origin_server text -- homeserver this was replicated from (if applicable)
+    origin_server text, -- homeserver this was replicated from (if applicable)
+    valid_until_ms integer not null default 0 -- When the invite is due to expire
 );
 CREATE INDEX IF NOT EXISTS invite_token_medium_address on invite_tokens(medium, address);
 CREATE INDEX IF NOT EXISTS invite_token_token on invite_tokens(token);
