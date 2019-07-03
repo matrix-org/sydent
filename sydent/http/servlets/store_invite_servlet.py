@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2015 OpenMarket Ltd
+# Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +17,7 @@
 import nacl.signing
 import random
 import string
+import time
 from email.header import Header
 
 from twisted.web.resource import Resource
@@ -70,8 +72,17 @@ class StoreInviteServlet(Resource):
         ephemeralPrivateKeyBase64 = encode_base64(ephemeralPrivateKey.encode(), True)
         ephemeralPublicKeyBase64 = encode_base64(ephemeralPublicKey.encode(), True)
 
+        now_ms = int(time.time() * 1000)
+        if self.sydent.invites_validity_period is not None:
+            valid_until_ts = now_ms + self.sydent.invites_validity_period
+        else:
+            valid_until_ts = None
+
         tokenStore.storeEphemeralPublicKey(ephemeralPublicKeyBase64)
-        tokenStore.storeToken(medium, address, roomId, sender, token)
+        tokenStore.storeToken(
+            medium, address, roomId, sender, token,
+            valid_until_ts=valid_until_ts,
+        )
 
         substitutions = {}
         for key, values in request.args.items():

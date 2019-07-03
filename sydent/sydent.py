@@ -2,6 +2,7 @@
 
 # Copyright 2014 OpenMarket Ltd
 # Copyright 2018 New Vector Ltd
+# Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,6 +79,10 @@ CONFIG_DEFAULTS = {
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
         'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
+        # Timestamp in milliseconds, or string in the form of e.g. "2w" for two weeks,
+        # which defines the time during which an invite will be valid on this server
+        # from the time it has been received.
+        'invites.validity_period': None,
     },
     'db': {
         'db.file': 'sydent.db',
@@ -175,6 +180,10 @@ class Sydent:
         self.user_dir_allowed_hses = set(list_from_comma_sep_string(
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
         ))
+
+        self.invites_validity_period = parse_duration(
+            self.cfg.get('general', 'invites.validity_period'),
+        )
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
@@ -293,6 +302,25 @@ def parse_config(config_file):
         cfg.read(config_file)
 
     return cfg
+
+
+def parse_duration(value):
+    if isinstance(value, int):
+        return value
+    second = 1000
+    minute = 60 * second
+    hour = 60 * minute
+    day = 24 * hour
+    week = 7 * day
+    year = 365 * day
+    sizes = {"s": second, "m": minute, "h": hour, "d": day, "w": week, "y": year}
+    size = 1
+    suffix = value[-1]
+    if suffix in sizes:
+        value = value[:-1]
+        size = sizes[suffix]
+    return int(value) * size
+
 
 if __name__ == '__main__':
     syd = Sydent()

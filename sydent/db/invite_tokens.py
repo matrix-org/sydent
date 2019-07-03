@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2015 OpenMarket Ltd
+# Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +24,7 @@ class JoinTokenStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, commit=True):
+    def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, valid_until_ts=None, commit=True):
         """Stores an invite token.
         
         :param medium: The medium of the token.
@@ -42,6 +43,9 @@ class JoinTokenStore(object):
         :param originId: The id of the token in the DB of originServer. Used
         for determining if we've already received a token or not.
         :type originId: int, None
+        :param valid_until_ts: The expiration date to set to this invite on this server.
+            This value is not replicated. None if invites are always valid.
+        :type valid_until_ts: int
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
@@ -56,14 +60,15 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
-                    " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts', 'origin_server', 'origin_id')"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (medium, address, roomId, sender, token, int(time.time()), originServer, originId))
+                    " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts', 'origin_server', 'origin_id', 'valid_until_ts')"
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (medium, address, roomId, sender, token, int(time.time()), originServer, originId, valid_until_ts))
         if commit:
             self.sydent.db.commit()
 
     def getTokens(self, medium, address):
         """Retrieve the invite token(s) for a given 3PID medium and address.
+        Filters out tokens which have expired.
         
         :param medium: The medium of the 3PID.
         :type medium: str
@@ -75,7 +80,7 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
 
         res = cur.execute(
-            "SELECT medium, address, room_id, sender, token, origin_server FROM invite_tokens"
+            "SELECT medium, address, room_id, sender, token, origin_server, valid_until_ms FROM invite_tokens"
             " WHERE medium = ? AND address = ?",
             (medium, address,)
         )
@@ -83,8 +88,15 @@ class JoinTokenStore(object):
 
         ret = []
 
+        now_ms = int(time.time() * 1000)
+
         for row in rows:
-            medium, address, roomId, sender, token, origin_server = row
+            medium, address, roomId, sender, token, origin_server, valid_until_ms = row
+
+            if valid_until_ms and valid_until_ms < now_ms:
+                # Ignore this invite if it has expired.
+                continue
+
             ret.append({
                 "medium": medium,
                 "address": address,
