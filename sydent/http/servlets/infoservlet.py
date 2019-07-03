@@ -20,6 +20,7 @@ from netaddr import IPAddress
 import logging
 import json
 
+from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
 logger = logging.getLogger(__name__)
@@ -65,6 +66,18 @@ class InfoServlet(Resource):
         if self.sydent.nonshadow_ips and ip not in self.sydent.nonshadow_ips:
             # This user is not whitelisted, present shadow_hs at their only hs
             result['hs'] = result.pop('shadow_hs', None)
+
+        # Check if there's a MXID associated with this address, if so use its domain as
+        # the value for "hs" (so that the user can still access their account through
+        # Tchap) and move the value "hs" should have had otherwise to "new_hs" if it's a
+        # different one.
+        store = GlobalAssociationStore(self.sydent)
+        mxid = store.getMxid(medium, address)
+        if mxid:
+            current_hs = mxid.split(':', 1)[1]
+            if current_hs != result['hs']:
+                result['new_hs'] = result['hs']
+                result['hs'] = current_hs
 
         # Non-internal. Remove 'requires_invite' if found
         result.pop('requires_invite', None)
