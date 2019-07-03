@@ -67,6 +67,10 @@ class InfoServlet(Resource):
             # This user is not whitelisted, present shadow_hs at their only hs
             result['hs'] = result.pop('shadow_hs', None)
 
+        # Check if there's a MXID associated with this address, if so use its domain as
+        # the value for "hs" (so that the user can still access their account through
+        # Tchap) and move the value "hs" should have had otherwise to "new_hs" if it's a
+        # different one.
         store = GlobalAssociationStore(self.sydent)
         mxid = store.getMxid(medium, address)
         if mxid:
