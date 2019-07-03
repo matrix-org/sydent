@@ -148,7 +148,9 @@ class SqliteDatabase:
             self._setSchemaVersion(3)
         if curVer < 4:
             cur = self.db.cursor()
-            cur.execute("ALTER TABLE invite_tokens ADD COLUMN valid_until_ms INTEGER NOT NULL DEFAULT 0")
+            # Timestamp after which the invite isn't considered valid anymore. Is NULL if
+            # invites are always valid.
+            cur.execute("ALTER TABLE invite_tokens ADD COLUMN valid_until_ts INTEGER")
             self.db.commit()
             logger.info("v3 -> v4 schema migration complete")
             self._setSchemaVersion(4)

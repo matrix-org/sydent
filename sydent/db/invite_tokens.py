@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import twisted.internet.task
-
 import time
 import logging
 
@@ -26,7 +24,7 @@ class JoinTokenStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, commit=True, expire_ts_ms=0):
+    def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, valid_until_ts=None, commit=True):
         """Stores an invite token.
         
         :param medium: The medium of the token.
@@ -45,12 +43,12 @@ class JoinTokenStore(object):
         :param originId: The id of the token in the DB of originServer. Used
         for determining if we've already received a token or not.
         :type originId: int, None
+        :param valid_until_ts: The expiration date to set to this invite on this server.
+            This value is not replicated. None if invites are always valid.
+        :type valid_until_ts: int
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
-        :param expire_ts_ms: The expiration date to set to this invite on this server. Not
-            replicated. 0 if no expiration date.
-        :type expire_ts_ms: int
         """
         if originId and originServer:
             # Check if we've already seen this association from this server
@@ -62,9 +60,9 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
-                    " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts', 'origin_server', 'origin_id', 'valid_until_ms')"
+                    " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts', 'origin_server', 'origin_id', 'valid_until_ts')"
                     " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (medium, address, roomId, sender, token, int(time.time()), originServer, originId, expire_ts_ms))
+                    (medium, address, roomId, sender, token, int(time.time()), originServer, originId, valid_until_ts))
         if commit:
             self.sydent.db.commit()
 

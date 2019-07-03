@@ -79,7 +79,10 @@ CONFIG_DEFAULTS = {
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
         'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
-        'invites.validity_period': 0,
+        # Timestamp in milliseconds, or string in the form of e.g. "2w" for two weeks,
+        # which defines the time during which an invite will be valid on this server
+        # from the time it has been received.
+        'invites.validity_period': None,
     },
     'db': {
         'db.file': 'sydent.db',
@@ -179,7 +182,7 @@ class Sydent:
         ))
 
         self.invites_validity_period = parse_duration(
-            self.cfg.get('general', 'invites.validity_period', 0),
+            self.cfg.get('general', 'invites.validity_period'),
         )
 
         self.validators = Validators()

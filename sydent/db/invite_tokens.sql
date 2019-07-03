@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS invite_tokens (
     sent_ts bigint, -- When the token was sent by us to the user
     origin_id integer, -- original id in homeserver's DB that this was replicated from (if applicable)
     origin_server text, -- homeserver this was replicated from (if applicable)
-    valid_until_ms integer not null default 0 -- When the invite is due to expire
+    valid_until_ts integer -- Timestamp after which the invite isn't valid anymore
 );
 CREATE INDEX IF NOT EXISTS invite_token_medium_address on invite_tokens(medium, address);
 CREATE INDEX IF NOT EXISTS invite_token_token on invite_tokens(token);

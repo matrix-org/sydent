@@ -77,7 +77,7 @@ class StoreInviteServlet(Resource):
         tokenStore.storeEphemeralPublicKey(ephemeralPublicKeyBase64)
         tokenStore.storeToken(
             medium, address, roomId, sender, token,
-            expire_ts_ms=now_ms + self.sydent.invites_validity_period if self.sydent.invites_validity_period else 0,
+            valid_until_ts=now_ms + self.sydent.invites_validity_period if self.sydent.invites_validity_period else None,
         )
 
         substitutions = {}
