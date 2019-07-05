@@ -82,7 +82,7 @@ CONFIG_DEFAULTS = {
         # Timestamp in milliseconds, or string in the form of e.g. "2w" for two weeks,
         # which defines the time during which an invite will be valid on this server
         # from the time it has been received.
-        'invites.validity_period': 'None',
+        'invites.validity_period': '',
     },
     'db': {
         'db.file': 'sydent.db',
@@ -305,7 +305,7 @@ def parse_config(config_file):
 
 
 def parse_duration(value):
-    if value == 'None':
+    if not len(value):
         return None
 
     try:
