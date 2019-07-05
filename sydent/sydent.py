@@ -112,9 +112,9 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self):
-        self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
-        self.cfg = parse_config(self.config_file)
+    def __init__(self, cfg, config_file_name=None):
+        self.config_file = config_file_name
+        self.cfg = cfg
 
         log_format = (
             "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
@@ -218,9 +218,10 @@ class Sydent:
         cb.start(10 * 60.0)
 
     def save_config(self):
-        fp = open(self.config_file, 'w')
-        self.cfg.write(fp)
-        fp.close()
+        if self.config_file:
+            fp = open(self.config_file, 'w')
+            self.cfg.write(fp)
+            fp.close()
 
     def run(self):
         self.clientApiHttpServer.setup()
@@ -291,6 +292,12 @@ def parse_config(config_file):
 
     return cfg
 
+
 if __name__ == '__main__':
-    syd = Sydent()
+    config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
+    cfg = parse_config(config_file)
+    syd = Sydent(
+        cfg=cfg,
+        config_file_name=config_file,
+    )
     syd.run()
