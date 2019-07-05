@@ -2,6 +2,7 @@
 
 # Copyright 2014 OpenMarket Ltd
 # Copyright 2018 New Vector Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -112,7 +113,9 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, cfg, config_file_name=None):
+    def __init__(self, cfg, config_file_name=None, reactor=twisted.internet.reactor):
+        self.reactor = reactor
+
         self.config_file = config_file_name
         self.cfg = cfg
 
@@ -241,7 +244,7 @@ class Sydent:
             with open(self.pidfile, 'w') as pidfile:
                 pidfile.write(str(os.getpid()) + "\n")
 
-        twisted.internet.reactor.run()
+        self.reactor.run()
 
     def ip_from_request(self, request):
         if (self.cfg.get('http', 'obey_x_forwarded_for') and
