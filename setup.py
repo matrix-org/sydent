@@ -50,6 +50,7 @@ setup(
         "attrs>=19.1.0",
         "netaddr>=0.7.0",
         "sortedcontainers>=2.1.0",
+        "six>=1.10",
     ],
     # make sure we package the sql files
     include_package_data=True,

@@ -18,6 +18,7 @@ import random
 import string
 from email.header import Header
 
+from six import string_types
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
@@ -75,9 +76,9 @@ class StoreInviteServlet(Resource):
         tokenStore.storeToken(medium, address, roomId, sender, token)
 
         substitutions = {}
-        for key, values in request.args.items():
-            if len(values) == 1 and type(values[0]) == str:
-                substitutions[key] = values[0]
+        for k, v in args.items():
+            if isinstance(v, string_types):
+                substitutions[k] = v
         substitutions["token"] = token
 
         required = [
