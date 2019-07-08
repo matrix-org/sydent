@@ -53,6 +53,7 @@ setup(
         "pynacl",
         "pyyaml",
         "netaddr",
+        "six>=1.10",
     ],
     # make sure we package the sql files
     include_package_data=True,
