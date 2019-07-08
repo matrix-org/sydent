@@ -22,13 +22,13 @@ from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.python.failure import Failure
 
+from tests.logcontext import LoggingContext
+
 
 def do_patch():
     """
     Patch defer.inlineCallbacks so that it checks the state of the logcontext on exit
     """
-
-    from tests.logcontext import LoggingContext
 
     orig_inline_callbacks = defer.inlineCallbacks
 

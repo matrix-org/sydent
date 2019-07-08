@@ -15,8 +15,10 @@
 
 import json
 import logging
+from io import BytesIO
 
 import attr
+from six import text_type
 from zope.interface import implementer
 
 from twisted.internet import address, udp
@@ -27,8 +29,9 @@ from twisted.internet.interfaces import IReactorPluggableNameResolver, IResolver
 from twisted.python.failure import Failure
 from twisted.test.proto_helpers import MemoryReactorClock
 from twisted.web.http_headers import Headers
+from twisted.web.server import Request
 
-from tests.utils import setup_test_identity_server as _sti
+from tests.utils import setup_test_identity_server as _sti, unquote
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +131,77 @@ class FakeSite:
     server_version_string = b"1"
     site_tag = "test"
     access_logger = logging.getLogger("synapse.access.http.fake")
+
+
+def make_request(
+    reactor,
+    method,
+    path,
+    content=b"",
+    access_token=None,
+    request=Request,
+    shorthand=True,
+    federation_auth_origin=None,
+):
+    """
+    Make a web request using the given method and path, feed it the
+    content, and return the Request and the Channel underneath.
+
+    Args:
+        method (bytes/unicode): The HTTP request method ("verb").
+        path (bytes/unicode): The HTTP path, suitably URL encoded (e.g.
+        escaped UTF-8 & spaces and such).
+        content (bytes or dict): The body of the request. JSON-encoded, if
+        a dict.
+        shorthand: Whether to try and be helpful and prefix the given URL
+        with the usual REST API path, if it doesn't contain it.
+        federation_auth_origin (bytes|None): if set to not-None, we will add a fake
+            Authorization header pretenting to be the given server name.
+
+    Returns:
+        Tuple[synapse.http.site.SynapseRequest, channel]
+    """
+    if not isinstance(method, bytes):
+        method = method.encode("ascii")
+
+    if not isinstance(path, bytes):
+        path = path.encode("ascii")
+
+    # Decorate it to be the full path, if we're using shorthand
+    if shorthand and not path.startswith(b"/_matrix"):
+        path = b"/_matrix/client/r0/" + path
+        path = path.replace(b"//", b"/")
+
+    if not path.startswith(b"/"):
+        path = b"/" + path
+
+    if isinstance(content, text_type):
+        content = content.encode("utf8")
+
+    channel = FakeChannel(reactor)
+
+    req = request(channel)
+    req.process = lambda: b""
+    req.content = BytesIO(content)
+    req.postpath = list(map(unquote, path[1:].split(b"/")))
+
+    if access_token:
+        req.requestHeaders.addRawHeader(
+            b"Authorization", b"Bearer " + access_token.encode("ascii")
+        )
+
+    if federation_auth_origin is not None:
+        req.requestHeaders.addRawHeader(
+            b"Authorization",
+            b"X-Matrix origin=%s,key=,sig=" % (federation_auth_origin,),
+        )
+
+    if content:
+        req.requestHeaders.addRawHeader(b"Content-Type", b"application/json")
+
+    req.requestReceived(method, path, b"1.1")
+
+    return req, channel
 
 
 def wait_until_result(clock, request, timeout=100):

@@ -16,13 +16,16 @@
 import gc
 import logging
 
+from canonicaljson import json
+
 import twisted
 import twisted.logger
 from twisted.internet.defer import Deferred
 from twisted.trial import unittest
+from twisted.web.server import Request
 
 from tests.logcontext import LoggingContext
-from tests.server import setup_test_identity_server
+from tests.server import make_request, render, setup_test_identity_server, ThreadedMemoryReactorClock
 from tests.test_utils.logging_setup import setup_logging
 from tests.utils import default_config
 
@@ -151,6 +154,8 @@ class IdentityServerTestCase(TestCase):
         hijacking the authentication system to return a fixed user, and then
         calling the prepare function.
         """
+        self.reactor = ThreadedMemoryReactorClock
+
         self.ident_server = self.make_identity_server()
 
         if self.ident_server is None:
@@ -159,10 +164,7 @@ class IdentityServerTestCase(TestCase):
         if not isinstance(self.ident_server, Sydent):
             raise Exception("An identity server wasn't returned, but %r" % (self.ident_server,))
 
-        self.http_client = SimpleHttpClient(self.ident_server)
-        self.federation_client = FederationHttpClient(self.ident_server)
-
-    def make_identity_server(self, reactor, clock):
+    def make_identity_server(self):
         """
         Make and return a homeserver.
 
@@ -201,6 +203,57 @@ class IdentityServerTestCase(TestCase):
 
         Function to optionally be overridden in subclasses.
         """
+    def make_request(
+        self,
+        method,
+        path,
+        content=b"",
+        access_token=None,
+        request=Request,
+        shorthand=True,
+        federation_auth_origin=None,
+    ):
+        """
+        Create a SynapseRequest at the path using the method and containing the
+        given content.
+
+        Args:
+            method (bytes/unicode): The HTTP request method ("verb").
+            path (bytes/unicode): The HTTP path, suitably URL encoded (e.g.
+            escaped UTF-8 & spaces and such).
+            content (bytes or dict): The body of the request. JSON-encoded, if
+            a dict.
+            shorthand: Whether to try and be helpful and prefix the given URL
+            with the usual REST API path, if it doesn't contain it.
+            federation_auth_origin (bytes|None): if set to not-None, we will add a fake
+                Authorization header pretenting to be the given server name.
+
+        Returns:
+            Tuple[synapse.http.site.SynapseRequest, channel]
+        """
+        if isinstance(content, dict):
+            content = json.dumps(content).encode("utf8")
+
+        return make_request(
+            self.reactor,
+            method,
+            path,
+            content,
+            access_token,
+            request,
+            shorthand,
+            federation_auth_origin,
+        )
+
+    def render(self, request):
+        """
+        Render a request against the resources registered by the test class's
+        servlets.
+
+        Args:
+            request (synapse.http.site.SynapseRequest): The request to render.
+        """
+        render(request, self.resource, self.reactor)
 
     def setup_test_identity_server(self, *args, **kwargs):
         """
@@ -215,7 +268,6 @@ class IdentityServerTestCase(TestCase):
             synapse.server.HomeServer
         """
         kwargs = dict(kwargs)
-        kwargs.update(self._hs_args)
         if "config" not in kwargs:
             config = self.default_config()
         else:
