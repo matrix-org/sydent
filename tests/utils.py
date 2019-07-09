@@ -34,6 +34,7 @@ def default_config(name):
     config_dict = CONFIG_DEFAULTS
 
     config_dict['general']['name'] = name
+    config_dict['general']['log.path'] = 'sydent.log'
     config_dict['crypto']['signing_key'] = 'ed25519 a_lPym qvioDNmfExFBRPgdTU+wtFYKq4JfwFRv7sYVgWvmgJg'
     config_dict['db']['db.file'] = ':memory:'
 

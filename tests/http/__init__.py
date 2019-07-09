@@ -12,17 +12,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from tests.unittest import IdentityServerTestCase
-
-
-class APITestCase(IdentityServerTestCase):
-
-    def make_identity_server(self):
-        self.ident_server = self.setup_test_identity_server()
-        return self.ident_server
-
-    def test_api(self):
-        request, channel = self.make_request("GET", "/_matrix/identity/api/v1")
-        self.render(request)
-        self.assertEqual(len(channel.json_body), 0, channel.result)

@@ -23,6 +23,7 @@ import twisted.logger
 from twisted.internet.defer import Deferred
 from twisted.trial import unittest
 from twisted.web.server import Request
+from twisted.web.resource import Resource
 
 from tests.logcontext import LoggingContext
 from tests.server import make_request, render, setup_test_identity_server, ThreadedMemoryReactorClock
@@ -30,7 +31,6 @@ from tests.test_utils.logging_setup import setup_logging
 from tests.utils import default_config
 
 from sydent.sydent import Sydent
-from sydent.http.httpclient import SimpleHttpClient, FederationHttpClient
 
 setup_logging()
 
@@ -154,7 +154,8 @@ class IdentityServerTestCase(TestCase):
         hijacking the authentication system to return a fixed user, and then
         calling the prepare function.
         """
-        self.reactor = ThreadedMemoryReactorClock
+        self.reactor = ThreadedMemoryReactorClock()
+        self.resource = Resource()
 
         self.ident_server = self.make_identity_server()
 
@@ -273,7 +274,7 @@ class IdentityServerTestCase(TestCase):
         else:
             config = kwargs["config"]
 
-        ident_server = setup_test_identity_server(config=config)
+        ident_server = setup_test_identity_server(config=config, reactor=self.reactor)
 
         return ident_server
 
