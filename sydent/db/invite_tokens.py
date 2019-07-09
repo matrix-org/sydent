@@ -80,7 +80,7 @@ class JoinTokenStore(object):
         cur = self.sydent.db.cursor()
 
         res = cur.execute(
-            "SELECT medium, address, room_id, sender, token, origin_server, valid_until_ms FROM invite_tokens"
+            "SELECT medium, address, room_id, sender, token, origin_server, valid_until_ts FROM invite_tokens"
             " WHERE medium = ? AND address = ?",
             (medium, address,)
         )
