@@ -99,7 +99,7 @@ class JoinTokenStore(object):
 
         cur.execute(
             "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
-            (int(time.time()), medium, address,)
+            (medium, address,)
         )
 
         self.sydent.db.commit()
