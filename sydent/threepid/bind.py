@@ -130,9 +130,15 @@ class ThreepidBinder:
                 try:
                     joinTokenStore = JoinTokenStore(self.sydent)
                     joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
+                    logger.info(
+                        "Successfully deleted invite for %s from the store",
+                        assoc["address"],
+                    )
                 except Exception as e:
                     logger.error(
-                        "Couldn't remove invite for % from the store: %s", mxid, e,
+                        "Couldn't remove invite for % from the store: %s",
+                        assoc["address"],
+                        e,
                     )
 
     def _notifyErrback(self, assoc, attempt, error):
