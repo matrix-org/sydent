@@ -215,18 +215,6 @@ class Sydent:
 
         self.pusher = Pusher(self)
 
-        # A dedicated validation session store just to clean up old sessions every N minutes
-        self.cleanupValSession = ThreePidValSessionStore(self)
-        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
-        cb.start(10 * 60.0)
-
-    def save_config(self):
-        if self.config_file:
-            fp = open(self.config_file, 'w')
-            self.cfg.write(fp)
-            fp.close()
-
-    def run(self):
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
@@ -240,11 +228,16 @@ class Sydent:
             self.internalApiHttpServer = InternalApiHttpServer(self)
             self.internalApiHttpServer.setup(interface, int(internalport))
 
-        if self.pidfile:
-            with open(self.pidfile, 'w') as pidfile:
-                pidfile.write(str(os.getpid()) + "\n")
+        # A dedicated validation session store just to clean up old sessions every N minutes
+        self.cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.start(10 * 60.0)
 
-        self.reactor.run()
+    def save_config(self):
+        if self.config_file:
+            fp = open(self.config_file, 'w')
+            self.cfg.write(fp)
+            fp.close()
 
     def ip_from_request(self, request):
         if (self.cfg.get('http', 'obey_x_forwarded_for') and
@@ -303,4 +296,10 @@ if __name__ == '__main__':
         cfg=cfg,
         config_file_name=config_file,
     )
-    syd.run()
+
+    pidfilename = cfg.get('general', "pidfile.path");
+
+    with open(pidfilename, 'w') as pidfile:
+        pidfile.write(str(os.getpid()) + "\n")
+
+    twisted.internet.reactor.run()
