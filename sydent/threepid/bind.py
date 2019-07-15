@@ -126,19 +126,18 @@ class ThreepidBinder:
             logger.info("Successfully notified on bind for %s" % (mxid,))
 
             # Only remove sent tokens when they've been successfully sent.
-            if assoc.get("invites"):
-                try:
-                    joinTokenStore = JoinTokenStore(self.sydent)
-                    joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
-                    logger.info(
-                        "Successfully deleted invite for %s from the store",
-                        assoc["address"],
-                    )
-                except Exception as e:
-                    logger.exception(
-                        "Couldn't remove invite for %s from the store",
-                        assoc["address"],
-                    )
+            try:
+                joinTokenStore = JoinTokenStore(self.sydent)
+                joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
+                logger.info(
+                    "Successfully deleted invite for %s from the store",
+                    assoc["address"],
+                )
+            except Exception as e:
+                logger.exception(
+                    "Couldn't remove invite for %s from the store",
+                    assoc["address"],
+                )
 
     def _notifyErrback(self, assoc, attempt, error):
         logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
