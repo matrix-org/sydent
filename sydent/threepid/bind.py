@@ -135,10 +135,9 @@ class ThreepidBinder:
                         assoc["address"],
                     )
                 except Exception as e:
-                    logger.error(
-                        "Couldn't remove invite for % from the store: %s",
+                    logger.exception(
+                        "Couldn't remove invite for %s from the store",
                         assoc["address"],
-                        e,
                     )
 
     def _notifyErrback(self, assoc, attempt, error):
