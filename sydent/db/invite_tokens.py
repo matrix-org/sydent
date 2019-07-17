@@ -93,3 +93,13 @@ class JoinTokenStore(object):
         if rows:
             return rows[0][0]
         return None
+
+    def deleteTokens(self, medium, address):
+        cur = self.sydent.db.cursor()
+
+        cur.execute(
+            "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
+            (medium, address,)
+        )
+
+        self.sydent.db.commit()
