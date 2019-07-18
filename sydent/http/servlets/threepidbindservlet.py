@@ -14,27 +14,66 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from twisted.web.resource import Resource
+import json
+import logging
 
+from twisted.web.resource import Resource
+from twisted.internet import defer
+from twisted.web import server
+
+from sydent.http.httpclient import SimpleHttpClient
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 
+
+logger = logging.getLogger(__name__)
+
+
+def isMxidDomainAllowed(domain):
+    if ':' in domain:
+        domain = domain.split(':', 1)[0]
+    return domain == 'matrix.org' or domain.endswith('.modular.im')
+
 class ThreePidBindServlet(Resource):
     def __init__(self, sydent):
         self.sydent = sydent
 
-    @jsonwrap
     def render_POST(self, request):
+        self._async_render_POST(request)
+        return server.NOT_DONE_YET
+
+    @defer.inlineCallbacks
+    def _async_render_POST(self, request):
         send_cors(request)
         err, args = get_args(request, ('sid', 'client_secret', 'mxid'))
         if err:
-            return err
+            request.write(json.dumps(err))
+            request.finish()
+            defer.returnValue(None)
 
         sid = args['sid']
         mxid = args['mxid']
         clientSecret = args['client_secret']
+
+        # let's say an mxid must be at least 3 chars (@, : and nonempty domain)
+        if len(mxid) < 3 or mxid[0] != '@':
+            request.write(json.dumps({
+                'errcode': 'M_INVALID_PARAM',
+                'error': "Invalid mxid",
+            }))
+            request.finish()
+            defer.returnValue(None)
+        parts = mxid[1:].split(':', 1)
+        if len(parts) != 2:
+            request.write(json.dumps({
+                'errcode': 'M_INVALID_PARAM',
+                'error': "Invalid mxid",
+            }))
+            request.finish()
+            defer.returnValue(None)
+        mxid_localpart, mxid_domain = parts
 
         # Return the same error for not found / bad client secret otherwise people can get information about
         # sessions without knowing the secret
@@ -45,18 +84,55 @@ class ThreePidBindServlet(Resource):
             valSessionStore = ThreePidValSessionStore(self.sydent)
             s = valSessionStore.getValidatedSession(sid, clientSecret)
         except IncorrectClientSecretException:
-            return noMatchError
+            request.write(json.dumps(noMatchError))
+            request.finish()
+            defer.returnValue(None)
         except SessionExpiredException:
-            return {'errcode': 'M_SESSION_EXPIRED',
-                    'error': "This validation session has expired: call requestToken again"}
+            request.write(json.dumps({'errcode': 'M_SESSION_EXPIRED',
+                    'error': "This validation session has expired: call requestToken again"}))
+            request.finish()
+            defer.returnValue(None)
         except InvalidSessionIdException:
-            return noMatchError
+            request.write(json.dumps(noMatchError))
+            request.finish()
+            defer.returnValue(None)
         except SessionNotValidatedException:
-            return {'errcode': 'M_SESSION_NOT_VALIDATED',
-                    'error': "This validation session has not yet been completed"}
+            request.write(json.dumps({'errcode': 'M_SESSION_NOT_VALIDATED',
+                    'error': "This validation session has not yet been completed"}))
+            request.finish()
+            defer.returnValue(None)
 
-        res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
-        return res
+        # check HS of mxid and only accept bindings to a set of whitelisted HSes
+        allow_mxid_domain = False
+        if isMxidDomainAllowed(mxid_domain):
+            logger.info("Allowing domain %s" % (mxid_domain,))
+            allow_mxid_domain = True
+        else:
+            # do the same check on the .well-known lookup
+            httpClient = SimpleHttpClient(self.sydent)
+            try:
+                wellKnown = yield httpClient.get_json("https://%s/.well-known/matrix/server" % (mxid_domain,))
+                if 'm.server' in wellKnown:
+                    if isMxidDomainAllowed(wellKnown['m.server']):
+                        logger.info("Allowing domain %s due to .well-known: %s" % (mxid_domain, wellKnown['m.server']))
+                        allow_mxid_domain = True
+                    else:
+                        logger.info("Not allowing domain %s from to .well-known: %s" % (mxid_domain, wellKnown['m.server']))
+            except Exception as e:
+                # we could be more specific with our errors but we're not going to allow it in any case
+                logger.info(".well-known lookup failed for %s: %r" % (mxid_domain, e))
+                pass
+
+        if allow_mxid_domain:
+            res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
+            request.write(json.dumps(res))
+        else:
+            request.write(json.dumps({
+                'errcode': 'M_INVALID_PARAM',
+                'error': "Invalid mxid",
+            }))
+
+        request.finish()
 
     @jsonwrap
     def render_OPTIONS(self, request):
