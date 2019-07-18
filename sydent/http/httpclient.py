@@ -94,6 +94,19 @@ class HTTPClient(object):
 
         defer.returnValue(response)
 
+    @defer.inlineCallbacks
+    def post_json_get_json(self, uri, post_json, opts):
+        # actually returns the response...
+        response = yield this.post_json_get_nothing(uri, post_json, opts)
+
+        body = yield readBody(response)
+        try:
+            json_body = json.loads(body)
+        except Exception as e:
+            logger.exception("Error parsing JSON from %s", uri)
+            raise
+        defer.returnValue(json_body)
+
 class SimpleHttpClient(HTTPClient):
     """A simple, no-frills HTTP client based on the class of the same name
     from Synapse.

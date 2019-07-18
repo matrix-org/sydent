@@ -138,6 +138,15 @@ class SqliteDatabase:
             self.db.commit()
             logger.info("v1 -> v2 schema migration complete")
             self._setSchemaVersion(2)
+        if curVer < 3:
+            cur = self.db.cursor()
+            cur.execute("CREATE TABLE accounts(user_id TEXT NOT NULL PRIMARY KEY, created_ts BIGINT NOT NULL, consent_version TEXT)")
+            cur.execute("CREATE TABLE tokens(token TEXT NOT NULL PRIMARY KEY, user_id TEXT NOT NULL)")
+            cur.execute("CREATE TABLE accepted_terms_urls(user_id TEXT NOT NULL, url TEXT NOT NULL)")
+            cur.execute("CREATE UNIQUE INDEX accepted_terms_urls_idx ON accepted_terms_urls (user_id, url)")
+            self.db.commit()
+            logger.info("v2 -> v3 schema migration complete")
+            self._setSchemaVersion(3)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()

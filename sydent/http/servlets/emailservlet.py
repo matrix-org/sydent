@@ -21,6 +21,7 @@ from sydent.validators.emailvalidator import SessionExpiredException
 from sydent.validators.emailvalidator import IncorrectClientSecretException
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.auth import authIfV2
 
 
 class EmailRequestCodeServlet(Resource):
@@ -33,10 +34,9 @@ class EmailRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error, args = get_args(request, ('email', 'client_secret', 'send_attempt'))
-        if error:
-            request.setResponseCode(400)
-            return error
+        authIfV2(self.sydent, request)
+
+        args = get_args(request, ('email', 'client_secret', 'send_attempt'))
 
         email = args['email']
         clientSecret = args['client_secret']
@@ -98,6 +98,8 @@ class EmailValidateCodeServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request):
+        authIfV2(self.sydent, request)
+
         return self.do_validate_request(request)
 
     def do_validate_request(self, request):

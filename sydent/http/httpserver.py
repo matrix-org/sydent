@@ -2,6 +2,7 @@
 
 # Copyright 2014 OpenMarket Ltd
 # Copyright 2018 New Vector Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +39,8 @@ class ClientApiHttpServer:
         identity = Resource()
         api = Resource()
         v1 = self.sydent.servlets.v1
+        # also use the 'v1' servlet for v2 - it's just a ping responder
+        v2 = self.sydent.servlets.v1
 
         validate = Resource()
         email = Resource()
@@ -92,6 +95,15 @@ class ClientApiHttpServer:
         v1.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
 
         v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+
+
+        # v2
+        # note v2 loses the /api so goes on 'identity' not 'api'
+        identity.putChild('v2', v2)
+
+        v2.putChild('terms', self.sydent.servlets.termsServlet)
+        v2.putChild('register', self.sydent.servlets.registerServlet)
+
 
         self.factory = Site(root)
         self.factory.displayTracebacks = False

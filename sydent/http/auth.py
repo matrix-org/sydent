@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2019 The Matrix.org Foundation C.I.C.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import logging
+
+import twisted.internet.ssl
+
+from sydent.db.accounts import AccountStore
+from sydent.terms.terms import get_terms
+from sydent.http.servlets import MatrixRestError
+
+
+logger = logging.getLogger(__name__)
+
+
+def authIfV2(sydent, request, requireTermsAgreed=True):
+    if request.path.startswith('/_matrix/identity/v2'):
+        token = None
+        # check for Authorization header first
+        authHeader = request.getHeader('Authorization')
+        if authHeader is not None and authHeader.startswith('Bearer '):
+            token = authHeader[len("Bearer "):]
+
+        # no? try access_token query param
+        if token is None and 'access_token' in request.args:
+            token = request.args['access_token'][0]
+
+        if token is None:
+            raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")
+
+        account = AccountStore.getAccountByToken(sydent, token)
+        if account is None:
+            raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")
+
+        if requireTermsAgreed:
+            terms = get_terms(sydent)
+            if account.consentVersion != terms.getMasterVersion():
+                raise MatrixRestError(403, "M_TERMS_NOT_SIGNED", "Terms not signed")
+
+        return account
+    return None
