@@ -127,9 +127,11 @@ class ThreePidBindServlet(Resource):
             res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
             request.write(json.dumps(res))
         else:
+            # ignore and return fake response, otherwise synapse gets confused
             request.write(json.dumps({
-                'errcode': 'M_INVALID_PARAM',
-                'error': "Invalid mxid",
+                'medium': s.medium,
+                'address': s.address,
+                'mxid': mxid,
             }))
 
         request.finish()
