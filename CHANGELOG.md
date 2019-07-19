@@ -1,3 +1,14 @@
+Unreleased changes
+==================
+
+ * Delete stored invites upon successful delivery to a homeserver
+ * Filter out delivered invites when delivering invites to a homserver upon successful binding
+ * Implement support for authenticating unbind queries by providing a `sid` and a
+   `client_secret`, as per [MSC1915](https://github.com/matrix-org/matrix-doc/blob/master/proposals/1915-unbind-identity-server-param.md)
+ * Add support for Prometheus and Sentry
+ * Handle .well-known files when talking to homeservers
+
+
 Changes in [1.0.3](https://github.com/matrix-org/sydent/releases/tag/v1.0.3) (2019-05-03)
 =========================================================================================
 
