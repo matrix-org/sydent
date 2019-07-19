@@ -141,14 +141,11 @@ class Sydent:
         handler.setFormatter(formatter)
         rootLogger = logging.getLogger('')
         rootLogger.setLevel(self.cfg.get('general', 'log.level'))
-        rootLogger.addHandler(handler)
+        # rootLogger.addHandler(handler)
 
         logger.info("Starting Sydent server")
 
         self.pidfile = self.cfg.get('general', "pidfile.path");
-
-        observer = log.PythonLoggingObserver()
-        observer.start()
 
         self.db = SqliteDatabase(self).db
 
@@ -231,6 +228,7 @@ class Sydent:
         # A dedicated validation session store just to clean up old sessions every N minutes
         self.cleanupValSession = ThreePidValSessionStore(self)
         cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.clock = self.reactor
         cb.start(10 * 60.0)
 
     def save_config(self):
@@ -292,6 +290,10 @@ def parse_config(config_file):
 if __name__ == '__main__':
     config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
     cfg = parse_config(config_file)
+
+    observer = log.PythonLoggingObserver()
+    observer.start()
+
     syd = Sydent(
         cfg=cfg,
         config_file_name=config_file,
