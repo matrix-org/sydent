@@ -13,11 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import os
 
 import twisted.logger
-
-from tests.logcontext import LoggingContextFilter
 
 
 class ToTwistedHandler(logging.Handler):
@@ -43,14 +40,10 @@ def setup_logging():
 
     log_format = (
         "%(asctime)s - %(name)s - %(lineno)d - "
-        "%(levelname)s - %(request)s - %(message)s"
+        "%(levelname)s - %(message)s"
     )
 
     handler = ToTwistedHandler()
     formatter = logging.Formatter(log_format)
     handler.setFormatter(formatter)
-    handler.addFilter(LoggingContextFilter(request=""))
     root_logger.addHandler(handler)
-
-    log_level = os.environ.get("SYNAPSE_TEST_LOG_LEVEL", "ERROR")
-    root_logger.setLevel(log_level)

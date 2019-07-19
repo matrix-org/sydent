@@ -372,31 +372,3 @@ class LoggingContext(object):
             event_count (int): number of events being fetched
         """
         self._resource_usage.evt_db_fetch_count += event_count
-
-
-class LoggingContextFilter(logging.Filter):
-    """Logging filter that adds values from the current logging context to each
-    record.
-    Args:
-        **defaults: Default values to avoid formatters complaining about
-            missing fields
-    """
-    def __init__(self, **defaults):
-        self.defaults = defaults
-
-    def filter(self, record):
-        """Add each fields from the logging contexts to the record.
-        Returns:
-            True to include the record in the log output.
-        """
-        context = LoggingContext.current_context()
-        for key, value in self.defaults.items():
-            setattr(record, key, value)
-
-        # context should never be None, but if it somehow ends up being, then
-        # we end up in a death spiral of infinite loops, so let's check, for
-        # robustness' sake.
-        if context is not None:
-            context.copy_to(record)
-
-        return True

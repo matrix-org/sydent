@@ -23,8 +23,6 @@ class APITestCase(IdentityServerTestCase):
         return self.ident_server
 
     def test_status_check(self):
-        print(self.ident_server.clientApiHttpServer)
-
         request, channel = self.make_request("GET", "/_matrix/identity/api/v1")
         self.render(request)
         self.assertEqual(len(channel.json_body), 0, channel.result)
