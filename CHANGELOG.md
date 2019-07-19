@@ -2,8 +2,10 @@ Unreleased changes
 ==================
 
  * Delete stored invites upon successful delivery to a homeserver
- * Fix a bug that would prevent requests to the `/store-invite` endpoint with JSON payloads to be correctly processed
- * Filter out delivered invites when delivering invites to a homserver upon successful binding
+ * Fix a bug that would prevent requests to the `/store-invite` endpoint with
+   JSON payloads to be correctly processed
+ * Filter out delivered invites when delivering invites to a homserver upon
+   successful binding
  * Implement support for authenticating unbind queries by providing a `sid` and a
    `client_secret`, as per [MSC1915](https://github.com/matrix-org/matrix-doc/blob/master/proposals/1915-unbind-identity-server-param.md)
  * Add support for Prometheus and Sentry
