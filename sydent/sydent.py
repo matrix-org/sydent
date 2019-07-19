@@ -113,7 +113,7 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, cfg, config_file_name=None, reactor=twisted.internet.reactor):
+    def __init__(self, cfg, config_file_name=None, reactor=twisted.internet.reactor, test=False):
         self.reactor = reactor
 
         self.config_file = config_file_name
@@ -140,8 +140,12 @@ class Sydent:
 
         handler.setFormatter(formatter)
         rootLogger = logging.getLogger('')
-        rootLogger.setLevel(self.cfg.get('general', 'log.level'))
-        # rootLogger.addHandler(handler)
+
+        # If we're running tests, we want to let the test framework manage the loglevel
+        # as well as the output.
+        if not test:
+            rootLogger.setLevel(self.cfg.get('general', 'log.level'))
+            rootLogger.addHandler(handler)
 
         logger.info("Starting Sydent server")
 

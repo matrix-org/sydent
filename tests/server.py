@@ -170,7 +170,7 @@ def make_request(
 
     # Decorate it to be the full path, if we're using shorthand
     if shorthand and not path.startswith(b"/_matrix"):
-        path = b"/_matrix/client/r0/" + path
+        path = b"/_matrix/identity/api/v1/" + path
         path = path.replace(b"//", b"/")
 
     if not path.startswith(b"/"):

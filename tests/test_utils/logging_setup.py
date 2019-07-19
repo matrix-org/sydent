@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import os
 
 import twisted.logger
 
@@ -47,3 +48,6 @@ def setup_logging():
     formatter = logging.Formatter(log_format)
     handler.setFormatter(formatter)
     root_logger.addHandler(handler)
+
+    log_level = os.environ.get("SYDENT_TEST_LOG_LEVEL", "ERROR")
+    root_logger.setLevel(log_level)
