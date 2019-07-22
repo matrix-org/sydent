@@ -41,7 +41,9 @@ def authIfV2(sydent, request, requireTermsAgreed=True):
         if token is None:
             raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")
 
-        account = AccountStore.getAccountByToken(sydent, token)
+        accountStore = AccountStore(sydent)
+
+        account = accountStore.getAccountByToken(token)
         if account is None:
             raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")
 

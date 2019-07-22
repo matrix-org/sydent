@@ -35,8 +35,7 @@ class TermsStore:
         cur = self.sydent.db.cursor()
         for u in urls:
             res = cur.execute(
-                "insert into accepted_terms_urls (user_id, url) values (?, ?) "
-                "on conflict ignore",
+                "insert or ignore into accepted_terms_urls (user_id, url) values (?, ?)",
                 (user_id, u),
             )
         self.sydent.db.commit()

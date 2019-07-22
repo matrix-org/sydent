@@ -101,9 +101,18 @@ class ClientApiHttpServer:
         # note v2 loses the /api so goes on 'identity' not 'api'
         identity.putChild('v2', v2)
 
+        # v2 exclusive APIs
         v2.putChild('terms', self.sydent.servlets.termsServlet)
         v2.putChild('register', self.sydent.servlets.registerServlet)
 
+        # v2 versions of existing APIs
+        v2.putChild('validate', validate)
+        v2.putChild('lookup', lookup)
+        v2.putChild('bulk_lookup', bulk_lookup)
+        v2.putChild('pubkey', pubkey)
+        v2.putChild('3pid', threepid)
+        v2.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
+        v2.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
 
         self.factory = Site(root)
         self.factory.displayTracebacks = False

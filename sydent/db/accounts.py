@@ -31,8 +31,8 @@ class AccountStore:
     def storeAccount(self, user_id, creation_ts, consent_version):
         cur = self.sydent.db.cursor()
         res = cur.execute(
-            "insert into accounts (user_id, created_ts, consent_version) "
-            "values (?, ?, ?) on conflict ignore",
+            "insert or ignore into accounts (user_id, created_ts, consent_version) "
+            "values (?, ?, ?)",
             (user_id, creation_ts, consent_version),
         )
         self.sydent.db.commit()

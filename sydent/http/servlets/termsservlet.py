@@ -64,8 +64,8 @@ class TermsServlet(Resource):
         unknown_urls = list(set(user_accepts) - terms.getUrlSet())
         if len(unknown_urls) > 0:
             return {
-                errcode: "M_UNKNOWN",
-                error: "Unrecognised URLs: %s" % (', '.join(unknown_urls),),
+                "errcode": "M_UNKNOWN",
+                "error": "Unrecognised URLs: %s" % (', '.join(unknown_urls),),
             }
 
         termsStore = TermsStore(self.sydent)

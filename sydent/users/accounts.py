@@ -13,23 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-import time
-
-import attr
-
-from sydent.util.tokenutils import generateAlphanumericTokenOfLength
-
-logger = logging.getLogger(__name__)
-
 class Account(object):
     def __init__(self, user_id, creation_ts, consent_version):
         self.userId = user_id
         self.creationTs = creation_ts;
         self.consentVersion = consent_version
-
-def issueToken(sydent, user_id):
-    self.db.storeAccount(user_id, int(time.time() * 1000), None)
-
-    newToken = generateAlphanumericTokenOfLength(64)
-    self.db.addToken(user_id, new_token)

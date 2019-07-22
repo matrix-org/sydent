@@ -22,7 +22,7 @@ import json
 
 from sydent.http.servlets import get_args, jsonwrap, deferjsonwrap, send_cors
 from sydent.http.httpclient import FederationHttpClient
-from sydent.users.accounts import issueToken
+from sydent.users.tokens import issueToken
 
 
 logger = logging.getLogger(__name__)
@@ -42,17 +42,23 @@ class RegisterServlet(Resource):
         """
         send_cors(request)
 
-        err, args = get_args(request, ('matrix_server_name', 'access_token'))
-        if err:
-            defer.returnValue(err)
+        args = get_args(request, ('matrix_server_name', 'access_token'))
 
         client = FederationHttpClient(self.sydent)
-        result = yield client.post_json_get_json("matrix://%s/_matrix/federation/v1/openid/userinfo" % server_name)
+        result = yield client.get_json(
+            "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s" % (
+                args['matrix_server_name'], args['access_token'],
+            ),
+        )
         if 'sub' not in result:
             raise Exception("Invalid response from Homeserver")
 
         user_id = result['sub']
-        tok = yield issueToken(user_id)
+        tok = yield issueToken(self.sydent, user_id)
+
+        logger.error("returning %r", {
+            "access_token": tok,
+        })
 
         defer.returnValue({
             "access_token": tok,

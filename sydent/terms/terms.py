@@ -42,7 +42,7 @@ class Terms(object):
         urls = set()
         for docName, doc in self._rawTerms['docs'].items():
             for langName, lang in doc['langs'].items():
-                urls.insert(lang['url'])
+                urls.add(lang['url'])
         return urls
 
     def urlListIsSufficient(self, urls):
@@ -52,7 +52,7 @@ class Terms(object):
         for docName, doc in self._rawTerms['docs'].items():
             for _, lang in doc['langs'].items():
                 if lang['url'] in urlset:
-                    agreed.insert(docName)
+                    agreed.add(docName)
                     break
 
         required = set(self._rawTerms['docs'].keys())
