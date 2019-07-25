@@ -1,0 +1,8 @@
+{
+	"token": "%(token)s",
+	"room_alias": "%(room_alias)s",
+	"room_avatar_url": "%(room_avatar_url)s",
+	"room_name": "%(room_name)s",
+	"sender_display_name": "%(sender_display_name)s",
+	"sender_avatar_url": "%(sender_avatar_url)s"
+}

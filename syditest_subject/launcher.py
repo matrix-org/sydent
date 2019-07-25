@@ -25,6 +25,7 @@ CFG_TEMPLATE = """
 clientapi.http.bind_address = localhost
 clientapi.http.port = 8099
 client_http_base = http://localhost:8099
+verify_response_template = {testsubject_path}/res/verify_response_template
 
 [db]
 db.file = :memory:
