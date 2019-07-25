@@ -80,6 +80,7 @@ class EmailValidateCodeServlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
+        resp = None
         try:
             resp = self.do_validate_request(request)
         except:
