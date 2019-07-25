@@ -103,7 +103,9 @@ class ClientApiHttpServer:
 
         # v2 exclusive APIs
         v2.putChild('terms', self.sydent.servlets.termsServlet)
-        v2.putChild('register', self.sydent.servlets.registerServlet)
+        account = Resource()
+        v2.putChild('account', account)
+        account.putChild('register', self.sydent.servlets.registerServlet)
 
         # v2 versions of existing APIs
         v2.putChild('validate', validate)
