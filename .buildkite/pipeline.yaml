@@ -1,0 +1,8 @@
+steps:
+  - command:
+      - "python -m pip install git+https://git@github.com:matrix-org/syditest.git@dbkr/v2tests"
+      - "PYTHONPATH=`pwd` trial syditest"
+    label: "syditest"
+    plugins:
+      - docker#v3.0.1:
+          image: "python:2.7"
