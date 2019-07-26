@@ -69,7 +69,7 @@ CONFIG_DEFAULTS = {
         'log.path': '',
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
-        'terms.path': 'terms.yaml',
+        'terms.path': '',
 
         # The following can be added to your local config file to enable prometheus
         # support.

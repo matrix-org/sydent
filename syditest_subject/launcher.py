@@ -23,15 +23,17 @@ from subprocess import Popen
 CFG_TEMPLATE = """
 [http]
 clientapi.http.bind_address = localhost
-clientapi.http.port = 8099
-client_http_base = http://localhost:8099
+clientapi.http.port = {port}
+client_http_base = http://localhost:{port}
 verify_response_template = {testsubject_path}/res/verify_response_template
+federation.verifycerts = False
 
 [db]
 db.file = :memory:
 
 [general]
 server.name = test.local
+terms.path = {terms_path}
 
 [email]
 email.tlsmode = 0
@@ -45,6 +47,9 @@ email.invite_template = {testsubject_path}/res/invite_template.eml
 """
 
 class SyditestLauncher(object):
+    def __init__(self, withTerms):
+        self.withTerms = withTerms
+
     def launch(self):
         sydent_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..',
@@ -52,11 +57,17 @@ class SyditestLauncher(object):
         testsubject_path = os.path.join(
             sydent_path, 'syditest_subject',
         )
+        terms_path = os.path.join(testsubject_path, 'terms.yaml') if self.withTerms else ''
+        port = 8099 if self.withTerms else 8098
 
         self.tmpdir = tempfile.mkdtemp(prefix='sydenttest')
 
         with open(os.path.join(self.tmpdir, 'sydent.conf'), 'w') as cfgfp:
-            cfgfp.write(CFG_TEMPLATE.format(testsubject_path=testsubject_path))
+            cfgfp.write(CFG_TEMPLATE.format(
+                testsubject_path=testsubject_path,
+                terms_path=terms_path,
+                port=port,
+            ))
 
         newEnv = os.environ.copy()
         newEnv.update({
@@ -74,9 +85,12 @@ class SyditestLauncher(object):
         # XXX: wait for startup in a sensible way
         time.sleep(2)
 
-        return 'http://localhost:8099'
+        self._baseUrl = 'http://localhost:%d' % (port,)
 
     def tearDown(self):
         print("Stopping sydent...")
         self.process.terminate()
         shutil.rmtree(self.tmpdir)
+
+    def getBaseUrl(self):
+        return self._baseUrl

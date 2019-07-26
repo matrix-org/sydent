@@ -26,34 +26,37 @@ class Terms(object):
         self._rawTerms = yamlObj
 
     def getMasterVersion(self):
-        return self._rawTerms['master_version']
+        return None if self._rawTerms is None else self._rawTerms['master_version']
 
     def getForClient(self):
         policies = {}
-        for docName, doc in self._rawTerms['docs'].items():
-            policies[docName] = {
-                'version': doc['version'],
-            }
-            for langName, lang in doc['langs'].items():
-                policies[docName][langName] = lang
+        if self._rawTerms is not None:
+            for docName, doc in self._rawTerms['docs'].items():
+                policies[docName] = {
+                    'version': doc['version'],
+                }
+                for langName, lang in doc['langs'].items():
+                    policies[docName][langName] = lang
         return { 'policies': policies }
 
     def getUrlSet(self):
         urls = set()
-        for docName, doc in self._rawTerms['docs'].items():
-            for langName, lang in doc['langs'].items():
-                urls.add(lang['url'])
+        if self._rawTerms is not None:
+            for docName, doc in self._rawTerms['docs'].items():
+                for langName, lang in doc['langs'].items():
+                    urls.add(lang['url'])
         return urls
 
     def urlListIsSufficient(self, urls):
         agreed = set()
         urlset = set(urls)
 
-        for docName, doc in self._rawTerms['docs'].items():
-            for _, lang in doc['langs'].items():
-                if lang['url'] in urlset:
-                    agreed.add(docName)
-                    break
+        if self._rawTerms is not None:
+            for docName, doc in self._rawTerms['docs'].items():
+                for _, lang in doc['langs'].items():
+                    if lang['url'] in urlset:
+                        agreed.add(docName)
+                        break
 
         required = set(self._rawTerms['docs'].keys())
         return agreed == required
@@ -61,7 +64,11 @@ class Terms(object):
 def get_terms(sydent):
     try:
         termsYaml = None
-        with open(sydent.cfg.get('general', 'terms.path')) as fp:
+        termsPath = sydent.cfg.get('general', 'terms.path')
+        if termsPath == '':
+            return Terms(None)
+
+        with open(termsPath) as fp:
             termsYaml = yaml.full_load(fp)
         if 'master_version' not in termsYaml:
             raise Exception("No master version")

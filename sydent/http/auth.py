@@ -49,7 +49,10 @@ def authIfV2(sydent, request, requireTermsAgreed=True):
 
         if requireTermsAgreed:
             terms = get_terms(sydent)
-            if account.consentVersion != terms.getMasterVersion():
+            if (
+                terms.getMasterVersion() is not None and
+                account.consentVersion != terms.getMasterVersion()
+            ):
                 raise MatrixRestError(403, "M_TERMS_NOT_SIGNED", "Terms not signed")
 
         return account
