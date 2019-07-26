@@ -1,6 +1,6 @@
 steps:
   - command:
-      - "python -m pip install git+https://git@github.com:matrix-org/syditest.git@dbkr/v2tests"
+      - "python -m pip install git+https://github.com/matrix-org/syditest.git@dbkr/v2tests"
       - "PYTHONPATH=`pwd` trial syditest"
     label: "syditest"
     plugins:
