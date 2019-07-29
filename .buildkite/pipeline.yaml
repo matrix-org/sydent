@@ -1,7 +1,9 @@
 steps:
   - command:
+      - "echo '--- Setup'"
       - "pip install -e ."
       - "python -m pip install git+https://github.com/matrix-org/syditest.git@dbkr/v2tests"
+      - "echo '+++ Run Tests'"
       - "PYTHONPATH=`pwd` trial syditest"
     label: "syditest"
     timeout_in_minutes: 5
@@ -9,5 +11,5 @@ steps:
       - docker#v3.0.1:
           image: "python:2.7"
     artifact_paths:
-      - "syditest_subject/sydent.err"
+      - "syditest_subject/sydent.stderr"
       - "_trial_temp/test.log"
