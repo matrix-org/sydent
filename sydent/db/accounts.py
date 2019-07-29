@@ -26,6 +26,9 @@ class AccountStore:
                           "where t.user_id = a.user_id and t.token = ?", (token,))
 
         row = res.fetchone()
+        if row is None:
+            return None
+
         return Account(row[0], row[1], row[2])
 
     def storeAccount(self, user_id, creation_ts, consent_version):
@@ -52,3 +55,13 @@ class AccountStore:
             (user_id, token),
         )
         self.sydent.db.commit()
+
+    def delToken(self, token):
+        cur = self.sydent.db.cursor()
+        res = cur.execute(
+            "delete from tokens where token = ?",
+            (token,),
+        )
+        deleted = cur.rowcount
+        self.sydent.db.commit()
+        return deleted

@@ -25,18 +25,22 @@ from sydent.http.servlets import MatrixRestError
 
 logger = logging.getLogger(__name__)
 
+def tokenFromRequest(request):
+    token = None
+    # check for Authorization header first
+    authHeader = request.getHeader('Authorization')
+    if authHeader is not None and authHeader.startswith('Bearer '):
+        token = authHeader[len("Bearer "):]
+
+    # no? try access_token query param
+    if token is None and 'access_token' in request.args:
+        token = request.args['access_token'][0]
+
+    return token
 
 def authIfV2(sydent, request, requireTermsAgreed=True):
     if request.path.startswith('/_matrix/identity/v2'):
-        token = None
-        # check for Authorization header first
-        authHeader = request.getHeader('Authorization')
-        if authHeader is not None and authHeader.startswith('Bearer '):
-            token = authHeader[len("Bearer "):]
-
-        # no? try access_token query param
-        if token is None and 'access_token' in request.args:
-            token = request.args['access_token'][0]
+        token = tokenFromRequest(request)
 
         if token is None:
             raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")

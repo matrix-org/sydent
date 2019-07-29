@@ -53,7 +53,9 @@ from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.v1_servlet import V1Servlet
+from http.servlets.accountservlet import AccountServlet
 from http.servlets.registerservlet import RegisterServlet
+from http.servlets.logoutservlet import LogoutServlet
 
 from db.valsession import ThreePidValSessionStore
 
@@ -206,7 +208,9 @@ class Sydent:
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
         self.servlets.termsServlet = TermsServlet(self)
+        self.servlets.accountServlet = AccountServlet(self)
         self.servlets.registerServlet = RegisterServlet(self)
+        self.servlets.logoutServlet = LogoutServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 
