@@ -41,7 +41,7 @@ email.template = {testsubject_path}/res/verification_template.eml
 email.invite.subject = %(sender_display_name)s has invited you to chat
 email.smtphost = localhost
 email.from = Sydent Validation <noreply@localhost>
-email.smtpport = 1025
+email.smtpport = 9925
 email.subject = Your Validation Token
 email.invite_template = {testsubject_path}/res/invite_template.eml
 """
