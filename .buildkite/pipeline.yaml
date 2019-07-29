@@ -1,7 +1,8 @@
 steps:
   - command:
-      - "echo '--- Setup'"
+      - "echo '--- Install dependencies'"
       - "pip install -e ."
+      - "echo '--- Install syditest'"
       - "python -m pip install git+https://github.com/matrix-org/syditest.git@dbkr/v2tests"
       - "echo '+++ Run Tests'"
       - "PYTHONPATH=`pwd` trial syditest"
