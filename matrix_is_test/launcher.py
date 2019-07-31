@@ -44,13 +44,13 @@ email.subject = Your Validation Token
 email.invite_template = {testsubject_path}/res/invite_template.eml
 """
 
-class SyditestLauncher(object):
+class MatrixIsTestLauncher(object):
     def launch(self):
         sydent_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..',
         ))
         testsubject_path = os.path.join(
-            sydent_path, 'syditest_subject',
+            sydent_path, 'matrix_is_test',
         )
 
         self.tmpdir = tempfile.mkdtemp(prefix='sydenttest')
