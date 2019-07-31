@@ -36,7 +36,7 @@ class AccountServlet(Resource):
         """
         send_cors(request)
 
-        account = authIfV2(self.sydent, request, False)
+        account = authIfV2(self.sydent, request)
 
         return {
             "user_id": account.userId,
