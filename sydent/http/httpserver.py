@@ -38,6 +38,7 @@ class ClientApiHttpServer:
         identity = Resource()
         api = Resource()
         v1 = self.sydent.servlets.v1
+        v2 = self.sydent.servlets.v2
 
         validate = Resource()
         email = Resource()
@@ -51,6 +52,8 @@ class ClientApiHttpServer:
         lookup = self.sydent.servlets.lookup
         bulk_lookup = self.sydent.servlets.bulk_lookup
 
+        lookup_v2 = self.sydent.servlets.lookup_v2
+
         threepid = Resource()
         bind = self.sydent.servlets.threepidBind
         unbind = self.sydent.servlets.threepidUnbind
@@ -63,6 +66,7 @@ class ClientApiHttpServer:
         root.putChild('_matrix', matrix)
         matrix.putChild('identity', identity)
         identity.putChild('api', api)
+        identity.putChild('v2', v2)
         api.putChild('v1', v1)
 
         v1.putChild('validate', validate)
@@ -92,6 +96,8 @@ class ClientApiHttpServer:
         v1.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
 
         v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+
+        v2.putChild('lookup', lookup_v2)
 
         self.factory = Site(root)
         self.factory.displayTracebacks = False

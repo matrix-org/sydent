@@ -44,6 +44,8 @@ from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCod
 from http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
 from http.servlets.lookupservlet import LookupServlet
 from http.servlets.bulklookupservlet import BulkLookupServlet
+from http.servlets.lookupv2servlet import LookupV2Servlet
+from http.servlets.hashdetailsservlet import HashDetailsServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
 from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
@@ -51,6 +53,7 @@ from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.v1_servlet import V1Servlet
+from http.servlets.v2_servlet import V2Servlet
 
 from db.valsession import ThreePidValSessionStore
 
@@ -108,6 +111,9 @@ CONFIG_DEFAULTS = {
     'crypto': {
         'ed25519.signingkey': '',
     },
+    'hashing': {
+        'algorithms': ['sha256'],
+    }
 }
 
 
@@ -174,6 +180,26 @@ class Sydent:
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
 
+        if self.cfg.has_option("hashing", "algorithms"):
+            algorithms = self.cfg.get("hashing", "algorithms")
+            if not isinstance(algorithms, list):
+                logger.fatal("Config file option hashing.algorithms is not an array")
+
+            # Ensure provided hash algorithms are known
+            for algorithm in algorithms:
+                if algorithm not in HashDetailsServlet.known_algorithms:
+                    logger.fatal(
+                        "Config file option hashing.algorithms contains unknown algorithm '%s'.",
+                        algorithm,
+                    )
+
+        # Determine whether a lookup_pepper value has been defined
+        lookup_pepper = self.cfg.get("hashing", "lookup_pepper")
+        if not lookup_pepper:
+            # If lookup_pepper hasn't been defined, or is an empty string,
+            # generate one
+            self.cfg.set("hashing", "lookup_pepper", generateAlphanumericTokenOfLength(5))
+
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
         self.validators.msisdn = MsisdnValidator(self)
@@ -186,12 +212,14 @@ class Sydent:
 
         self.servlets = Servlets()
         self.servlets.v1 = V1Servlet(self)
+        self.servlets.v2 = V2Servlet(self)
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
         self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.bulk_lookup = BulkLookupServlet(self)
+        self.servlets.lookup_v2 = LookupV2Servlet(self)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
