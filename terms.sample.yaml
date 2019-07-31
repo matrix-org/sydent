@@ -1,7 +1,7 @@
 master_version: "flerb"
 docs:
   terms_of_service:
-    version: "5.0"
+    version: "2.0"
     langs:
       en:
         name: "Terms of Service"
