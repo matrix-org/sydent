@@ -180,7 +180,7 @@ class GlobalAssociationStore:
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
         :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
-        :param sgAssoc The original raw bytes of the signed association
+        :param sgAssoc: The original raw bytes of the signed association
         :return:
         """
         cur = self.sydent.db.cursor()
@@ -214,4 +214,61 @@ class GlobalAssociationStore:
             "Deleted %d rows from global associations for %s/%s",
             cur.rowcount, medium, address,
         )
+        self.sydent.db.commit()
+
+class HashingMetadataStore:
+    def __init__(self, sydent):
+        self.sydent = sydent
+
+    def retrieve_value(self, name)
+        """Return a value from the hashing_metadata table
+        
+        :param name: The name of the db column to return the value for
+        :type name: str
+
+        :returns a value corresponding to the specified name, or None if a
+        value does not exist
+        """
+        cur = self.sydent.db.cursor()
+        res = cur.execute("select %s from hashing_metadata" % name)
+        row = res.fetchone()
+
+        if not row:
+            return None
+
+        return row[0]
+
+    def is_new(self, name, value):
+        """
+        Returns whether a provided value does NOT match a value stored in the
+        database under the specified db column name
+
+        :param name: The name of the db column to check
+        :type name: str
+
+        :param value: The value to check against
+
+        :returns a boolean that is true if the the provided value and the
+        value of the item under the named db column is different
+        :rtype: bool
+        """
+        db_value = self.retrieve_value(name)
+        if not value:
+            return False
+        return value != db_value
+
+    def store_values(self, names_and_values):
+        """Stores values in the hashing_metadata table under the named columns
+
+        :param names_and_values: Column names and associated values to store
+                                 in the database
+        :type names_and_values: Dict
+        """
+        cur = self.sydent.db.cursor()
+
+        columns = ', '.join(names_and_values.keys())
+        values = ', '.join('?' * len(names_and_values))
+        sql = 'INSERT INTO hashing_metadata ({}) VALUES ({})'.format(columns, values)
+
+        cur.execute(sql)
         self.sydent.db.commit()

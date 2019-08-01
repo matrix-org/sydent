@@ -14,10 +14,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-CREATE TABLE IF NOT EXISTS local_threepid_associations (id integer primary key, medium varchar(16) not null, address varchar(256) not null, mxid varchar(256) not null, ts integer not null, notBefore bigint not null, notAfter bigint not null);
+CREATE TABLE IF NOT EXISTS local_threepid_associations (
+    id integer primary key,
+    medium varchar(16) not null,
+    address varchar(256) not null,
+    hash varchar(256) not null,
+    mxid varchar(256) not null,
+    ts integer not null,
+    notBefore bigint not null,
+    notAfter bigint not null
+);
 CREATE UNIQUE INDEX IF NOT EXISTS medium_address on local_threepid_associations(medium, address);
 
-CREATE TABLE IF NOT EXISTS global_threepid_associations (id integer primary key, medium varchar(16) not null, address varchar(256) not null, mxid varchar(256) not null, ts integer not null, notBefore bigint not null, notAfter integer not null, originServer varchar(255) not null, originId integer not null, sgAssoc text not null);
+CREATE TABLE IF NOT EXISTS global_threepid_associations (
+    id integer primary key,
+    medium varchar(16) not null,
+    address varchar(256) not null,
+    hash varchar(256) not null,
+    mxid varchar(256) not null,
+    ts integer not null,
+    notBefore bigint not null,
+    notAfter integer not null,
+    originServer varchar(255) not null,
+    originId integer not null,
+    sgAssoc text not null
+);
 CREATE INDEX IF NOT EXISTS medium_address on global_threepid_associations (medium, address);
 CREATE INDEX IF NOT EXISTS medium_lower_address on global_threepid_associations (medium, lower(address));
 CREATE UNIQUE INDEX IF NOT EXISTS originServer_originId on global_threepid_associations (originServer, originId);
+
+/* 
+ * hashing_metadata contains information needed for the identity server to carry
+ * out tasks related to hashing. Salts and peppers etc. should go here.
+ */
+CREATE TABLE IF NOT EXISTS hashing_metadata (
+    lookup_pepper varchar(256) not null,
+);

@@ -56,6 +56,7 @@ from http.servlets.v1_servlet import V1Servlet
 from http.servlets.v2_servlet import V2Servlet
 
 from db.valsession import ThreePidValSessionStore
+from db.threepid_associations import HashingMetadataStore
 
 from threepid.bind import ThreepidBinder
 
@@ -195,10 +196,19 @@ class Sydent:
 
         # Determine whether a lookup_pepper value has been defined
         lookup_pepper = self.cfg.get("hashing", "lookup_pepper")
+        # If lookup_pepper hasn't been defined, or is an empty string...
         if not lookup_pepper:
-            # If lookup_pepper hasn't been defined, or is an empty string,
-            # generate one
-            self.cfg.set("hashing", "lookup_pepper", generateAlphanumericTokenOfLength(5))
+            # ...and it is not defined in the database...
+            if HashingMetadataStore.is_new("lookup_pepper", lookup_pepper):
+                new_pepper = generateAlphanumericTokenOfLength(5)
+                # ...then generate one
+                self.cfg.set(
+                    "hashing", "lookup_pepper",
+                    new_pepper,
+                )
+
+                # Store it in the DB
+                HashingMetadataStore.store_values({"lookup_pepper": new_pepper})
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)

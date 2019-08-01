@@ -85,7 +85,7 @@ class LookupV2Servlet(Resource):
 
         logger.info("Lookup of %d threepids with algorithm", len(addresses), algorithm)
 
-        # TODO: Matching. Make sure to generate hashes in the DB. Use migrations to generate hashes for existing 3PIDs?
+
 
         return json.dumps({ 'mappings': results })
 
