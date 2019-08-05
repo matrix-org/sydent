@@ -38,6 +38,8 @@ from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
 from hs_federation.verifier import Verifier
 
+from util.hash import sha256_and_url_safe_base64
+
 from sign.ed25519 import SydentEd25519
 
 from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
@@ -198,17 +200,40 @@ class Sydent:
         lookup_pepper = self.cfg.get("hashing", "lookup_pepper")
         # If lookup_pepper hasn't been defined, or is an empty string...
         if not lookup_pepper:
-            # ...and it is not defined in the database...
-            if HashingMetadataStore.is_new("lookup_pepper", lookup_pepper):
+            # See if it exists in the database
+            lookup_pepper_db = HashingMetadataStore.retrieve_value("lookup_pepper")
+            if lookup_pepper_db:
+                # A pepper already exists, use it
+                self.cfg.set("hashing", "lookup_pepper", lookup_pepper_db)
+            else:
+                # No pepper defined and there isn't one in the database
+                # Generate one
                 new_pepper = generateAlphanumericTokenOfLength(5)
-                # ...then generate one
+
+                # Cache it
                 self.cfg.set(
                     "hashing", "lookup_pepper",
                     new_pepper,
                 )
 
-                # Store it in the DB
+                # Store it in the database
                 HashingMetadataStore.store_values({"lookup_pepper": new_pepper})
+
+                # Re-hash all 3pids
+                HashingMetadataStore.rehash_threepids(
+                    sha256_and_url_safe_base64, new_pepper,
+                )
+        else:
+            # If it has been defined, check if it's different from what we have
+            # in the database
+            if HashingMetadataStore.is_new("lookup_pepper", lookup_pepper):
+                # Store the new pepper in the database
+                HashingMetadataStore.store_values({"lookup_pepper": lookup_pepper})
+
+                # Re-hash all 3pids
+                HashingMetadataStore.rehash_threepids(
+                    sha256_and_url_safe_base64, lookup_pepper,
+                )
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)

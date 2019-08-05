@@ -272,3 +272,39 @@ class HashingMetadataStore:
 
         cur.execute(sql)
         self.sydent.db.commit()
+
+    def rehash_threepids(self, hashing_function, pepper):
+        """Rehash all 3PIDs using a given hashing_function and pepper
+
+        :param hashing_function: A function with single input and output strings
+        :type hashing_function func(str) -> str
+
+        :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing.
+        :type pepper: str
+        """
+        # Pull items from the database
+        cur = self.sydent.db.cursor()
+
+        # Medium/address combos are marked as UNIQUE in the database
+        sql = "SELECT medium, address FROM local_threepid_associations"
+        res = cur.execute(sql)
+        rows = res.fetchall()
+
+        for medium, address in rows:
+            # Combine the medium, address and pepper together in the following form:
+            # "address medium pepper"
+            # According to MSC2134: https://github.com/matrix-org/matrix-doc/blob/hs/hash-identity/proposals/2134-identity-hash-lookup.md
+            combo = "%s %s %s" % (address, medium, pepper)
+
+            # Hash the resulting string
+            result = hashing_function(combo)
+
+            # Save the result to the DB
+            sql = (
+                "UPDATE local_threepid_associations SET hash = '%s' "
+                "WHERE medium = %s AND address = %s"
+                % (result, medium, address)
+            )
+            cur.execute(sql)
+
+        self.sydent.db.commit()
