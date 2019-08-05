@@ -71,11 +71,11 @@ class LocalPeer(Peer):
                 assocObj = threePidAssocFromDict(sgAssocs[localId])
 
                 if assocObj.mxid is not None:
-                    # Assign a hash to this association for the purposes of lookup
-                    hash_str = ' '.join(
+                    # Assign a lookup_hash to this association for the purposes of lookup
+                    str_to_hash  = ' '.join(
                         [address, medium, self.sydent.cfg.get("hashing", "lookup_pepper")],
                     )
-                    assocObj.hash = sha256_and_url_safe_base64(hash_str)
+                    assocObj.lookup_hash = sha256_and_url_safe_base64(hash_str)
 
                     # We can probably skip verification for the local peer (although it could be good as a sanity check)
                     globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),

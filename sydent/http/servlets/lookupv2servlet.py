@@ -38,7 +38,7 @@ class LookupV2Servlet(Resource):
         """
         Perform lookups with potentially hashed 3PID details.
 
-        Depending on our response to /hash_details, the client will chosoe a
+        Depending on our response to /hash_details, the client will choose a
         hash algorithm and pepper, hash the 3PIDs it wants to lookup, and
         send them to us, along with the algorithm and pepper it used.
 

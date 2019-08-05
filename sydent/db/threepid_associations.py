@@ -34,9 +34,9 @@ class LocalAssociationStore:
 
         # sqlite's support for upserts is atrocious
         cur.execute("insert or replace into local_threepid_associations "
-                    "('medium', 'address', 'hash', mxid', 'ts', 'notBefore', 'notAfter')"
+                    "('medium', 'address', 'lookup_hash', mxid', 'ts', 'notBefore', 'notAfter')"
                     " values (?, ?, ?, ?, ?, ?, ?)",
-                    (assoc.medium, assoc.address, assoc.hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
+                    (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
 
     def getAssociationsAfterId(self, afterId, limit):
@@ -194,9 +194,9 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("insert or ignore into global_threepid_associations "
-                          "(medium, address, hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
+                          "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
                           "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                          (assoc.medium, assoc.address, assoc.hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
+                          (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
                           originServer, originId, rawSgAssoc))
         if commit:
             self.sydent.db.commit()
@@ -225,18 +225,19 @@ class GlobalAssociationStore:
         )
         self.sydent.db.commit()
 
-    def retrieveMxidFromHash(self, input_hash):
-        """Returns an mxid from a given hash value
+    def retrieveMxidFromHash(self, lookup_hash):
+        """Returns an mxid from a given lookup_hash value
 
-        :param input_hash: The hash string to lookup in the database
+        :param input_hash: The lookup_hash value to lookup in the database
         :type input_hash: str
 
-        :returns the MXID relating to the hash if one is found, otherwise None
+        :returns the MXID relating to the lookup_hash value if found,
+                 otherwise None
         :rtype: str|None
         """
         cur = self.sydent.db.cursor()
 
-        res = cur.execute("SELECT mxid WHERE hash = ?", (input_hash,))
+        res = cur.execute("SELECT mxid WHERE lookup_hash = ?", (lookup_hash,))
         row = res.fetchone()
         if not row:
             return None

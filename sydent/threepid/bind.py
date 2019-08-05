@@ -73,10 +73,10 @@ class ThreepidBinder:
         str_to_hash = ' '.join(
             [address, medium, self.sydent.cfg.get("hashing", "lookup_pepper")],
         )
-        hash_digest = sha256_and_url_safe_base64(str_to_hash)
+        lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
         assoc = ThreepidAssociation(
-            medium, address, hash_digest, mxid, createdAt, createdAt, expires,
+            medium, address, lookup_hash, mxid, createdAt, createdAt, expires,
         )
 
         localAssocStore.addOrUpdateAssociation(assoc)

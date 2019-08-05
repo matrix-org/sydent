@@ -107,8 +107,8 @@ class HashingMetadataStore:
         count = 0
         while count < len(rows):
             for medium, address in rows[count:count+batch_size]:
-                # Combine the medium, address and pepper together in the following form:
-                # "address medium pepper"
+                # Combine the medium, address and pepper together in the
+                # following form: "address medium pepper"
                 # According to MSC2134: https://github.com/matrix-org/matrix-doc/blob/hs/hash-identity/proposals/2134-identity-hash-lookup.md
                 combo = "%s %s %s" % (address, medium, pepper)
 
@@ -117,7 +117,7 @@ class HashingMetadataStore:
 
                 # Save the result to the DB
                 sql = (
-                    "UPDATE %s SET hash = '%s' "
+                    "UPDATE %s SET lookup_hash = '%s' "
                     "WHERE medium = %s AND address = %s"
                     % (table, result, medium, address)
                 )

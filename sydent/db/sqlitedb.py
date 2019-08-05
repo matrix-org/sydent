@@ -142,14 +142,14 @@ class SqliteDatabase:
 
         if curVer < 3:
             cur = self.db.cursor()
-            cur.execute("ALTER local_threepid_associations ADD COLUMN hash VARCHAR(256) NOT NULL")
-            cur.execute("CREATE INDEX IF NOT EXISTS hash_medium on local_threepid_associations (hash, medium))")
+            cur.execute("ALTER local_threepid_associations ADD COLUMN lookup_hash VARCHAR(256) NOT NULL")
+            cur.execute("CREATE INDEX IF NOT EXISTS lookup_hash_medium on local_threepid_associations (lookup_hash, medium))")
 
-            cur.execute("ALTER global_threepid_associations ADD COLUMN hash VARCHAR(256) NOT NULL")
-            cur.execute("CREATE INDEX IF NOT EXISTS hash_medium on global_threepid_associations (hash, medium)")
+            cur.execute("ALTER global_threepid_associations ADD COLUMN lookup_hash VARCHAR(256) NOT NULL")
+            cur.execute("CREATE INDEX IF NOT EXISTS lookup_hash_medium on global_threepid_associations (lookup_hash, medium)")
 
             cur.execute(
-                "CREATE TABLE IF NOT EXISTS hashing_metadata "
+                "CREATE TABLE IF NOT EXISTS lookup_hashing_metadata "
                 "(lookup_pepper varchar(256) not null)"
             )
             self.db.commit()

@@ -19,7 +19,7 @@ import unpaddedbase64
 
 
 def sha256_and_url_safe_base64(input_text):
-    """SHA256 hash an input string, encode it as url-safe base64, and return it"""
+    """SHA256 hash an input string, encode the digest as url-safe base64, and return"""
     digest = hashlib.sha256(input_text.encode()).digest()
     return unpaddedbase64.encode_base64(digest, urlsafe=True)
 
