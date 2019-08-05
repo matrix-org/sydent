@@ -46,9 +46,10 @@ CREATE INDEX IF NOT EXISTS medium_lower_address on global_threepid_associations 
 CREATE UNIQUE INDEX IF NOT EXISTS originServer_originId on global_threepid_associations (originServer, originId);
 
 /* 
- * lookup_hashing_metadata contains information needed for the identity server to carry
- * out tasks related to lookup_hashing. Salts and peppers etc. should go here.
+ * hashing_metadata contains information needed for the identity server to carry
+ * out tasks related to hashing. Algorithms, salts and peppers etc. should go here.
  */
-CREATE TABLE IF NOT EXISTS lookup_hashing_metadata (
+CREATE TABLE IF NOT EXISTS hashing_metadata (
     lookup_pepper varchar(256) not null,
+    lookup_hash varchar(256) not null,
 );

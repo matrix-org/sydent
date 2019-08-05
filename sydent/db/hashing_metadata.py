@@ -33,7 +33,6 @@ class HashingMetadataStore:
 
         if not row:
             return None
-
         return row[0]
 
     def is_new(self, name, value):
@@ -77,7 +76,7 @@ class HashingMetadataStore:
         :param hashing_function: A function with single input and output strings
         :type hashing_function func(str) -> str
 
-        :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing.
+        :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing
         :type pepper: str
         """
         self._rehash_threepids(hashing_function, pepper, "local_threepid_associations")
@@ -89,15 +88,15 @@ class HashingMetadataStore:
         :param hashing_function: A function with single input and output strings
         :type hashing_function func(str) -> str
 
-        :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing.
+        :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing
         :type pepper: str
 
         :param table: The database table to perform the rehashing on
         :type table: str
         """
-        # Pull items from the database
         cur = self.sydent.db.cursor()
 
+        # Pull items from the database
         # Medium/address combos are marked as UNIQUE in the database
         sql = "SELECT medium, address FROM %s" % table
         res = cur.execute(sql)

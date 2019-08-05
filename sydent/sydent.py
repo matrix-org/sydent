@@ -19,6 +19,7 @@ import ConfigParser
 import logging
 import logging.handlers
 import os
+import pickle
 
 import twisted.internet.reactor
 from twisted.internet import task
@@ -38,7 +39,7 @@ from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
 from hs_federation.verifier import Verifier
 
-from util.hash import sha256_and_url_safe_base64
+from util.hash import sha256_and_url_safe_base64, diff_lists
 
 from sign.ed25519 import SydentEd25519
 
@@ -183,18 +184,8 @@ class Sydent:
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
 
-        if self.cfg.has_option("hashing", "algorithms"):
-            algorithms = self.cfg.get("hashing", "algorithms")
-            if not isinstance(algorithms, list):
-                logger.fatal("Config file option hashing.algorithms is not an array")
-
-            # Ensure provided hash algorithms are known
-            for algorithm in algorithms:
-                if algorithm not in HashDetailsServlet.known_algorithms:
-                    logger.fatal(
-                        "Config file option hashing.algorithms contains unknown algorithm '%s'.",
-                        algorithm,
-                    )
+        # Whether to compute a lookup_hash for each 3pid in the database
+        compute_lookup_hashes = False
 
         # Determine whether a lookup_pepper value has been defined
         lookup_pepper = self.cfg.get("hashing", "lookup_pepper")
@@ -210,7 +201,7 @@ class Sydent:
                 # Generate one
                 new_pepper = generateAlphanumericTokenOfLength(5)
 
-                # Cache it
+                # Save it for later use
                 self.cfg.set(
                     "hashing", "lookup_pepper",
                     new_pepper,
@@ -220,9 +211,7 @@ class Sydent:
                 HashingMetadataStore.store_values({"lookup_pepper": new_pepper})
 
                 # Re-hash all 3pids
-                HashingMetadataStore.rehash_threepids(
-                    sha256_and_url_safe_base64, new_pepper,
-                )
+                compute_lookup_hashes = True
         else:
             # If it has been defined, check if it's different from what we have
             # in the database
@@ -231,9 +220,36 @@ class Sydent:
                 HashingMetadataStore.store_values({"lookup_pepper": lookup_pepper})
 
                 # Re-hash all 3pids
-                HashingMetadataStore.rehash_threepids(
-                    sha256_and_url_safe_base64, lookup_pepper,
+                compute_lookup_hashes = True
+
+        algorithms = self.cfg.get("hashing", "algorithms")
+        if not isinstance(algorithms, list):
+            logger.fatal("Config file option hashing.algorithms is not a list")
+
+        # Ensure provided hash algorithms are known
+        for algorithm in algorithms:
+            if algorithm not in HashDetailsServlet.known_algorithms:
+                logger.fatal(
+                    "Config file option hashing.algorithms contains unknown algorithm '%s'.",
+                    algorithm,
                 )
+
+        # Check if list of algorithms have changed since the last run
+        db_algorithms = HashingMetadataStore.retrieve_value("algorithms")
+        if db_algorithms:
+            db_algorithms = pickle.loads(db_algorithms)
+
+            # If the items differ by just a "none" value (or not at all), then
+            # there's no need to rehash
+            diff = diff_lists(db_algorithms, algorithms)
+            if diff and diff != ["none"]:
+                # Lookup hashing algorithm changed. Re-hash all 3pids
+                compute_lookup_hashes = True
+
+        if compute_lookup_hashes:
+            HashingMetadataStore.rehash_threepids(
+                sha256_and_url_safe_base64, self.cfg.get("hashing", "lookup_pepper"),
+            )
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)

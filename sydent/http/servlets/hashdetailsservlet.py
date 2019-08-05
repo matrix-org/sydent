@@ -50,10 +50,8 @@ class HashDetailsServlet(Resource):
         send_cors(request)
 
         # Determine what hashing algorithms have been enabled
+        # A default list value is defined in the config
         algorithms = self.sydent.config.get("hashing", "algorithms")
-        if not algorithms:
-            # Default response
-            algorithms = ["sha256"]
 
         # A lookup_pepper is defined in the config, otherwise it is generated 
         lookup_pepper = self.sydent.config.get("hashing", "lookup_pepper")

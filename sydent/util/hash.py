@@ -48,3 +48,19 @@ def parse_space_separated_str(self, input_str):
 
     # Return the last item separated from the rest
     return (' '.join(split_input[:-1]), split_input[-1])
+
+def diff_lists(first, second):
+    """Returns any differences between two lists
+
+    :param first: A list of items
+    :type first: List
+
+    :param second: Another list of items
+    :type second: List
+
+    :returns a list containing items not found in both lists
+    :rtype: List
+    """
+    a_minus_b = [x for x in first if x not in second]
+    b_minus_a = [x for x in second if x not in first]
+    return a_minus_b + b_minus_a
