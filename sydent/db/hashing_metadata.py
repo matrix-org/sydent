@@ -103,6 +103,7 @@ class HashingMetadataStore:
         res = cur.execute(sql)
         rows = res.fetchall()
 
+        # TODO: Do this in batches
         for medium, address in rows:
             # Combine the medium, address and pepper together in the following form:
             # "address medium pepper"

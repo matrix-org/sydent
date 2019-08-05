@@ -15,15 +15,13 @@
 # limitations under the License.
 
 from twisted.web.resource import Resource
-from sydent.db.threepid_associations import GlobalAssociationStore
-from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
 
 import logging
 import json
 import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
-
+from sydent.db.threepid_associations import GlobalAssociationStore
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +31,7 @@ class LookupV2Servlet(Resource):
 
     def __init__(self, syd):
         self.sydent = syd
+        self.globalAssociationStore = GlobalAssociationStore(self.sydent)
 
     def render_POST(self, request):
         """
@@ -84,11 +83,33 @@ class LookupV2Servlet(Resource):
             return {'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match server's"}, None
 
         logger.info("Lookup of %d threepids with algorithm", len(addresses), algorithm)
+        if algorithm == "none":
+            # Lookup without hashing
+            medium_address_tuples = []
+            for medium_and_address in addresses:
+                # Parse medium, address components
+                # Being careful to account for 3PIDs one day having spaces in the address
+                split_input = medium_and_address.split()
+                (address, medium) = (' '.join(split_input[:-1]), split_input[-1])
 
+                medium_address_tuples.append((medium, address))
 
+            # Lookup the mxids
+            medium_address_mxid_tuples = GlobalAssociationStore.getMxids(medium_address_tuples)
 
-        return json.dumps({ 'mappings': results })
+            return json.dumps({'mappings': {x[0]: x[2] for x in medium_address_mxid_tuples}})
 
+        elif algorithm == "sha256":
+            # Lookup using SHA256 with URL-safe base64 encoding
+            mappings = {}
+            for h in addresses:
+                mxid = self.globalAssociationStore.retrieveMxidFromHash(h)
+                if mxid:
+                    mappings[h] = mxid
+
+            return json.dumps({'mappings': mappings})
+
+        return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}, None
 
     @jsonwrap
     def render_OPTIONS(self, request):

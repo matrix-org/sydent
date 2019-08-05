@@ -138,6 +138,16 @@ class GlobalAssociationStore:
         return row[0]
 
     def getMxids(self, threepid_tuples):
+        """Given a list of threepid_tuples, the same list but with MXIDs
+        appended to each tuple for which a match was found in the database
+        for. Output is ordered by medium, address, timestamp DESC
+
+        :param threepid_tuples: List containing (medium, address) tuples
+        :type threepid_tuples: [(str, str)]
+
+        :returns a list of (medium, address, mxid) tuples
+        :rtype [(str, str, str)]
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))");
@@ -181,7 +191,6 @@ class GlobalAssociationStore:
         """
         :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
         :param sgAssoc: The original raw bytes of the signed association
-        :return:
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("insert or ignore into global_threepid_associations "
@@ -215,3 +224,20 @@ class GlobalAssociationStore:
             cur.rowcount, medium, address,
         )
         self.sydent.db.commit()
+
+    def retrieveMxidFromHash(self, input_hash):
+        """Returns an mxid from a given hash value
+
+        :param input_hash: The hash string to lookup in the database
+        :type input_hash: str
+
+        :returns the MXID relating to the hash if one is found, otherwise None
+        :rtype: str|None
+        """
+        cur = self.sydent.db.cursor()
+
+        res = cur.execute("SELECT mxid WHERE hash = ?", (input_hash,))
+        row = res.fetchone()
+        if not row:
+            return None
+        return row[0]
