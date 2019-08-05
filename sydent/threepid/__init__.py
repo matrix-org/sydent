@@ -15,14 +15,23 @@
 # limitations under the License.
 
 def threePidAssocFromDict(d):
-    assoc = ThreepidAssociation(d['medium'], d['address'], d['mxid'], d['ts'], d['not_before'], d['not_after'])
+    assoc = ThreepidAssociation(
+        d['medium'],
+        d['address'],
+        None, # empty hash digest by default
+        d['mxid'],
+        d['ts'],
+        d['not_before'],
+        d['not_after'],
+    )
     return assoc
 
 class ThreepidAssociation:
-    def __init__(self, medium, address, mxid, ts, not_before, not_after):
+    def __init__(self, medium, address, hash_digest, mxid, ts, not_before, not_after):
         """
         :param medium: The medium of the 3pid (eg. email)
         :param address: The identifier (eg. email address)
+        :param hash_digest: A hash digest of the 3pid
         :param mxid: The matrix ID the 3pid is associated with
         :param ts: The creation timestamp of this association, ms
         :param not_before: The timestamp, in ms, at which this association becomes valid
@@ -30,6 +39,7 @@ class ThreepidAssociation:
         """
         self.medium = medium
         self.address = address
+        self.hash = hash_digest
         self.mxid = mxid
         self.ts = ts
         self.not_before = not_before

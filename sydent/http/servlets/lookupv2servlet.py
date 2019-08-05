@@ -22,6 +22,7 @@ import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.util.hash import parse_space_separated_str
 
 logger = logging.getLogger(__name__)
 
@@ -88,10 +89,7 @@ class LookupV2Servlet(Resource):
             medium_address_tuples = []
             for medium_and_address in addresses:
                 # Parse medium, address components
-                # Being careful to account for 3PIDs one day having spaces in the address
-                split_input = medium_and_address.split()
-                (address, medium) = (' '.join(split_input[:-1]), split_input[-1])
-
+                medium, address = parse_space_separated_str(medium_and_address)
                 medium_address_tuples.append((medium, address))
 
             # Lookup the mxids

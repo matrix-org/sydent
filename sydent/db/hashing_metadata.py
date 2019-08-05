@@ -124,4 +124,3 @@ class HashingMetadataStore:
                 cur.execute(sql)
 
             self.sydent.db.commit()
-

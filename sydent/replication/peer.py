@@ -19,6 +19,7 @@ import ConfigParser
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 from sydent.config import ConfigError
+from sydent.util.hash import sha256_and_url_safe_base64
 from unpaddedbase64 import decode_base64
 
 import signedjson.sign
@@ -68,7 +69,14 @@ class LocalPeer(Peer):
         for localId in sgAssocs:
             if localId > self.lastId:
                 assocObj = threePidAssocFromDict(sgAssocs[localId])
+
                 if assocObj.mxid is not None:
+                    # Assign a hash to this association for the purposes of lookup
+                    hash_str = ' '.join(
+                        [address, medium, self.sydent.cfg.get("hashing", "lookup_pepper")],
+                    )
+                    assocObj.hash = sha256_and_url_safe_base64(hash_str)
+
                     # We can probably skip verification for the local peer (although it could be good as a sanity check)
                     globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
                                                     self.sydent.server_name, localId)

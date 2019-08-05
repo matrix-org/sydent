@@ -34,9 +34,9 @@ class LocalAssociationStore:
 
         # sqlite's support for upserts is atrocious
         cur.execute("insert or replace into local_threepid_associations "
-                    "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter')"
-                    " values (?, ?, ?, ?, ?, ?)",
-                    (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
+                    "('medium', 'address', 'hash', mxid', 'ts', 'notBefore', 'notAfter')"
+                    " values (?, ?, ?, ?, ?, ?, ?)",
+                    (assoc.medium, assoc.address, assoc.hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
 
     def getAssociationsAfterId(self, afterId, limit):
@@ -194,9 +194,9 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("insert or ignore into global_threepid_associations "
-                          "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
-                          "(?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                          (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
+                          "(medium, address, hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
+                          "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                          (assoc.medium, assoc.address, assoc.hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
                           originServer, originId, rawSgAssoc))
         if commit:
             self.sydent.db.commit()
