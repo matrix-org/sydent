@@ -58,7 +58,7 @@ from http.servlets.v1_servlet import V1Servlet
 from http.servlets.v2_servlet import V2Servlet
 
 from db.valsession import ThreePidValSessionStore
-from db.threepid_associations import HashingMetadataStore
+from db.hashing_metadata import HashingMetadataStore
 
 from threepid.bind import ThreepidBinder
 
