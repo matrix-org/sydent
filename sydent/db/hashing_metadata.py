@@ -103,22 +103,25 @@ class HashingMetadataStore:
         res = cur.execute(sql)
         rows = res.fetchall()
 
-        # TODO: Do this in batches
-        for medium, address in rows:
-            # Combine the medium, address and pepper together in the following form:
-            # "address medium pepper"
-            # According to MSC2134: https://github.com/matrix-org/matrix-doc/blob/hs/hash-identity/proposals/2134-identity-hash-lookup.md
-            combo = "%s %s %s" % (address, medium, pepper)
+        batch_size = 500
+        count = 0
+        while count < len(rows):
+            for medium, address in rows[count:count+batch_size]:
+                # Combine the medium, address and pepper together in the following form:
+                # "address medium pepper"
+                # According to MSC2134: https://github.com/matrix-org/matrix-doc/blob/hs/hash-identity/proposals/2134-identity-hash-lookup.md
+                combo = "%s %s %s" % (address, medium, pepper)
 
-            # Hash the resulting string
-            result = hashing_function(combo)
+                # Hash the resulting string
+                result = hashing_function(combo)
 
-            # Save the result to the DB
-            sql = (
-                "UPDATE %s SET hash = '%s' "
-                "WHERE medium = %s AND address = %s"
-                % (table, result, medium, address)
-            )
-            cur.execute(sql)
+                # Save the result to the DB
+                sql = (
+                    "UPDATE %s SET hash = '%s' "
+                    "WHERE medium = %s AND address = %s"
+                    % (table, result, medium, address)
+                )
+                cur.execute(sql)
 
-        self.sydent.db.commit()
+            self.sydent.db.commit()
+
