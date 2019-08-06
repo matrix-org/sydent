@@ -30,17 +30,16 @@ logger = logging.getLogger(__name__)
 
 class HashDetailsServlet(Resource):
     isLeaf = True
+    known_algorithms = ["sha256", "none"]
 
     def __init__(self, syd):
         self.sydent = syd
-        self.known_algorithms = ["sha256", "none"]
 
     def render_GET(self, request):
         """
-        Return the hashing algorithms and pepper that this IS supports.
-        Whether the response includes the "none" algorithm is determined by a
-        config option. The pepper included in the response is also set by the
-        config, and generated if one is not set.
+        Return the hashing algorithms and pepper that this IS supports. The
+        pepper included in the response is set by the config, and generated
+        if one is not set.
 
         Returns: An object containing an array of hashing algorithms the
                  server supports, and a `lookup_pepper` field, which is a
@@ -49,15 +48,12 @@ class HashDetailsServlet(Resource):
         """
         send_cors(request)
 
-        # Determine what hashing algorithms have been enabled
-        # A default list value is defined in the config
-        algorithms = self.sydent.config.get("hashing", "algorithms")
-
         # A lookup_pepper is defined in the config, otherwise it is generated 
         lookup_pepper = self.sydent.config.get("hashing", "lookup_pepper")
         
+        request.setResponseCode(200)
         return {
-            "algorithms": algorithms,
+            "algorithms": known_algorithms,
             "lookup_pepper": lookup_pepper,
         }
 

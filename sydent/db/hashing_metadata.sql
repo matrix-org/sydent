@@ -20,5 +20,4 @@ limitations under the License.
  */
 CREATE TABLE IF NOT EXISTS hashing_metadata (
     lookup_pepper varchar(256),
-    lookup_algorithms varchar(256),
 );

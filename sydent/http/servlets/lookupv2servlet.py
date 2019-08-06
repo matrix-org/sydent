@@ -22,6 +22,7 @@ import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
 from sydent.util.hash import parse_space_separated_str
 
 logger = logging.getLogger(__name__)
@@ -59,11 +60,6 @@ class LookupV2Servlet(Resource):
         """
         send_cors(request)
 
-        supported_algorithms = self.sydent.config.get("hashing", "algorithms")
-        if len(supported_algorithms) == 0:
-            request.setResponseCode(400)
-            return {'errcode': 'M_UNKNOWN', 'error': 'v2 lookup is disabled on this server'}, None
-
         err, args = get_args(request, ('addresses', 'algorithm', 'pepper'))
         if err:
             return json.dumps(err)
@@ -77,7 +73,7 @@ class LookupV2Servlet(Resource):
         if not isinstance(algorithm, str):
             request.setResponseCode(400)
             return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm must be a string'}, None
-        if algorithm not in self.sydent.config.get("hashing", "algorithms"):
+        if algorithm not in HashDetailsServlet.known_algorithms:
             request.setResponseCode(400)
             return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}, None
 

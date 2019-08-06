@@ -19,12 +19,21 @@ import unpaddedbase64
 
 
 def sha256_and_url_safe_base64(input_text):
-    """SHA256 hash an input string, encode the digest as url-safe base64, and return"""
+    """SHA256 hash an input string, encode the digest as url-safe base64, and
+    return
+
+    :param input_text: string to hash
+    :type input_text: str
+
+    :returns a sha256 hashed and url-safe base64 encoded digest
+    :rtype: str
+    """
     digest = hashlib.sha256(input_text.encode()).digest()
     return unpaddedbase64.encode_base64(digest, urlsafe=True)
 
-def parse_space_separated_str(self, input_str):
-    """Parses a string containing values seperated by a space. Joins the leading chunks if there are more than two.
+def parse_space_separated_str(input_str):
+    """Parses a string containing values seperated by a space. Joins the
+    leading chunks if there are more than two.
 
     Used for parsing medium, address values.
 
@@ -48,19 +57,3 @@ def parse_space_separated_str(self, input_str):
 
     # Return the last item separated from the rest
     return (' '.join(split_input[:-1]), split_input[-1])
-
-def diff_lists(first, second):
-    """Returns any differences between two lists
-
-    :param first: A list of items
-    :type first: List
-
-    :param second: Another list of items
-    :type second: List
-
-    :returns a list containing items not found in both lists
-    :rtype: List
-    """
-    a_minus_b = [x for x in first if x not in second]
-    b_minus_a = [x for x in second if x not in first]
-    return a_minus_b + b_minus_a

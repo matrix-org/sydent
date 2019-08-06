@@ -18,7 +18,7 @@ class HashingMetadataStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def retrieve_value(self, name)
+    def retrieve_value(self, name):
         """Return a value from the hashing_metadata table
         
         :param name: The name of the db column to return the value for
@@ -101,13 +101,15 @@ class HashingMetadataStore:
         res = cur.execute(sql)
         rows = res.fetchall()
 
+        # Iterate through each medium, address combo, hash it,
+        # and store in the db
         batch_size = 500
         count = 0
         while count < len(rows):
             for medium, address in rows[count:count+batch_size]:
                 # Combine the medium, address and pepper together in the
                 # following form: "address medium pepper"
-                # According to MSC2134: https://github.com/matrix-org/matrix-doc/blob/hs/hash-identity/proposals/2134-identity-hash-lookup.md
+                # According to MSC2134: https://github.com/matrix-org/matrix-doc/pull/2134
                 combo = "%s %s %s" % (address, medium, pepper)
 
                 # Hash the resulting string

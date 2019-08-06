@@ -71,7 +71,7 @@ class LocalPeer(Peer):
                 assocObj = threePidAssocFromDict(sgAssocs[localId])
 
                 if assocObj.mxid is not None:
-                    # Assign a lookup_hash to this association for the purposes of lookup
+                    # Assign a lookup_hash to this association
                     str_to_hash  = ' '.join(
                         [address, medium, self.sydent.cfg.get("hashing", "lookup_pepper")],
                     )

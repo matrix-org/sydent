@@ -139,7 +139,7 @@ class GlobalAssociationStore:
 
     def getMxids(self, threepid_tuples):
         """Given a list of threepid_tuples, return the same list but with
-        MXIDs appended to each tuple for which a match was found in the
+        mxids appended to each tuple for which a match was found in the
         database for. Output is ordered by medium, address, timestamp DESC
 
         :param threepid_tuples: List containing (medium, address) tuples
