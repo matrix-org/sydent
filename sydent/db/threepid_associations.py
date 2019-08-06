@@ -138,9 +138,9 @@ class GlobalAssociationStore:
         return row[0]
 
     def getMxids(self, threepid_tuples):
-        """Given a list of threepid_tuples, the same list but with MXIDs
-        appended to each tuple for which a match was found in the database
-        for. Output is ordered by medium, address, timestamp DESC
+        """Given a list of threepid_tuples, return the same list but with
+        MXIDs appended to each tuple for which a match was found in the
+        database for. Output is ordered by medium, address, timestamp DESC
 
         :param threepid_tuples: List containing (medium, address) tuples
         :type threepid_tuples: [(str, str)]
@@ -231,7 +231,7 @@ class GlobalAssociationStore:
         :param input_hash: The lookup_hash value to lookup in the database
         :type input_hash: str
 
-        :returns the MXID relating to the lookup_hash value if found,
+        :returns the mxid relating to the lookup_hash value if found,
                  otherwise None
         :rtype: str|None
         """

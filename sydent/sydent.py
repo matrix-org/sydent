@@ -239,7 +239,7 @@ class Sydent:
                 )
 
         # Check if list of algorithms have changed since the last run
-        db_algorithms = HashingMetadataStore.retrieve_value("algorithms")
+        db_algorithms = HashingMetadataStore.retrieve_value("lookup_algorithms")
         if db_algorithms:
             db_algorithms = pickle.loads(db_algorithms)
 
@@ -249,6 +249,15 @@ class Sydent:
             if diff and diff != ["none"]:
                 # Lookup hashing algorithm changed. Re-hash all 3pids
                 compute_lookup_hashes = True
+        else:
+            # The db didn't contain any info on hashing algorithms.
+            if "sha256" in algorithms:
+                # Rehash if "sha256" is specified in the config
+                compute_lookup_hashes = True
+
+        # Save algorithm data to db
+        pickled_algorithms = pickle.dumps(algorithms)
+        HashingMetadataStore.store_values({"lookup_algorithms": pickled_algorithms})
 
         if compute_lookup_hashes:
             HashingMetadataStore.rehash_threepids(

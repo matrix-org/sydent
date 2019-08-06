@@ -38,7 +38,8 @@ class HashingMetadataStore:
     def is_new(self, name, value):
         """
         Returns whether a provided value does NOT match a value stored in the
-        database under the specified db column name
+        database under the specified db column name. The provided value will
+        be compared against None if it is not in the database.
 
         :param name: The name of the db column to check
         :type name: str
@@ -46,12 +47,10 @@ class HashingMetadataStore:
         :param value: The value to check against
 
         :returns a boolean that is true if the the provided value and the
-        value of the item under the named db column is different
+                 value of the item under the named db column is different.
         :rtype: bool
         """
         db_value = self.retrieve_value(name)
-        if not value:
-            return False
         return value != db_value
 
     def store_values(self, names_and_values):
