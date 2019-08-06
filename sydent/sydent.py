@@ -39,7 +39,8 @@ from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
 from hs_federation.verifier import Verifier
 
-from util.hash import sha256_and_url_safe_base64, diff_lists
+from util.hash import sha256_and_url_safe_base64
+from util.tokenutils import generateAlphanumericTokenOfLength
 
 from sign.ed25519 import SydentEd25519
 
@@ -181,47 +182,19 @@ class Sydent:
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
 
-        # Whether to compute a lookup_hash for each 3pid in the database
-        compute_lookup_hashes = False
-
-        # Determine whether a lookup_pepper value has been defined
-        lookup_pepper = self.cfg.get("hashing", "lookup_pepper")
-        # If lookup_pepper hasn't been defined, or is an empty string...
+        # See if a pepper already exists in the database
+        hashing_metadata_store = HashingMetadataStore(self)
+        lookup_pepper = hashing_metadata_store.retrieve_value("lookup_pepper")
         if not lookup_pepper:
-            # See if it exists in the database
-            lookup_pepper_db = HashingMetadataStore.retrieve_value("lookup_pepper")
-            if lookup_pepper_db:
-                # A pepper already exists, use it
-                self.cfg.set("hashing", "lookup_pepper", lookup_pepper_db)
-            else:
-                # No pepper defined and there isn't one in the database
-                # Generate one
-                new_pepper = generateAlphanumericTokenOfLength(5)
+            # No pepper defined in the database, generate one
+            lookup_pepper = generateAlphanumericTokenOfLength(5)
 
-                # Save it for later use
-                self.cfg.set(
-                    "hashing", "lookup_pepper",
-                    new_pepper,
-                )
+            # Store it in the database
+            hashing_metadata_store.store_values({"lookup_pepper": lookup_pepper})
 
-                # Store it in the database
-                HashingMetadataStore.store_values({"lookup_pepper": new_pepper})
-
-                # Re-hash all 3pids
-                compute_lookup_hashes = True
-        else:
-            # If it has been defined, check if it's different from what we have
-            # in the database
-            if HashingMetadataStore.is_new("lookup_pepper", lookup_pepper):
-                # Store the new pepper in the database
-                HashingMetadataStore.store_values({"lookup_pepper": lookup_pepper})
-
-                # Re-hash all 3pids
-                compute_lookup_hashes = True
-
-        if compute_lookup_hashes:
-            HashingMetadataStore.rehash_threepids(
-                sha256_and_url_safe_base64, self.cfg.get("hashing", "lookup_pepper"),
+            # Re-hash all 3pids
+            hashing_metadata_store.rehash_threepids(
+                sha256_and_url_safe_base64, lookup_pepper,
             )
 
         self.validators = Validators()
@@ -243,7 +216,8 @@ class Sydent:
         self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.bulk_lookup = BulkLookupServlet(self)
-        self.servlets.lookup_v2 = LookupV2Servlet(self)
+        self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
+        self.servlets.lookup_v2 = LookupV2Servlet(self, lookup_pepper)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)

@@ -24,7 +24,7 @@ def get_args(request, required_args):
     Currently takes args from the top level keys of a json object or
     www-form-urlencoded for backwards compatability.
     Returns a tuple (error, args) where if error is non-null,
-    the requesat is malformed. Otherwise, args contains the
+    the request is malformed. Otherwise, args contains the
     parameters passed.
     """
     args = None

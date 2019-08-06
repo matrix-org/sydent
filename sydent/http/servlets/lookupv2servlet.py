@@ -31,9 +31,10 @@ logger = logging.getLogger(__name__)
 class LookupV2Servlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd, lookup_pepper):
         self.sydent = syd
         self.globalAssociationStore = GlobalAssociationStore(self.sydent)
+        self.lookup_pepper = lookup_pepper
 
     def render_POST(self, request):
         """
@@ -52,6 +53,7 @@ class LookupV2Servlet(Resource):
                 * 'algorithm': The algorithm the client has used to process
                                the 3PIDs.
                 * 'pepper': The pepper the client has attached to the 3PIDs.
+
         Returns: Object with key 'mappings', which is a dictionary of results
                  where each result is a key/value pair of what the client sent, and
                  the matching Matrix User ID that claims to own that 3PID.
@@ -67,36 +69,34 @@ class LookupV2Servlet(Resource):
         addresses = args['addresses']
         if not isinstance(addresses, list):
             request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PARAM', 'error': 'addresses must be a list'}, None
+            return json.dumps({'errcode': 'M_INVALID_PARAM', 'error': 'addresses must be a list'})
 
-        algorithm = args['algorithm']
-        if not isinstance(algorithm, str):
-            request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm must be a string'}, None
+        algorithm = str(args['algorithm'])
         if algorithm not in HashDetailsServlet.known_algorithms:
             request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}, None
+            return json.dumps({'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'})
 
-        pepper = args['pepper']
-        if not isinstance(pepper, str):
+        pepper = str(args['pepper'])
+        if pepper != self.lookup_pepper:
             request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PARAM', 'error': 'pepper must be a string'}, None
-        if pepper != self.sydent.config.get("hashing", "lookup_pepper"):
-            request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match server's"}, None
+            return json.dumps({'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match server's"})
 
-        logger.info("Lookup of %d threepids with algorithm", len(addresses), algorithm)
+        logger.info("Lookup of %d threepid(s) with algorithm %s", len(addresses), algorithm)
         if algorithm == "none":
             # Lookup without hashing
             medium_address_tuples = []
-            for medium_and_address in addresses:
+            for address_and_medium in addresses:
                 # Parse medium, address components
-                medium, address = parse_space_separated_str(medium_and_address)
-                medium_address_tuples.append((medium, address))
+                # The address and medium are flipped from what getMxids() is
+                # expecting, so switch them around
+                address, medium = parse_space_separated_str(address_and_medium)
+                medium_address_tuples.append((str(medium), str(address)))
 
             # Lookup the mxids
-            medium_address_mxid_tuples = GlobalAssociationStore.getMxids(medium_address_tuples)
+            print "giving: " + str(medium_address_tuples)
+            medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)
 
+            # Return a dictionary of lookup_string: mxid values
             return json.dumps({'mappings': {x[0]: x[2] for x in medium_address_mxid_tuples}})
 
         elif algorithm == "sha256":
@@ -109,7 +109,7 @@ class LookupV2Servlet(Resource):
 
             return json.dumps({'mappings': mappings})
 
-        return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}, None
+        return json.dumps({'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'})
 
     @jsonwrap
     def render_OPTIONS(self, request):

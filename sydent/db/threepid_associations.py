@@ -150,8 +150,8 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))");
-        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))");
+        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))")
+        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))")
 
         try:
             inserted_cap = 0
@@ -237,7 +237,9 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
 
-        res = cur.execute("SELECT mxid WHERE lookup_hash = ?", (lookup_hash,))
+        res = cur.execute(
+            "SELECT mxid FROM global_threepid_associations WHERE lookup_hash = ?", (lookup_hash,)
+        )
         row = res.fetchone()
         if not row:
             return None

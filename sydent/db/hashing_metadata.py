@@ -35,24 +35,6 @@ class HashingMetadataStore:
             return None
         return row[0]
 
-    def is_new(self, name, value):
-        """
-        Returns whether a provided value does NOT match a value stored in the
-        database under the specified db column name. The provided value will
-        be compared against None if it is not in the database.
-
-        :param name: The name of the db column to check
-        :type name: str
-
-        :param value: The value to check against
-
-        :returns a boolean that is true if the the provided value and the
-                 value of the item under the named db column is different.
-        :rtype: bool
-        """
-        db_value = self.retrieve_value(name)
-        return value != db_value
-
     def store_values(self, names_and_values):
         """Stores values in the hashing_metadata table under the named columns
 
@@ -65,8 +47,8 @@ class HashingMetadataStore:
         columns = ', '.join(names_and_values.keys())
         values = ', '.join('?' * len(names_and_values))
         sql = 'INSERT INTO hashing_metadata ({}) VALUES ({})'.format(columns, values)
-
-        cur.execute(sql)
+        values = names_and_values.values()
+        cur.execute(sql, values)
         self.sydent.db.commit()
 
     def rehash_threepids(self, hashing_function, pepper):
@@ -104,9 +86,8 @@ class HashingMetadataStore:
         # Iterate through each medium, address combo, hash it,
         # and store in the db
         batch_size = 500
-        count = 0
-        while count < len(rows):
-            for medium, address in rows[count:count+batch_size]:
+        while rows:
+            for medium, address in rows[:batch_size]:
                 # Combine the medium, address and pepper together in the
                 # following form: "address medium pepper"
                 # According to MSC2134: https://github.com/matrix-org/matrix-doc/pull/2134
@@ -117,10 +98,13 @@ class HashingMetadataStore:
 
                 # Save the result to the DB
                 sql = (
-                    "UPDATE %s SET lookup_hash = '%s' "
-                    "WHERE medium = %s AND address = %s"
-                    % (table, result, medium, address)
+                    "UPDATE %s SET lookup_hash = ? "
+                    "WHERE medium = ? AND address = ?"
+                    % (table)
                 )
-                cur.execute(sql)
+                cur.execute(sql, (result, medium, address))
+
+            # Remove processed items from the list
+            rows = rows[batch_size:]
 
             self.sydent.db.commit()

@@ -49,7 +49,7 @@ def parse_space_separated_str(input_str):
     :param input_str: The space-separated str to split
     :type input_str: str
 
-    :returns a list with 2 strings in it
+    :returns a list with 2 strings in it, (address, medium)
     :rtype [str, str]
     """
     # Split the string by spaces

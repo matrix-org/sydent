@@ -16,7 +16,7 @@
 
 from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
-from sydent.util.tokenutils import generateAlphanumericTokenOfLength
+from sydent.db.hashing_metadata import HashingMetadataStore
 
 import logging
 import json
@@ -32,14 +32,15 @@ class HashDetailsServlet(Resource):
     isLeaf = True
     known_algorithms = ["sha256", "none"]
 
-    def __init__(self, syd):
+    def __init__(self, syd, lookup_pepper):
         self.sydent = syd
+        self.lookup_pepper = lookup_pepper
 
     def render_GET(self, request):
         """
         Return the hashing algorithms and pepper that this IS supports. The
-        pepper included in the response is set by the config, and generated
-        if one is not set.
+        pepper included in the response is stored in the database, or
+        otherwise generated.
 
         Returns: An object containing an array of hashing algorithms the
                  server supports, and a `lookup_pepper` field, which is a
@@ -47,15 +48,12 @@ class HashDetailsServlet(Resource):
                  information before hashing.
         """
         send_cors(request)
-
-        # A lookup_pepper is defined in the config, otherwise it is generated 
-        lookup_pepper = self.sydent.config.get("hashing", "lookup_pepper")
         
         request.setResponseCode(200)
-        return {
-            "algorithms": known_algorithms,
-            "lookup_pepper": lookup_pepper,
-        }
+        return json.dumps({
+            "algorithms": self.known_algorithms,
+            "lookup_pepper": self.lookup_pepper,
+        })
 
     @jsonwrap
     def render_OPTIONS(self, request):

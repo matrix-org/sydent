@@ -52,6 +52,7 @@ class ClientApiHttpServer:
         lookup = self.sydent.servlets.lookup
         bulk_lookup = self.sydent.servlets.bulk_lookup
 
+        hash_details = self.sydent.servlets.hash_details
         lookup_v2 = self.sydent.servlets.lookup_v2
 
         threepid = Resource()
@@ -98,6 +99,7 @@ class ClientApiHttpServer:
         v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
 
         v2.putChild('lookup', lookup_v2)
+        v2.putChild('hash_details', hash_details)
 
         self.factory = Site(root)
         self.factory.displayTracebacks = False
