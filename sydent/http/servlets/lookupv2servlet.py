@@ -58,6 +58,12 @@ class LookupV2Servlet(Resource):
                  User IDs for which no mapping is found are omitted.
         """
         send_cors(request)
+
+        supported_algorithms = self.sydent.config.get("hashing", "algorithms")
+        if len(supported_algorithms) == 0:
+            request.setResponseCode(400)
+            return {'errcode': 'M_UNKNOWN', 'error': 'v2 lookup is disabled on this server'}, None
+
         err, args = get_args(request, ('addresses', 'algorithm', 'pepper'))
         if err:
             return json.dumps(err)

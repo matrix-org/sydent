@@ -116,6 +116,10 @@ CONFIG_DEFAULTS = {
         'ed25519.signingkey': '',
     },
     'hashing': {
+        # algorithms is a list with possible items "sha256" and "none"
+        # "sha256" - support lookup with sha256-hashed contact details
+        # "none" - support lookup with plaintext contact details
+        # Supplying an empty list will disable lookup
         'algorithms': ['sha256'],
     }
 }
