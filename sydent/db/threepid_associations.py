@@ -96,7 +96,8 @@ class LocalAssociationStore:
                 "No local assoc found for %s/%s/%s",
                 threepid['medium'], threepid['address'], mxid,
             )
-            raise ValueError("No match found between provided mxid and threepid")
+            # we still consider this successful in the name of idempotency:
+            # the binding to be deleted is not there, so we're in the desired state.
 
 
 class GlobalAssociationStore:
