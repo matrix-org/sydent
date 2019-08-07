@@ -70,7 +70,7 @@ class ThreePidUnbindServlet(Resource):
             # We now check for authentication in two different ways, depending
             # on the contents of the request. If the user has supplied "sid"
             # (the Session ID returned by Sydent during the original binding)
-            # and "client_secret" fields, they are trying to provie that they
+            # and "client_secret" fields, they are trying to prove that they
             # were the original author of the bind. We then check that what
             # they supply matches and if it does, allow the unbind.
             # 
