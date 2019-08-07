@@ -70,7 +70,7 @@ class ThreePidUnbindServlet(Resource):
             # We now check for authentication in two different ways, depending
             # on the contents of the request. If the user has supplied "sid"
             # (the Session ID returned by Sydent during the original binding)
-            # and "client_secret" fields, they are trying to provie that they
+            # and "client_secret" fields, they are trying to prove that they
             # were the original author of the bind. We then check that what
             # they supply matches and if it does, allow the unbind.
             # 
@@ -144,16 +144,7 @@ class ThreePidUnbindServlet(Resource):
                     request.finish()
                     return
 
-            try:
-                res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
-            except ValueError:
-                # User could have provided correct 3PID/sid/client_secret
-                # details but not the correct mxid, which would cause the
-                # binding removal to fail
-                request.setResponseCode(400)
-                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': "Association between provided mxid and 3pid not found"}))
-                request.finish()
-                return
+            res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
 
             request.write(json.dumps({}))
             request.finish()
