@@ -1,7 +1,7 @@
-master_version: "flerb"
+master_version: "master_1_1"
 docs:
   terms_of_service:
-    version: "5.0"
+    version: "2.0"
     langs:
       en:
         name: "Terms of Service"
@@ -14,7 +14,7 @@ docs:
     langs:
       en:
         name: "Privacy Policy"
-        url: "https://example.org/somewhere/privaacy-1.2-en.html"
+        url: "https://example.org/somewhere/privacy-1.2-en.html"
       fr:
         name: "Politique de confidentialité"
         url: "https://example.org/somewhere/privacy-1.2-fr.html"
