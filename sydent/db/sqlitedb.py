@@ -133,6 +133,7 @@ class SqliteDatabase:
             logger.info("v0 -> v1 schema migration complete")
             self._setSchemaVersion(1)
         if curVer < 2:
+            logger.info("Migrating schema from v1 to v2")
             cur = self.db.cursor()
             cur.execute("CREATE INDEX threepid_validation_sessions_mtime ON threepid_validation_sessions(mtime)")
             self.db.commit()
