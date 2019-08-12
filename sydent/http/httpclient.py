@@ -78,7 +78,7 @@ class HTTPClient(object):
             b"Content-Type": [b"application/json"],
         }))
 
-        logger.debug("HTTP POST %s -> %s", json_str, uri)
+        logger.debug("HTTP POST %s", uri)
 
         response = yield self.agent.request(
             "POST",

@@ -87,14 +87,14 @@ class LocalAssociationStore:
                 (threepid['medium'], threepid['address'], ts),
             )
             logger.info(
-                "Deleting local assoc for %s/%s/%s replaced %d rows",
-                threepid['medium'], threepid['address'], mxid, cur.rowcount,
+                "Deleting local assoc %s. Replaced %d rows",
+                mxid, cur.rowcount,
             )
             self.sydent.db.commit()
         else:
             logger.info(
-                "No local assoc found for %s/%s/%s",
-                threepid['medium'], threepid['address'], mxid,
+                "No local assoc found for %s during attempted removal",
+                 mxid,
             )
             # we still consider this successful in the name of idempotency:
             # the binding to be deleted is not there, so we're in the desired state.
@@ -204,7 +204,7 @@ class GlobalAssociationStore:
 
         return row[0]
 
-    def removeAssociation(self, medium, address):
+    def removeAssociation(self, medium, address, mxid):
         cur = self.sydent.db.cursor()
         cur.execute(
             "DELETE FROM global_threepid_associations WHERE "
@@ -212,7 +212,7 @@ class GlobalAssociationStore:
             (medium, address),
         )
         logger.info(
-            "Deleted %d rows from global associations for %s/%s",
-            cur.rowcount, medium, address,
+            "Deleted %d rows from global associations for %s",
+            cur.rowcount, mxid,
         )
         self.sydent.db.commit()

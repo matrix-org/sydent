@@ -129,7 +129,7 @@ class SrvResolver(object):
             defer.returnValue([])
         except DomainError as e:
             # We failed to resolve the name (other than a NameError)
-            # Try something in the cache, else rereaise
+            # Try something in the cache, else reraise
             cache_entry = self._cache.get(service_name, None)
             if cache_entry:
                 logger.warn(

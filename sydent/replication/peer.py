@@ -73,7 +73,7 @@ class LocalPeer(Peer):
                     globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
                                                     self.sydent.server_name, localId)
                 else:
-                    globalAssocStore.removeAssociation(assocObj.medium, assocObj.address)
+                    globalAssocStore.removeAssociation(assocObj.medium, assocObj.address, assocObj.mxid)
 
         d = defer.succeed(True)
         return d

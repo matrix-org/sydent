@@ -59,11 +59,11 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         parsedFrom = email.utils.parseaddr(mailFrom)[1]
         parsedTo = email.utils.parseaddr(mailTo)[1]
         if parsedFrom == '' or parsedTo == '':
-            logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
+            logger.info("Couldn't parse from / to address while trying to send mail")
             raise EmailAddressException()
 
         if parsedTo != mailTo:
-            logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
+            logger.info("Parsed to address changed the address")
             raise EmailAddressException()
 
         mailServer = sydent.cfg.get('email', 'email.smtphost')
@@ -71,7 +71,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         mailUsername = sydent.cfg.get('email', 'email.smtpusername')
         mailPassword = sydent.cfg.get('email', 'email.smtppassword')
         mailTLSMode = sydent.cfg.get('email', 'email.tlsmode')
-        logger.info("Sending mail to %s with mail server: %s" % (mailTo, mailServer,))
+        logger.info("Sending mail with mail server: %s" % (mailServer,))
         try:
             if mailTLSMode == 'SSL' or mailTLSMode == 'TLS':
                 smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)

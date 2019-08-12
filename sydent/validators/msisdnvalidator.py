@@ -90,10 +90,7 @@ class MsisdnValidator:
         smsBodyTemplate = self.sydent.cfg.get('sms', 'bodyTemplate')
         originator = self.getOriginator(phoneNumber)
 
-        logger.info(
-            "Attempting to text code %s to %s (country %d) with originator %s",
-            valSession.token, msisdn, phoneNumber.country_code, originator
-        )
+        logger.info("Attempting to text code")
 
         smsBody = smsBodyTemplate.format(token=valSession.token)
 

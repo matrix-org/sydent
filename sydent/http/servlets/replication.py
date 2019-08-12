@@ -66,7 +66,7 @@ class ReplicationPushServlet(Resource):
 
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
-        for originId,sgAssoc in inJson['sgAssocs'].items():
+        for originId, sgAssoc in inJson['sgAssocs'].items():
             try:
                 peer.verifySignedAssociation(sgAssoc)
                 logger.debug("Signed association from %s with origin ID %s verified", peer.servername, originId)
@@ -82,8 +82,8 @@ class ReplicationPushServlet(Resource):
                 if assocObj.mxid is not None:
                     globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
                 else:
-                    logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
-                    globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
+                    logger.info("Incoming deletion: removing an association for %s", assocObj.mxid)
+                    globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address, assocObj.mxid)
                 logger.info("Stored association origin ID %s from %s", originId, peer.servername)
             except:
                 failedIds.append(originId)
