@@ -184,13 +184,13 @@ class Sydent:
 
         # See if a pepper already exists in the database
         hashing_metadata_store = HashingMetadataStore(self)
-        lookup_pepper = hashing_metadata_store.retrieve_value("lookup_pepper")
+        lookup_pepper = hashing_metadata_store.get_lookup_pepper()
         if not lookup_pepper:
             # No pepper defined in the database, generate one
             lookup_pepper = generateAlphanumericTokenOfLength(5)
 
             # Store it in the database
-            hashing_metadata_store.store_values({"lookup_pepper": lookup_pepper})
+            hashing_metadata_store.store_lookup_pepper(lookup_pepper)
 
             # Re-hash all 3pids
             hashing_metadata_store.rehash_threepids(

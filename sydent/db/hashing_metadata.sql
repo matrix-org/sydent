@@ -19,5 +19,6 @@ limitations under the License.
  * out tasks related to hashing. Salts and peppers etc. should go here.
  */
 CREATE TABLE IF NOT EXISTS hashing_metadata (
-    lookup_pepper varchar(256)
+    id integer primary key,
+    lookup_pepper varchar
 );

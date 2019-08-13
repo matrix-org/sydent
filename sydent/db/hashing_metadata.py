@@ -18,37 +18,34 @@ class HashingMetadataStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def retrieve_value(self, name):
-        """Return a value from the hashing_metadata table
+    def get_lookup_pepper(self):
+        """Return the value of the current lookup pepper from the db
         
-        :param name: The name of the db column to return the value for
-        :type name: str
-
-        :returns a value corresponding to the specified name, or None if a
-        value does not exist
+        :returns a pepper if it exists in the database, or None if one does
+                 not exist
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("select %s from hashing_metadata" % name)
+        res = cur.execute("select lookup_pepper from hashing_metadata")
         row = res.fetchone()
 
         if not row:
             return None
         return row[0]
 
-    def store_values(self, names_and_values):
-        """Stores values in the hashing_metadata table under the named columns
+    def store_lookup_pepper(self, lookup_pepper):
+        """Stores a new lookup pepper in the hashing_metadata db table
 
-        :param names_and_values: Column names and associated values to store
-                                 in the database
-        :type names_and_values: Dict
+        :param lookup_pepper: The pepper to store in the database
+        :type lookup_pepper: str
         """
         cur = self.sydent.db.cursor()
 
-        columns = ', '.join(names_and_values.keys())
-        values = ', '.join('?' * len(names_and_values))
-        sql = 'INSERT INTO hashing_metadata ({}) VALUES ({})'.format(columns, values)
-        values = names_and_values.values()
-        cur.execute(sql, values)
+        # Create or update lookup_pepper
+        sql = (
+            'INSERT OR REPLACE INTO hashing_metadata (id, lookup_pepper) '
+            'VALUES (0, ?)'
+        )
+        cur.execute(sql, lookup_pepper)
         self.sydent.db.commit()
 
     def rehash_threepids(self, hashing_function, pepper):
@@ -77,17 +74,29 @@ class HashingMetadataStore:
         """
         cur = self.sydent.db.cursor()
 
-        # Pull items from the database
+        # Get count of all 3PID records
         # Medium/address combos are marked as UNIQUE in the database
-        sql = "SELECT medium, address FROM %s" % table
+        sql = "SELECT COUNT(*) FROM %s" % table
         res = cur.execute(sql)
-        rows = res.fetchall()
+        row_count = res.fetchone()
+        row_count = row_count[0]
 
         # Iterate through each medium, address combo, hash it,
         # and store in the db
         batch_size = 500
-        while rows:
-            for medium, address in rows[:batch_size]:
+        while count < row_count:
+            sql = (
+                "SELECT medium, address FROM %s LIMIT %s OFFSET %s ORDER BY id" % 
+                (table, batch_size, count)
+            )
+            res = cur.execute(sql)
+            rows = res.fetchall()
+
+            for medium, address in rows:
+                # Skip broken db entry
+                if not medium or not address:
+                    continue
+
                 # Combine the medium, address and pepper together in the
                 # following form: "address medium pepper"
                 # According to MSC2134: https://github.com/matrix-org/matrix-doc/pull/2134
@@ -104,7 +113,6 @@ class HashingMetadataStore:
                 )
                 cur.execute(sql, (result, medium, address))
 
-            # Remove processed items from the list
-            rows = rows[batch_size:]
+            count += len(rows)
 
             self.sydent.db.commit()

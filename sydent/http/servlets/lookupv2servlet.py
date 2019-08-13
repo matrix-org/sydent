@@ -36,6 +36,7 @@ class LookupV2Servlet(Resource):
         self.globalAssociationStore = GlobalAssociationStore(self.sydent)
         self.lookup_pepper = lookup_pepper
 
+    @jsonwrap
     def render_POST(self, request):
         """
         Perform lookups with potentially hashed 3PID details.
@@ -64,22 +65,22 @@ class LookupV2Servlet(Resource):
 
         err, args = get_args(request, ('addresses', 'algorithm', 'pepper'))
         if err:
-            return json.dumps(err)
+            return err
 
         addresses = args['addresses']
         if not isinstance(addresses, list):
             request.setResponseCode(400)
-            return json.dumps({'errcode': 'M_INVALID_PARAM', 'error': 'addresses must be a list'})
+            return {'errcode': 'M_INVALID_PARAM', 'error': 'addresses must be a list'}
 
         algorithm = str(args['algorithm'])
         if algorithm not in HashDetailsServlet.known_algorithms:
             request.setResponseCode(400)
-            return json.dumps({'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'})
+            return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}
 
         pepper = str(args['pepper'])
         if pepper != self.lookup_pepper:
             request.setResponseCode(400)
-            return json.dumps({'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match server's"})
+            return {'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match server's"}
 
         logger.info("Lookup of %d threepid(s) with algorithm %s", len(addresses), algorithm)
         if algorithm == "none":
@@ -97,7 +98,7 @@ class LookupV2Servlet(Resource):
             medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)
 
             # Return a dictionary of lookup_string: mxid values
-            return json.dumps({'mappings': {x[0]: x[2] for x in medium_address_mxid_tuples}})
+            return { 'mappings': {x[0]: x[2] for x in medium_address_mxid_tuples} }
 
         elif algorithm == "sha256":
             # Lookup using SHA256 with URL-safe base64 encoding
@@ -107,9 +108,9 @@ class LookupV2Servlet(Resource):
                 if mxid:
                     mappings[h] = mxid
 
-            return json.dumps({'mappings': mappings})
+            return {'mappings': mappings}
 
-        return json.dumps({'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'})
+        return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}
 
     @jsonwrap
     def render_OPTIONS(self, request):

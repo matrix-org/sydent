@@ -108,7 +108,7 @@ class SrvResolver(object):
         :type service_name: bytes
 
         :returns a list of the SRV records, or an empty list if none found.
-        :rtype: Deferred[[Server]]
+        :rtype: Deferred[list[Server]]
         """
         now = int(self._get_time())
 
