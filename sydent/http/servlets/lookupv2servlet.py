@@ -95,7 +95,6 @@ class LookupV2Servlet(Resource):
                 medium_address_tuples.append((str(medium), str(address)))
 
             # Lookup the mxids
-            print "giving: " + str(medium_address_tuples)
             medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)
 
             # Return a dictionary of lookup_string: mxid values
