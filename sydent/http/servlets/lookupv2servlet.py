@@ -80,7 +80,8 @@ class LookupV2Servlet(Resource):
         pepper = str(args['pepper'])
         if pepper != self.lookup_pepper:
             request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match server's"}
+            return {'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match "
+                                                            "the server's"}
 
         logger.info("Lookup of %d threepid(s) with algorithm %s", len(addresses), algorithm)
         if algorithm == "none":

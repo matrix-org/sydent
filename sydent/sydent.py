@@ -189,13 +189,9 @@ class Sydent:
             # No pepper defined in the database, generate one
             lookup_pepper = generateAlphanumericTokenOfLength(5)
 
-            # Store it in the database
-            hashing_metadata_store.store_lookup_pepper(lookup_pepper)
-
-            # Re-hash all 3pids
-            hashing_metadata_store.rehash_threepids(
-                sha256_and_url_safe_base64, lookup_pepper,
-            )
+            # Store it in the database and rehash 3PIDs
+            hashing_metadata_store.store_lookup_pepper(sha256_and_url_safe_base64,
+                                                       lookup_pepper)
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)

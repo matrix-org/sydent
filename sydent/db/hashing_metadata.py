@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class HashingMetadataStore:
     def __init__(self, sydent):
         self.sydent = sydent
@@ -32,11 +33,14 @@ class HashingMetadataStore:
             return None
         return row[0]
 
-    def store_lookup_pepper(self, lookup_pepper):
-        """Stores a new lookup pepper in the hashing_metadata db table
+    def store_lookup_pepper(self, hashing_function, pepper):
+        """Stores a new lookup pepper in the hashing_metadata db table and rehashes all 3PIDs
 
-        :param lookup_pepper: The pepper to store in the database
-        :type lookup_pepper: str
+        :param hashing_function: A function with single input and output strings
+        :type hashing_function func(str) -> str
+
+        :param pepper: The pepper to store in the database
+        :type pepper: str
         """
         cur = self.sydent.db.cursor()
 
@@ -45,23 +49,25 @@ class HashingMetadataStore:
             'INSERT OR REPLACE INTO hashing_metadata (id, lookup_pepper) '
             'VALUES (0, ?)'
         )
-        cur.execute(sql, lookup_pepper)
+        cur.execute(sql, (pepper,))
+
+        # Hand the cursor it to each rehashing function
+        # Each function will queue some rehashing db transactions
+        self._rehash_threepids(cur, hashing_function, pepper, "local_threepid_associations")
+        self._rehash_threepids(cur, hashing_function, pepper, "global_threepid_associations")
+
+        # Commit the queued db transactions so that adding a new pepper and hashing is atomic
         self.sydent.db.commit()
 
-    def rehash_threepids(self, hashing_function, pepper):
-        """Rehash all 3PIDs using a given hashing_function and pepper
-
-        :param hashing_function: A function with single input and output strings
-        :type hashing_function func(str) -> str
-
-        :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing
-        :type pepper: str
-        """
-        self._rehash_threepids(hashing_function, pepper, "local_threepid_associations")
-        self._rehash_threepids(hashing_function, pepper, "global_threepid_associations")
-
-    def _rehash_threepids(self, hashing_function, pepper, table):
+    def _rehash_threepids(self, cur, hashing_function, pepper, table):
         """Rehash 3PIDs of a given table using a given hashing_function and pepper
+
+        A database cursor `cur` must be passed to this function. After this function completes,
+        the calling function should make sure to call self`self.sydent.db.commit()` to commit
+        the made changes to the database.
+
+        :param cur: Database cursor
+        :type cur:
 
         :param hashing_function: A function with single input and output strings
         :type hashing_function func(str) -> str
@@ -72,7 +78,6 @@ class HashingMetadataStore:
         :param table: The database table to perform the rehashing on
         :type table: str
         """
-        cur = self.sydent.db.cursor()
 
         # Get count of all 3PID records
         # Medium/address combos are marked as UNIQUE in the database
@@ -84,9 +89,10 @@ class HashingMetadataStore:
         # Iterate through each medium, address combo, hash it,
         # and store in the db
         batch_size = 500
+        count = 0
         while count < row_count:
             sql = (
-                "SELECT medium, address FROM %s LIMIT %s OFFSET %s ORDER BY id" % 
+                "SELECT medium, address FROM %s ORDER BY id LIMIT %s OFFSET %s" %
                 (table, batch_size, count)
             )
             res = cur.execute(sql)
@@ -109,10 +115,9 @@ class HashingMetadataStore:
                 sql = (
                     "UPDATE %s SET lookup_hash = ? "
                     "WHERE medium = ? AND address = ?"
-                    % (table)
+                    % table
                 )
+                # Lines up the query to be executed on commit
                 cur.execute(sql, (result, medium, address))
 
             count += len(rows)
-
-            self.sydent.db.commit()
