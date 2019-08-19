@@ -153,7 +153,7 @@ class Sydent:
         if self.server_name == '':
             self.server_name = os.uname()[1]
             logger.warn(("You had not specified a server name. I have guessed that this server is called '%s' "
-                        + " and saved this in the config file. If this is incorrect, you should edit server.name in "
+                        + "and saved this in the config file. If this is incorrect, you should edit server.name in "
                         + "the config file.") % (self.server_name,))
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
