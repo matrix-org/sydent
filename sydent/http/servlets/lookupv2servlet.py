@@ -17,13 +17,10 @@
 from twisted.web.resource import Resource
 
 import logging
-import json
-import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
-from sydent.util.hash import parse_space_separated_str
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +77,8 @@ class LookupV2Servlet(Resource):
         pepper = str(args['pepper'])
         if pepper != self.lookup_pepper:
             request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match "
-                                                            "the server's"}
+            return {'errcode': 'M_INVALID_PEPPER', 'error': "pepper does not match '%s'" %
+                                                            self.lookup_pepper}
 
         logger.info("Lookup of %d threepid(s) with algorithm %s", len(addresses), algorithm)
         if algorithm == "none":
@@ -91,7 +88,7 @@ class LookupV2Servlet(Resource):
                 # Parse medium, address components
                 # The address and medium are flipped from what getMxids() is
                 # expecting, so switch them around
-                address, medium = parse_space_separated_str(address_and_medium)
+                address, medium = address_and_medium.rsplit(maxsplit=1)
                 medium_address_tuples.append((str(medium), str(address)))
 
             # Lookup the mxids
