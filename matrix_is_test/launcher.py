@@ -65,8 +65,10 @@ class MatrixIsTestLauncher(object):
 
         stderr_fp = open(os.path.join(testsubject_path, 'sydent.stderr'), 'w')
 
+        pybin = os.getenv('SYDENT_PYTHON', 'python')
+
         self.process = Popen(
-            args=['python', '-m', 'sydent.sydent'],
+            args=[pybin, '-m', 'sydent.sydent'],
             cwd=self.tmpdir,
             env=newEnv,
             stderr=stderr_fp,
