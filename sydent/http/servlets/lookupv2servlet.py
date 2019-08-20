@@ -88,7 +88,7 @@ class LookupV2Servlet(Resource):
                 # Parse medium, address components
                 # The address and medium are flipped from what getMxids() is
                 # expecting, so switch them around
-                address, medium = address_and_medium.split()
+                address, medium = address_and_medium.rsplit(maxsplit=1)
 
                 # Forbid addresses that contain a space
                 if " " in address:
