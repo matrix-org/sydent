@@ -100,11 +100,16 @@ class ThreepidBinder:
     @defer.inlineCallbacks
     def _notify(self, assoc, attempt):
         mxid = assoc["mxid"]
-        domain = mxid.split(":")[-1]
-        server = yield self._pickServer(domain)
+        mxid_parts = mxid.split(":", 1)
+        if len(mxid_parts) != 2:
+            logger.error(
+                "Can't notify on bind for unparseable mxid %s. Not retrying.",
+                assoc["mxid"],
+            )
+            return
 
-        post_url = "https://%s/_matrix/federation/v1/3pid/onbind" % (
-            server,
+        post_url = "matrix://%s/_matrix/federation/v1/3pid/onbind" % (
+            mxid_parts[1],
         )
 
         logger.info("Making bind callback to: %s", post_url)
@@ -146,56 +151,3 @@ class ThreepidBinder:
     # The below is lovingly ripped off of synapse/http/endpoint.py
 
     _Server = collections.namedtuple("_Server", "priority weight host port")
-
-    @defer.inlineCallbacks
-    def _pickServer(self, host):
-        servers = yield self._fetchServers(host)
-        if not servers:
-            defer.returnValue("%s:8448" % (host,))
-
-        min_priority = servers[0].priority
-        weight_indexes = list(
-            (index, server.weight + 1)
-            for index, server in enumerate(servers)
-            if server.priority == min_priority
-        )
-
-        total_weight = sum(weight for index, weight in weight_indexes)
-        target_weight = random.randint(0, total_weight)
-
-        for index, weight in weight_indexes:
-            target_weight -= weight
-            if target_weight <= 0:
-                server = servers[index]
-                defer.returnValue("%s:%d" % (server.host, server.port,))
-                return
-
-    @defer.inlineCallbacks
-    def _fetchServers(self, host):
-        try:
-            service = "_matrix._tcp.%s" % host
-            answers, auth, add = yield client.lookupService(service)
-        except DNSNameError:
-            answers = []
-
-        if (len(answers) == 1
-                and answers[0].type == dns.SRV
-                and answers[0].payload
-                and answers[0].payload.target == dns.Name(".")):
-            raise DNSNameError("Service %s unavailable", service)
-
-        servers = []
-
-        for answer in answers:
-            if answer.type != dns.SRV or not answer.payload:
-                continue
-            payload = answer.payload
-            servers.append(ThreepidBinder._Server(
-                host=str(payload.target),
-                port=int(payload.port),
-                priority=int(payload.priority),
-                weight=int(payload.weight)
-            ))
-
-        servers.sort()
-        defer.returnValue(servers)
