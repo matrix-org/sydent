@@ -92,6 +92,7 @@ class LookupV2Servlet(Resource):
 
                 # Forbid addresses that contain a space
                 if " " in address:
+                    request.setResponseCode(400)
                     return {
                         'errcode': 'M_UNKNOWN',
                         'error': '"%s": contains spaces' % address
@@ -103,7 +104,7 @@ class LookupV2Servlet(Resource):
             medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)
 
             # Return a dictionary of lookup_string: mxid values
-            return { 'mappings': {x[0]: x[2] for x in medium_address_mxid_tuples} }
+            return {'mappings': {x[0]: x[2] for x in medium_address_mxid_tuples}}
 
         elif algorithm == "sha256":
             # Lookup using SHA256 with URL-safe base64 encoding
@@ -115,6 +116,7 @@ class LookupV2Servlet(Resource):
 
             return {'mappings': mappings}
 
+        request.setResponseCode(400)
         return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}
 
     @jsonwrap
