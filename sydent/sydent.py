@@ -183,6 +183,8 @@ class Sydent:
             )
 
         # See if a pepper already exists in the database
+        # Note: This MUST be run before we start serving requests, otherwise lookups for
+        # 3PID hashes may come in before we've completed generating them
         hashing_metadata_store = HashingMetadataStore(self)
         lookup_pepper = hashing_metadata_store.get_lookup_pepper()
         if not lookup_pepper:
