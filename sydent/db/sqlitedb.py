@@ -132,6 +132,7 @@ class SqliteDatabase:
             self.db.commit()
             logger.info("v0 -> v1 schema migration complete")
             self._setSchemaVersion(1)
+
         if curVer < 2:
             logger.info("Migrating schema from v1 to v2")
             cur = self.db.cursor()
@@ -139,6 +140,41 @@ class SqliteDatabase:
             self.db.commit()
             logger.info("v1 -> v2 schema migration complete")
             self._setSchemaVersion(2)
+
+        if curVer < 3:
+            cur = self.db.cursor()
+
+            # Add lookup_hash columns to threepid association tables
+            cur.execute(
+                "ALTER TABLE local_threepid_associations "
+                "ADD COLUMN lookup_hash VARCHAR(256)"
+            )
+            cur.execute(
+                "CREATE INDEX IF NOT EXISTS lookup_hash_medium "
+                "on local_threepid_associations "
+                "(lookup_hash, medium)"
+            )
+            cur.execute(
+                "ALTER TABLE global_threepid_associations "
+                "ADD COLUMN lookup_hash VARCHAR(256)"
+            )
+            cur.execute(
+                "CREATE INDEX IF NOT EXISTS lookup_hash_medium "
+                "on global_threepid_associations "
+                "(lookup_hash, medium)"
+            )
+
+            # Create hashing_metadata table to store the current lookup_pepper
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS hashing_metadata ("
+                "id integer primary key, "
+                "lookup_pepper varchar(256)"
+                ")"
+            )
+
+            self.db.commit()
+            logger.info("v2 -> v3 schema migration complete")
+            self._setSchemaVersion(3)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()

@@ -34,9 +34,9 @@ class LocalAssociationStore:
 
         # sqlite's support for upserts is atrocious
         cur.execute("insert or replace into local_threepid_associations "
-                    "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter')"
-                    " values (?, ?, ?, ?, ?, ?)",
-                    (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
+                    "('medium', 'address', 'lookup_hash', 'mxid', 'ts', 'notBefore', 'notAfter')"
+                    " values (?, ?, ?, ?, ?, ?, ?)",
+                    (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
 
     def getAssociationsAfterId(self, afterId, limit):
@@ -45,7 +45,8 @@ class LocalAssociationStore:
         if afterId is None:
             afterId = -1
 
-        q = "select id, medium, address, mxid, ts, notBefore, notAfter from local_threepid_associations " \
+        q = "select id, medium, address, lookup_hash, mxid, ts, notBefore, notAfter from " \
+            "local_threepid_associations " \
             "where id > ? order by id asc"
         if limit is not None:
             q += " limit ?"
@@ -58,7 +59,7 @@ class LocalAssociationStore:
 
         assocs = {}
         for row in res.fetchall():
-            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6])
+            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             assocs[row[0]] = assoc
             maxId = row[0]
 
@@ -139,10 +140,20 @@ class GlobalAssociationStore:
         return row[0]
 
     def getMxids(self, threepid_tuples):
+        """Given a list of threepid_tuples, return the same list but with
+        mxids appended to each tuple for which a match was found in the
+        database for. Output is ordered by medium, address, timestamp DESC
+
+        :param threepid_tuples: List containing (medium, address) tuples
+        :type threepid_tuples: [(str, str)]
+
+        :returns a list of (medium, address, mxid) tuples
+        :rtype [(str, str, str)]
+        """
         cur = self.sydent.db.cursor()
 
-        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))");
-        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))");
+        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))")
+        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))")
 
         try:
             inserted_cap = 0
@@ -181,14 +192,13 @@ class GlobalAssociationStore:
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
         :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
-        :param sgAssoc The original raw bytes of the signed association
-        :return:
+        :param sgAssoc: The original raw bytes of the signed association
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("insert or ignore into global_threepid_associations "
-                          "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
-                          "(?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                          (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
+                          "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
+                          "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                          (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
                           originServer, originId, rawSgAssoc))
         if commit:
             self.sydent.db.commit()
@@ -216,3 +226,23 @@ class GlobalAssociationStore:
             cur.rowcount, medium, address,
         )
         self.sydent.db.commit()
+
+    def retrieveMxidFromHash(self, lookup_hash):
+        """Returns an mxid from a given lookup_hash value
+
+        :param input_hash: The lookup_hash value to lookup in the database
+        :type input_hash: str
+
+        :returns the mxid relating to the lookup_hash value if found,
+                 otherwise None
+        :rtype: str|None
+        """
+        cur = self.sydent.db.cursor()
+
+        res = cur.execute(
+            "SELECT mxid FROM global_threepid_associations WHERE lookup_hash = ?", (lookup_hash,)
+        )
+        row = res.fetchone()
+        if not row:
+            return None
+        return row[0]
