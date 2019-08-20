@@ -86,25 +86,25 @@ class LookupV2Servlet(Resource):
             medium_address_tuples = []
             for address_and_medium in addresses:
                 # Parse medium, address components
-                # The address and medium are flipped from what getMxids() is
-                # expecting, so switch them around
-                address, medium = address_and_medium.rsplit(maxsplit=1)
+                address_medium_split = address_and_medium.split()
 
                 # Forbid addresses that contain a space
-                if " " in address:
+                if len(address_medium_split) != 2:
                     request.setResponseCode(400)
                     return {
                         'errcode': 'M_UNKNOWN',
-                        'error': '"%s": contains spaces' % address
+                        'error': 'Invalid "address medium" pair: "%s"' % address_and_medium
                     }
 
+                # Get the mxid for the address/medium combo if known
+                address, medium = address_medium_split
                 medium_address_tuples.append((str(medium), str(address)))
 
             # Lookup the mxids
             medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)
 
             # Return a dictionary of lookup_string: mxid values
-            return {'mappings': {x[0]: x[2] for x in medium_address_mxid_tuples}}
+            return {'mappings': {x[1]: x[2] for x in medium_address_mxid_tuples}}
 
         elif algorithm == "sha256":
             # Lookup using SHA256 with URL-safe base64 encoding

@@ -50,6 +50,7 @@ class ThreepidBinder:
 
     def __init__(self, sydent):
         self.sydent = sydent
+        self.hashing_store = HashingMetadataStore(sydent)
 
     def addBinding(self, medium, address, mxid):
         """Binds the given 3pid to the given mxid.
@@ -71,7 +72,7 @@ class ThreepidBinder:
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
         str_to_hash = ' '.join(
-            [address, medium, self.sydent.cfg.get("hashing", "lookup_pepper")],
+            [address, medium, self.hashing_store.get_lookup_pepper()],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 

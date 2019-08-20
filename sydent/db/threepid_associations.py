@@ -34,7 +34,7 @@ class LocalAssociationStore:
 
         # sqlite's support for upserts is atrocious
         cur.execute("insert or replace into local_threepid_associations "
-                    "('medium', 'address', 'lookup_hash', mxid', 'ts', 'notBefore', 'notAfter')"
+                    "('medium', 'address', 'lookup_hash', 'mxid', 'ts', 'notBefore', 'notAfter')"
                     " values (?, ?, ?, ?, ?, ?, ?)",
                     (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
@@ -45,7 +45,8 @@ class LocalAssociationStore:
         if afterId is None:
             afterId = -1
 
-        q = "select id, medium, address, mxid, ts, notBefore, notAfter from local_threepid_associations " \
+        q = "select id, medium, address, lookup_hash, mxid, ts, notBefore, notAfter from " \
+            "local_threepid_associations " \
             "where id > ? order by id asc"
         if limit is not None:
             q += " limit ?"
@@ -58,7 +59,7 @@ class LocalAssociationStore:
 
         assocs = {}
         for row in res.fetchall():
-            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6])
+            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             assocs[row[0]] = assoc
             maxId = row[0]
 

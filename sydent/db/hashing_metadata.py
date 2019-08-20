@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Actions on the hashing_metadata table which is defined in the migration process in
+# sqlitedb.py
 
 class HashingMetadataStore:
     def __init__(self, sydent):
