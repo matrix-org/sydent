@@ -53,7 +53,7 @@ class HashingMetadataStore:
         )
         cur.execute(sql, (pepper,))
 
-        # Hand the cursor it to each rehashing function
+        # Hand the cursor to each rehashing function
         # Each function will queue some rehashing db transactions
         self._rehash_threepids(cur, hashing_function, pepper, "local_threepid_associations")
         self._rehash_threepids(cur, hashing_function, pepper, "global_threepid_associations")
