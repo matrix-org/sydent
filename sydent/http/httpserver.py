@@ -39,8 +39,7 @@ class ClientApiHttpServer:
         identity = Resource()
         api = Resource()
         v1 = self.sydent.servlets.v1
-        # also use the 'v1' servlet for v2 - it's just a ping responder
-        v2 = self.sydent.servlets.v1
+        v2 = self.sydent.servlets.v2
 
         validate = Resource()
         email = Resource()
@@ -54,6 +53,9 @@ class ClientApiHttpServer:
         lookup = self.sydent.servlets.lookup
         bulk_lookup = self.sydent.servlets.bulk_lookup
 
+        hash_details = self.sydent.servlets.hash_details
+        lookup_v2 = self.sydent.servlets.lookup_v2
+
         threepid = Resource()
         bind = self.sydent.servlets.threepidBind
         unbind = self.sydent.servlets.threepidUnbind
@@ -66,6 +68,7 @@ class ClientApiHttpServer:
         root.putChild('_matrix', matrix)
         matrix.putChild('identity', identity)
         identity.putChild('api', api)
+        identity.putChild('v2', v2)
         api.putChild('v1', v1)
 
         v1.putChild('validate', validate)
@@ -96,7 +99,6 @@ class ClientApiHttpServer:
 
         v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
 
-
         # v2
         # note v2 loses the /api so goes on 'identity' not 'api'
         identity.putChild('v2', v2)
@@ -116,6 +118,8 @@ class ClientApiHttpServer:
         v2.putChild('3pid', threepid)
         v2.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
         v2.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+        v2.putChild('lookup', lookup_v2)
+        v2.putChild('hash_details', hash_details)
 
         self.factory = Site(root)
         self.factory.displayTracebacks = False

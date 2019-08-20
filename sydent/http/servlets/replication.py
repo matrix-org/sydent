@@ -18,6 +18,10 @@ import twisted.python.log
 from twisted.web.resource import Resource
 from sydent.http.servlets import jsonwrap
 from sydent.threepid import threePidAssocFromDict
+
+from sydent.util.hash import sha256_and_url_safe_base64
+
+from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
@@ -29,6 +33,7 @@ logger = logging.getLogger(__name__)
 class ReplicationPushServlet(Resource):
     def __init__(self, sydent):
         self.sydent = sydent
+        self.hashing_store = HashingMetadataStore(sydent)
 
     @jsonwrap
     def render_POST(self, request):
@@ -66,21 +71,32 @@ class ReplicationPushServlet(Resource):
 
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
-        for originId,sgAssoc in inJson['sgAssocs'].items():
+        for originId, sgAssoc in inJson['sgAssocs'].items():
             try:
                 peer.verifySignedAssociation(sgAssoc)
                 logger.debug("Signed association from %s with origin ID %s verified", peer.servername, originId)
 
-                # Don't bother adding if one has already failed: we add all of them or none so we're only going to
-                # roll back the transaction anyway (but we continue to try & verify the rest so we can give a
-                # complete list of the ones that don't verify)
+                # Don't bother adding if one has already failed: we add all of them or none so
+                # we're only going to roll back the transaction anyway (but we continue to try
+                # & verify the rest so we can give a complete list of the ones that don't
+                # verify)
                 if len(failedIds) > 0:
                     continue
 
                 assocObj = threePidAssocFromDict(sgAssoc)
 
                 if assocObj.mxid is not None:
-                    globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
+                    # Calculate the lookup hash with our own pepper for this association
+                    str_to_hash = ' '.join(
+                        [assocObj.address, assocObj.medium,
+                         self.hashing_store.get_lookup_pepper()],
+                    )
+                    assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
+
+                    # Add this association
+                    globalAssocsStore.addAssociation(
+                        assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False
+                    )
                 else:
                     logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
                     globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
@@ -98,4 +114,4 @@ class ReplicationPushServlet(Resource):
                     'failed_ids':failedIds}
         else:
             self.sydent.db.commit()
-            return {'success':True}
+            return {'success': True}
