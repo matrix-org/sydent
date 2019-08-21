@@ -104,7 +104,8 @@ class LookupV2Servlet(Resource):
             medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)
 
             # Return a dictionary of lookup_string: mxid values
-            return {'mappings': {x[1]: x[2] for x in medium_address_mxid_tuples}}
+            return {'mappings': {
+                        "%s %s" % (x[1], x[0]): x[2] for x in medium_address_mxid_tuples}}
 
         elif algorithm == "sha256":
             # Lookup using SHA256 with URL-safe base64 encoding
