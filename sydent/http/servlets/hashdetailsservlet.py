@@ -17,6 +17,7 @@
 from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.hashing_metadata import HashingMetadataStore
+from sydent.http.auth import authIfV2
 
 import logging
 import json
@@ -36,6 +37,7 @@ class HashDetailsServlet(Resource):
         self.sydent = syd
         self.lookup_pepper = lookup_pepper
 
+    @jsonwrap
     def render_GET(self, request):
         """
         Return the hashing algorithms and pepper that this IS supports. The
@@ -48,12 +50,14 @@ class HashDetailsServlet(Resource):
                  information before hashing.
         """
         send_cors(request)
+
+        authIfV2(self.sydent, request)
         
         request.setResponseCode(200)
-        return json.dumps({
+        return {
             "algorithms": self.known_algorithms,
             "lookup_pepper": self.lookup_pepper,
-        })
+        }
 
     @jsonwrap
     def render_OPTIONS(self, request):

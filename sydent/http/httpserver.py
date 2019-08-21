@@ -112,8 +112,6 @@ class ClientApiHttpServer:
 
         # v2 versions of existing APIs
         v2.putChild('validate', validate)
-        v2.putChild('lookup', lookup)
-        v2.putChild('bulk_lookup', bulk_lookup)
         v2.putChild('pubkey', pubkey)
         v2.putChild('3pid', threepid)
         v2.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
