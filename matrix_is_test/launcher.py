@@ -46,19 +46,19 @@ email.subject = Your Validation Token
 email.invite_template = {testsubject_path}/res/invite_template.eml
 """
 
-class SyditestLauncher(object):
-    def __init__(self, withTerms):
-        self.withTerms = withTerms
+class MatrixIsTestLauncher(object):
+    def __init__(self, with_terms):
+        self.with_terms = with_terms
 
     def launch(self):
         sydent_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..',
         ))
         testsubject_path = os.path.join(
-            sydent_path, 'syditest_subject',
+            sydent_path, 'matrix_is_test',
         )
-        terms_path = os.path.join(testsubject_path, 'terms.yaml') if self.withTerms else ''
-        port = 8099 if self.withTerms else 8098
+        terms_path = os.path.join(testsubject_path, 'terms.yaml') if self.with_terms else ''
+        port = 8099 if self.with_terms else 8098
 
         self.tmpdir = tempfile.mkdtemp(prefix='sydenttest')
 
@@ -76,8 +76,10 @@ class SyditestLauncher(object):
 
         stderr_fp = open(os.path.join(testsubject_path, 'sydent.stderr'), 'w')
 
+        pybin = os.getenv('SYDENT_PYTHON', 'python')
+
         self.process = Popen(
-            args=['python', '-m', 'sydent.sydent'],
+            args=[pybin, '-m', 'sydent.sydent'],
             cwd=self.tmpdir,
             env=newEnv,
             stderr=stderr_fp,
@@ -92,5 +94,5 @@ class SyditestLauncher(object):
         self.process.terminate()
         shutil.rmtree(self.tmpdir)
 
-    def getBaseUrl(self):
+    def get_base_url(self):
         return self._baseUrl

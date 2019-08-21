@@ -20,6 +20,7 @@ import logging
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.http.auth import authIfV2
 from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
 
 logger = logging.getLogger(__name__)
@@ -60,9 +61,9 @@ class LookupV2Servlet(Resource):
         """
         send_cors(request)
 
-        err, args = get_args(request, ('addresses', 'algorithm', 'pepper'))
-        if err:
-            return err
+        authIfV2(self.sydent, request)
+
+        args = get_args(request, ('addresses', 'algorithm', 'pepper'))
 
         addresses = args['addresses']
         if not isinstance(addresses, list):
@@ -104,7 +105,8 @@ class LookupV2Servlet(Resource):
             medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)
 
             # Return a dictionary of lookup_string: mxid values
-            return {'mappings': {x[1]: x[2] for x in medium_address_mxid_tuples}}
+            return {'mappings': {"%s %s" % (x[1], x[0]): x[2]
+                                 for x in medium_address_mxid_tuples}}
 
         elif algorithm == "sha256":
             # Lookup using SHA256 with URL-safe base64 encoding
