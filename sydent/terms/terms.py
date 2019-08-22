@@ -35,8 +35,7 @@ class Terms(object):
                 policies[docName] = {
                     'version': doc['version'],
                 }
-                for langName, lang in doc['langs'].items():
-                    policies[docName][langName] = lang
+                policies[docName].update(doc['langs'])
         return { 'policies': policies }
 
     def getUrlSet(self):
