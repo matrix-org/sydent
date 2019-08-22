@@ -24,7 +24,14 @@ from twisted.web import server
 
 logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
+
+
 class MatrixRestError(Exception):
+    """
+    Handled by the jsonwrap wrapper. Any servlets that don't use this
+    wrapper should catch this exception themselves.
+    """
     def __init__(self, httpStatus, errcode, error):
         super(Exception, self).__init__(error)
         self.httpStatus = httpStatus
@@ -96,6 +103,14 @@ def jsonwrap(f):
             return json.dumps({
                 "errcode": e.errcode,
                 "error": e.error,
+            })
+        except Exception:
+            logger.exception("Exception processing request");
+            request = args[1]
+            request.setResponseCode(500)
+            return json.dumps({
+                "errcode": "M_UNKNOWN",
+                "error": "Internal Server Error",
             })
     return inner
 
