@@ -72,8 +72,7 @@ def get_args(request, required_args):
         if a not in args:
             missing.append(a)
 
-    @functools.wraps(f)
-    def inner(*args, **kwargs):
+    if len(missing) > 0:
         request.setResponseCode(400)
         msg = "Missing parameters: "+(",".join(missing))
         raise MatrixRestError(400, 'M_MISSING_PARAMS', msg)
@@ -81,6 +80,7 @@ def get_args(request, required_args):
     return args
 
 def jsonwrap(f):
+    @functools.wraps(f)
     def inner(*args, **kwargs):
         try:
             return json.dumps(f(*args, **kwargs)).encode("UTF-8")
