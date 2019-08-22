@@ -49,7 +49,7 @@ def authIfV2(sydent, request, requireTermsAgreed=True):
 
         account = accountStore.getAccountByToken(token)
         if account is None:
-            raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")
+            raise MatrixRestError(401, "M_UNAUTHORIZED", "Unauthorized")
 
         if requireTermsAgreed:
             terms = get_terms(sydent)
