@@ -26,7 +26,7 @@ class TermsStore:
         )
 
         urls = []
-        for row in res.fetchall():
+        for url, in res:
             urls.append(row[0])
 
         return urls
