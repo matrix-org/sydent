@@ -17,6 +17,7 @@
 import logging
 import json
 import copy
+import functools
 
 from twisted.internet import defer
 from twisted.web import server
@@ -95,11 +96,10 @@ def get_args(request, required_args):
 
 def jsonwrap(f):
     @functools.wraps(f)
-    def inner(*args, **kwargs):
+    def inner(self, request, *args, **kwargs):
         try:
-            return json.dumps(f(*args, **kwargs)).encode("UTF-8")
+            return json.dumps(f(self, request, *args, **kwargs)).encode("UTF-8")
         except MatrixRestError as e:
-            request = args[1]
             request.setResponseCode(e.httpStatus)
             return json.dumps({
                 "errcode": e.errcode,
@@ -107,7 +107,6 @@ def jsonwrap(f):
             })
         except Exception:
             logger.exception("Exception processing request");
-            request = args[1]
             request.setResponseCode(500)
             return json.dumps({
                 "errcode": "M_UNKNOWN",
