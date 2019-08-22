@@ -2,6 +2,7 @@
 
 # Copyright 2014 OpenMarket Ltd
 # Copyright 2018 New Vector Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,6 +99,23 @@ class ClientApiHttpServer:
 
         v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
 
+        # v2
+        # note v2 loses the /api so goes on 'identity' not 'api'
+        identity.putChild('v2', v2)
+
+        # v2 exclusive APIs
+        v2.putChild('terms', self.sydent.servlets.termsServlet)
+        account = self.sydent.servlets.accountServlet
+        v2.putChild('account', account)
+        account.putChild('register', self.sydent.servlets.registerServlet)
+        account.putChild('logout', self.sydent.servlets.logoutServlet)
+
+        # v2 versions of existing APIs
+        v2.putChild('validate', validate)
+        v2.putChild('pubkey', pubkey)
+        v2.putChild('3pid', threepid)
+        v2.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
+        v2.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
         v2.putChild('lookup', lookup_v2)
         v2.putChild('hash_details', hash_details)
 

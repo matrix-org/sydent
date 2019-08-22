@@ -39,25 +39,32 @@ def get_args(request, required_args):
     """
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
-    www-form-urlencoded for backwards compatability.
+    www-form-urlencoded for backwards compatability on v1 endpoints only.
     Returns a tuple (error, args) where if error is non-null,
     the request is malformed. Otherwise, args contains the
     parameters passed.
     """
+    v1_path = request.path.startswith('/_matrix/identity/v1')
+
     args = None
+    # for v1 paths, only look for json args if content type is json
     if (
-        request.requestHeaders.hasHeader('Content-Type') and
-        request.requestHeaders.getRawHeaders('Content-Type')[0].startswith('application/json')
+        request.method == 'POST' and (
+            not v1_path or (
+                request.requestHeaders.hasHeader('Content-Type') and
+                request.requestHeaders.getRawHeaders('Content-Type')[0].startswith('application/json')
+            )
+        )
     ):
         try:
             args = json.load(request.content)
         except ValueError:
             raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
-    # If we didn't get anything from that, try the request args
+    # If we didn't get anything from that, and it's a v1 api path, try the request args
     # (riot-web's usage of the ed25519 sign servlet currently involves
     # sending the params in the query string with a json body of 'null')
-    if args is None:
+    if args is None and (v1_path or request.method == 'GET'):
         args = copy.copy(request.args)
         # Twisted supplies everything as an array because it's valid to
         # supply the same params multiple times with www-form-urlencoded
@@ -67,6 +74,8 @@ def get_args(request, required_args):
         for k, v in args.items():
             if isinstance(v, list) and len(v) == 1:
                 args[k] = v[0]
+    elif args is None:
+        args = {}
 
     missing = []
     for a in required_args:
@@ -98,6 +107,31 @@ def jsonwrap(f):
                 "errcode": "M_UNKNOWN",
                 "error": "Internal Server Error",
             })
+    return inner
+
+def deferjsonwrap(f):
+    def reqDone(resp, request):
+        request.setResponseCode(200)
+        request.write(json.dumps(resp).encode("UTF-8"))
+        request.finish()
+
+    def reqErr(failure, request):
+        if failure.check(MatrixRestError) is not None:
+            request.setResponseCode(failure.value.httpStatus)
+            request.write(json.dumps({'errcode': failure.value.errcode, 'error': failure.value.error}))
+        else:
+            logger.error("Request processing failed: %r, %s", failure, failure.getTraceback())
+            request.setResponseCode(500)
+            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
+        request.finish()
+
+    def inner(*args, **kwargs):
+        request = args[1]
+
+        d = defer.maybeDeferred(f, *args, **kwargs)
+        d.addCallback(reqDone, request)
+        d.addErrback(reqErr, request)
+        return server.NOT_DONE_YET
     return inner
 
 def send_cors(request):
