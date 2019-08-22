@@ -16,7 +16,7 @@
 
 from sydent.users.accounts import Account
 
-class AccountStore:
+class AccountStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
