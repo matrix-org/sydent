@@ -61,6 +61,10 @@ class Terms(object):
         return agreed == required
 
 def get_terms(sydent):
+    """Read and parse terms as specified in the config.
+
+    :returns Terms
+    """
     try:
         termsYaml = None
         termsPath = sydent.cfg.get('general', 'terms.path')
