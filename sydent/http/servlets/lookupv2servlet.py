@@ -79,7 +79,7 @@ class LookupV2Servlet(Resource):
             request.setResponseCode(400)
             return {
                 'errcode': 'M_INVALID_PEPPER',
-                'error': "pepper does not match '%s'" % self.lookup_pepper,
+                'error': "pepper does not match '%s'" % (self.lookup_pepper,),
                 'algorithm': algorithm,
                 'lookup_pepper': self.lookup_pepper,
             }
