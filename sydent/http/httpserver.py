@@ -110,6 +110,15 @@ class ClientApiHttpServer:
         account.putChild('register', self.sydent.servlets.registerServlet)
         account.putChild('logout', self.sydent.servlets.logoutServlet)
 
+        # v2 versions of existing APIs
+        v2.putChild('validate', validate)
+        v2.putChild('pubkey', pubkey)
+        v2.putChild('3pid', threepid)
+        v2.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
+        v2.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+        v2.putChild('lookup', lookup_v2)
+        v2.putChild('hash_details', hash_details)
+
         self.factory = Site(root)
         self.factory.displayTracebacks = False
 

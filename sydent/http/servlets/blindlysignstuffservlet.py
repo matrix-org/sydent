@@ -20,6 +20,7 @@ import signedjson.key
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.auth import authIfV2
 
 
 class BlindlySignStuffServlet(Resource):
@@ -32,6 +33,8 @@ class BlindlySignStuffServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         args = get_args(request, ("private_key", "token", "mxid"))
 

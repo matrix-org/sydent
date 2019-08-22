@@ -18,6 +18,7 @@ from twisted.web.resource import Resource
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.auth import authIfV2
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 
@@ -28,6 +29,8 @@ class ThreePidBindServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         args = get_args(request, ('sid', 'client_secret', 'mxid'))
 

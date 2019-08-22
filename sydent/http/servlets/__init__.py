@@ -19,6 +19,11 @@ import json
 import copy
 import functools
 
+from twisted.internet import defer
+from twisted.web import server
+
+
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 
@@ -140,4 +145,4 @@ def send_cors(request):
     request.setHeader("Access-Control-Allow-Methods",
                       "GET, POST, PUT, DELETE, OPTIONS")
     request.setHeader("Access-Control-Allow-Headers",
-                      "Origin, X-Requested-With, Content-Type, Accept")
+                      "Origin, X-Requested-With, Content-Type, Accept, Authorization")
