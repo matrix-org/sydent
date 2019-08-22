@@ -2,6 +2,7 @@
 
 # Copyright 2014 OpenMarket Ltd
 # Copyright 2018 New Vector Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +36,7 @@ from http.httpserver import (
 from http.httpsclient import ReplicationHttpsClient
 from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
+from http.servlets.termsservlet import TermsServlet
 from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
 from hs_federation.verifier import Verifier
@@ -57,6 +59,9 @@ from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.v1_servlet import V1Servlet
+from http.servlets.accountservlet import AccountServlet
+from http.servlets.registerservlet import RegisterServlet
+from http.servlets.logoutservlet import LogoutServlet
 from http.servlets.v2_servlet import V2Servlet
 
 from db.valsession import ThreePidValSessionStore
@@ -74,6 +79,7 @@ CONFIG_DEFAULTS = {
         'log.path': '',
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
+        'terms.path': '',
 
         # The following can be added to your local config file to enable prometheus
         # support.
@@ -225,6 +231,10 @@ class Sydent:
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
+        self.servlets.termsServlet = TermsServlet(self)
+        self.servlets.accountServlet = AccountServlet(self)
+        self.servlets.registerServlet = RegisterServlet(self)
+        self.servlets.logoutServlet = LogoutServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 
