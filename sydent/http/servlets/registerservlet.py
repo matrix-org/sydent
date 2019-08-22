@@ -34,6 +34,7 @@ class RegisterServlet(Resource):
 
     def __init__(self, syd):
         self.sydent = syd
+        self.client = FederationHttpClient(self.sydent)
 
     @deferjsonwrap
     @defer.inlineCallbacks
@@ -45,8 +46,7 @@ class RegisterServlet(Resource):
 
         args = get_args(request, ('matrix_server_name', 'access_token'))
 
-        client = FederationHttpClient(self.sydent)
-        result = yield client.get_json(
+        result = yield self.client.get_json(
             "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s" % (
                 args['matrix_server_name'], urllib.quote(args['access_token']),
             ),
