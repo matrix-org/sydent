@@ -28,9 +28,8 @@ class ThreePidBindServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        err, args = get_args(request, ('sid', 'client_secret', 'mxid'))
-        if err:
-            return err
+
+        args = get_args(request, ('sid', 'client_secret', 'mxid'))
 
         sid = args['sid']
         mxid = args['mxid']

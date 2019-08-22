@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014,2017 OpenMarket Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +22,7 @@ import logging
 import json
 import signedjson.sign
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,7 @@ class LookupServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
+    @jsonwrap
     def render_GET(self, request):
         """
         Look up an individual threepid.
@@ -44,9 +46,8 @@ class LookupServlet(Resource):
         Returns: A signed association if the threepid has a corresponding mxid, otherwise the empty object.
         """
         send_cors(request)
-        err, args = get_args(request, ('medium', 'address'))
-        if err:
-            return json.dumps(err)
+
+        args = get_args(request, ('medium', 'address'))
 
         medium = args['medium']
         address = args['address']
@@ -56,7 +57,7 @@ class LookupServlet(Resource):
         sgassoc = globalAssocStore.signedAssociationStringForThreepid(medium, address)
 
         if not sgassoc:
-            return json.dumps({})
+            return {}
 
         sgassoc = json.loads(sgassoc.encode('utf8'))
         if not self.sydent.server_name in sgassoc['signatures']:
@@ -82,8 +83,9 @@ class LookupServlet(Resource):
                 self.sydent.server_name,
                 self.sydent.keyring.ed25519
             )
-        return json.dumps(sgassoc)
+        return sgassoc
 
+    @jsonwrap
     def render_POST(self, request):
         """
         Bulk-lookup for threepids.
@@ -94,9 +96,8 @@ class LookupServlet(Resource):
         Threepids for which no mapping is found are omitted.
         """
         send_cors(request)
-        err, args = get_args(request, ('threepids',))
-        if err:
-            return json.dumps(err)
+
+        args = get_args(request, ('threepids',))
 
         threepids = args['threepids']
         if not isinstance(threepids, list):

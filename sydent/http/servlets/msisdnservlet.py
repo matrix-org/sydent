@@ -39,10 +39,7 @@ class MsisdnRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error, args = get_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
-        if error:
-            request.setResponseCode(400)
-            return error
+        args = get_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
 
         raw_phone_number = args['phone_number']
         country = args['country']
@@ -128,9 +125,7 @@ class MsisdnValidateCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        err, args = get_args(request, ('token', 'sid', 'client_secret'))
-        if err:
-            return err
+        args = get_args(request, ('token', 'sid', 'client_secret'))
 
         return self.do_validate_request(args)
 

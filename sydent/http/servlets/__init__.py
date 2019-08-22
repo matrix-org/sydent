@@ -18,6 +18,14 @@ import json
 import copy
 
 
+class MatrixRestError(Exception):
+    def __init__(self, httpStatus, errcode, error):
+        super(Exception, self).__init__(error)
+        self.httpStatus = httpStatus
+        self.errcode = errcode
+        self.error = error
+
+
 def get_args(request, required_args):
     """
     Helper function to get arguments for an HTTP request.
@@ -35,8 +43,7 @@ def get_args(request, required_args):
         try:
             args = json.load(request.content)
         except ValueError:
-            request.setResponseCode(400)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}, None
+            raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
     # If we didn't get anything from that, try the request args
     # (riot-web's usage of the ed25519 sign servlet currently involves
@@ -60,13 +67,21 @@ def get_args(request, required_args):
     if len(missing) > 0:
         request.setResponseCode(400)
         msg = "Missing parameters: "+(",".join(missing))
-        return {'errcode': 'M_MISSING_PARAMS', 'error': msg}, None
+        raise MatrixRestError(400, 'M_MISSING_PARAMS', msg)
 
-    return None, args
+    return args
 
 def jsonwrap(f):
     def inner(*args, **kwargs):
-        return json.dumps(f(*args, **kwargs)).encode("UTF-8")
+        try:
+            return json.dumps(f(*args, **kwargs)).encode("UTF-8")
+        except MatrixRestError as e:
+            request = args[1]
+            request.setResponseCode(e.httpStatus)
+            return json.dumps({
+                "errcode": e.errcode,
+                "error": e.error,
+            })
     return inner
 
 def send_cors(request):

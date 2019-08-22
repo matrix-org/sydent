@@ -60,9 +60,7 @@ class LookupV2Servlet(Resource):
         """
         send_cors(request)
 
-        err, args = get_args(request, ('addresses', 'algorithm', 'pepper'))
-        if err:
-            return err
+        args = get_args(request, ('addresses', 'algorithm', 'pepper'))
 
         addresses = args['addresses']
         if not isinstance(addresses, list):
