@@ -26,6 +26,10 @@ from sydent.http.servlets import MatrixRestError
 logger = logging.getLogger(__name__)
 
 def tokenFromRequest(request):
+    """Extract token from header of query parameter.
+
+    :returns str|None: The token or None if not found
+    """
     token = None
     # check for Authorization header first
     authHeader = request.getHeader('Authorization')
