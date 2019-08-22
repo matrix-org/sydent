@@ -29,7 +29,7 @@ class AccountStore(object):
         if row is None:
             return None
 
-        return Account(row[0], row[1], row[2])
+        return Account(*row)
 
     def storeAccount(self, user_id, creation_ts, consent_version):
         cur = self.sydent.db.cursor()

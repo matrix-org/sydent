@@ -33,9 +33,8 @@ class TermsStore(object):
 
     def addAgreedUrls(self, user_id, urls):
         cur = self.sydent.db.cursor()
-        for u in urls:
-            res = cur.execute(
-                "insert or ignore into accepted_terms_urls (user_id, url) values (?, ?)",
-                (user_id, u),
-            )
+        res = cur.executemany(
+            "insert or ignore into accepted_terms_urls (user_id, url) values (?, ?)",
+            ((user_id, u) for u in urls),
+        )
         self.sydent.db.commit()
