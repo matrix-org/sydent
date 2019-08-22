@@ -53,7 +53,7 @@ class Terms(object):
 
         if self._rawTerms is not None:
             for docName, doc in self._rawTerms['docs'].items():
-                for _, lang in doc['langs'].items():
+                for lang in doc['langs'].values():
                     if lang['url'] in urlset:
                         agreed.add(docName)
                         break
