@@ -35,8 +35,7 @@ class Terms(object):
                 policies[docName] = {
                     'version': doc['version'],
                 }
-                for langName, lang in doc['langs'].items():
-                    policies[docName][langName] = lang
+                policies[docName].update(doc['langs'])
         return { 'policies': policies }
 
     def getUrlSet(self):
@@ -53,7 +52,7 @@ class Terms(object):
 
         if self._rawTerms is not None:
             for docName, doc in self._rawTerms['docs'].items():
-                for _, lang in doc['langs'].items():
+                for lang in doc['langs'].values():
                     if lang['url'] in urlset:
                         agreed.add(docName)
                         break
@@ -62,6 +61,10 @@ class Terms(object):
         return agreed == required
 
 def get_terms(sydent):
+    """Read and parse terms as specified in the config.
+
+    :returns Terms
+    """
     try:
         termsYaml = None
         termsPath = sydent.cfg.get('general', 'terms.path')
