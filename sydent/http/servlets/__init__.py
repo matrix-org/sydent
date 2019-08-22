@@ -86,7 +86,8 @@ def get_args(request, required_args):
         if a not in args:
             missing.append(a)
 
-    if len(missing) > 0:
+    @functools.wraps(f)
+    def inner(*args, **kwargs):
         request.setResponseCode(400)
         msg = "Missing parameters: "+(",".join(missing))
         raise MatrixRestError(400, 'M_MISSING_PARAMS', msg)
