@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 New Vector Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,26 +16,21 @@
 
 from twisted.web.resource import Resource
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.servlets import jsonwrap, send_cors
 
 
-class AuthenticatedBindThreePidServlet(Resource):
-    """A servlet which allows a caller to bind any 3pid they want to an mxid
+class V2Servlet(Resource):
+    isLeaf = False
 
-    It is assumed that authentication happens out of band
-    """
-    def __init__(self, sydent):
+    def __init__(self, syd):
         Resource.__init__(self)
-        self.sydent = sydent
+        self.sydent = syd
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_GET(self, request):
         send_cors(request)
-        args = get_args(request, ('medium', 'address', 'mxid'))
-
-        return self.sydent.threepidBinder.addBinding(
-            args['medium'], args['address'], args['mxid'],
-        )
+        request.setResponseCode(200)
+        return {}
 
     @jsonwrap
     def render_OPTIONS(self, request):

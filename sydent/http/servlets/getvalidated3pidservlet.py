@@ -19,6 +19,7 @@
 from twisted.web.resource import Resource
 
 from sydent.http.servlets import jsonwrap, get_args
+from sydent.http.auth import authIfV2
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
@@ -31,9 +32,9 @@ class GetValidated3pidServlet(Resource):
 
     @jsonwrap
     def render_GET(self, request):
-        err, args = get_args(request, ('sid', 'client_secret'))
-        if err:
-            return err
+        authIfV2(self.sydent, request)
+
+        args = get_args(request, ('sid', 'client_secret'))
 
         sid = args['sid']
         clientSecret = args['client_secret']
