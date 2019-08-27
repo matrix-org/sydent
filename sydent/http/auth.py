@@ -26,6 +26,10 @@ from sydent.http.servlets import MatrixRestError
 logger = logging.getLogger(__name__)
 
 def tokenFromRequest(request):
+    """Extract token from header of query parameter.
+
+    :returns str|None: The token or None if not found
+    """
     token = None
     # check for Authorization header first
     authHeader = request.getHeader('Authorization')
@@ -39,17 +43,22 @@ def tokenFromRequest(request):
     return token
 
 def authIfV2(sydent, request, requireTermsAgreed=True):
+    """For v2 APIs check that the request has a valid access token associated with it
+
+    :returns Account|None: The account object if there is correct auth, or None for v1 APIs
+    :raises MatrixRestError: If the request is v2 but could not be authed or the user has not accepted terms
+    """
     if request.path.startswith('/_matrix/identity/v2'):
         token = tokenFromRequest(request)
 
         if token is None:
-            raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")
+            raise MatrixRestError(401, "M_UNAUTHORIZED", "Unauthorized")
 
         accountStore = AccountStore(sydent)
 
         account = accountStore.getAccountByToken(token)
         if account is None:
-            raise MatrixRestError(403, "M_UNAUTHORIZED", "Unauthorized")
+            raise MatrixRestError(401, "M_UNAUTHORIZED", "Unauthorized")
 
         if requireTermsAgreed:
             terms = get_terms(sydent)

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class TermsStore:
+class TermsStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
@@ -26,16 +26,15 @@ class TermsStore:
         )
 
         urls = []
-        for row in res.fetchall():
+        for url, in res:
             urls.append(row[0])
 
         return urls
 
     def addAgreedUrls(self, user_id, urls):
         cur = self.sydent.db.cursor()
-        for u in urls:
-            res = cur.execute(
-                "insert or ignore into accepted_terms_urls (user_id, url) values (?, ?)",
-                (user_id, u),
-            )
+        res = cur.executemany(
+            "insert or ignore into accepted_terms_urls (user_id, url) values (?, ?)",
+            ((user_id, u) for u in urls),
+        )
         self.sydent.db.commit()
