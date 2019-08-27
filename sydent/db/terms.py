@@ -27,7 +27,7 @@ class TermsStore(object):
 
         urls = []
         for url, in res:
-            urls.append(row[0])
+            urls.append(url)
 
         return urls
 
