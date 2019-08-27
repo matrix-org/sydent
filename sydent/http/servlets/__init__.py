@@ -25,8 +25,6 @@ from twisted.web import server
 
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
-
 
 class MatrixRestError(Exception):
     """
@@ -54,7 +52,7 @@ def get_args(request, required_args):
     args = None
     # for v1 paths, only look for json args if content type is json
     if (
-        request.method == 'POST' and (
+        request.method in ('POST', 'PUT') and (
             not v1_path or (
                 request.requestHeaders.hasHeader('Content-Type') and
                 request.requestHeaders.getRawHeaders('Content-Type')[0].startswith('application/json')
@@ -144,5 +142,4 @@ def send_cors(request):
     request.setHeader("Access-Control-Allow-Origin", "*")
     request.setHeader("Access-Control-Allow-Methods",
                       "GET, POST, PUT, DELETE, OPTIONS")
-    request.setHeader("Access-Control-Allow-Headers",
-                      "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+    request.setHeader("Access-Control-Allow-Headers", "*")
