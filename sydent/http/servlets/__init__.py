@@ -47,7 +47,7 @@ def get_args(request, required_args):
     the request is malformed. Otherwise, args contains the
     parameters passed.
     """
-    v1_path = request.path.startswith('/_matrix/identity/v1')
+    v1_path = request.path.startswith('/_matrix/identity/api/v1')
 
     args = None
     # for v1 paths, only look for json args if content type is json
