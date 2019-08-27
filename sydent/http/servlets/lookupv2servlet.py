@@ -20,6 +20,7 @@ import logging
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.http.auth import authIfV2
 from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,8 @@ class LookupV2Servlet(Resource):
                  User IDs for which no mapping is found are omitted.
         """
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         args = get_args(request, ('addresses', 'algorithm', 'pepper'))
 
