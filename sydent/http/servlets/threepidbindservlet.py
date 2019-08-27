@@ -45,7 +45,7 @@ class ThreePidBindServlet(Resource):
                         'error': "No valid session was found matching that sid and client secret"}
 
         if account:
-            # we're authed, so only allow binding to the logged in user id
+            # This is a v2 API so only allow binding to the logged in user id
             if account.userId != mxid:
                 raise MatrixRestError(403, 'M_UNAUTHORIZED', "This user is prohibited from binding to the mxid");
 
