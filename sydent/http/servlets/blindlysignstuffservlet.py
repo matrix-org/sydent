@@ -27,6 +27,7 @@ class BlindlySignStuffServlet(Resource):
     isLeaf = True
 
     def __init__(self, syd):
+        self.sydent = syd
         self.server_name = syd.server_name
         self.tokenStore = JoinTokenStore(syd)
 
