@@ -25,8 +25,6 @@ from twisted.web import server
 
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
-
 
 class MatrixRestError(Exception):
     """
