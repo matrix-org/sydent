@@ -142,5 +142,4 @@ def send_cors(request):
     request.setHeader("Access-Control-Allow-Origin", "*")
     request.setHeader("Access-Control-Allow-Methods",
                       "GET, POST, PUT, DELETE, OPTIONS")
-    request.setHeader("Access-Control-Allow-Headers",
-                      "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+    request.setHeader("Access-Control-Allow-Headers", "*")
