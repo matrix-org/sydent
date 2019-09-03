@@ -91,8 +91,12 @@ class MsisdnValidator:
         originator = self.getOriginator(phoneNumber)
 
         logger.info(
-            "Attempting to text code %s to %s (country %d) with originator %s",
-            valSession.token, msisdn, phoneNumber.country_code, originator
+            "Attempting to text code (country %d) with originator %s",
+            phoneNumber.country_code, originator
+        )
+        logger.debug(
+            "Texting code %s to %s",
+            valSession.token, msisdn
         )
 
         smsBody = smsBodyTemplate.format(token=valSession.token)

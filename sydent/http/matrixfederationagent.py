@@ -312,7 +312,7 @@ class MatrixFederationAgent(object):
         """
         uri = b"https://%s/.well-known/matrix/server" % (server_name, )
         uri_str = uri.decode("ascii")
-        logger.info("Fetching %s", uri_str)
+        logger.info("Fetching well-known: %s", uri_str)
         try:
             response = yield self._well_known_agent.request(b"GET", uri)
             body = yield readBody(response)

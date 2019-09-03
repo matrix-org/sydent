@@ -52,9 +52,9 @@ class MsisdnRequestCodeServlet(Resource):
         try:
             phone_number_object = phonenumbers.parse(raw_phone_number, country)
         except Exception as e:
-            logger.warn("Invalid phone number given: %r", e)
+            logger.debug("Invalid phone number given: %r", e)
             request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PHONE_NUMBER', 'error': "Invalid phone number" }
+            return {'errcode': 'M_INVALID_PHONE_NUMBER', 'error': "Invalid phone number"}
 
         msisdn = phonenumbers.format_number(
             phone_number_object, phonenumbers.PhoneNumberFormat.E164
@@ -73,13 +73,17 @@ class MsisdnRequestCodeServlet(Resource):
                 phone_number_object, clientSecret, sendAttempt, None
             )
         except DestinationRejectedException:
-            logger.error("Destination rejected for number: %s", msisdn);
+            logger.error("Destination rejected for country: %s", country)
+            logger.debug("Rejected msisdn is: %s", msisdn)
             request.setResponseCode(400)
-            resp = {'errcode': 'M_DESTINATION_REJECTED', 'error': 'Phone numbers in this country are not currently supported'}
+            resp = {
+                'errcode': 'M_DESTINATION_REJECTED',
+                'error': 'Phone numbers in this country are not currently supported',
+            }
         except Exception as e:
-            logger.error("Exception sending SMS: %r", e);
+            logger.error("Exception sending SMS: %r", e)
             request.setResponseCode(500)
-            resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
+            resp = {'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}
 
         if not resp:
             resp = {

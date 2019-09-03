@@ -87,13 +87,13 @@ class LocalAssociationStore:
                 " values (?, ?, NULL, ?, null, null)",
                 (threepid['medium'], threepid['address'], ts),
             )
-            logger.info(
+            logger.debug(
                 "Deleting local assoc for %s/%s/%s replaced %d rows",
                 threepid['medium'], threepid['address'], mxid, cur.rowcount,
             )
             self.sydent.db.commit()
         else:
-            logger.info(
+            logger.debug(
                 "No local assoc found for %s/%s/%s",
                 threepid['medium'], threepid['address'], mxid,
             )
@@ -221,7 +221,7 @@ class GlobalAssociationStore:
             "medium = ? AND address = ?",
             (medium, address),
         )
-        logger.info(
+        logger.debug(
             "Deleted %d rows from global associations for %s/%s",
             cur.rowcount, medium, address,
         )

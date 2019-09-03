@@ -98,7 +98,10 @@ class ReplicationPushServlet(Resource):
                         assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False
                     )
                 else:
-                    logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
+                    logger.debug(
+                        "Incoming deletion: removing association for %s / %s",
+                        assocObj.medium, assocObj.address
+                    )
                     globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
                 logger.info("Stored association origin ID %s from %s", originId, peer.servername)
             except:
@@ -111,7 +114,7 @@ class ReplicationPushServlet(Resource):
             self.sydent.db.rollback()
             request.setResponseCode(400)
             return {'errcode': 'M_VERIFICATION_FAILED', 'error': 'Verification failed for one or more associations',
-                    'failed_ids':failedIds}
+                    'failed_ids': failedIds}
         else:
             self.sydent.db.commit()
             return {'success': True}
