@@ -1,4 +1,4 @@
-master_version: "flerb"
+master_version: "someversion"
 docs:
   terms_of_service:
     version: "5.0"
