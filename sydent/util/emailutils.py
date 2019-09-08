@@ -36,6 +36,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         mailTemplateFile = sydent.cfg.get('email', templateName)
 
         myHostname = sydent.cfg.get('email', 'email.hostname')
+        clientBaseUrl = sydent.cfg.get('email', 'email.client_base_url', fallback='https://riot.im/app')
         if myHostname == '':
             myHostname = socket.getfqdn()
         midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
@@ -48,6 +49,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
             'date': email.utils.formatdate(localtime=False),
             'to': mailTo,
             'from': mailFrom,
+            'client_base_url': clientBaseUrl
         })
 
         for k,v in allSubstitutions.items():

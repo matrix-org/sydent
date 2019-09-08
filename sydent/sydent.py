@@ -108,6 +108,7 @@ CONFIG_DEFAULTS = {
         'email.template': 'res/email.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
+        'email.client_base_url': 'https://riot.im/app',
         'email.invite.subject': '%(sender_display_name)s has invited you to chat',
         'email.smtphost': 'localhost',
         'email.smtpport': '25',
