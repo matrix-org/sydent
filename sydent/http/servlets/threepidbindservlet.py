@@ -66,8 +66,7 @@ class ThreePidBindServlet(Resource):
         res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
         return res
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return ''

@@ -32,8 +32,7 @@ class V2Servlet(Resource):
         request.setResponseCode(200)
         return {}
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return ''

@@ -47,9 +47,8 @@ class LogoutServlet(Resource):
         accountStore.delToken(token)
         return {}
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return ''
 

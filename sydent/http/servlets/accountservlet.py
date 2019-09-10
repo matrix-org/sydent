@@ -42,9 +42,8 @@ class AccountServlet(Resource):
             "user_id": account.userId,
         }
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return ''
 

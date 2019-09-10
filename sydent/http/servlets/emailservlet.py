@@ -66,11 +66,10 @@ class EmailRequestCodeServlet(Resource):
 
         return resp
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return ''
 
 
 class EmailValidateCodeServlet(Resource):
@@ -129,8 +128,7 @@ class EmailValidateCodeServlet(Resource):
 
         return resp
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return ''

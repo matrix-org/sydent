@@ -117,8 +117,7 @@ class LookupServlet(Resource):
         return json.dumps(results)
          
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return ''
