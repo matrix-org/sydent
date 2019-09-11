@@ -64,4 +64,4 @@ class RegisterServlet(Resource):
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return ''
+        return b''
