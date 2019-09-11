@@ -96,6 +96,7 @@ def jsonwrap(f):
     @functools.wraps(f)
     def inner(self, request, *args, **kwargs):
         try:
+            request.setHeader("Content-Type", "application/json")
             return json.dumps(f(self, request, *args, **kwargs)).encode("UTF-8")
         except MatrixRestError as e:
             request.setResponseCode(e.httpStatus)
@@ -138,7 +139,6 @@ def deferjsonwrap(f):
     return inner
 
 def send_cors(request):
-    request.setHeader(b"Content-Type", b"application/json")
     request.setHeader("Access-Control-Allow-Origin", "*")
     request.setHeader("Access-Control-Allow-Methods",
                       "GET, POST, PUT, DELETE, OPTIONS")
