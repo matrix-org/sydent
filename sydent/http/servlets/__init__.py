@@ -122,13 +122,12 @@ def deferjsonwrap(f):
         request.finish()
 
     def reqErr(failure, request):
+        request.setHeader("Content-Type", "application/json")
         if failure.check(MatrixRestError) is not None:
-            request.setHeader("Content-Type", "application/json")
             request.setResponseCode(failure.value.httpStatus)
             request.write(json.dumps({'errcode': failure.value.errcode, 'error': failure.value.error}))
         else:
             logger.error("Request processing failed: %r, %s", failure, failure.getTraceback())
-            request.setHeader("Content-Type", "application/json")
             request.setResponseCode(500)
             request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
         request.finish()
