@@ -87,7 +87,7 @@ class LocalAssociationStore:
             )
             logger.info(
                 "Deleting local assoc for %s/%s/%s",
-                threepid['medium'], threepid['address'], mxid, cur.rowcount,
+                threepid['medium'], threepid['address'], mxid,
             )
             self.sydent.db.commit()
         else:
