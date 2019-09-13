@@ -192,7 +192,7 @@ class SqliteDatabase:
             # removing the whole row to minimize personal information
             # https://github.com/matrix-org/sydent/issues/192
             cur = self.db.cursor()
-            cur.execute("DELETE FROM local_threepid_associations WHERE mxid = NULL")
+            cur.execute("DELETE FROM local_threepid_associations WHERE mxid IS NULL")
             self.db.commit()
             logger.info("v4 -> v5 schema migration complete")
             self._setSchemaVersion(5)
