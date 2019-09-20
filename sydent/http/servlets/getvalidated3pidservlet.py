@@ -44,14 +44,15 @@ class GetValidated3pidServlet(Resource):
 
         try:
             s = valSessionStore.getValidatedSession(sid, clientSecret)
-        except IncorrectClientSecretException:
+        except (IncorrectClientSecretException, InvalidSessionIdException):
+            request.setResponseCode(404)
             return noMatchError
         except SessionExpiredException:
+            request.setResponseCode(400)
             return {'errcode': 'M_SESSION_EXPIRED',
                     'error': "This validation session has expired: call requestToken again"}
-        except InvalidSessionIdException:
-            return noMatchError
         except SessionNotValidatedException:
+            request.setResponseCode(400)
             return {'errcode': 'M_SESSION_NOT_VALIDATED',
                     'error': "This validation session has not yet been completed"}
 
