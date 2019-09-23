@@ -12,6 +12,7 @@ Unreleased changes
  * Handle .well-known files when talking to homeservers
  * Fix a bug where multiple cleanup tasks would be unnecessary spawned
  * Fix logging so Sydent doesn't log 3PIDs when processing lookup requests
+ * Correctly delete 3pid associations on unbind. [#213](https://github.com/matrix-org/sydent/pull/213)
 
 
 Changes in [1.0.3](https://github.com/matrix-org/sydent/releases/tag/v1.0.3) (2019-05-03)
