@@ -13,6 +13,8 @@ Unreleased changes
  * Fix a bug where multiple cleanup tasks would be unnecessary spawned
  * Fix logging so Sydent doesn't log 3PIDs when processing lookup requests
  * Correctly delete 3pid associations on unbind. [#213](https://github.com/matrix-org/sydent/pull/213)
+ * Fix incorrect HTTP response from `/3pid/getValidated3pid` endpoint on
+   failure. [#216](https://github.com/matrix-org/sydent/pull/216)
 
 
 Changes in [1.0.3](https://github.com/matrix-org/sydent/releases/tag/v1.0.3) (2019-05-03)
