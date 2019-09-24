@@ -61,9 +61,7 @@ class RegisterServlet(Resource):
             "access_token": tok,
         })
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
-
+        return b''

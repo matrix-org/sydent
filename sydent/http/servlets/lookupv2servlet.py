@@ -125,8 +125,7 @@ class LookupV2Servlet(Resource):
         request.setResponseCode(400)
         return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return b''

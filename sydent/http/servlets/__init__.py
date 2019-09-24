@@ -96,6 +96,7 @@ def jsonwrap(f):
     @functools.wraps(f)
     def inner(self, request, *args, **kwargs):
         try:
+            request.setHeader("Content-Type", "application/json")
             return json.dumps(f(self, request, *args, **kwargs)).encode("UTF-8")
         except MatrixRestError as e:
             request.setResponseCode(e.httpStatus)
@@ -105,6 +106,7 @@ def jsonwrap(f):
             })
         except Exception:
             logger.exception("Exception processing request");
+            request.setHeader("Content-Type", "application/json")
             request.setResponseCode(500)
             return json.dumps({
                 "errcode": "M_UNKNOWN",
@@ -114,11 +116,13 @@ def jsonwrap(f):
 
 def deferjsonwrap(f):
     def reqDone(resp, request):
+        request.setHeader("Content-Type", "application/json")
         request.setResponseCode(200)
         request.write(json.dumps(resp).encode("UTF-8"))
         request.finish()
 
     def reqErr(failure, request):
+        request.setHeader("Content-Type", "application/json")
         if failure.check(MatrixRestError) is not None:
             request.setResponseCode(failure.value.httpStatus)
             request.write(json.dumps({'errcode': failure.value.errcode, 'error': failure.value.error}))
@@ -138,7 +142,6 @@ def deferjsonwrap(f):
     return inner
 
 def send_cors(request):
-    request.setHeader(b"Content-Type", b"application/json")
     request.setHeader("Access-Control-Allow-Origin", "*")
     request.setHeader("Access-Control-Allow-Methods",
                       "GET, POST, PUT, DELETE, OPTIONS")
