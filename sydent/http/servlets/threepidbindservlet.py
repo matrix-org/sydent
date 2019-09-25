@@ -52,6 +52,8 @@ class ThreePidBindServlet(Resource):
 
         account = authIfV2(self.sydent, request)
 
+        isV2 = request.path.startswith('/_matrix/identity/v2')
+
         args = get_args(request, ('sid', 'client_secret', 'mxid'))
 
         sid = args['sid']
@@ -110,24 +112,29 @@ class ThreePidBindServlet(Resource):
 
         # check HS of mxid and only accept bindings to a set of whitelisted HSes
         allow_mxid_domain = False
-        if isMxidDomainAllowed(mxid_domain):
-            logger.info("Allowing domain %s" % (mxid_domain,))
+
+        if isV2:
+            logger.info("Allowing any domain because path is v2")
             allow_mxid_domain = True
         else:
-            # do the same check on the .well-known lookup
-            httpClient = SimpleHttpClient(self.sydent)
-            try:
-                wellKnown = yield httpClient.get_json("https://%s/.well-known/matrix/server" % (mxid_domain,))
-                if 'm.server' in wellKnown:
-                    if isMxidDomainAllowed(wellKnown['m.server']):
-                        logger.info("Allowing domain %s due to .well-known: %s" % (mxid_domain, wellKnown['m.server']))
-                        allow_mxid_domain = True
-                    else:
-                        logger.info("Not allowing domain %s from to .well-known: %s" % (mxid_domain, wellKnown['m.server']))
-            except Exception as e:
-                # we could be more specific with our errors but we're not going to allow it in any case
-                logger.info(".well-known lookup failed for %s: %r" % (mxid_domain, e))
-                pass
+            if isMxidDomainAllowed(mxid_domain):
+                logger.info("Allowing domain %s" % (mxid_domain,))
+                allow_mxid_domain = True
+            else:
+                # do the same check on the .well-known lookup
+                httpClient = SimpleHttpClient(self.sydent)
+                try:
+                    wellKnown = yield httpClient.get_json("https://%s/.well-known/matrix/server" % (mxid_domain,))
+                    if 'm.server' in wellKnown:
+                        if isMxidDomainAllowed(wellKnown['m.server']):
+                            logger.info("Allowing domain %s due to .well-known: %s" % (mxid_domain, wellKnown['m.server']))
+                            allow_mxid_domain = True
+                        else:
+                            logger.info("Not allowing domain %s from to .well-known: %s" % (mxid_domain, wellKnown['m.server']))
+                except Exception as e:
+                    # we could be more specific with our errors but we're not going to allow it in any case
+                    logger.info(".well-known lookup failed for %s: %r" % (mxid_domain, e))
+                    pass
 
         if allow_mxid_domain:
             res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
