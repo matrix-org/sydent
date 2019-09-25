@@ -80,14 +80,16 @@ class LocalAssociationStore:
         )
         row = cur.fetchone()
         if row[0] > 0:
+            ts = time_msec()
             cur.execute(
-                "DELETE FROM local_threepid_associations "
-                " WHERE medium = ? AND address = ?",
-                (threepid['medium'], threepid['address']),
+                "REPLACE INTO local_threepid_associations "
+                "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter') "
+                " values (?, ?, NULL, ?, null, null)",
+                (threepid['medium'], threepid['address'], ts),
             )
             logger.info(
-                "Deleting local assoc for %s/%s/%s",
-                threepid['medium'], threepid['address'], mxid,
+                "Deleting local assoc for %s/%s/%s replaced %d rows",
+                threepid['medium'], threepid['address'], mxid, cur.rowcount,
             )
             self.sydent.db.commit()
         else:
