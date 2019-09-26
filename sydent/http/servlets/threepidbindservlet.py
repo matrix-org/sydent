@@ -52,6 +52,8 @@ class ThreePidBindServlet(Resource):
 
         account = authIfV2(self.sydent, request)
 
+        isV2 = request.path.startswith('/_matrix/identity/v2')
+
         args = get_args(request, ('sid', 'client_secret', 'mxid'))
 
         sid = args['sid']
@@ -110,7 +112,11 @@ class ThreePidBindServlet(Resource):
 
         # check HS of mxid and only accept bindings to a set of whitelisted HSes
         allow_mxid_domain = False
-        if isMxidDomainAllowed(mxid_domain):
+
+        if isV2:
+            logger.info("Allowing any domain because path is v2")
+            allow_mxid_domain = True
+        elif isMxidDomainAllowed(mxid_domain):
             logger.info("Allowing domain %s" % (mxid_domain,))
             allow_mxid_domain = True
         else:
