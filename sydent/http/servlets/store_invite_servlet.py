@@ -72,17 +72,8 @@ class StoreInviteServlet(Resource):
         ephemeralPrivateKeyBase64 = encode_base64(ephemeralPrivateKey.encode(), True)
         ephemeralPublicKeyBase64 = encode_base64(ephemeralPublicKey.encode(), True)
 
-        now_ms = int(time.time() * 1000)
-        if self.sydent.invites_validity_period is not None:
-            valid_until_ts = now_ms + self.sydent.invites_validity_period
-        else:
-            valid_until_ts = None
-
         tokenStore.storeEphemeralPublicKey(ephemeralPublicKeyBase64)
-        tokenStore.storeToken(
-            medium, address, roomId, sender, token,
-            valid_until_ts=valid_until_ts,
-        )
+        tokenStore.storeToken(medium, address, roomId, sender, token)
 
         substitutions = {}
         for key, values in request.args.items():

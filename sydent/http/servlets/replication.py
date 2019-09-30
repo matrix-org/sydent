@@ -165,17 +165,11 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        now_ms = int(time.time() * 1000)
-        if self.sydent.invites_validity_period is not None:
-            valid_until_ts = now_ms + self.sydent.invites_validity_period
-        else:
-            valid_until_ts = None
-
         for originId, inviteToken in invite_tokens.items():
             tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                 inviteToken['sender'], inviteToken['token'],
                                 originServer=peer.servername, originId=originId,
-                                valid_until_ts=valid_until_ts, commit=False)
+                                commit=False)
             logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
         # Process any ephemeral public keys
