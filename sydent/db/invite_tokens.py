@@ -90,8 +90,7 @@ class JoinTokenStore(object):
 
         validity_period = self.sydent.invites_validity_period
         if validity_period is not None:
-            now_ms = int(time.time() * 1000)
-            min_valid_ts_ms = now_ms - validity_period
+            min_valid_ts_ms = int(time.time() - validity_period/1000)
 
         for row in rows:
             medium, address, roomId, sender, token, origin_server, received_ts = row
