@@ -43,9 +43,6 @@ class JoinTokenStore(object):
         :param originId: The id of the token in the DB of originServer. Used
         for determining if we've already received a token or not.
         :type originId: int, None
-        :param valid_until_ts: The expiration date to set to this invite on this server.
-            This value is not replicated. None if invites are always valid.
-        :type valid_until_ts: int
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
