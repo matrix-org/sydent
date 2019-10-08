@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS local_threepid_associations (
     notBefore bigint not null,
     notAfter bigint not null
 );
-CREATE UNIQUE INDEX IF NOT EXISTS medium_address on local_threepid_associations(medium, address);
 
 CREATE TABLE IF NOT EXISTS global_threepid_associations (
     id integer primary key,
@@ -39,6 +38,4 @@ CREATE TABLE IF NOT EXISTS global_threepid_associations (
     originId integer not null,
     sgAssoc text not null
 );
-CREATE INDEX IF NOT EXISTS medium_address on global_threepid_associations (medium, address);
-CREATE INDEX IF NOT EXISTS medium_lower_address on global_threepid_associations (medium, lower(address));
 CREATE UNIQUE INDEX IF NOT EXISTS originServer_originId on global_threepid_associations (originServer, originId);

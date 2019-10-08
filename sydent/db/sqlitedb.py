@@ -150,11 +150,6 @@ class SqliteDatabase:
                 "ADD COLUMN lookup_hash VARCHAR(256)"
             )
             cur.execute(
-                "CREATE INDEX IF NOT EXISTS lookup_hash_medium "
-                "on local_threepid_associations "
-                "(lookup_hash, medium)"
-            )
-            cur.execute(
                 "ALTER TABLE global_threepid_associations "
                 "ADD COLUMN lookup_hash VARCHAR(256)"
             )
@@ -189,7 +184,7 @@ class SqliteDatabase:
         if curVer < 5:
             # Fix lookup_hash index for selecting on mxid instead of medium
             cur = self.db.cursor()
-            cur.execute("DROP INDEX lookup_hash_medium")
+            cur.execute("DROP INDEX IF EXITS lookup_hash_medium")
             cur.execute("CREATE INDEX global_threepid_lookup_hash ON global_threepid_associations(lookup_hash)")
             self.db.commit()
             logger.info("v4 -> v5 schema migration complete")
