@@ -190,7 +190,7 @@ class SqliteDatabase:
             # Fix lookup_hash index for selecting on mxid instead of medium
             cur = self.db.cursor()
             cur.execute("DROP INDEX lookup_hash_medium")
-            cur.execute("CREATE UNIQUE INDEX lookup_hash_mxid ON global_threepid_associations(lookup_hash, mxid)")
+            cur.execute("CREATE INDEX global_threepid_lookup_hash ON global_threepid_associations(lookup_hash)")
             self.db.commit()
             logger.info("v4 -> v5 schema migration complete")
             self._setSchemaVersion(5)
