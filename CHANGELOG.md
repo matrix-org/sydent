@@ -14,6 +14,7 @@ Unreleased changes
  * Fix logging so Sydent doesn't log 3PIDs when processing lookup requests
  * Fix incorrect HTTP response from `/3pid/getValidated3pid` endpoint on
    failure. [#216](https://github.com/matrix-org/sydent/pull/216)
+ * Improve performance of hashed lookups
 
 
 Changes in [1.0.3](https://github.com/matrix-org/sydent/releases/tag/v1.0.3) (2019-05-03)
