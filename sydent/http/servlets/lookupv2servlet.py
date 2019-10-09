@@ -75,6 +75,13 @@ class LookupV2Servlet(Resource):
             request.setResponseCode(400)
             return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}
 
+        # Ensure address count is under the configured limit
+        limit = int(self.sydent.cfg.get("general", "address_lookup_limit"))
+        if len(addresses) > limit:
+            request.setResponseCode(400)
+            return {'errcode': 'M_TOO_LARGE', 'error': 'More than the maximum amount of '
+                                                       'addresses provided'}
+
         pepper = str(args['pepper'])
         if pepper != self.lookup_pepper:
             request.setResponseCode(400)
@@ -114,11 +121,7 @@ class LookupV2Servlet(Resource):
 
         elif algorithm == "sha256":
             # Lookup using SHA256 with URL-safe base64 encoding
-            mappings = {}
-            for h in addresses:
-                mxid = self.globalAssociationStore.retrieveMxidFromHash(h)
-                if mxid:
-                    mappings[h] = mxid
+            mappings = self.globalAssociationStore.retrieveMxidsForHashes(addresses)
 
             return {'mappings': mappings}
 

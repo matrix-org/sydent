@@ -14,5 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+-- Note that this SQL file is not up to date, and migrations can be found in sydent/db/sqlitedb.py
+
 CREATE TABLE IF NOT EXISTS threepid_validation_sessions (id integer primary key, medium varchar(16) not null, address varchar(256) not null, clientSecret varchar(32) not null, validated int default 0, mtime bigint not null);
 CREATE TABLE IF NOT EXISTS threepid_token_auths (id integer primary key, validationSession integer not null, token varchar(32) not null, sendAttemptNumber integer not null, foreign key (validationSession) references threepid_validations(id));

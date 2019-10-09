@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+-- Note that this SQL file is not up to date, and migrations can be found in sydent/db/sqlitedb.py
+
 CREATE TABLE IF NOT EXISTS invite_tokens (
     id integer primary key,
     medium varchar(16) not null,
