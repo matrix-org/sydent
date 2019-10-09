@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+-- Note that this SQL file is not up to date, and migrations can be found in sydent/db/sqlitedb.py
+
 CREATE TABLE IF NOT EXISTS peers (id integer primary key, name varchar(255) not null, port integer default null, lastSentVersion integer, lastPokeSucceededAt integer, active integer not null default 0);
 CREATE UNIQUE INDEX IF NOT EXISTS name on peers(name);
 
