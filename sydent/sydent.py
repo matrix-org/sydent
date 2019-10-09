@@ -103,6 +103,7 @@ CONFIG_DEFAULTS = {
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
         'federation.verifycerts': 'True',
+        'clientapi.http.lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
     },
     'email': {
         'email.template': 'res/email.template',

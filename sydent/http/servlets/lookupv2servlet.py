@@ -75,6 +75,13 @@ class LookupV2Servlet(Resource):
             request.setResponseCode(400)
             return {'errcode': 'M_INVALID_PARAM', 'error': 'algorithm is not supported'}
 
+        # Ensure address count is under the configured limit
+        limit = int(self.sydent.cfg.get("http", "clientapi.http.lookup_limit"))
+        if len(addresses) > limit:
+            request.setResponseCode(400)
+            return {'errcode': 'M_TOO_LARGE', 'error': 'More than the maximum amount of '
+                                                       'addresses provided'}
+
         pepper = str(args['pepper'])
         if pepper != self.lookup_pepper:
             request.setResponseCode(400)
