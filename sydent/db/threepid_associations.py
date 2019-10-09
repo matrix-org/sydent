@@ -264,10 +264,13 @@ class GlobalAssociationStore:
                 "JOIN tmp_retrieve_mxids_for_hashes "
                 "ON gta.lookup_hash = tmp_retrieve_mxids_for_hashes.lookup_hash "
                 "WHERE gta.notBefore < ? AND gta.notAfter > ? "
-                "ORDER BY gta.lookup_hash, gta.mxid, gta.ts DESC",
+                "ORDER BY gta.lookup_hash, gta.mxid, gta.ts",
                 (time_msec(), time_msec())
             )
 
+            # Place the results from the query into a dictionary
+            # Results are sorted from oldest to newest, so if there are multiple mxid's for
+            # the same lookup hash, only the newest mapping will be returned
             for lookup_hash, mxid in res.fetchall():
                 results[lookup_hash] = mxid
 
