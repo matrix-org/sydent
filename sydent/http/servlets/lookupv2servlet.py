@@ -114,11 +114,7 @@ class LookupV2Servlet(Resource):
 
         elif algorithm == "sha256":
             # Lookup using SHA256 with URL-safe base64 encoding
-            mappings = {}
-            for h in addresses:
-                mxid = self.globalAssociationStore.retrieveMxidFromHash(h)
-                if mxid:
-                    mappings[h] = mxid
+            mappings = self.globalAssociationStore.retrieveMxidsForHashes(addresses)
 
             return {'mappings': mappings}
 
