@@ -238,10 +238,8 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("CREATE TEMPORARY TABLE tmp_retrieve_mxids_for_hashes ("
-                    "lookup_hash VARCHAR, "
-                    "mxid VARCHAR"
-                    ")")
+        cur.execute("CREATE TEMPORARY TABLE tmp_retrieve_mxids_for_hashes "
+                    "(lookup_hash VARCHAR)")
         cur.execute("CREATE INDEX tmp_retrieve_mxids_for_hashes_lookup_hash ON "
                     "tmp_retrieve_mxids_for_hashes(lookup_hash)")
 
@@ -260,9 +258,14 @@ class GlobalAssociationStore:
                 inserted_cap += 500
 
             res = cur.execute(
+                # 'notBefore' is the time the association starts being valid, 'notAfter' the the time at which
+                # it ceases to be valid, so the ts must be greater than 'notBefore' and less than 'notAfter'.
                 "SELECT gta.lookup_hash, gta.mxid FROM global_threepid_associations gta "
                 "JOIN tmp_retrieve_mxids_for_hashes "
-                "ON gta.lookup_hash = tmp_retrieve_mxids_for_hashes.lookup_hash"
+                "ON gta.lookup_hash = tmp_retrieve_mxids_for_hashes.lookup_hash "
+                "WHERE gta.notBefore < ? AND gta.notAfter > ? "
+                "ORDER BY gta.lookup_hash, gta.mxid, gta.ts DESC",
+                (time_msec(), time_msec())
             )
 
             for lookup_hash, mxid in res.fetchall():
