@@ -80,6 +80,7 @@ CONFIG_DEFAULTS = {
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
         'terms.path': '',
+        'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
 
         # The following can be added to your local config file to enable prometheus
         # support.
@@ -103,7 +104,6 @@ CONFIG_DEFAULTS = {
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
         'federation.verifycerts': 'True',
-        'clientapi.http.lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
     },
     'email': {
         'email.template': 'res/email.template',
