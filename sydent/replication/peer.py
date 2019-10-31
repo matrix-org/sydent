@@ -44,6 +44,14 @@ class Peer(object):
         self.pubkeys = pubkeys
         self.is_being_pushed_to = False
 
+    def pushUpdates(self, sgAssocs):
+        """
+        :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
+                        sgAssoc is the json object of the signed association
+        :return a deferred
+        """
+        pass
+
 
 class LocalPeer(Peer):
     """

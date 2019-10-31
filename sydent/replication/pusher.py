@@ -23,14 +23,11 @@ import twisted.internet.task
 
 from sydent.util import time_msec
 from sydent.replication.peer import LocalPeer
-from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.db.peers import PeerStore
 
 logger = logging.getLogger(__name__)
 
-EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT = 100
-INVITE_TOKENS_PUSH_LIMIT = 100
 ASSOCIATIONS_PUSH_LIMIT = 100
 
 
@@ -39,7 +36,6 @@ class Pusher:
         self.sydent = sydent
         self.pushing = False
         self.peerStore = PeerStore(self.sydent)
-        self.join_token_store = JoinTokenStore(self.sydent)
         self.local_assoc_store = LocalAssociationStore(self.sydent)
 
     def setup(self):
@@ -63,7 +59,7 @@ class Pusher:
         localPeer.pushUpdates(signedAssocs)
 
     def scheduledPush(self):
-        """Push pending updates to a remote peer. To be called regularly.
+        """Push pending updates to all known remote peers. To be called regularly.
 
         :returns a deferred.DeferredList of defers, one per peer we're pushing to that will
         resolve when pushing to that peer has completed, successfully or otherwise
@@ -101,30 +97,14 @@ class Pusher:
                 )
                 push_data["sg_assocs"], ids["sg_assocs"] = associations
 
-                # Push invite tokens and ephemeral public keys
-                tokens = self.join_token_store.getInviteTokensAfterId(
-                    p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT
-                )
-                push_data["invite_tokens"], ids["invite_tokens"] = tokens
-
-                keys = self.join_token_store.getEphemeralPublicKeysAfterId(
-                    p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT
-                )
-                push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"] = keys
-
-                token_count = len(push_data["invite_tokens"])
-                key_count = len(push_data["ephemeral_public_keys"])
                 association_count = len(push_data["sg_assocs"])
-
-                total_updates += token_count + key_count + association_count
-
                 logger.debug(
                     "%d updates to push to %s:%d",
-                    total_updates, p.servername, p.port
+                    association_count, p.servername, p.port
                 )
 
                 # If there are no updates left to send, break the loop
-                if not total_updates:
+                if not association_count:
                     logger.info("Pushing updates to %s:%d finished", p.servername, p.port)
                     break
 

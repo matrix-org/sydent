@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2015 OpenMarket Ltd
-# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 
 import time
-
 
 class JoinTokenStore(object):
     def __init__(self, sydent):
@@ -55,45 +53,6 @@ class JoinTokenStore(object):
 
         return ret
 
-    def getInviteTokensAfterId(self, afterId, limit):
-        """Retrieves max `limit` invite tokens after a given DB id.
-
-        :param afterId: A database id to act as an offset. Tokens after this
-            id are returned.
-        :type afterId: int
-        :param limit: Max amount of database rows to return.
-        :type limit: int, None
-        :returns a tuple consisting of a dict of invite tokens (with key
-            being the token's DB id) and the maximum DB id that was extracted.
-            Otherwise returns ({}, None) if no tokens are found.
-        :rtype: Tuple[Dict[int, Dict], int|None]
-        """
-        cur = self.sydent.db.cursor()
-        res = cur.execute(
-            "SELECT id, medium, address, room_id, sender, token FROM invite_tokens"
-            " WHERE id > ? AND origin_id IS NULL LIMIT ?",
-            (afterId, limit,)
-        )
-        rows = res.fetchall()
-
-        # Dict of "id": {content}
-        invite_tokens = {}
-
-        maxId = None
-
-        for row in rows:
-            maxId, medium, address, room_id, sender, token = row
-            invite_tokens[maxId] = {
-                "origin_id": maxId,
-                "medium": medium,
-                "address": address,
-                "room_id": room_id,
-                "sender": sender,
-                "token": token,
-            }
-
-        return invite_tokens, maxId
-
     def markTokensAsSent(self, medium, address):
         cur = self.sydent.db.cursor()
 
@@ -102,42 +61,6 @@ class JoinTokenStore(object):
             (int(time.time()), medium, address,)
         )
         self.sydent.db.commit()
-
-    def getEphemeralPublicKeysAfterId(self, afterId, limit):
-        """Retrieves max `limit` ephemeral public keys after a given DB id.
-
-        :param afterId: A database id to act as an offset. Keys after this id
-            are returned.
-        :type afterId: int
-        :param limit: Max amount of database rows to return.
-        :type limit: int
-        :returns a tuple consisting of a list of ephemeral public keys (with
-            key being the token's DB id) and the maximum table id that was
-            extracted. Otherwise returns ({}, None) if no keys are found.
-        :rtype: Tuple[Dict[int, Dict], int|None]
-        """
-        cur = self.sydent.db.cursor()
-        res = cur.execute(
-            "SELECT id, public_key, verify_count, persistence_ts FROM ephemeral_public_keys"
-            " WHERE id > ? AND origin_id IS NULL LIMIT ?",
-            (afterId, limit,)
-        )
-        rows = res.fetchall()
-
-        # Dict of "id": {content}
-        ephemeral_keys = {}
-
-        maxId = None
-
-        for row in rows:
-            maxId, public_key, verify_count, persistence_ts = row
-            ephemeral_keys[maxId] = {
-                "public_key": public_key,
-                "verify_count": verify_count,
-                "persistence_ts": persistence_ts,
-            }
-
-        return ephemeral_keys, maxId
 
     def storeEphemeralPublicKey(self, publicKey):
         cur = self.sydent.db.cursor()
