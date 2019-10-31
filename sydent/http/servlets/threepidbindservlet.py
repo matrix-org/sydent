@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +18,8 @@
 from twisted.web.resource import Resource
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.auth import authIfV2
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 
@@ -28,9 +30,10 @@ class ThreePidBindServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        err, args = get_args(request, ('sid', 'client_secret', 'mxid'))
-        if err:
-            return err
+
+        account = authIfV2(self.sydent, request)
+
+        args = get_args(request, ('sid', 'client_secret', 'mxid'))
 
         sid = args['sid']
         mxid = args['mxid']
@@ -40,6 +43,11 @@ class ThreePidBindServlet(Resource):
         # sessions without knowing the secret
         noMatchError = {'errcode': 'M_NO_VALID_SESSION',
                         'error': "No valid session was found matching that sid and client secret"}
+
+        if account:
+            # This is a v2 API so only allow binding to the logged in user id
+            if account.userId != mxid:
+                raise MatrixRestError(403, 'M_UNAUTHORIZED', "This user is prohibited from binding to the mxid");
 
         try:
             valSessionStore = ThreePidValSessionStore(self.sydent)
@@ -58,8 +66,7 @@ class ThreePidBindServlet(Resource):
         res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
         return res
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return b''

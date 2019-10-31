@@ -34,7 +34,7 @@ class JoinTokenStore(object):
 
         res = cur.execute(
             "SELECT medium, address, room_id, sender, token FROM invite_tokens"
-            " WHERE medium = ? AND address = ?",
+            " WHERE medium = ? AND address = ? AND sent_ts IS NULL",
             (medium, address,)
         )
         rows = res.fetchall()
@@ -93,3 +93,13 @@ class JoinTokenStore(object):
         if rows:
             return rows[0][0]
         return None
+
+    def deleteTokens(self, medium, address):
+        cur = self.sydent.db.cursor()
+
+        cur.execute(
+            "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
+            (medium, address,)
+        )
+
+        self.sydent.db.commit()

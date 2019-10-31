@@ -19,21 +19,25 @@ import json
 import signedjson.key
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.auth import authIfV2
 
 
 class BlindlySignStuffServlet(Resource):
     isLeaf = True
 
     def __init__(self, syd):
+        self.sydent = syd
         self.server_name = syd.server_name
         self.tokenStore = JoinTokenStore(syd)
 
+    @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        err, args = get_args(request, ("private_key", "token", "mxid"))
-        if err:
-            return json.dumps(err)
+
+        authIfV2(self.sydent, request)
+
+        args = get_args(request, ("private_key", "token", "mxid"))
 
         private_key_base64 = args['private_key']
         token = args['token']
@@ -41,11 +45,7 @@ class BlindlySignStuffServlet(Resource):
 
         sender = self.tokenStore.getSenderForToken(token)
         if sender is None:
-            request.setResponseCode(404)
-            return json.dumps({
-                "errcode": "M_UNRECOGNIZED",
-                "error": "Didn't recognize token",
-            })
+            raise MatrixRestError(404, "M_UNRECOGNIZED", "Didn't recognize token")
 
         to_sign = {
             "mxid": mxid,
@@ -64,14 +64,12 @@ class BlindlySignStuffServlet(Resource):
                 private_key
             )
         except:
-            return json.dumps({
-                "errcode": "M_UNKNOWN",
-            })
+            logger.exception("signing failed")
+            raise MatrixRestError(500, "M_UNKNOWN", "Internal Server Error")
 
-        return json.dumps(signed)
+        return signed
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return b''

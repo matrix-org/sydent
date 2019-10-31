@@ -34,9 +34,9 @@ class LocalAssociationStore:
 
         # sqlite's support for upserts is atrocious
         cur.execute("insert or replace into local_threepid_associations "
-                    "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter')"
-                    " values (?, ?, ?, ?, ?, ?)",
-                    (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
+                    "('medium', 'address', 'lookup_hash', 'mxid', 'ts', 'notBefore', 'notAfter')"
+                    " values (?, ?, ?, ?, ?, ?, ?)",
+                    (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
 
     def getAssociationsAfterId(self, afterId, limit):
@@ -45,7 +45,8 @@ class LocalAssociationStore:
         if afterId is None:
             afterId = -1
 
-        q = "select id, medium, address, mxid, ts, notBefore, notAfter from local_threepid_associations " \
+        q = "select id, medium, address, lookup_hash, mxid, ts, notBefore, notAfter from " \
+            "local_threepid_associations " \
             "where id > ? order by id asc"
         if limit is not None:
             q += " limit ?"
@@ -58,7 +59,7 @@ class LocalAssociationStore:
 
         assocs = {}
         for row in res.fetchall():
-            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6])
+            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             assocs[row[0]] = assoc
             maxId = row[0]
 
@@ -96,6 +97,8 @@ class LocalAssociationStore:
                 "No local assoc found for %s/%s/%s",
                 threepid['medium'], threepid['address'], mxid,
             )
+            # we still consider this successful in the name of idempotency:
+            # the binding to be deleted is not there, so we're in the desired state.
 
 
 class GlobalAssociationStore:
@@ -137,10 +140,20 @@ class GlobalAssociationStore:
         return row[0]
 
     def getMxids(self, threepid_tuples):
+        """Given a list of threepid_tuples, return the same list but with
+        mxids appended to each tuple for which a match was found in the
+        database for. Output is ordered by medium, address, timestamp DESC
+
+        :param threepid_tuples: List containing (medium, address) tuples
+        :type threepid_tuples: [(str, str)]
+
+        :returns a list of (medium, address, mxid) tuples
+        :rtype [(str, str, str)]
+        """
         cur = self.sydent.db.cursor()
 
-        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))");
-        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))");
+        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))")
+        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))")
 
         try:
             inserted_cap = 0
@@ -179,14 +192,13 @@ class GlobalAssociationStore:
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
         :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
-        :param sgAssoc The original raw bytes of the signed association
-        :return:
+        :param sgAssoc: The original raw bytes of the signed association
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("insert or ignore into global_threepid_associations "
-                          "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
-                          "(?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                          (assoc.medium, assoc.address, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
+                          "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
+                          "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                          (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
                           originServer, originId, rawSgAssoc))
         if commit:
             self.sydent.db.commit()
@@ -214,3 +226,55 @@ class GlobalAssociationStore:
             cur.rowcount, medium, address,
         )
         self.sydent.db.commit()
+
+    def retrieveMxidsForHashes(self, addresses):
+        """Returns a mapping from hash: mxid from a list of given lookup_hash values
+
+        :param addresses: An array of lookup_hash values to check against the db
+        :type addresses: list[str]
+
+        :returns a dictionary of lookup_hash values to mxids of all discovered matches
+        :rtype: dict[str, str]
+        """
+        cur = self.sydent.db.cursor()
+
+        cur.execute("CREATE TEMPORARY TABLE tmp_retrieve_mxids_for_hashes "
+                    "(lookup_hash VARCHAR)")
+        cur.execute("CREATE INDEX tmp_retrieve_mxids_for_hashes_lookup_hash ON "
+                    "tmp_retrieve_mxids_for_hashes(lookup_hash)")
+
+        results = {}
+        try:
+            # Convert list of addresses to list of tuples of addresses
+            addresses = [(x,) for x in addresses]
+
+            inserted_cap = 0
+            while inserted_cap < len(addresses):
+                cur.executemany(
+                    "INSERT INTO tmp_retrieve_mxids_for_hashes(lookup_hash) "
+                    "VALUES (?)",
+                    addresses[inserted_cap:inserted_cap + 500]
+                )
+                inserted_cap += 500
+
+            res = cur.execute(
+                # 'notBefore' is the time the association starts being valid, 'notAfter' the the time at which
+                # it ceases to be valid, so the ts must be greater than 'notBefore' and less than 'notAfter'.
+                "SELECT gta.lookup_hash, gta.mxid FROM global_threepid_associations gta "
+                "JOIN tmp_retrieve_mxids_for_hashes "
+                "ON gta.lookup_hash = tmp_retrieve_mxids_for_hashes.lookup_hash "
+                "WHERE gta.notBefore < ? AND gta.notAfter > ? "
+                "ORDER BY gta.lookup_hash, gta.mxid, gta.ts",
+                (time_msec(), time_msec())
+            )
+
+            # Place the results from the query into a dictionary
+            # Results are sorted from oldest to newest, so if there are multiple mxid's for
+            # the same lookup hash, only the newest mapping will be returned
+            for lookup_hash, mxid in res.fetchall():
+                results[lookup_hash] = mxid
+
+        finally:
+            cur.execute("DROP TABLE tmp_retrieve_mxids_for_hashes")
+
+        return results

@@ -14,10 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-CREATE TABLE IF NOT EXISTS local_threepid_associations (id integer primary key, medium varchar(16) not null, address varchar(256) not null, mxid varchar(256) not null, ts integer not null, notBefore bigint not null, notAfter bigint not null);
-CREATE UNIQUE INDEX IF NOT EXISTS medium_address on local_threepid_associations(medium, address);
+-- Note that this SQL file is not up to date, and migrations can be found in sydent/db/sqlitedb.py
 
-CREATE TABLE IF NOT EXISTS global_threepid_associations (id integer primary key, medium varchar(16) not null, address varchar(256) not null, mxid varchar(256) not null, ts integer not null, notBefore bigint not null, notAfter integer not null, originServer varchar(255) not null, originId integer not null, sgAssoc text not null);
-CREATE INDEX IF NOT EXISTS medium_address on global_threepid_associations (medium, address);
-CREATE INDEX IF NOT EXISTS medium_lower_address on global_threepid_associations (medium, lower(address));
+CREATE TABLE IF NOT EXISTS local_threepid_associations (
+    id integer primary key,
+    medium varchar(16) not null,
+    address varchar(256) not null,
+    mxid varchar(256) not null,
+    ts integer not null,
+    notBefore bigint not null,
+    notAfter bigint not null
+);
+
+CREATE TABLE IF NOT EXISTS global_threepid_associations (
+    id integer primary key,
+    medium varchar(16) not null,
+    address varchar(256) not null,
+    mxid varchar(256) not null,
+    ts integer not null,
+    notBefore bigint not null,
+    notAfter integer not null,
+    originServer varchar(255) not null,
+    originId integer not null,
+    sgAssoc text not null
+);
 CREATE UNIQUE INDEX IF NOT EXISTS originServer_originId on global_threepid_associations (originServer, originId);

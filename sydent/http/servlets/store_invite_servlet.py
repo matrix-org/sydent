@@ -18,6 +18,7 @@ import random
 import string
 from email.header import Header
 
+from six import string_types
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
@@ -25,19 +26,23 @@ import json
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
-from sydent.http.servlets import get_args, send_cors
+from sydent.http.servlets import get_args, send_cors, jsonwrap
+from sydent.http.auth import authIfV2
 from sydent.util.emailutils import sendEmail
 
 
 class StoreInviteServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
+        self.random = random.SystemRandom()
 
+    @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        err, args = get_args(request, ("medium", "address", "room_id", "sender",))
-        if err:
-            return json.dumps(err)
+
+        authIfV2(self.sydent, request)
+
+        args = get_args(request, ("medium", "address", "room_id", "sender",))
         medium = args["medium"]
         address = args["address"]
         roomId = args["room_id"]
@@ -47,18 +52,18 @@ class StoreInviteServlet(Resource):
         mxid = globalAssocStore.getMxid(medium, address)
         if mxid:
             request.setResponseCode(400)
-            return json.dumps({
+            return {
                 "errcode": "THREEPID_IN_USE",
                 "error": "Binding already known",
                 "mxid": mxid,
-            })
+            }
 
         if medium != "email":
             request.setResponseCode(400)
-            return json.dumps({
+            return {
                 "errcode": "M_UNRECOGNIZED",
                 "error": "Didn't understand medium '%s'" % (medium,),
-            })
+            }
 
         token = self._randomString(128)
 
@@ -74,9 +79,9 @@ class StoreInviteServlet(Resource):
         tokenStore.storeToken(medium, address, roomId, sender, token)
 
         substitutions = {}
-        for key, values in request.args.items():
-            if len(values) == 1 and type(values[0]) == str:
-                substitutions[key] = values[0]
+        for k, v in args.items():
+            if isinstance(v, string_types):
+                substitutions[k] = v
         substitutions["token"] = token
 
         required = [
@@ -123,7 +128,7 @@ class StoreInviteServlet(Resource):
             "display_name": self.redact(address),
         }
 
-        return json.dumps(resp)
+        return resp
 
     def redact(self, address):
         return "@".join(map(self._redact, address.split("@", 1)))
@@ -137,4 +142,4 @@ class StoreInviteServlet(Resource):
             return "..."
 
     def _randomString(self, length):
-        return ''.join(random.choice(string.ascii_letters) for _ in xrange(length))
+        return ''.join(self.random.choice(string.ascii_letters) for _ in xrange(length))

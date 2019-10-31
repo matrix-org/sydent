@@ -25,7 +25,10 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import LocalAssociationStore
 
 from sydent.util import time_msec
+from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.threepid.signer import Signer
+from sydent.http.httpclient import FederationHttpClient
 
 from sydent.threepid import ThreepidAssociation
 
@@ -47,6 +50,7 @@ class ThreepidBinder:
 
     def __init__(self, sydent):
         self.sydent = sydent
+        self.hashing_store = HashingMetadataStore(sydent)
 
     def addBinding(self, medium, address, mxid):
         """Binds the given 3pid to the given mxid.
@@ -61,9 +65,20 @@ class ThreepidBinder:
         """
         localAssocStore = LocalAssociationStore(self.sydent)
 
+        # Fill out the association details
         createdAt = time_msec()
         expires = createdAt + ThreepidBinder.THREEPID_ASSOCIATION_LIFETIME_MS
-        assoc = ThreepidAssociation(medium, address, mxid, createdAt, createdAt, expires)
+
+        # Hash the medium + address and store that hash for the purposes of
+        # later lookups
+        str_to_hash = ' '.join(
+            [address, medium, self.hashing_store.get_lookup_pepper()],
+        )
+        lookup_hash = sha256_and_url_safe_base64(str_to_hash)
+
+        assoc = ThreepidAssociation(
+            medium, address, lookup_hash, mxid, createdAt, createdAt, expires,
+        )
 
         localAssocStore.addOrUpdateAssociation(assoc)
 
@@ -99,31 +114,49 @@ class ThreepidBinder:
     @defer.inlineCallbacks
     def _notify(self, assoc, attempt):
         mxid = assoc["mxid"]
-        domain = mxid.split(":")[-1]
-        server = yield self._pickServer(domain)
-        callbackUrl = "https://%s/_matrix/federation/v1/3pid/onbind" % (
-            server,
+        mxid_parts = mxid.split(":", 1)
+        if len(mxid_parts) != 2:
+            logger.error(
+                "Can't notify on bind for unparseable mxid %s. Not retrying.",
+                assoc["mxid"],
+            )
+            return
+
+        post_url = "matrix://%s/_matrix/federation/v1/3pid/onbind" % (
+            mxid_parts[1],
         )
 
-        logger.info("Making bind callback to: %s", callbackUrl)
-        # TODO: Not be woefully insecure
-        agent = Agent(reactor, InsecureInterceptableContextFactory())
-        reqDeferred = agent.request(
-            "POST",
-            callbackUrl.encode("utf8"),
-            Headers({
-                "Content-Type": ["application/json"],
-                "User-Agent": ["Sydent"],
-            }),
-            FileBodyProducer(StringIO(json.dumps(assoc)))
-        )
-        reqDeferred.addCallback(
-            lambda _: logger.info("Successfully notified on bind for %s" % (mxid,))
-        )
+        logger.info("Making bind callback to: %s", post_url)
 
-        reqDeferred.addErrback(
-            lambda err: self._notifyErrback(assoc, attempt, err)
-        )
+        # Make a POST to the chosen Synapse server
+        http_client = FederationHttpClient(self.sydent)
+        try:
+            response = yield http_client.post_json_get_nothing(post_url, assoc, {})
+        except Exception as e:
+            self._notifyErrback(assoc, attempt, e)
+            return
+
+        # If the request failed, try again with exponential backoff
+        if response.code != 200:
+            self._notifyErrback(
+                assoc, attempt, "Non-OK error code received (%d)" % response.code
+            )
+        else:
+            logger.info("Successfully notified on bind for %s" % (mxid,))
+
+            # Only remove sent tokens when they've been successfully sent.
+            try:
+                joinTokenStore = JoinTokenStore(self.sydent)
+                joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
+                logger.info(
+                    "Successfully deleted invite for %s from the store",
+                    assoc["address"],
+                )
+            except Exception as e:
+                logger.exception(
+                    "Couldn't remove invite for %s from the store",
+                    assoc["address"],
+                )
 
     def _notifyErrback(self, assoc, attempt, error):
         logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
@@ -132,71 +165,3 @@ class ThreepidBinder:
     # The below is lovingly ripped off of synapse/http/endpoint.py
 
     _Server = collections.namedtuple("_Server", "priority weight host port")
-
-    @defer.inlineCallbacks
-    def _pickServer(self, host):
-        servers = yield self._fetchServers(host)
-        if not servers:
-            defer.returnValue("%s:8448" % (host,))
-
-        min_priority = servers[0].priority
-        weight_indexes = list(
-            (index, server.weight + 1)
-            for index, server in enumerate(servers)
-            if server.priority == min_priority
-        )
-
-        total_weight = sum(weight for index, weight in weight_indexes)
-        target_weight = random.randint(0, total_weight)
-
-        for index, weight in weight_indexes:
-            target_weight -= weight
-            if target_weight <= 0:
-                server = servers[index]
-                defer.returnValue("%s:%d" % (server.host, server.port,))
-                return
-
-    @defer.inlineCallbacks
-    def _fetchServers(self, host):
-        try:
-            service = "_matrix._tcp.%s" % host
-            answers, auth, add = yield client.lookupService(service)
-        except DNSNameError:
-            answers = []
-
-        if (len(answers) == 1
-                and answers[0].type == dns.SRV
-                and answers[0].payload
-                and answers[0].payload.target == dns.Name(".")):
-            raise DNSNameError("Service %s unavailable", service)
-
-        servers = []
-
-        for answer in answers:
-            if answer.type != dns.SRV or not answer.payload:
-                continue
-            payload = answer.payload
-            servers.append(ThreepidBinder._Server(
-                host=str(payload.target),
-                port=int(payload.port),
-                priority=int(payload.priority),
-                weight=int(payload.weight)
-            ))
-
-        servers.sort()
-        defer.returnValue(servers)
-
-
-class InsecureInterceptableContextFactory(ssl.ContextFactory):
-    """
-    Factory for PyOpenSSL SSL contexts which accepts any certificate for any domain.
-
-    Do not use this since it allows an attacker to intercept your communications.
-    """
-
-    def __init__(self):
-        self._context = SSL.Context(SSL.SSLv23_METHOD)
-        self._context.set_verify(VERIFY_NONE, lambda *_: None)
-
-    def getContext(self, hostname, port):
-        return self._context

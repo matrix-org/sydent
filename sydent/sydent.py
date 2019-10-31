@@ -2,6 +2,7 @@
 
 # Copyright 2014 OpenMarket Ltd
 # Copyright 2018 New Vector Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +20,10 @@ import ConfigParser
 import logging
 import logging.handlers
 import os
+import pickle
 
 import twisted.internet.reactor
+from twisted.internet import task
 from twisted.python import log
 
 from db.sqlitedb import SqliteDatabase
@@ -33,9 +36,13 @@ from http.httpserver import (
 from http.httpsclient import ReplicationHttpsClient
 from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
+from http.servlets.termsservlet import TermsServlet
 from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
 from hs_federation.verifier import Verifier
+
+from util.hash import sha256_and_url_safe_base64
+from util.tokenutils import generateAlphanumericTokenOfLength
 
 from sign.ed25519 import SydentEd25519
 
@@ -43,6 +50,8 @@ from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCod
 from http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
 from http.servlets.lookupservlet import LookupServlet
 from http.servlets.bulklookupservlet import BulkLookupServlet
+from http.servlets.lookupv2servlet import LookupV2Servlet
+from http.servlets.hashdetailsservlet import HashDetailsServlet
 from http.servlets.pubkeyservlets import Ed25519Servlet
 from http.servlets.threepidbindservlet import ThreePidBindServlet
 from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
@@ -50,6 +59,13 @@ from http.servlets.replication import ReplicationPushServlet
 from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from http.servlets.store_invite_servlet import StoreInviteServlet
 from http.servlets.v1_servlet import V1Servlet
+from http.servlets.accountservlet import AccountServlet
+from http.servlets.registerservlet import RegisterServlet
+from http.servlets.logoutservlet import LogoutServlet
+from http.servlets.v2_servlet import V2Servlet
+
+from db.valsession import ThreePidValSessionStore
+from db.hashing_metadata import HashingMetadataStore
 
 from threepid.bind import ThreepidBinder
 
@@ -63,6 +79,16 @@ CONFIG_DEFAULTS = {
         'log.path': '',
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
+        'terms.path': '',
+        'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
+
+        # The following can be added to your local config file to enable prometheus
+        # support.
+        # 'prometheus_port': '8080',  # The port to serve metrics on
+        # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
+
+        # The following can be added to your local config file to enable sentry support.
+        # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
     },
     'db': {
         'db.file': 'sydent.db',
@@ -142,10 +168,39 @@ class Sydent:
         if self.server_name == '':
             self.server_name = os.uname()[1]
             logger.warn(("You had not specified a server name. I have guessed that this server is called '%s' "
-                        + " and saved this in the config file. If this is incorrect, you should edit server.name in "
+                        + "and saved this in the config file. If this is incorrect, you should edit server.name in "
                         + "the config file.") % (self.server_name,))
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
+
+        if self.cfg.has_option("general", "sentry_dsn"):
+            # Only import and start sentry SDK if configured.
+            import sentry_sdk
+            sentry_sdk.init(
+                dsn=self.cfg.get("general", "sentry_dsn"),
+            )
+            with sentry_sdk.configure_scope() as scope:
+                scope.set_tag("sydent_server_name", self.server_name)
+
+        if self.cfg.has_option("general", "prometheus_port"):
+            import prometheus_client
+            prometheus_client.start_http_server(
+                port=self.cfg.getint("general", "prometheus_port"),
+                addr=self.cfg.get("general", "prometheus_addr"),
+            )
+
+        # See if a pepper already exists in the database
+        # Note: This MUST be run before we start serving requests, otherwise lookups for
+        # 3PID hashes may come in before we've completed generating them
+        hashing_metadata_store = HashingMetadataStore(self)
+        lookup_pepper = hashing_metadata_store.get_lookup_pepper()
+        if not lookup_pepper:
+            # No pepper defined in the database, generate one
+            lookup_pepper = generateAlphanumericTokenOfLength(5)
+
+            # Store it in the database and rehash 3PIDs
+            hashing_metadata_store.store_lookup_pepper(sha256_and_url_safe_base64,
+                                                       lookup_pepper)
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
@@ -159,12 +214,15 @@ class Sydent:
 
         self.servlets = Servlets()
         self.servlets.v1 = V1Servlet(self)
+        self.servlets.v2 = V2Servlet(self)
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
         self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.bulk_lookup = BulkLookupServlet(self)
+        self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
+        self.servlets.lookup_v2 = LookupV2Servlet(self, lookup_pepper)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
@@ -174,6 +232,10 @@ class Sydent:
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
+        self.servlets.termsServlet = TermsServlet(self)
+        self.servlets.accountServlet = AccountServlet(self)
+        self.servlets.registerServlet = RegisterServlet(self)
+        self.servlets.logoutServlet = LogoutServlet(self)
 
         self.threepidBinder = ThreepidBinder(self)
 
@@ -184,6 +246,11 @@ class Sydent:
         self.replicationHttpsClient = ReplicationHttpsClient(self)
 
         self.pusher = Pusher(self)
+
+        # A dedicated validation session store just to clean up old sessions every N minutes
+        self.cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.start(10 * 60.0)
 
     def save_config(self):
         fp = open(self.config_file, 'w')

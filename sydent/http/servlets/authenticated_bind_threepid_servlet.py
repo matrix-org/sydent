@@ -16,7 +16,7 @@
 
 from twisted.web.resource import Resource
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 
 
 class AuthenticatedBindThreePidServlet(Resource):
@@ -31,15 +31,13 @@ class AuthenticatedBindThreePidServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        err, args = get_args(request, ('medium', 'address', 'mxid'))
-        if err:
-            return err
+        args = get_args(request, ('medium', 'address', 'mxid'))
+
         return self.sydent.threepidBinder.addBinding(
             args['medium'], args['address'], args['mxid'],
         )
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return b''
