@@ -16,9 +16,9 @@
 
 from sydent.util import time_msec
 
-from sydent.threepid import ThreepidAssociation, threePidAssocFromDict
+from sydent.threepid import ThreepidAssociation
+from sydent.threepid.signer import Signer
 
-import json
 import logging
 
 
@@ -63,6 +63,20 @@ class LocalAssociationStore:
             maxId = row[0]
 
         return (assocs, maxId)
+
+    def getSignedAssociationsAfterId(self, afterId, limit):
+        assocs = {}
+
+        localAssocStore = LocalAssociationStore(self.sydent)
+        (localAssocs, maxId) = localAssocStore.getAssociationsAfterId(afterId, limit)
+
+        signer = Signer(self.sydent)
+
+        for localId in localAssocs:
+            sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
+            assocs[localId] = sgAssoc
+
+        return assocs, maxId
 
     def removeAssociation(self, threepid, mxid):
         cur = self.sydent.db.cursor()
