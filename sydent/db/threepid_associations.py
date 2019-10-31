@@ -64,7 +64,22 @@ class LocalAssociationStore:
 
         return (assocs, maxId)
 
-    def getSignedAssociationsAfterId(self, afterId, limit):
+    def getSignedAssociationsAfterId(self, afterId, limit, shadow=False):
+        """Return max `limit` associations from the database after a given
+        DB table id.
+        :param afterId: A database id to act as an offset. Rows after this id
+            are returned.
+        :type afterId: int
+        :param limit: Max amount of database rows to return.
+        :type limit: int
+        :param shadow: Whether these associations are intended for a shadow
+            server.
+        :type shadow: bool
+        :returns a tuple with the first item being a dict of associations,
+            and the second being the maximum table id of the returned
+            associations.
+        :rtype: Tuple[Dict[Dict, Dict], int|None]
+        """
         assocs = {}
 
         localAssocStore = LocalAssociationStore(self.sydent)
@@ -72,9 +87,16 @@ class LocalAssociationStore:
 
         signer = Signer(self.sydent)
 
-        for localId in localAssocs:
-            sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
-            assocs[localId] = sgAssoc
+        for localId, assoc in localAssocs.items():
+            if shadow and self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
+                # mxid is null if 3pid has been unbound
+                if assoc.mxid:
+                    assoc.mxid = assoc.mxid.replace(
+                        ":" + self.sydent.shadow_hs_master,
+                        ":" + self.sydent.shadow_hs_slave
+                    )
+
+            assocs[localId] = signer.signedThreePidAssociation(assoc)
 
         return assocs, maxId
 
