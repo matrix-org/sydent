@@ -18,7 +18,7 @@ import json
 import logging
 
 from StringIO import StringIO
-from twisted.internet import defer, reactor
+from twisted.internet import defer
 from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers
 from sydent.http.matrixfederationagent import MatrixFederationAgent
@@ -104,7 +104,7 @@ class SimpleHttpClient(HTTPClient):
         # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
         # 'like a browser'
         self.agent = Agent(
-            reactor,
+            self.sydent.reactor,
             connectTimeout=15,
         )
 
@@ -115,6 +115,6 @@ class FederationHttpClient(HTTPClient):
     def __init__(self, sydent):
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
-            reactor,
+            self.sydent.reactor,
             ClientTLSOptionsFactory(sydent.cfg),
         )

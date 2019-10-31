@@ -17,7 +17,7 @@
 import logging
 from base64 import b64encode
 
-from twisted.internet import defer, reactor
+from twisted.internet import defer
 from sydent.http.httpclient import SimpleHttpClient
 from twisted.web.http_headers import Headers
 
