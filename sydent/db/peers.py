@@ -78,30 +78,10 @@ class PeerStore:
         return peers
 
     def setLastSentVersionAndPokeSucceeded(self, peerName, lastSentVersion, lastPokeSucceeded):
+        if not lastSentVersion:
+            return
+
         cur = self.sydent.db.cursor()
         res = cur.execute("update peers set lastSentVersion = ?, lastPokeSucceededAt = ? "
                           "where name = ?", (lastSentVersion, lastPokeSucceeded, peerName))
-        self.sydent.db.commit()
-
-    def setLastSentIdAndPokeSucceeded(self, peerName, ids, lastPokeSucceeded):
-        """Set last successful replication of data to this peer.
-
-        If an id for a replicated database table is None, the last sent value
-        will not be updated.
-
-        :param peerName: The name of the peer.
-        :type peerName: str
-        :param ids: A Dictionary of ids that represent the last database
-            table ids that were replicated to this peer.
-        :type ids: Dict[str, int]
-        :param lastPokeSucceeded: The time of when the last successful
-            replication succeeded (even if no actual replication of data was
-            necessary).
-        :type lastPokeSucceeded: int
-        """
-
-        cur = self.sydent.db.cursor()
-        if ids["sg_assocs"]:
-            cur.execute("update peers set lastSentAssocsId = ?, lastPokeSucceededAt = ? "
-                        "where name = ?", (ids["sg_assocs"], lastPokeSucceeded, peerName))
         self.sydent.db.commit()

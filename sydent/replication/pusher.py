@@ -84,40 +84,30 @@ class Pusher:
         try:
             # Keep looping until we're sure that there's no updates left to send
             while True:
-                # Dictionary for holding all data to push
-                push_data = {}
-
-                # Dictionary for holding all the ids of db tables we've successfully replicated
-                ids = {}
-                total_updates = 0
-
                 # Push associations
                 associations = self.local_assoc_store.getSignedAssociationsAfterId(
                     p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT
                 )
-                push_data["sg_assocs"], ids["sg_assocs"] = associations
-
-                association_count = len(push_data["sg_assocs"])
-                logger.debug(
-                    "%d updates to push to %s:%d",
-                    association_count, p.servername, p.port
-                )
+                assocs, latest_assoc_id = associations
 
                 # If there are no updates left to send, break the loop
-                if not association_count:
+                if not assocs:
                     logger.info("Pushing updates to %s:%d finished", p.servername, p.port)
                     break
 
-                logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
-                result = yield p.pushUpdates(push_data)
+                logger.info(
+                    "Pushing %d updates to %s:%d",
+                    len(assocs), p.servername, p.port
+                )
+                result = yield p.pushUpdates(assocs)
 
                 logger.info(
                     "Pushed updates to %s:%d with result %d %s",
                     p.servername, p.port, result.code, result.phrase
                 )
 
-                yield self.peerStore.setLastSentIdAndPokeSucceeded(
-                    p.servername, ids, time_msec()
+                yield self.peerStore.setLastSentVersionAndPokeSucceeded(
+                    p.servername, latest_assoc_id, time_msec()
                 )
         except Exception:
             logger.exception("Error pushing updates to %s:%d: %r", p.servername, p.port)
