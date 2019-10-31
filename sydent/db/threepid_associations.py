@@ -39,7 +39,7 @@ class LocalAssociationStore:
                     (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
         self.sydent.db.commit()
 
-    def getAssociationsAfterId(self, afterId, limit):
+    def getAssociationsAfterId(self, afterId, limit=None):
         cur = self.sydent.db.cursor()
 
         if afterId is None:
@@ -65,7 +65,19 @@ class LocalAssociationStore:
 
         return (assocs, maxId)
 
-    def getSignedAssociationsAfterId(self, afterId, limit):
+    def getSignedAssociationsAfterId(self, afterId, limit=None):
+        """Get associations after a given ID, and sign them before returning
+
+        :param afterId: The ID to return results after (not inclusive)
+        :type afterId: int
+
+        :param limit: The maximum amount of signed associations to return. None for no limit
+        :type limit: int|None
+
+        :return: A tuple consisting of a dictionary containing the signed associations (id:
+            assoc dict) and an int representing the maximum ID
+        :rtype: Tuple[dict[int, int]
+        """
         assocs = {}
 
         localAssocStore = LocalAssociationStore(self.sydent)

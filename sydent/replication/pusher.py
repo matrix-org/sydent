@@ -28,6 +28,7 @@ from sydent.db.peers import PeerStore
 
 logger = logging.getLogger(__name__)
 
+# Maximum amount of signed associations to replicate to a peer at a time
 ASSOCIATIONS_PUSH_LIMIT = 100
 
 
