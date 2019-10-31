@@ -42,7 +42,6 @@ class Peer(object):
     def __init__(self, servername, pubkeys):
         self.servername = servername
         self.pubkeys = pubkeys
-        self.shadow = False
         self.is_being_pushed_to = False
 
 
