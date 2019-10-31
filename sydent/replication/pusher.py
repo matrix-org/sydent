@@ -86,7 +86,7 @@ class Pusher:
             while True:
                 # Push associations
                 associations = self.local_assoc_store.getSignedAssociationsAfterId(
-                    p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT
+                    p.lastSentVersion, ASSOCIATIONS_PUSH_LIMIT
                 )
                 assocs, latest_assoc_id = associations
 
