@@ -127,8 +127,8 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, reactor=None):
-        self.reactor = reactor if reactor else twisted.internet.reactor
+    def __init__(self, reactor=twisted.internet.reactor):
+        self.reactor = reactor
         self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
         self.cfg = parse_config(self.config_file)
 
