@@ -78,7 +78,17 @@ class ThreepidBinder:
         Returns: The resulting signed association
         """
         mxidParts = parseMxid(mxid)
-        result = self._info.match_user_id(medium, address)
+
+        try:
+            result = self._info.match_user_id(medium, address)
+        except AssertionError:
+            # There is no info.yaml file available
+            logger.info(
+                "Denying bind of %r/%r -> %r due to no info.yaml file found",
+                medium, address, mxid
+            )
+            raise BindingNotPermittedException()
+
         possible_hses = []
         if 'hs' in result:
             possible_hses.append(result['hs'])

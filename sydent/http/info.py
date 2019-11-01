@@ -55,6 +55,8 @@ class Info(object):
         """
         result = {}
 
+        assert hasattr(self, "config")
+
         # Find an entry in the info file matching this user's ID
         if address in self.config['medium']['email']['entries']:
             result = self.config['medium']['email']['entries'][address]
