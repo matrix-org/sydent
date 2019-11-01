@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 def sendEmail(sydent, templateName, mailTo, substitutions):
+        logger.info("Substitutions: %r", substitutions)
         mailFrom = sydent.cfg.get('email', 'email.from')
         mailTemplateFile = sydent.cfg.get('email', templateName)
 

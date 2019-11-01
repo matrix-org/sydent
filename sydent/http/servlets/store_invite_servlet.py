@@ -16,6 +16,7 @@
 import nacl.signing
 import random
 import string
+import logging
 from email.header import Header
 
 from six import string_types
@@ -29,6 +30,8 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import get_args, send_cors, jsonwrap
 from sydent.http.auth import authIfV2
 from sydent.util.emailutils import sendEmail
+
+logger = logging.getLogger(__name__)
 
 
 class StoreInviteServlet(Resource):
