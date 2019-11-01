@@ -116,6 +116,9 @@ CONFIG_DEFAULTS = {
     'userdir': {
         'userdir.allowed_homeservers': '',
     },
+    'dinsic': {
+        'info_path': 'info.yaml',
+    }
 }
 
 
@@ -215,7 +218,7 @@ class Sydent:
         self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.userDirectorySearchServlet = UserDirectorySearchServlet(self)
 
-        info = Info(self)
+        info = Info(self, self.cfg.get("dinsic", "info_path"))
         self.servlets.info = InfoServlet(self, info)
         self.servlets.internalInfo = InternalInfoServlet(self, info)
 
