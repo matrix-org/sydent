@@ -22,6 +22,14 @@ class ThreadedMemoryReactorClock(MemoryReactorClock):
         self.threadpool = ThreadPool(self)
 
         self._udp = []
+
+        # Lookup dictionary linking between DNS names and IP addresses for populating the
+        # FakeResolver. Should be used in tests like so:
+        # self.lookups["matrix.org"] = [(IPv4Address, "8.8.8.8")]
+        #
+        # Create two variables pointing to the same dictionary. `self.lookups` is accessible to
+        # tests, which isn't accessible to FakeResolver (which has a different `self` object).
+        # It uses `lookups` instead.
         lookups = self.lookups = {}
 
         @implementer(IResolverSimple)
