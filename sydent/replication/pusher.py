@@ -133,7 +133,7 @@ class Pusher:
                 total_updates, p.servername, p.port
             )
         except Exception:
-            logger.exception("Error pushing updates to %s:%d: %r", p.servername, p.port)
+            logger.exception("Error pushing updates to %s:%d", p.servername, p.port)
         finally:
             # Whether pushing completed or an error occurred, signal that pushing has finished
             p.is_being_pushed_to = False
