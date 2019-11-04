@@ -1,12 +1,12 @@
 from twisted.trial import unittest
-from sydent.server import ThreadedMemoryReactorClock
+from twisted.test.proto_helpers import MemoryReactorClock
 from sydent.sydent import Sydent
 
 
 class StartupTestCase(unittest.TestCase):
     """Test that sydent started up correctly"""
     def test_start(self):
-        reactor = ThreadedMemoryReactorClock()
+        reactor = MemoryReactorClock()
         sydent = Sydent(reactor)
 
         sydent.run()
