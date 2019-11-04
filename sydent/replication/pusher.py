@@ -82,8 +82,6 @@ class Pusher:
             logger.debug("Waiting for %s:%d to finish pushing...", p.servername, p.port)
             return
 
-        pushed_data_count = 0
-
         try:
             # Dictionary for holding all data to push
             push_data = {}
@@ -130,15 +128,12 @@ class Pusher:
                 p.servername, ids, time_msec()
             )
 
-            pushed_data_count = total_updates
+            logger.info(
+                "Successfully pushed %d items to %s:%d",
+                total_updates, p.servername, p.port
+            )
         except Exception:
             logger.exception("Error pushing updates to %s:%d: %r", p.servername, p.port)
         finally:
             # Whether pushing completed or an error occurred, signal that pushing has finished
             p.is_being_pushed_to = False
-
-            if not pushed_data_count:
-                logger.info(
-                    "Successfully pushed %d items to %s:%d",
-                    pushed_data_count, p.servername, p.port
-                )
