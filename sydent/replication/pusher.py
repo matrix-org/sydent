@@ -83,54 +83,55 @@ class Pusher:
             return
 
         try:
-            peers = self.peerStore.getAllPeers()
+            # Dictionary for holding all data to push
+            push_data = {}
 
-            for p in peers:
-                logger.debug("Looking for updates to push to %s", p.servername)
+            # Dictionary for holding all the ids of db tables we've successfully replicated
+            ids = {}
+            total_updates = 0
 
-                # Dictionary for holding all data to push
-                push_data = {}
+            # Push associations
+            associations = self.local_assoc_store.getSignedAssociationsAfterId(
+                p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT
+            )
+            push_data["sg_assocs"], ids["sg_assocs"] = associations
 
-                # Dictionary for holding all the ids of db tables we've successfully replicated
-                ids = {}
-                total_updates = 0
+            # Push invite tokens and ephemeral public keys
+            tokens = self.join_token_store.getInviteTokensAfterId(
+                p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT
+            )
+            push_data["invite_tokens"], ids["invite_tokens"] = tokens
 
-                # Push associations
-                associations = self.local_assoc_store.getSignedAssociationsAfterId(
-                    p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT
-                )
-                push_data["sg_assocs"], ids["sg_assocs"] = associations
+            keys = self.join_token_store.getEphemeralPublicKeysAfterId(
+                p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT
+            )
+            push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"] = keys
 
-                # Push invite tokens and ephemeral public keys
-                tokens = self.join_token_store.getInviteTokensAfterId(
-                    p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT
-                )
-                push_data["invite_tokens"], ids["invite_tokens"] = tokens
+            token_count = len(push_data["invite_tokens"])
+            key_count = len(push_data["ephemeral_public_keys"])
+            association_count = len(push_data["sg_assocs"])
 
-                keys = self.join_token_store.getEphemeralPublicKeysAfterId(
-                    p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT
-                )
-                push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"] = keys
+            total_updates += token_count + key_count + association_count
 
-                token_count = len(push_data["invite_tokens"])
-                key_count = len(push_data["ephemeral_public_keys"])
-                association_count = len(push_data["sg_assocs"])
+            logger.debug(
+                "%d updates to push to %s:%d",
+                total_updates, p.servername, p.port
+            )
 
-                total_updates += token_count + key_count + association_count
+            # Return if there are no updates to send
+            if not total_updates:
+                return
 
-                logger.debug(
-                    "%d updates to push to %s:%d",
-                    total_updates, p.servername, p.port
-                )
+            yield p.pushUpdates(push_data)
 
-                # If there are no updates left to send, break the loop
-                if not total_updates:
-                    logger.info("Pushing updates to %s:%d finished", p.servername, p.port)
-                    break
+            yield self.peerStore.setLastSentIdAndPokeSucceeded(
+                p.servername, ids, time_msec()
+            )
 
-                yield self.peerStore.setLastSentIdAndPokeSucceeded(
-                    p.servername, ids, time_msec()
-                )
+            logger.info(
+                "Successfully pushed %d items to %s:%d",
+                total_updates, p.servername, p.port
+            )
         except Exception:
             logger.exception("Error pushing updates to %s:%d: %r", p.servername, p.port)
         finally:
