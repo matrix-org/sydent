@@ -16,9 +16,9 @@
 
 from sydent.util import time_msec
 
-from sydent.threepid import ThreepidAssociation, threePidAssocFromDict
+from sydent.threepid import ThreepidAssociation
+from sydent.threepid.signer import Signer
 
-import json
 import logging
 
 
@@ -63,6 +63,42 @@ class LocalAssociationStore:
             maxId = row[0]
 
         return (assocs, maxId)
+
+    def getSignedAssociationsAfterId(self, afterId, limit, shadow=False):
+        """Return max `limit` associations from the database after a given
+        DB table id.
+        :param afterId: A database id to act as an offset. Rows after this id
+            are returned.
+        :type afterId: int
+        :param limit: Max amount of database rows to return.
+        :type limit: int|None
+        :param shadow: Whether these associations are intended for a shadow
+            server.
+        :type shadow: bool
+        :returns a tuple with the first item being a dict of associations,
+            and the second being the maximum table id of the returned
+            associations.
+        :rtype: Tuple[Dict[Dict, Dict], int|None]
+        """
+        assocs = {}
+
+        localAssocStore = LocalAssociationStore(self.sydent)
+        (localAssocs, maxId) = localAssocStore.getAssociationsAfterId(afterId, limit)
+
+        signer = Signer(self.sydent)
+
+        for localId, assoc in localAssocs.items():
+            if shadow and self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
+                # mxid is null if 3pid has been unbound
+                if assoc.mxid:
+                    assoc.mxid = assoc.mxid.replace(
+                        ":" + self.sydent.shadow_hs_master,
+                        ":" + self.sydent.shadow_hs_slave
+                    )
+
+            assocs[localId] = signer.signedThreePidAssociation(assoc)
+
+        return assocs, maxId
 
     def removeAssociation(self, threepid, mxid):
         cur = self.sydent.db.cursor()

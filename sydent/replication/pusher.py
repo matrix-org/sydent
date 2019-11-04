@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +16,8 @@
 # limitations under the License.
 
 import logging
-import copy
 
+from twisted.internet import defer
 import twisted.internet.reactor
 import twisted.internet.task
 
@@ -25,83 +26,61 @@ from sydent.replication.peer import LocalPeer
 from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.peers import PeerStore
-from sydent.threepid.signer import Signer
 
 logger = logging.getLogger(__name__)
 
+# Maximum amount of signed objects to replicate to a peer at a time
 EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT = 100
 INVITE_TOKENS_PUSH_LIMIT = 100
 ASSOCIATIONS_PUSH_LIMIT = 100
+
 
 class Pusher:
     def __init__(self, sydent):
         self.sydent = sydent
         self.pushing = False
         self.peerStore = PeerStore(self.sydent)
+        self.join_token_store = JoinTokenStore(self.sydent)
+        self.local_assoc_store = LocalAssociationStore(self.sydent)
 
     def setup(self):
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
         cb.start(10.0)
 
-    def getSignedAssociationsAfterId(self, afterId, limit, shadow=False):
-        """Return max `limit` associations from the database after a given
-        DB table id.
-
-        :param afterId: A database id to act as an offset. Rows after this id
-            are returned.
-        :type afterId: int
-        :param limit: Max amount of database rows to return.
-        :type limit: int
-        :param shadow: Whether these associations are intended for a shadow
-            server.
-        :type shadow: bool
-        :returns a tuple with the first item being a dict of associations,
-            and the second being the maximum table id of the returned
-            associations.
-        :rtype: Tuple[Dict[Dict, Dict], int|None]
-        """
-        assocs = {}
-
-        localAssocStore = LocalAssociationStore(self.sydent)
-        (localAssocs, maxId) = localAssocStore.getAssociationsAfterId(afterId, limit)
-
-        signer = Signer(self.sydent)
-
-        for localId, assoc in localAssocs.items():
-            if shadow and self.sydent.shadow_hs_master and self.sydent.shadow_hs_slave:
-                # mxid is null if 3pid has been unbound
-                if assoc.mxid:
-                    assoc.mxid = assoc.mxid.replace(
-                        ":" + self.sydent.shadow_hs_master,
-                        ":" + self.sydent.shadow_hs_slave
-                    )
-
-            assocs[localId] = signer.signedThreePidAssociation(assoc)
-
-        return (assocs, maxId)
-
     def doLocalPush(self):
         """
         Synchronously push local associations to this server (ie. copy them to globals table)
-        The local server is essentially treated the same as any other peer except we don't do the
-        network round-trip and this function can be used so the association goes into the global table
-        before the http call returns (so clients know it will be available on at least the same ID server they used)
+        The local server is essentially treated the same as any other peer except we don't do
+        the network round-trip and this function can be used so the association goes into the
+        global table before the http call returns (so clients know it will be available on at
+        least the same ID server they used)
         """
         localPeer = LocalPeer(self.sydent)
 
-        (signedAssocs, _) = self.getSignedAssociationsAfterId(localPeer.lastId, None)
+        signedAssocs, _ = self.local_assoc_store.getSignedAssociationsAfterId(
+            localPeer.lastId, None
+        )
 
         localPeer.pushUpdates(signedAssocs)
 
     def scheduledPush(self):
-        """Push pending updates to a remote peer. To be called regularly."""
-        if self.pushing:
+        """Push pending updates to a remote peer. To be called regularly.
+
+        :returns deferred.DeferredList
+        """
+        peers = self.peerStore.getAllPeers()
+
+        # Push to all peers in parallel
+        return defer.DeferredList([self._push_to_peer(p) for p in peers])
+
+    @defer.inlineCallbacks
+    def _push_to_peer(self, p):
+        logger.debug("Looking for updates to push to %s", p.servername)
+
+        # Check if a push operation is already active. If so, don't start another
+        if p.is_being_pushed_to:
+            logger.debug("Waiting for %s:%d to finish pushing...", p.servername, p.port)
             return
-        self.pushing = True
-
-        updateDeferred = None
-
-        join_token_store = JoinTokenStore(self.sydent)
 
         try:
             peers = self.peerStore.getAllPeers()
@@ -112,42 +91,48 @@ class Pusher:
                 # Dictionary for holding all data to push
                 push_data = {}
 
-                # Dictionary for holding all the ids of db tables we've successfully replicated up to
+                # Dictionary for holding all the ids of db tables we've successfully replicated
                 ids = {}
                 total_updates = 0
 
                 # Push associations
-                (push_data["sg_assocs"], ids["sg_assocs"]) = self.getSignedAssociationsAfterId(p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT, p.shadow)
-                total_updates += len(push_data["sg_assocs"])
+                associations = self.local_assoc_store.getSignedAssociationsAfterId(
+                    p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT
+                )
+                push_data["sg_assocs"], ids["sg_assocs"] = associations
 
                 # Push invite tokens and ephemeral public keys
-                (push_data["invite_tokens"], ids["invite_tokens"]) = join_token_store.getInviteTokensAfterId(p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT)
-                (push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"]) = join_token_store.getEphemeralPublicKeysAfterId(p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT)
-                total_updates += len(push_data["invite_tokens"]) + len(push_data["ephemeral_public_keys"])
+                tokens = self.join_token_store.getInviteTokensAfterId(
+                    p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT
+                )
+                push_data["invite_tokens"], ids["invite_tokens"] = tokens
 
-                logger.debug("%d updates to push to %s", total_updates, p.servername)
-                if total_updates:
-                    logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
-                    updateDeferred = p.pushUpdates(push_data)
-                    updateDeferred.addCallback(self._pushSucceeded, peer=p, ids=ids)
-                    updateDeferred.addErrback(self._pushFailed, peer=p)
+                keys = self.join_token_store.getEphemeralPublicKeysAfterId(
+                    p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT
+                )
+                push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"] = keys
+
+                token_count = len(push_data["invite_tokens"])
+                key_count = len(push_data["ephemeral_public_keys"])
+                association_count = len(push_data["sg_assocs"])
+
+                total_updates += token_count + key_count + association_count
+
+                logger.debug(
+                    "%d updates to push to %s:%d",
+                    total_updates, p.servername, p.port
+                )
+
+                # If there are no updates left to send, break the loop
+                if not total_updates:
+                    logger.info("Pushing updates to %s:%d finished", p.servername, p.port)
                     break
+
+                yield self.peerStore.setLastSentIdAndPokeSucceeded(
+                    p.servername, ids, time_msec()
+                )
+        except Exception:
+            logger.exception("Error pushing updates to %s:%d: %r", p.servername, p.port)
         finally:
-            if not updateDeferred:
-                self.pushing = False
-
-    def _pushSucceeded(self, result, peer, ids):
-        """To be called after a successful push to a remote peer."""
-        logger.info("Pushed updates to %s with result %d %s",
-                    peer.servername, result.code, result.phrase)
-
-        self.peerStore.setLastSentIdAndPokeSucceeded(peer.servername, ids, time_msec())
-
-        self.pushing = False
-        self.scheduledPush()
-
-    def _pushFailed(self, failure, peer):
-        """To be called after an unsuccessful push to a remote peer."""
-        logger.info("Failed to push updates to %s:%s: %s", peer.servername, peer.port, failure)
-        self.pushing = False
-        return None
+            # Whether pushing completed or an error occurred, signal that pushing has finished
+            p.is_being_pushed_to = False
