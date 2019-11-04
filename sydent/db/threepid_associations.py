@@ -71,7 +71,7 @@ class LocalAssociationStore:
             are returned.
         :type afterId: int
         :param limit: Max amount of database rows to return.
-        :type limit: int
+        :type limit: int|None
         :param shadow: Whether these associations are intended for a shadow
             server.
         :type shadow: bool
