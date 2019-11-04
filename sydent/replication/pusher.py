@@ -29,6 +29,7 @@ from sydent.db.peers import PeerStore
 
 logger = logging.getLogger(__name__)
 
+# Maximum amount of signed objects to replicate to a peer at a time
 EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT = 100
 INVITE_TOKENS_PUSH_LIMIT = 100
 ASSOCIATIONS_PUSH_LIMIT = 100
