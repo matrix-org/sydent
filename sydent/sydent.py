@@ -83,6 +83,9 @@ CONFIG_DEFAULTS = {
         # which defines the time during which an invite will be valid on this server
         # from the time it has been received.
         'invites.validity_period': '',
+        # Path to file detailing the configuration of the /info and /internal-info servlets.
+        # More information about them can be found in docs/info.md
+        'info_path': 'info.yaml',
     },
     'db': {
         'db.file': 'sydent.db',
@@ -116,9 +119,6 @@ CONFIG_DEFAULTS = {
     'userdir': {
         'userdir.allowed_homeservers': '',
     },
-    'dinsic': {
-        'info_path': 'info.yaml',
-    }
 }
 
 
@@ -218,7 +218,7 @@ class Sydent:
         self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.userDirectorySearchServlet = UserDirectorySearchServlet(self)
 
-        info = Info(self, self.cfg.get("dinsic", "info_path"))
+        info = Info(self, self.cfg.get("general", "info_path"))
         self.servlets.info = InfoServlet(self, info)
         self.servlets.internalInfo = InternalInfoServlet(self, info)
 
