@@ -84,7 +84,7 @@ CONFIG_DEFAULTS = {
         # from the time it has been received.
         'invites.validity_period': '',
         # Path to file detailing the configuration of the /info and /internal-info servlets.
-        # More information about them can be found in docs/info.md
+        # More information can be found in docs/info.md.
         'info_path': 'info.yaml',
     },
     'db': {
