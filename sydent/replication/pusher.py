@@ -16,7 +16,6 @@
 
 import logging
 
-import twisted.internet.reactor
 import twisted.internet.task
 
 from sydent.util import time_msec
@@ -36,6 +35,7 @@ class Pusher:
 
     def setup(self):
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
+        cb.clock = self.sydent.reactor
         cb.start(10.0)
 
     def getSignedAssociationsAfterId(self, afterId, limit):
