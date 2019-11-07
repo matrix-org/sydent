@@ -57,8 +57,12 @@ class RegisterServlet(Resource):
         user_id = result['sub']
         tok = yield issueToken(self.sydent, user_id)
 
+        # XXX: `token` is correct for the spec, but we released with `access_token`
+        # for a substantial amount of time. Serve both to make spec-compliant clients
+        # happy.
         defer.returnValue({
             "access_token": tok,
+            "token": tok,
         })
 
     def render_OPTIONS(self, request):
