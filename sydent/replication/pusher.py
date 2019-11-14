@@ -41,6 +41,7 @@ class Pusher:
 
     def setup(self):
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
+        cb.clock = self.sydent.reactor
         cb.start(10.0)
 
     def doLocalPush(self):

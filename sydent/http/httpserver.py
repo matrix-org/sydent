@@ -20,7 +20,6 @@ from twisted.web.server import Site
 from twisted.web.resource import Resource
 
 import logging
-import twisted.internet.reactor
 import twisted.internet.ssl
 
 from sydent.http.servlets.authenticated_bind_threepid_servlet import (
@@ -126,7 +125,7 @@ class ClientApiHttpServer:
         httpPort = int(self.sydent.cfg.get('http', 'clientapi.http.port'))
         interface = self.sydent.cfg.get('http', 'clientapi.http.bind_address')
         logger.info("Starting Client API HTTP server on %s:%d", interface, httpPort)
-        twisted.internet.reactor.listenTCP(
+        self.sydent.reactor.listenTCP(
             httpPort, self.factory, interface=interface,
         )
 
@@ -153,7 +152,7 @@ class InternalApiHttpServer(object):
 
         factory = Site(root)
         factory.displayTracebacks = False
-        twisted.internet.reactor.listenTCP(port, factory, interface=interface)
+        self.sydent.reactor.listenTCP(port, factory, interface=interface)
 
 
 class ReplicationHttpsServer:
@@ -191,4 +190,5 @@ class ReplicationHttpsServer:
             logger.info("Loaded server private key and certificate!")
             logger.info("Starting Replication HTTPS server on %s:%d", interface, httpPort)
 
-            twisted.internet.reactor.listenSSL(httpPort, self.factory, certOptions, interface=interface)
+            self.sydent.reactor.listenSSL(httpPort, self.factory, certOptions,
+                                          interface=interface)
