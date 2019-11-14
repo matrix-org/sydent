@@ -84,35 +84,32 @@ class Pusher:
         p.is_being_pushed_to = True
 
         try:
-            # Keep looping until we're sure that there's no updates left to send
-            while True:
-                # Push associations
-                associations = self.local_assoc_store.getSignedAssociationsAfterId(
-                    p.lastSentVersion, ASSOCIATIONS_PUSH_LIMIT
-                )
-                assocs, latest_assoc_id = associations
+            # Push associations
+            associations = self.local_assoc_store.getSignedAssociationsAfterId(
+                p.lastSentVersion, ASSOCIATIONS_PUSH_LIMIT
+            )
+            assocs, latest_assoc_id = associations
 
-                # If there are no updates left to send, break the loop
-                if not assocs:
-                    logger.info("Pushing updates to %s:%d finished", p.servername, p.port)
-                    break
+            # If there are no updates left to send, break the loop
+            if not assocs:
+                return
 
-                logger.info(
-                    "Pushing %d updates to %s:%d",
-                    len(assocs), p.servername, p.port
-                )
-                result = yield p.pushUpdates(assocs)
+            logger.info(
+                "Pushing %d updates to %s:%d",
+                len(assocs), p.servername, p.port
+            )
+            result = yield p.pushUpdates(assocs)
 
-                logger.info(
-                    "Pushed updates to %s:%d with result %d %s",
-                    p.servername, p.port, result.code, result.phrase
-                )
+            yield self.peerStore.setLastSentVersionAndPokeSucceeded(
+                p.servername, latest_assoc_id, time_msec()
+            )
 
-                yield self.peerStore.setLastSentVersionAndPokeSucceeded(
-                    p.servername, latest_assoc_id, time_msec()
-                )
+            logger.info(
+                "Pushed updates to %s:%d with result %d %s",
+                p.servername, p.port, result.code, result.phrase
+            )
         except Exception:
-            logger.exception("Error pushing updates to %s:%d: %r", p.servername, p.port)
+            logger.exception("Error pushing updates to %s:%d", p.servername, p.port)
         finally:
             # Whether pushing completed or an error occurred, signal that pushing has finished
             p.is_being_pushed_to = False
