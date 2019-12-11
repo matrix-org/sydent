@@ -185,6 +185,22 @@ class JoinTokenStore(object):
             "UPDATE invite_tokens SET sent_ts = ? WHERE medium = ? AND address = ?",
             (int(time.time()), medium, address,)
         )
+
+        # Insert a row for every updated invite in the updated_invites table so the
+        # update is replicated to other servers.
+        res = cur.execute(
+            "SELECT id FROM invite_tokens WHERE medium = ? AND address = ?",
+            (int(time.time()), medium, address,)
+        )
+
+        rows = res.fetchall()
+
+        for (invite_id,) in rows:
+            cur.execute(
+                "INSERT INTO updated_invites (invite_id) VALUES (?)",
+                (invite_id,)
+            )
+
         self.sydent.db.commit()
 
     def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None, commit=True):
@@ -316,3 +332,44 @@ class JoinTokenStore(object):
         if rows:
             return rows[0][0]
         return None
+
+    def getInviteUpdatesAfterId(self, last_id, limit):
+        cur = self.sydent.db.cursor()
+
+        res = cur.execute(
+            """
+                SELECT id, invite_id FROM updated_invites
+                WHERE id > ? LIMIT ?
+            """,
+            (last_id, limit),
+        )
+
+        rows = res.fetchall()
+
+        invites = []
+        for (maxId, invite_id) in rows:
+            invite_res = cur.execute(
+                """
+                    SELECT id, medium, address, room_id, sender, token
+                    FROM invite_tokens WHERE id = ?
+                """,
+                (invite_id,)
+            )
+
+            invite_rows = invite_res.fetchall()
+            for row in invite_rows:
+                invite_id, medium, address, room_id, sender, token = row
+                invites.append(
+                    {
+                        "origin_id": invite_id,
+                        "medium": medium,
+                        "address": address,
+                        "room_id": room_id,
+                        "sender": sender,
+                        "token": token,
+                    }
+                )
+
+        self.sydent.db.commit()
+
+        return (invites, maxId)

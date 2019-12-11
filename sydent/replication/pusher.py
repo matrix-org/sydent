@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # Maximum amount of signed objects to replicate to a peer at a time
 EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT = 100
 INVITE_TOKENS_PUSH_LIMIT = 100
+INVITE_UPDATES_PUSH_LIMIT = 100
 ASSOCIATIONS_PUSH_LIMIT = 100
 
 
@@ -97,10 +98,18 @@ class Pusher:
             push_data["sg_assocs"], ids["sg_assocs"] = associations
 
             # Push invite tokens and ephemeral public keys
+            push_data["invite_tokens"] = {}
+            ids["invite_tokens"] = {}
+
             tokens = self.join_token_store.getInviteTokensAfterId(
                 p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT
             )
-            push_data["invite_tokens"], ids["invite_tokens"] = tokens
+            push_data["invite_tokens"]["added"], ids["invite_tokens"]["added"] = tokens
+
+            updates = self.join_token_store.getInviteUpdatesAfterId(
+                p.lastSentInviteUpdatesId, INVITE_UPDATES_PUSH_LIMIT
+            )
+            push_data["invite_tokens"]["updated"], ids["invite_tokens"]["updated"] = updates
 
             keys = self.join_token_store.getEphemeralPublicKeysAfterId(
                 p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT
