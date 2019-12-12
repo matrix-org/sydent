@@ -63,6 +63,51 @@ class JoinTokenStore(object):
         if commit:
             self.sydent.db.commit()
 
+    def updateToken(self, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id, commit=True):
+        """Process an invite update received over replication.
+
+        :param medium:
+        :param address:
+        :param room_id:
+        :param sender:
+        :param token:
+        :param sent_ts:
+        :param origin_server:
+        :param origin_id:
+        :param commit:
+        :return:
+        """
+        cur = self.sydent.db.cursor()
+
+        params = (medium, address, room_id, sender, token, sent_ts, origin_id)
+
+        # Updates sent over replication include the origin_server and the origin_id as
+        # seen from the server performing the update.
+        # If we received an update to an invite that originated from this server,
+        # use the id row to identify the invite to update, otherwise use the
+        # origin_server and origin_id to identify the invite.
+        if origin_server == self.sydent.server_name:
+            where_clause = """
+                WHERE id = ?
+            """
+        else:
+            where_clause = """
+                WHERE origin_id = ? AND origin_server = ?
+            """
+            params += (origin_server,)
+
+        sql = """
+            UPDATE invite_tokens
+            SET medium = ?, address = ?, room_id = ?, sender = ?, token = ?, sent_ts = ?
+        """
+
+        sql += where_clause
+
+        cur.execute(sql, params)
+
+        if commit:
+            self.sydent.db.commit()
+
     def getTokens(self, medium, address):
         """Retrieve the invite token(s) for a given 3PID medium and address.
         Filters out tokens which have expired.
@@ -350,7 +395,7 @@ class JoinTokenStore(object):
         for (maxId, invite_id) in rows:
             invite_res = cur.execute(
                 """
-                    SELECT id, medium, address, room_id, sender, token
+                    SELECT id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id
                     FROM invite_tokens WHERE id = ?
                 """,
                 (invite_id,)
@@ -358,15 +403,17 @@ class JoinTokenStore(object):
 
             invite_rows = invite_res.fetchall()
             for row in invite_rows:
-                invite_id, medium, address, room_id, sender, token = row
+                invite_id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
                 invites.append(
                     {
-                        "origin_id": invite_id,
+                        "origin_id": origin_id if origin_id is not None else invite_id,
+                        "origin_server": origin_server if origin_server is not None else self.sydent.server_name,
                         "medium": medium,
                         "address": address,
                         "room_id": room_id,
                         "sender": sender,
                         "token": token,
+                        "sent_ts": sent_ts,
                     }
                 )
 
