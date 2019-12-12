@@ -174,7 +174,7 @@ class ReplicationPushServlet(Resource):
                                 commit=False)
             logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
-        # Process any invite update
+        # Process any invite token update
 
         invite_updates = invite_tokens.get('updated')
         if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
