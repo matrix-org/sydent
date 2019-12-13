@@ -89,9 +89,10 @@ class PeerStore:
                 port = row[1]
                 lastSentAssocsId = row[2]
                 lastSentInviteTokensId = row[3]
-                lastSentEphemeralKeysId = row[4]
-                shadow = row[5]
-            pubkeys[row[6]] = row[7]
+                lastSentInviteUpdatesId = row[4]
+                lastSentEphemeralKeysId = row[5]
+                shadow = row[6]
+            pubkeys[row[7]] = row[8]
 
         if len(pubkeys) > 0:
             p = RemotePeer(self.sydent, peername, port, pubkeys)
