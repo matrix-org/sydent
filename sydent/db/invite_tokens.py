@@ -252,7 +252,7 @@ class JoinTokenStore(object):
         # update is replicated to other servers.
         res = cur.execute(
             "SELECT id FROM invite_tokens WHERE medium = ? AND address = ?",
-            (int(time.time()), medium, address,)
+            (medium, address,)
         )
 
         rows = res.fetchall()

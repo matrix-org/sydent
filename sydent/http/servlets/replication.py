@@ -185,9 +185,9 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        for updated_invite in new_invites:
+        for updated_invite in invite_updates:
             tokensStore.updateToken(updated_invite['medium'], updated_invite['address'], updated_invite['room_id'],
-                                updated_invite['sender'], updated_invite['token'],
+                                updated_invite['sender'], updated_invite['token'], updated_invite['sent_ts'],
                                 origin_server=updated_invite['origin_server'], origin_id=updated_invite['origin_id'],
                                 commit=False)
             logger.info("Stored invite update with origin ID %s from %s", updated_invite['origin_id'], peer.servername)
