@@ -166,7 +166,7 @@ class SqliteDatabase:
             )
             cur.execute(
                 """
-                    ALTER TABLE invite_tokens
+                    ALTER TABLE peers
                     ADD COLUMN lastSentInviteUpdatesId INTEGER DEFAULT 0
                 """
             )
