@@ -396,7 +396,7 @@ class JoinTokenStore(object):
         return None
 
     def getInviteUpdatesAfterId(self, last_id, limit):
-        """Returns every updated tokens which update id is higher than the provided
+        """Returns every updated token for which update id is higher than the provided
         last_id, capped at `limit` tokens.
 
         :param last_id: The last ID processed during the previous run.
@@ -404,7 +404,7 @@ class JoinTokenStore(object):
         :param limit: The maximum number of results to return.
         :type limit: int
         :returns a tuple consisting of a list of invite tokens and the maximum DB id
-            that was extracted from the table keeping track of the uodates.
+            that was extracted from the table keeping track of the updates.
             Otherwise returns ([], None) if no tokens are found.
         :rtype: Tuple[List[Dict], int|None]
 
