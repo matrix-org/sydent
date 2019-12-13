@@ -61,7 +61,7 @@ class PeerStore:
     def getAllPeers(self):
         cur = self.sydent.db.cursor()
         res = cur.execute("select p.name, p.port, "
-                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, "
+                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentInviteUpdatesId, p.lastSentEphemeralKeysId, "
                           "p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where pk.peername = p.name and p.active = 1")
 
@@ -71,6 +71,7 @@ class PeerStore:
         port = None
         lastSentAssocsId = 0
         lastSentInviteTokensId = 0
+        lastSentInviteUpdatesId = 0
         lastSentEphemeralKeysId = 0
         pubkeys = {}
 
@@ -80,6 +81,7 @@ class PeerStore:
                     p = RemotePeer(self.sydent, peername, port, pubkeys)
                     p.lastSentAssocsId = lastSentAssocsId
                     p.lastSentInviteTokensId = lastSentInviteTokensId
+                    p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
                     p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
                     peers.append(p)
                     pubkeys = {}
@@ -95,6 +97,7 @@ class PeerStore:
             p = RemotePeer(self.sydent, peername, port, pubkeys)
             p.lastSentAssocsId = lastSentAssocsId
             p.lastSentInviteTokensId = lastSentInviteTokensId
+            p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
             p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
             p.shadow = True if shadow else False
             peers.append(p)
