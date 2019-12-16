@@ -127,10 +127,10 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, reactor=twisted.internet.reactor):
+    def __init__(self, reactor=twisted.internet.reactor, config=None):
         self.reactor = reactor
         self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
-        self.cfg = parse_config(self.config_file)
+        self.cfg = config if config else parse_config(self.config_file)
 
         log_format = (
             "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
