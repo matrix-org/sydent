@@ -257,11 +257,9 @@ class JoinTokenStore(object):
 
         rows = res.fetchall()
 
-        for (invite_id,) in rows:
-            cur.execute(
-                "INSERT INTO updated_invites (invite_id) VALUES (?)",
-                (invite_id,)
-            )
+        cur.executemany(
+            "INSERT INTO updated_invites (invite_id) VALUES (?)", rows
+        )
 
         self.sydent.db.commit()
 
@@ -414,8 +412,11 @@ class JoinTokenStore(object):
         # Retrieve the IDs of the invites that have been updated since the last time.
         res = cur.execute(
             """
-                SELECT id, invite_id FROM updated_invites
-                WHERE id > ? LIMIT ?
+                SELECT u.id, t.id, medium, address, room_id, sender, token, sent_ts,
+                    origin_server, origin_id
+                FROM updated_invites AS u
+                    LEFT JOIN invite_tokens AS t ON (t.id = u.invite_id)
+                WHERE u.id > ? ORDER BY u.id ASC LIMIT ?;
             """,
             (last_id, limit),
         )
@@ -426,36 +427,25 @@ class JoinTokenStore(object):
 
         # Retrieve each invite and append it to a list.
         invites = []
-        for (max_id, invite_id) in rows:
-            invite_res = cur.execute(
-                """
-                    SELECT id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id
-                    FROM invite_tokens WHERE id = ?
-                """,
-                (invite_id,)
+        for row in rows:
+            max_id, invite_id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
+            # Append a new object to the list containing the token's metadata,
+            # including an `origin_id` and an `origin_server` so that the receiving end
+            # can figure out which invite to update in its local database. If the token
+            # originated from this server, use its local ID as the value for
+            # `origin_id`, and the local server's server_name for `origin_server`.
+            invites.append(
+                {
+                    "origin_id": origin_id if origin_id is not None else invite_id,
+                    "origin_server": origin_server if origin_server is not None else self.sydent.server_name,
+                    "medium": medium,
+                    "address": address,
+                    "room_id": room_id,
+                    "sender": sender,
+                    "token": token,
+                    "sent_ts": sent_ts,
+                }
             )
-
-            invite_rows = invite_res.fetchall()
-            for row in invite_rows:
-                invite_id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
-                # Append a new object to the list containing the token's metadata,
-                # including an `origin_id` and an `origin_server` so that the receiving
-                # end can figure out which invite to update in its local database. If
-                # the token originated from this server, use its local ID as the value
-                # for `origin_id`, and the local server's server_name for
-                # `origin_server`.
-                invites.append(
-                    {
-                        "origin_id": origin_id if origin_id is not None else invite_id,
-                        "origin_server": origin_server if origin_server is not None else self.sydent.server_name,
-                        "medium": medium,
-                        "address": address,
-                        "room_id": room_id,
-                        "sender": sender,
-                        "token": token,
-                        "sent_ts": sent_ts,
-                    }
-                )
 
         self.sydent.db.commit()
 
