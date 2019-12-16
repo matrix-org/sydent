@@ -96,7 +96,7 @@ class JoinTokenStore(object):
         # Updates sent over replication include the origin_server and the origin_id as
         # seen from the server performing the update.
         # If we received an update to an invite that originated from this server,
-        # use the id row to identify the invite to update, otherwise use the
+        # use the id column to identify the invite to update, otherwise use the
         # origin_server and origin_id to identify the invite.
         # Note that we don't replicate 3PID invites that have been received over
         # replication, so we're sure that origin_server and origin_id are the right
@@ -394,7 +394,7 @@ class JoinTokenStore(object):
         return None
 
     def getInviteUpdatesAfterId(self, last_id, limit):
-        """Returns every updated tokens which update id is higher than the provided
+        """Returns every updated token for which update id is higher than the provided
         last_id, capped at `limit` tokens.
 
         :param last_id: The last ID processed during the previous run.
@@ -402,7 +402,7 @@ class JoinTokenStore(object):
         :param limit: The maximum number of results to return.
         :type limit: int
         :returns a tuple consisting of a list of invite tokens and the maximum DB id
-            that was extracted from the table keeping track of the uodates.
+            that was extracted from the table keeping track of the updates.
             Otherwise returns ([], None) if no tokens are found.
         :rtype: Tuple[List[Dict], int|None]
 
