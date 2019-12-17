@@ -123,18 +123,18 @@ class PeerStore:
         :type lastPokeSucceeded: int
         """
 
-        invite_tokens_ids = ids.get("invite_tokens", {})
+        invite_token_ids = ids.get("invite_tokens", {})
 
         cur = self.sydent.db.cursor()
         if ids["sg_assocs"]:
             cur.execute("update peers set lastSentAssocsId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["sg_assocs"], lastPokeSucceeded, peerName))
-        if invite_tokens_ids["added"]:
+        if invite_token_ids["added"]:
             cur.execute("update peers set lastSentInviteTokensId = ?, lastPokeSucceededAt = ? "
-                        "where name = ?", (invite_tokens_ids["added"], lastPokeSucceeded, peerName))
-        if invite_tokens_ids["updated"]:
+                        "where name = ?", (invite_token_ids["added"], lastPokeSucceeded, peerName))
+        if invite_token_ids["updated"]:
             cur.execute("update peers set lastSentInviteUpdatesId = ?, lastPokeSucceededAt = ? "
-                        "where name = ?", (invite_tokens_ids["updated"], lastPokeSucceeded, peerName))
+                        "where name = ?", (invite_token_ids["updated"], lastPokeSucceeded, peerName))
         if ids["ephemeral_public_keys"]:
             cur.execute("update peers set lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["ephemeral_public_keys"], lastPokeSucceeded, peerName))
