@@ -158,7 +158,7 @@ class ReplicationPushServlet(Resource):
         # Process any new invite tokens
 
         invite_tokens = inJson.get('invite_tokens', {})
-        new_invites = invite_tokens.get('added')
+        new_invites = invite_tokens.get('added', {})
         if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
             self.sydent.db.rollback()
             logger.warn("Peer %s made push with 'invite_tokens.added' field containing %d entries, which is greater than the maximum %d", peer.servername, len(new_invites), MAX_INVITE_TOKENS_LIMIT)
@@ -176,10 +176,10 @@ class ReplicationPushServlet(Resource):
 
         # Process any invite token update
 
-        invite_updates = invite_tokens.get('updated')
+        invite_updates = invite_tokens.get('updated', {})
         if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
             self.sydent.db.rollback()
-            logger.warn("Peer %s made push with 'invite_tokens.updated' field containing %d entries, which is greater than the maximum %d", peer.servername, len(invite_updates), MAX_INVITE_UPDATES_LIMIT)
+            logger.warning("Peer %s made push with 'invite_tokens.updated' field containing %d entries, which is greater than the maximum %d", peer.servername, len(invite_updates), MAX_INVITE_UPDATES_LIMIT)
             request.setResponseCode(400)
             request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens.updated" has more than %d keys' % MAX_INVITE_UPDATES_LIMIT}))
             request.finish()

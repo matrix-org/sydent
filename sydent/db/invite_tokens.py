@@ -97,11 +97,11 @@ class JoinTokenStore(object):
         # seen from the server performing the update.
         # If we received an update to an invite that originated from this server,
         # use the id column to identify the invite to update, otherwise use the
-        # origin_server and origin_id to identify the invite.
+        # origin_server and origin_id.
         # Note that we don't replicate 3PID invites that have been received over
         # replication, so we're sure that origin_server and origin_id are the right
         # ones (as opposed to, e.g., a server B replicating an invite on behalf of
-        # another server A so that the origin_server and origin_id are for the B rather
+        # another server A so that the origin_server and origin_id are for B rather
         # than A, from which that invite originated).
         if origin_server == self.sydent.server_name:
             where_clause = """
@@ -394,8 +394,8 @@ class JoinTokenStore(object):
         return None
 
     def getInviteUpdatesAfterId(self, last_id, limit):
-        """Returns every updated token for which update id is higher than the provided
-        last_id, capped at `limit` tokens.
+        """Returns every updated token for which its update id is higher than the provided
+        `last_id`, capped at `limit` tokens.
 
         :param last_id: The last ID processed during the previous run.
         :type last_id: int
@@ -429,7 +429,7 @@ class JoinTokenStore(object):
         invites = []
         for row in rows:
             max_id, invite_id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
-            # Append a new object to the list containing the token's metadata,
+            # Append a new dict to the list containing the token's metadata,
             # including an `origin_id` and an `origin_server` so that the receiving end
             # can figure out which invite to update in its local database. If the token
             # originated from this server, use its local ID as the value for
@@ -449,4 +449,4 @@ class JoinTokenStore(object):
 
         self.sydent.db.commit()
 
-        return (invites, max_id)
+        return invites, max_id
