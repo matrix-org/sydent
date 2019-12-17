@@ -24,7 +24,7 @@ class PeerStore:
     def getPeerByName(self, name):
         cur = self.sydent.db.cursor()
         res = cur.execute("select p.name, p.port, "
-                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, "
+                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentInviteUpdatesId, p.lastSentEphemeralKeysId, "
                           "p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
 
@@ -32,6 +32,7 @@ class PeerStore:
         port = None
         lastSentAssocsId = None
         lastSentInviteTokensId = None
+        lastSentInviteUpdatesId = None
         lastSentEphemeralKeysId = None
         pubkeys = {}
 
@@ -40,9 +41,10 @@ class PeerStore:
             port = row[1]
             lastSentAssocsId = row[2]
             lastSentInviteTokensId = row[3]
-            lastSentEphemeralKeysId = row[4]
-            shadow = row[5]
-            pubkeys[row[6]] = row[7]
+            lastSentInviteUpdatesId = row[4]
+            lastSentEphemeralKeysId = row[5]
+            shadow = row[6]
+            pubkeys[row[7]] = row[8]
 
         if len(pubkeys) == 0:
             return None
@@ -50,6 +52,7 @@ class PeerStore:
         p = RemotePeer(self.sydent, serverName, port, pubkeys)
         p.lastSentAssocsId = lastSentAssocsId
         p.lastSentInviteTokensId = lastSentInviteTokensId
+        p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
         p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
         p.shadow = True if shadow else False
 
@@ -58,7 +61,7 @@ class PeerStore:
     def getAllPeers(self):
         cur = self.sydent.db.cursor()
         res = cur.execute("select p.name, p.port, "
-                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentEphemeralKeysId, "
+                          "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentInviteUpdatesId, p.lastSentEphemeralKeysId, "
                           "p.shadow, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where pk.peername = p.name and p.active = 1")
 
@@ -68,6 +71,7 @@ class PeerStore:
         port = None
         lastSentAssocsId = 0
         lastSentInviteTokensId = 0
+        lastSentInviteUpdatesId = 0
         lastSentEphemeralKeysId = 0
         pubkeys = {}
 
@@ -77,6 +81,7 @@ class PeerStore:
                     p = RemotePeer(self.sydent, peername, port, pubkeys)
                     p.lastSentAssocsId = lastSentAssocsId
                     p.lastSentInviteTokensId = lastSentInviteTokensId
+                    p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
                     p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
                     peers.append(p)
                     pubkeys = {}
@@ -84,14 +89,16 @@ class PeerStore:
                 port = row[1]
                 lastSentAssocsId = row[2]
                 lastSentInviteTokensId = row[3]
-                lastSentEphemeralKeysId = row[4]
-                shadow = row[5]
-            pubkeys[row[6]] = row[7]
+                lastSentInviteUpdatesId = row[4]
+                lastSentEphemeralKeysId = row[5]
+                shadow = row[6]
+            pubkeys[row[7]] = row[8]
 
         if len(pubkeys) > 0:
             p = RemotePeer(self.sydent, peername, port, pubkeys)
             p.lastSentAssocsId = lastSentAssocsId
             p.lastSentInviteTokensId = lastSentInviteTokensId
+            p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
             p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
             p.shadow = True if shadow else False
             peers.append(p)
@@ -116,13 +123,18 @@ class PeerStore:
         :type lastPokeSucceeded: int
         """
 
+        invite_token_ids = ids.get("invite_tokens", {})
+
         cur = self.sydent.db.cursor()
         if ids["sg_assocs"]:
             cur.execute("update peers set lastSentAssocsId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["sg_assocs"], lastPokeSucceeded, peerName))
-        if ids["invite_tokens"]:
+        if invite_token_ids["added"]:
             cur.execute("update peers set lastSentInviteTokensId = ?, lastPokeSucceededAt = ? "
-                        "where name = ?", (ids["invite_tokens"], lastPokeSucceeded, peerName))
+                        "where name = ?", (invite_token_ids["added"], lastPokeSucceeded, peerName))
+        if invite_token_ids["updated"]:
+            cur.execute("update peers set lastSentInviteUpdatesId = ?, lastPokeSucceededAt = ? "
+                        "where name = ?", (invite_token_ids["updated"], lastPokeSucceeded, peerName))
         if ids["ephemeral_public_keys"]:
             cur.execute("update peers set lastSentEphemeralKeysId = ?, lastPokeSucceededAt = ? "
                         "where name = ?", (ids["ephemeral_public_keys"], lastPokeSucceeded, peerName))

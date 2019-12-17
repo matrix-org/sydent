@@ -63,6 +63,68 @@ class JoinTokenStore(object):
         if commit:
             self.sydent.db.commit()
 
+    def updateToken(self, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id, commit=True):
+        """Process an invite token update received over replication.
+
+        :param medium: The medium of the token.
+        :type medium: str
+        :param address: The address of the token.
+        :type address: str
+        :param room_id: The room ID this token is tied to.
+        :type room_id: str
+        :param sender: The sender of the invite.
+        :type sender: str
+        :param token: The token itself.
+        :type token: str
+        :param sent_ts: The timestamp at which the token has been delivered to the
+            invitee (if applicable).
+        :type sent_ts: str, None
+        :param origin_server: The server the original version of the token originated
+            from.
+        :type origin_server: str
+        :param origin_id: The id of the token in the DB of origin_server. Used
+            for determining the row to update in the database.
+        :type origin_id: int
+        :param commit: Whether DB changes should be committed by this
+            function (or an external one).
+        :type commit: bool
+        """
+        cur = self.sydent.db.cursor()
+
+        params = (medium, address, room_id, sender, token, sent_ts, origin_id)
+
+        # Updates sent over replication include the origin_server and the origin_id as
+        # seen from the server performing the update.
+        # If we received an update to an invite that originated from this server,
+        # use the id column to identify the invite to update, otherwise use the
+        # origin_server and origin_id.
+        # Note that we don't replicate 3PID invites that have been received over
+        # replication, so we're sure that origin_server and origin_id are the right
+        # ones (as opposed to, e.g., a server B replicating an invite on behalf of
+        # another server A so that the origin_server and origin_id are for B rather
+        # than A, from which that invite originated).
+        if origin_server == self.sydent.server_name:
+            where_clause = """
+                WHERE id = ?
+            """
+        else:
+            where_clause = """
+                WHERE origin_id = ? AND origin_server = ?
+            """
+            params += (origin_server,)
+
+        sql = """
+            UPDATE invite_tokens
+            SET medium = ?, address = ?, room_id = ?, sender = ?, token = ?, sent_ts = ?
+        """
+
+        sql += where_clause
+
+        cur.execute(sql, params)
+
+        if commit:
+            self.sydent.db.commit()
+
     def getTokens(self, medium, address):
         """Retrieve the invite token(s) for a given 3PID medium and address.
         Filters out tokens which have expired.
@@ -185,6 +247,20 @@ class JoinTokenStore(object):
             "UPDATE invite_tokens SET sent_ts = ? WHERE medium = ? AND address = ?",
             (int(time.time()), medium, address,)
         )
+
+        # Insert a row for every updated invite in the updated_invites table so the
+        # update is replicated to other servers.
+        res = cur.execute(
+            "SELECT id FROM invite_tokens WHERE medium = ? AND address = ?",
+            (medium, address,)
+        )
+
+        rows = res.fetchall()
+
+        cur.executemany(
+            "INSERT INTO updated_invites (invite_id) VALUES (?)", rows
+        )
+
         self.sydent.db.commit()
 
     def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None, commit=True):
@@ -316,3 +392,61 @@ class JoinTokenStore(object):
         if rows:
             return rows[0][0]
         return None
+
+    def getInviteUpdatesAfterId(self, last_id, limit):
+        """Returns every updated token for which its update id is higher than the provided
+        `last_id`, capped at `limit` tokens.
+
+        :param last_id: The last ID processed during the previous run.
+        :type last_id: int
+        :param limit: The maximum number of results to return.
+        :type limit: int
+        :returns a tuple consisting of a list of invite tokens and the maximum DB id
+            that was extracted from the table keeping track of the updates.
+            Otherwise returns ([], None) if no tokens are found.
+        :rtype: Tuple[List[Dict], int|None]
+
+        """
+        cur = self.sydent.db.cursor()
+
+        # Retrieve the IDs of the invites that have been updated since the last time.
+        res = cur.execute(
+            """
+                SELECT u.id, t.id, medium, address, room_id, sender, token, sent_ts,
+                    origin_server, origin_id
+                FROM updated_invites AS u
+                    LEFT JOIN invite_tokens AS t ON (t.id = u.invite_id)
+                WHERE u.id > ? ORDER BY u.id ASC LIMIT ?;
+            """,
+            (last_id, limit),
+        )
+
+        rows = res.fetchall()
+
+        max_id = None
+
+        # Retrieve each invite and append it to a list.
+        invites = []
+        for row in rows:
+            max_id, invite_id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
+            # Append a new dict to the list containing the token's metadata,
+            # including an `origin_id` and an `origin_server` so that the receiving end
+            # can figure out which invite to update in its local database. If the token
+            # originated from this server, use its local ID as the value for
+            # `origin_id`, and the local server's server_name for `origin_server`.
+            invites.append(
+                {
+                    "origin_id": origin_id if origin_id is not None else invite_id,
+                    "origin_server": origin_server if origin_server is not None else self.sydent.server_name,
+                    "medium": medium,
+                    "address": address,
+                    "room_id": room_id,
+                    "sender": sender,
+                    "token": token,
+                    "sent_ts": sent_ts,
+                }
+            )
+
+        self.sydent.db.commit()
+
+        return invites, max_id

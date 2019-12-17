@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 MAX_SG_ASSOCS_LIMIT = 100
 MAX_INVITE_TOKENS_LIMIT = 100
+MAX_INVITE_UPDATES_LIMIT = 100
 MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT = 100
 
 class ReplicationPushServlet(Resource):
@@ -154,23 +155,54 @@ class ReplicationPushServlet(Resource):
 
         tokensStore = JoinTokenStore(self.sydent)
 
-        # Process any invite tokens
+        # Process any new invite tokens
 
         invite_tokens = inJson.get('invite_tokens', {})
-        if len(invite_tokens) > MAX_INVITE_TOKENS_LIMIT:
+        new_invites = invite_tokens.get('added', {})
+        if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
             self.sydent.db.rollback()
-            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(invite_tokens), MAX_INVITE_TOKENS_LIMIT)
+            logger.warning(
+                "Peer %s made push with 'invite_tokens.added' field containing %d "
+                "entries, which is greater than the maximum %d",
+                peer.servername,
+                len(new_invites),
+                MAX_INVITE_TOKENS_LIMIT,
+            )
             request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}))
+            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens.added" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}))
             request.finish()
             return
 
-        for originId, inviteToken in invite_tokens.items():
+        for originId, inviteToken in new_invites.items():
             tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                 inviteToken['sender'], inviteToken['token'],
                                 originServer=peer.servername, originId=originId,
                                 commit=False)
             logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
+
+        # Process any invite token update
+
+        invite_updates = invite_tokens.get('updated', {})
+        if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
+            self.sydent.db.rollback()
+            logger.warning(
+                "Peer %s made push with 'invite_tokens.updated' field containing %d "
+                "entries, which is greater than the maximum %d",
+                peer.servername,
+                len(invite_updates),
+                MAX_INVITE_UPDATES_LIMIT,
+            )
+            request.setResponseCode(400)
+            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens.updated" has more than %d keys' % MAX_INVITE_UPDATES_LIMIT}))
+            request.finish()
+            return
+
+        for updated_invite in invite_updates:
+            tokensStore.updateToken(updated_invite['medium'], updated_invite['address'], updated_invite['room_id'],
+                                updated_invite['sender'], updated_invite['token'], updated_invite['sent_ts'],
+                                origin_server=updated_invite['origin_server'], origin_id=updated_invite['origin_id'],
+                                commit=False)
+            logger.info("Stored invite update with origin ID %s from %s", updated_invite['origin_id'], peer.servername)
 
         # Process any ephemeral public keys
 

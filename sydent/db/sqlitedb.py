@@ -154,6 +154,25 @@ class SqliteDatabase:
             self.db.commit()
             logger.info("v3 -> v4 schema migration complete")
             self._setSchemaVersion(4)
+        if curVer < 5:
+            cur = self.db.cursor()
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS updated_invites (
+                    id INTEGER PRIMARY KEY,
+                    invite_id INTEGER NOT NULL
+                )
+                """
+            )
+            cur.execute(
+                """
+                    ALTER TABLE peers
+                    ADD COLUMN lastSentInviteUpdatesId INTEGER DEFAULT 0
+                """
+            )
+            self.db.commit()
+            logger.info("v4 -> v5 schema migration complete")
+            self._setSchemaVersion(5)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
