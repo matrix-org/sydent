@@ -95,6 +95,7 @@ class RemotePeer(Peer):
     def __init__(self, sydent, server_name, port, pubkeys):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
+        self.port = port
 
         # look up or build the replication URL
         try:
