@@ -132,7 +132,7 @@ class Sydent:
         if config:
             self.cfg = parse_config_dict(config)
         else:
-            parse_config_file(self.config_file)
+            self.cfg = parse_config_file(self.config_file)
 
         log_format = (
             "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
