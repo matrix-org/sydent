@@ -52,7 +52,7 @@ class RegisterServlet(Resource):
             ),
         )
         if 'sub' not in result:
-            raise Exception("Invalid response from Homeserver")
+            raise Exception("Invalid response from homeserver")
 
         user_id = result['sub']
         tok = yield issueToken(self.sydent, user_id)

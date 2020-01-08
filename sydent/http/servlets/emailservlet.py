@@ -56,7 +56,7 @@ class EmailRequestCodeServlet(Resource):
             )
         except EmailAddressException:
             request.setResponseCode(400)
-            resp = {'errcode': 'M_INVALID_EMAIL', 'error':'Invalid email address'}
+            resp = {'errcode': 'M_INVALID_EMAIL', 'error': 'Invalid email address'}
         except EmailSendException:
             request.setResponseCode(500)
             resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to send email'}
