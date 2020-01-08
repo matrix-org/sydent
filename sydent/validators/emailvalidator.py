@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import logging
-import urllib
+import urllib.parse
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.emailutils import sendEmail
@@ -65,8 +65,8 @@ class EmailValidator:
         base = self.sydent.cfg.get('http', 'client_http_base')
         link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
             base,
-            urllib.quote(valSession.token),
-            urllib.quote(clientSecret),
+            urllib.parse.quote(valSession.token),
+            urllib.parse.quote(clientSecret),
             valSession.id,
         )
         if nextLink:
@@ -77,9 +77,9 @@ class EmailValidator:
                 nextLink += '&'
             else:
                 nextLink += '?'
-            nextLink += "sid=" + urllib.quote(str(valSession.id))
+            nextLink += "sid=" + urllib.parse.quote(str(valSession.id))
 
-            link += "&nextLink=%s" % (urllib.quote(nextLink))
+            link += "&nextLink=%s" % (urllib.parse.quote(nextLink))
         return link
 
     def validateSessionWithToken(self, sid, clientSecret, token):

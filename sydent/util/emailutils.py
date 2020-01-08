@@ -21,8 +21,8 @@ import smtplib
 import email.utils
 import string
 import twisted.python.log
-import cgi
-import urllib
+import html
+import urllib.parse
 
 import email.utils
 

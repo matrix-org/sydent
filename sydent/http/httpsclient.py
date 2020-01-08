@@ -17,7 +17,7 @@
 import logging
 import json
 
-from StringIO import StringIO
+from io import StringIO
 
 from zope.interface import implementer
 

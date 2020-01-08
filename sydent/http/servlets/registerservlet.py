@@ -19,7 +19,7 @@ from twisted.internet import defer
 
 import logging
 import json
-import urllib
+import urllib.parse
 
 from sydent.http.servlets import get_args, jsonwrap, deferjsonwrap, send_cors
 from sydent.http.httpclient import FederationHttpClient
@@ -48,7 +48,7 @@ class RegisterServlet(Resource):
 
         result = yield self.client.get_json(
             "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s" % (
-                args['matrix_server_name'], urllib.quote(args['access_token']),
+                args['matrix_server_name'], urllib.parse.quote(args['access_token']),
             ),
         )
         if 'sub' not in result:

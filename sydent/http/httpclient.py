@@ -17,7 +17,7 @@
 import json
 import logging
 
-from StringIO import StringIO
+from io import StringIO
 from twisted.internet import defer
 from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers

@@ -18,11 +18,9 @@ import random
 import string
 from email.header import Header
 
-from six import string_types
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
-import json
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
@@ -80,7 +78,7 @@ class StoreInviteServlet(Resource):
 
         substitutions = {}
         for k, v in args.items():
-            if isinstance(v, string_types):
+            if isinstance(v, str):
                 substitutions[k] = v
         substitutions["token"] = token
 
@@ -142,4 +140,4 @@ class StoreInviteServlet(Resource):
             return "..."
 
     def _randomString(self, length):
-        return ''.join(self.random.choice(string.ascii_letters) for _ in xrange(length))
+        return ''.join(self.random.choice(string.ascii_letters) for _ in range(length))

@@ -34,7 +34,7 @@ from sydent.threepid import ThreepidAssociation
 
 from OpenSSL import SSL
 from OpenSSL.SSL import VERIFY_NONE
-from StringIO import StringIO
+from io import StringIO
 from twisted.internet import defer, ssl
 from twisted.names import client, dns
 from twisted.names.error import DNSNameError
