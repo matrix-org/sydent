@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import ConfigParser
+import configparser
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -100,7 +100,7 @@ class RemotePeer(Peer):
             replication_url = sydent.cfg.get(
                 "peer.%s" % server_name, "base_replication_url",
             )
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        except (configparser.NoSectionError, configparser.NoOptionError):
             if not port:
                 port = 1001
             replication_url = "https://%s:%i" % (server_name, port)

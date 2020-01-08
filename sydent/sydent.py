@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ConfigParser
+import configparser
 import logging
 import logging.handlers
 import os
@@ -268,7 +268,7 @@ class Sydent:
         if internalport:
             try:
                 interface = self.cfg.get('http', 'internalapi.http.bind_address')
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 interface = '::1'
             self.internalApiHttpServer = InternalApiHttpServer(self)
             self.internalApiHttpServer.setup(interface, int(internalport))
@@ -305,7 +305,7 @@ def parse_config(config_file):
         config_file (str): the file to be parsed
     """
 
-    cfg = ConfigParser.SafeConfigParser()
+    cfg = configparser.ConfigParser()
 
     # if the config file doesn't exist, prepopulate the config object
     # with the defaults, in the right section.
@@ -322,7 +322,7 @@ def parse_config(config_file):
         for sect, entries in CONFIG_DEFAULTS.items():
             cfg.add_section(sect)
             for k, v in entries.items():
-                cfg.set(ConfigParser.DEFAULTSECT, k, v)
+                cfg.set(configparser.DEFAULTSECT, k, v)
 
         cfg.read(config_file)
 
