@@ -97,7 +97,8 @@ class EmailValidateCodeServlet(Resource):
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
 
         request.setHeader("Content-Type", "text/html")
-        return open(templateFile).read() % {'message': msg}
+        res = open(templateFile).read() % {'message': msg}
+        return res.encode("UTF-8")
 
     @jsonwrap
     def render_POST(self, request):

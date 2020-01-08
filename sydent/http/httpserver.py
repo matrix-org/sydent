@@ -64,59 +64,59 @@ class ClientApiHttpServer:
 
         pk_ed25519 = self.sydent.servlets.pubkey_ed25519
 
-        root.putChild('_matrix', matrix)
-        matrix.putChild('identity', identity)
-        identity.putChild('api', api)
-        identity.putChild('v2', v2)
-        api.putChild('v1', v1)
+        root.putChild(b'_matrix', matrix)
+        matrix.putChild(b'identity', identity)
+        identity.putChild(b'api', api)
+        identity.putChild(b'v2', v2)
+        api.putChild(b'v1', v1)
 
-        v1.putChild('validate', validate)
-        validate.putChild('email', email)
-        validate.putChild('msisdn', msisdn)
+        v1.putChild(b'validate', validate)
+        validate.putChild(b'email', email)
+        validate.putChild(b'msisdn', msisdn)
 
-        v1.putChild('lookup', lookup)
-        v1.putChild('bulk_lookup', bulk_lookup)
+        v1.putChild(b'lookup', lookup)
+        v1.putChild(b'bulk_lookup', bulk_lookup)
 
-        v1.putChild('pubkey', pubkey)
-        pubkey.putChild('isvalid', self.sydent.servlets.pubkeyIsValid)
-        pubkey.putChild('ed25519:0', pk_ed25519)
-        pubkey.putChild('ephemeral', ephemeralPubkey)
-        ephemeralPubkey.putChild('isvalid', self.sydent.servlets.ephemeralPubkeyIsValid)
+        v1.putChild(b'pubkey', pubkey)
+        pubkey.putChild(b'isvalid', self.sydent.servlets.pubkeyIsValid)
+        pubkey.putChild(b'ed25519:0', pk_ed25519)
+        pubkey.putChild(b'ephemeral', ephemeralPubkey)
+        ephemeralPubkey.putChild(b'isvalid', self.sydent.servlets.ephemeralPubkeyIsValid)
 
-        v1.putChild('3pid', threepid)
-        threepid.putChild('bind', bind)
-        threepid.putChild('unbind', unbind)
-        threepid.putChild('getValidated3pid', getValidated3pid)
+        v1.putChild(b'3pid', threepid)
+        threepid.putChild(b'bind', bind)
+        threepid.putChild(b'unbind', unbind)
+        threepid.putChild(b'getValidated3pid', getValidated3pid)
 
-        email.putChild('requestToken', emailReqCode)
-        email.putChild('submitToken', emailValCode)
+        email.putChild(b'requestToken', emailReqCode)
+        email.putChild(b'submitToken', emailValCode)
 
-        msisdn.putChild('requestToken', msisdnReqCode)
-        msisdn.putChild('submitToken', msisdnValCode)
+        msisdn.putChild(b'requestToken', msisdnReqCode)
+        msisdn.putChild(b'submitToken', msisdnValCode)
 
-        v1.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
+        v1.putChild(b'store-invite', self.sydent.servlets.storeInviteServlet)
 
-        v1.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+        v1.putChild(b'sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
 
         # v2
         # note v2 loses the /api so goes on 'identity' not 'api'
-        identity.putChild('v2', v2)
+        identity.putChild(b'v2', v2)
 
         # v2 exclusive APIs
-        v2.putChild('terms', self.sydent.servlets.termsServlet)
+        v2.putChild(b'terms', self.sydent.servlets.termsServlet)
         account = self.sydent.servlets.accountServlet
-        v2.putChild('account', account)
-        account.putChild('register', self.sydent.servlets.registerServlet)
-        account.putChild('logout', self.sydent.servlets.logoutServlet)
+        v2.putChild(b'account', account)
+        account.putChild(b'register', self.sydent.servlets.registerServlet)
+        account.putChild(b'logout', self.sydent.servlets.logoutServlet)
 
         # v2 versions of existing APIs
-        v2.putChild('validate', validate)
-        v2.putChild('pubkey', pubkey)
-        v2.putChild('3pid', threepid)
-        v2.putChild('store-invite', self.sydent.servlets.storeInviteServlet)
-        v2.putChild('sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
-        v2.putChild('lookup', lookup_v2)
-        v2.putChild('hash_details', hash_details)
+        v2.putChild(b'validate', validate)
+        v2.putChild(b'pubkey', pubkey)
+        v2.putChild(b'3pid', threepid)
+        v2.putChild(b'store-invite', self.sydent.servlets.storeInviteServlet)
+        v2.putChild(b'sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
+        v2.putChild(b'lookup', lookup_v2)
+        v2.putChild(b'hash_details', hash_details)
 
         self.factory = Site(root)
         self.factory.displayTracebacks = False
@@ -139,16 +139,16 @@ class InternalApiHttpServer(object):
         root = Resource()
 
         matrix = Resource()
-        root.putChild('_matrix', matrix)
+        root.putChild(b'_matrix', matrix)
 
         identity = Resource()
-        matrix.putChild('identity', identity)
+        matrix.putChild(b'identity', identity)
 
         internal = Resource()
-        identity.putChild('internal', internal)
+        identity.putChild(b'internal', internal)
 
         authenticated_bind = AuthenticatedBindThreePidServlet(self.sydent)
-        internal.putChild('bind', authenticated_bind)
+        internal.putChild(b'bind', authenticated_bind)
 
         factory = Site(root)
         factory.displayTracebacks = False

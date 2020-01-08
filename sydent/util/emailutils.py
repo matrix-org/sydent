@@ -41,21 +41,20 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
         messageid = "<%d%s@%s>" % (time_msec(), midRandom, myHostname)
 
-        allSubstitutions = {}
-        allSubstitutions.update(substitutions)
-        allSubstitutions.update({
+        substitutions.update({
             'messageid': messageid,
             'date': email.utils.formatdate(localtime=False),
             'to': mailTo,
             'from': mailFrom,
         })
 
-        for k,v in allSubstitutions.items():
-            allSubstitutions[k] = v.decode('utf8')
-            allSubstitutions[k+"_forhtml"] = cgi.escape(v.decode('utf8'))
-            allSubstitutions[k+"_forurl"] = urllib.quote(v)
+        allSubstitutions = {}
+        for k, v in substitutions.items():
+            allSubstitutions[k] = v
+            allSubstitutions[k+"_forhtml"] = html.escape(v)
+            allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
 
-        mailString = open(mailTemplateFile).read().decode('utf8') % allSubstitutions
+        mailString = open(mailTemplateFile).read() % allSubstitutions
         parsedFrom = email.utils.parseaddr(mailFrom)[1]
         parsedTo = email.utils.parseaddr(mailTo)[1]
         if parsedFrom == '' or parsedTo == '':

@@ -47,12 +47,12 @@ def get_args(request, required_args):
     the request is malformed. Otherwise, args contains the
     parameters passed.
     """
-    v1_path = request.path.startswith('/_matrix/identity/api/v1')
+    v1_path = request.path.startswith(b'/_matrix/identity/api/v1')
 
     args = None
     # for v1 paths, only look for json args if content type is json
     if (
-        request.method in ('POST', 'PUT') and (
+        request.method in (b'POST', b'PUT') and (
             not v1_path or (
                 request.requestHeaders.hasHeader('Content-Type') and
                 request.requestHeaders.getRawHeaders('Content-Type')[0].startswith('application/json')
@@ -67,16 +67,17 @@ def get_args(request, required_args):
     # If we didn't get anything from that, and it's a v1 api path, try the request args
     # (riot-web's usage of the ed25519 sign servlet currently involves
     # sending the params in the query string with a json body of 'null')
-    if args is None and (v1_path or request.method == 'GET'):
-        args = copy.copy(request.args)
+    if args is None and (v1_path or request.method == b'GET'):
+        args_bytes = copy.copy(request.args)
         # Twisted supplies everything as an array because it's valid to
         # supply the same params multiple times with www-form-urlencoded
         # params. This make it incompatible with the json object though,
         # so we need to convert one of them. Since this is the
         # backwards-compat option, we convert this one.
-        for k, v in args.items():
+        args = {}
+        for k, v in args_bytes.items():
             if isinstance(v, list) and len(v) == 1:
-                args[k] = v[0]
+                args[k.decode("UTF-8")] = v[0].decode("UTF-8")
     elif args is None:
         args = {}
 
@@ -103,7 +104,7 @@ def jsonwrap(f):
             return json.dumps({
                 "errcode": e.errcode,
                 "error": e.error,
-            })
+            }).encode("UTF-8")
         except Exception:
             logger.exception("Exception processing request");
             request.setHeader("Content-Type", "application/json")
@@ -111,7 +112,7 @@ def jsonwrap(f):
             return json.dumps({
                 "errcode": "M_UNKNOWN",
                 "error": "Internal Server Error",
-            })
+            }).encode("UTF-8")
     return inner
 
 def deferjsonwrap(f):
@@ -125,11 +126,11 @@ def deferjsonwrap(f):
         request.setHeader("Content-Type", "application/json")
         if failure.check(MatrixRestError) is not None:
             request.setResponseCode(failure.value.httpStatus)
-            request.write(json.dumps({'errcode': failure.value.errcode, 'error': failure.value.error}))
+            request.write(json.dumps({'errcode': failure.value.errcode, 'error': failure.value.error}).encode("UTF-8"))
         else:
             logger.error("Request processing failed: %r, %s", failure, failure.getTraceback())
             request.setResponseCode(500)
-            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
+            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}).encode("UTF-8"))
         request.finish()
 
     def inner(*args, **kwargs):

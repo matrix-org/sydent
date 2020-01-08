@@ -43,7 +43,7 @@ class HTTPClient(object):
         logger.debug("HTTP GET %s", uri)
 
         response = yield self.agent.request(
-            "GET",
+            b"GET",
             uri.encode("ascii"),
         )
         body = yield readBody(response)
