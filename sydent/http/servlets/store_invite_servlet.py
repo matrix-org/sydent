@@ -13,11 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
+
 import nacl.signing
 import random
 import string
 from email.header import Header
 
+from six import string_types
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
@@ -78,7 +81,7 @@ class StoreInviteServlet(Resource):
 
         substitutions = {}
         for k, v in args.items():
-            if isinstance(v, str):
+            if isinstance(v, string_types):
                 substitutions[k] = v
         substitutions["token"] = token
 

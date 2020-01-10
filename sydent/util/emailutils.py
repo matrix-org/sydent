@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 import socket
@@ -21,8 +22,14 @@ import smtplib
 import email.utils
 import string
 import twisted.python.log
-import html
-import urllib.parse
+import six
+from six.moves import urllib
+from six.moves import range
+
+if six.PY2:
+    from cgi import escape
+else:
+    from html import escape
 
 import email.utils
 
@@ -51,7 +58,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         allSubstitutions = {}
         for k, v in substitutions.items():
             allSubstitutions[k] = v
-            allSubstitutions[k+"_forhtml"] = html.escape(v)
+            allSubstitutions[k+"_forhtml"] = escape(v)
             allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
 
         mailString = open(mailTemplateFile).read() % allSubstitutions
