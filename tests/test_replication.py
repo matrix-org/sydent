@@ -3,7 +3,7 @@ import json
 from twisted.web.client import Response
 from twisted.internet import defer
 from twisted.trial import unittest
-from . import make_sydent
+from tests.utils import make_sydent
 from mock import Mock
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
