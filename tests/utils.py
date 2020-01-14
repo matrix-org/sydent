@@ -1,19 +1,17 @@
 import json
-import logging
-import attr
 from io import BytesIO
 
+import attr
 from six import text_type
-
 from twisted.internet import address
 from twisted.web.http_headers import Headers
 from twisted.web.server import Request, Site
 from twisted.web.http import unquote
-
 from twisted.test.proto_helpers import MemoryReactorClock
+from OpenSSL import crypto
+
 from sydent.sydent import Sydent
 
-from OpenSSL import crypto
 
 # Expires on Jan 11 2030 at 17:53:40 GMT
 FAKE_SERVER_CERT_PEM = """
@@ -51,8 +49,17 @@ def make_sydent(test_config={}):
     """
     # Send the Sydent logs to sydent.log in the _trial_temp directory instead of stderr.
     if 'general' not in test_config:
-        test_config['general'] = {}
-    test_config['general']['log.path'] = 'sydent.log'
+        test_config['general'] = {'log.path': 'sydent.log'}
+    else:
+        test_config['general'].setdefault('log.path', 'sydent.log')
+
+    # Use an in-memory SQLite database. Note that the database isn't cleaned up between
+    # tests, so by default the same database will be used for each test if changed to be
+    # a file on disk.
+    if 'db' not in test_config:
+        test_config['db'] = {'db.file': ':memory:'}
+    else:
+        test_config['db'].setdefault('db.file', ':memory:')
 
     reactor = MemoryReactorClock()
     return Sydent(reactor, config=test_config)
@@ -62,7 +69,7 @@ def make_sydent(test_config={}):
 class FakeChannel(object):
     """
     A fake Twisted Web Channel (the part that interfaces with the
-    wire).
+    wire). Mostly copied from Synapse's tests framework.
     """
 
     site = attr.ib(type=Site)
@@ -139,18 +146,13 @@ class FakeChannel(object):
         return self
 
     def getPeerCertificate(self):
+        """Returns the hardcoded TLS certificate for fake.server."""
         return crypto.load_certificate(crypto.FILETYPE_PEM, FAKE_SERVER_CERT_PEM)
 
 
 class FakeSite:
-    """
-    A fake Twisted Web Site, with mocks of the extra things that
-    Synapse adds.
-    """
-
-    server_version_string = b"1"
-    site_tag = "test"
-    access_logger = logging.getLogger("sydent.access.http.fake")
+    """A fake Twisted Web Site."""
+    pass
 
 
 def make_request(
@@ -165,14 +167,18 @@ def make_request(
 ):
     """
     Make a web request using the given method and path, feed it the
-    content, and return the Request and the Channel underneath.
+    content, and return the Request and the Channel underneath. Mostly
 
     Args:
-        method (bytes/unicode): The HTTP request method ("verb").
-        path (bytes/unicode): The HTTP path, suitably URL encoded (e.g.
+        reactor (IReactor): The Twisted reactor to use when performing the request.
+        method (bytes or unicode): The HTTP request method ("verb").
+        path (bytes or unicode): The HTTP path, suitably URL encoded (e.g.
         escaped UTF-8 & spaces and such).
         content (bytes or dict): The body of the request. JSON-encoded, if
         a dict.
+        access_token (unicode): An access token to use to authenticate the request,
+            None if no access token needs to be included.
+        request (IRequest): The class to use when instantiating the request object.
         shorthand: Whether to try and be helpful and prefix the given URL
         with the usual REST API path, if it doesn't contain it.
         federation_auth_origin (bytes|None): if set to not-None, we will add a fake

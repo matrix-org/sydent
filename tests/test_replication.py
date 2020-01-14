@@ -1,16 +1,16 @@
 import json
 
-from twisted.web.client import Response
-from twisted.internet import defer
-from twisted.trial import unittest
-from tests.utils import make_request, make_sydent
 from mock import Mock
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
+from tests.utils import make_request, make_sydent
+from twisted.web.client import Response
+from twisted.internet import defer
+from twisted.trial import unittest
 
 
 class ReplicationTestCase(unittest.TestCase):
-    """Test that a sydent can correctly replicate data to another sydent"""
+    """Test that a Sydent can correctly replicate data with another Sydent"""
 
     def setUp(self):
         # Create a new sydent
@@ -21,10 +21,10 @@ class ReplicationTestCase(unittest.TestCase):
         }
         self.sydent = make_sydent(test_config=config)
 
-        # Create fake peer to replicate to
+        # Create a fake peer to replicate to.
         peer_public_key_base64 = "+vB8mTaooD/MA8YYZM8t9+vnGhP1937q2icrqPV9JTs"
 
-        # Inject our fake peer into the database
+        # Inject our fake peer into the database.
         cur = self.sydent.db.cursor()
         cur.execute(
             "insert into peers (name, port, lastSentVersion, active) VALUES (?, ?, ?, ?)",
@@ -37,7 +37,7 @@ class ReplicationTestCase(unittest.TestCase):
 
         self.sydent.db.commit()
 
-        # Insert fake associations into the db
+        # Build some fake associations.
         self.assocs = []
         assoc_count = 150
         for i in range(assoc_count):
@@ -58,6 +58,9 @@ class ReplicationTestCase(unittest.TestCase):
         """
         self.sydent.run()
 
+        # Configure the Sydent to impersonate. We need to use "fake.server" as the
+        # server's name because that's the name the recipient Sydent has for it, and
+        # because the certificate's common name is for this name.
         config = {
             "general": {
                 "server.name": "fake.server"
@@ -70,11 +73,14 @@ class ReplicationTestCase(unittest.TestCase):
         fake_sydent = make_sydent(config)
         signer = Signer(fake_sydent)
 
+        # Sign the associations with the Sydent to impersonate so the recipient Sydent
+        # can verify the signatures on them.
         signed_assocs = {}
         for assoc_id, assoc in enumerate(self.assocs):
             signed_assoc = signer.signedThreePidAssociation(assoc)
             signed_assocs[assoc_id] = signed_assoc
 
+        # Send the replication push.
         body = json.dumps({"sgAssocs": signed_assocs})
         request, channel = make_request(
             self.sydent.reactor, "POST", "/_matrix/identity/replicate/v1/push", body
@@ -83,6 +89,8 @@ class ReplicationTestCase(unittest.TestCase):
 
         self.assertEqual(channel.code, 200)
 
+        # Check that the recipient Sydent has correctly saved the associations in the
+        # push.
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT originId, sgAssoc FROM global_threepid_associations")
 
@@ -93,13 +101,11 @@ class ReplicationTestCase(unittest.TestCase):
             self.assertDictEqual(signed_assoc, signed_assocs[originId])
 
     def test_outgoing_replication(self):
-        """Sydent has a background job that runs every 10s in order to push new
-        associations to peers. These peers are defined in sydent's db
-
-        Make a fake peer and associations and make sure Sydent tries to push to it.
+        """Make a fake peer and associations and make sure Sydent tries to push to it.
         """
         cur = self.sydent.db.cursor()
 
+        # Insert the fake associations in the database.
         cur.executemany(
             "insert into local_threepid_associations "
             "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter) "
@@ -119,7 +125,8 @@ class ReplicationTestCase(unittest.TestCase):
 
         self.sydent.db.commit()
 
-        # Manually sign all associations and ensure sydent attempted to push the same
+        # Manually sign all associations so we can check whether Sydent attempted to
+        # push the same.
         signer = Signer(self.sydent)
         signed_assocs = {}
         for assoc_id, assoc in enumerate(self.assocs):
@@ -133,25 +140,34 @@ class ReplicationTestCase(unittest.TestCase):
             assert method == 'POST'
             assert uri == 'https://fake.server:1234/_matrix/identity/replicate/v1/push'
 
-            # postJson calls the agent with a StringIO within a FileBodyProducer.
+            # postJson calls the agent with a StringIO within a FileBodyProducer, so we
+            # need to unpack the payload correctly.
             payload = json.loads(body._inputFile.buf)
             for assoc_id, assoc in payload['sgAssocs'].items():
                 sent_assocs[assoc_id] = assoc
 
-            # Return with a fake response wrapped in a deferred.
+            # Return with a fake response wrapped in a Deferred.
             d = defer.Deferred()
             d.callback(Response((b'HTTP', 1, 1), 200, b'OK', None, None))
             return d
 
+        # Mock the replication client's agent so it runs the custom code instead of
+        # actually sending the requests.
         agent = Mock(spec=['request'])
         agent.request.side_effect = request
         self.sydent.replicationHttpsClient.agent = agent
 
-        # Start sydent and wait for an automated peer push
+        # Start Sydent and let some time for all the necessary pushes to happen.
         self.sydent.run()
         self.sydent.reactor.advance(1000)
 
-        # Ensure at least one push occurred with the correct data
+        # Check that, now that Sydent pushed all the associations it meant to, we
+        # have all of the associations we've inserted initially.
         self.assertEqual(len(self.assocs), len(sent_assocs))
         for assoc_id, assoc in sent_assocs.items():
+            # Replication payloads use a specific format that causes the JSON encoder to
+            # convert the numeric indexes to string, so we need to convert them back when
+            # looking up in signed_assocs. Also, the ID of the first association Sydent
+            # will push will be 1, so we need to subtract 1 when figuring out which index
+            # to lookup.
             self.assertDictEqual(assoc, signed_assocs[int(assoc_id)-1])
