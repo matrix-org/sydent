@@ -85,10 +85,9 @@ class Pusher:
 
         try:
             # Push associations
-            associations = self.local_assoc_store.getSignedAssociationsAfterId(
+            assocs, latest_assoc_id = self.local_assoc_store.getSignedAssociationsAfterId(
                 p.lastSentVersion, ASSOCIATIONS_PUSH_LIMIT
             )
-            assocs, latest_assoc_id = associations
 
             # If there are no updates left to send, break the loop
             if not assocs:

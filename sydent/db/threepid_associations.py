@@ -76,7 +76,7 @@ class LocalAssociationStore:
 
         :return: A tuple consisting of a dictionary containing the signed associations (id:
             assoc dict) and an int representing the maximum ID
-        :rtype: Tuple[dict[int, int]
+        :rtype: Tuple[dict[int, int]]
         """
         assocs = {}
 

@@ -107,9 +107,9 @@ class ReplicationTestCase(unittest.TestCase):
         """
         cur = self.sydent.db.cursor()
 
-        # Insert the fake associations in the database.
+        # Insert the fake associations into the database.
         cur.executemany(
-            "insert into local_threepid_associations "
+            "INSERT INTO  local_threepid_associations "
             "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter) "
             "VALUES (?, ?, ?, ?, ?, ?, ?)",
             [
@@ -117,7 +117,8 @@ class ReplicationTestCase(unittest.TestCase):
                     assoc.medium,
                     assoc.address,
                     assoc.lookup_hash,
-                    assoc.mxid, assoc.ts,
+                    assoc.mxid,
+                    assoc.ts,
                     assoc.not_before,
                     assoc.not_after,
                 )
@@ -159,12 +160,12 @@ class ReplicationTestCase(unittest.TestCase):
         agent.request.side_effect = request
         self.sydent.replicationHttpsClient.agent = agent
 
-        # Start Sydent and let some time for all the necessary pushes to happen.
+        # Start Sydent and allow some time for all the necessary pushes to happen.
         self.sydent.run()
         self.sydent.reactor.advance(1000)
 
-        # Check that, now that Sydent pushed all the associations it meant to, we
-        # have all of the associations we've inserted initially.
+        # Check that, now that Sydent pushed all the associations it was meant to, we
+        # have all of the associations we initially inserted.
         self.assertEqual(len(self.assocs), len(sent_assocs))
         for assoc_id, assoc in sent_assocs.items():
             # Replication payloads use a specific format that causes the JSON encoder to
