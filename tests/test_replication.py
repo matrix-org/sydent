@@ -27,11 +27,11 @@ class ReplicationTestCase(unittest.TestCase):
         # Inject our fake peer into the database.
         cur = self.sydent.db.cursor()
         cur.execute(
-            "insert into peers (name, port, lastSentVersion, active) VALUES (?, ?, ?, ?)",
+            "INSERT INTO peers (name, port, lastSentVersion, active) VALUES (?, ?, ?, ?)",
             ("fake.server", 1234, 0, 1)
         )
         cur.execute(
-            "insert into peer_pubkeys (peername, alg, key) VALUES (?, ?, ?)",
+            "INSERT INTO peer_pubkeys (peername, alg, key) VALUES (?, ?, ?)",
             ("fake.server", "ed25519", peer_public_key_base64)
         )
 
