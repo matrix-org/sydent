@@ -62,7 +62,7 @@ class ReplicationTestCase(unittest.TestCase):
         # server's name because that's the name the recipient Sydent has for it. On top
         # of that, the replication servlet expects a TLS certificate in the request so it
         # can extract a common name and figure out which peer sent it from its common
-        # name, and the common name of the certificate we use for tests is fake.server.
+        # name. The common name of the certificate we use for tests is fake.server.
         config = {
             "general": {
                 "server.name": "fake.server"
