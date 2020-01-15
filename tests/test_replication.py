@@ -59,8 +59,10 @@ class ReplicationTestCase(unittest.TestCase):
         self.sydent.run()
 
         # Configure the Sydent to impersonate. We need to use "fake.server" as the
-        # server's name because that's the name the recipient Sydent has for it, and
-        # because the certificate's common name is for this name.
+        # server's name because that's the name the recipient Sydent has for it. On top
+        # of that, the replication servlet expects a TLS certificate in the request so it
+        # can extract a common name and figure out which peer sent it from its common
+        # name, and the common name of the certificate we use for tests is fake.server.
         config = {
             "general": {
                 "server.name": "fake.server"
@@ -70,8 +72,8 @@ class ReplicationTestCase(unittest.TestCase):
             }
         }
 
-        fake_sydent = make_sydent(config)
-        signer = Signer(fake_sydent)
+        fake_sender_sydent = make_sydent(config)
+        signer = Signer(fake_sender_sydent)
 
         # Sign the associations with the Sydent to impersonate so the recipient Sydent
         # can verify the signatures on them.
