@@ -20,7 +20,6 @@ import ConfigParser
 import logging
 import logging.handlers
 import os
-import pickle
 
 import twisted.internet.reactor
 from twisted.internet import task
@@ -127,10 +126,13 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, reactor=twisted.internet.reactor):
+    def __init__(self, reactor=twisted.internet.reactor, config=None):
         self.reactor = reactor
         self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
-        self.cfg = parse_config(self.config_file)
+        if config:
+            self.cfg = parse_config_dict(config)
+        else:
+            self.cfg = parse_config_file(self.config_file)
 
         log_format = (
             "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
@@ -298,35 +300,55 @@ class Keyring:
     pass
 
 
-def parse_config(config_file):
-    """Parse the given config file, populating missing items and sections
+def parse_config_dict(config_dict):
+    """Parse the given config from a dictionary, populating missing items and sections
+
+    Args:
+        config_dict (dict): the configuration dictionary to be parsed
+    """
+    # Build a config dictionary from the defaults merged with the given dictionary
+    config = CONFIG_DEFAULTS
+    for section, section_dict in config_dict.items():
+        if section not in config:
+            config[section] = {}
+        for option in section_dict.keys():
+            config[section][option] = config_dict[section][option]
+
+    # Build a ConfigParser from the merged dictionary
+    cfg = ConfigParser.SafeConfigParser()
+    for section, section_dict in config.items():
+        cfg.add_section(section)
+        for option, value in section_dict.items():
+            cfg.set(section, option, value)
+
+    return cfg
+
+
+def parse_config_file(config_file):
+    """Parse the given config from a filepath, populating missing items and
+    sections
 
     Args:
         config_file (str): the file to be parsed
     """
-
-    cfg = ConfigParser.SafeConfigParser()
-
     # if the config file doesn't exist, prepopulate the config object
     # with the defaults, in the right section.
-    if not os.path.exists(config_file):
-        for sect, entries in CONFIG_DEFAULTS.items():
-            cfg.add_section(sect)
-            for k, v in entries.items():
-                cfg.set(sect, k, v)
-    else:
-        # otherwise, we have to put the defaults in the DEFAULT section,
-        # to ensure that they don't override anyone's settings which are
-        # in their config file in the default section (which is likely,
-        # because sydent used to be braindead).
-        for sect, entries in CONFIG_DEFAULTS.items():
-            cfg.add_section(sect)
-            for k, v in entries.items():
-                cfg.set(ConfigParser.DEFAULTSECT, k, v)
+    #
+    # otherwise, we have to put the defaults in the DEFAULT section,
+    # to ensure that they don't override anyone's settings which are
+    # in their config file in the default section (which is likely,
+    # because sydent used to be braindead).
+    use_defaults = not os.path.exists(config_file)
+    cfg = ConfigParser.SafeConfigParser()
+    for sect, entries in CONFIG_DEFAULTS.items():
+        cfg.add_section(sect)
+        for k, v in entries.items():
+            cfg.set(ConfigParser.DEFAULTSECT if use_defaults else sect, k, v)
 
-        cfg.read(config_file)
+    cfg.read(config_file)
 
     return cfg
+
 
 if __name__ == '__main__':
     syd = Sydent()
