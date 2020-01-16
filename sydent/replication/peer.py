@@ -42,6 +42,7 @@ class Peer(object):
     def __init__(self, servername, pubkeys):
         self.servername = servername
         self.pubkeys = pubkeys
+        self.is_being_pushed_to = False
 
     def pushUpdates(self, sgAssocs):
         """
@@ -94,6 +95,7 @@ class RemotePeer(Peer):
     def __init__(self, sydent, server_name, port, pubkeys):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
+        self.port = port
 
         # look up or build the replication URL
         try:
