@@ -117,7 +117,6 @@ def jsonwrap(f):
 def deferjsonwrap(f):
     def reqDone(resp, request):
         request.setHeader("Content-Type", "application/json")
-        request.setResponseCode(200)
         request.write(json.dumps(resp).encode("UTF-8"))
         request.finish()
 
