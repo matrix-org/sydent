@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 
@@ -25,8 +26,12 @@ from sydent.http.servlets import MatrixRestError
 
 logger = logging.getLogger(__name__)
 
+
 def tokenFromRequest(request):
     """Extract token from header of query parameter.
+
+    :param request: The request to look for an access token in.
+    :type request: twisted.web.server.Request
 
     :returns str|None: The token or None if not found
     """
@@ -42,13 +47,23 @@ def tokenFromRequest(request):
 
     return token
 
+
 def authIfV2(sydent, request, requireTermsAgreed=True):
     """For v2 APIs check that the request has a valid access token associated with it
 
-    :returns Account|None: The account object if there is correct auth, or None for v1 APIs
-    :raises MatrixRestError: If the request is v2 but could not be authed or the user has not accepted terms
+    :param sydent: The Sydent instance to use.
+    :type sydent: sydent.sydent.Sydent
+    :param request: The request to look for an access token in.
+    :type request: twisted.web.server.Request
+    :param requireTermsAgreed: Whether to deny authentication if the user hasn't accepted
+        the terms of service.
+
+    :returns Account|None: The account object if there is correct auth, or None for v1
+        APIs.
+    :raises MatrixRestError: If the request is v2 but could not be authed or the user has
+        not accepted terms.
     """
-    if request.path.startswith('/_matrix/identity/v2'):
+    if request.path.startswith(b'/_matrix/identity/v2'):
         token = tokenFromRequest(request)
 
         if token is None:

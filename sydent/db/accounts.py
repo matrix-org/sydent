@@ -23,6 +23,15 @@ class AccountStore(object):
         self.sydent = sydent
 
     def getAccountByToken(self, token):
+        """
+        Select the account matching the given token, if any.
+
+        :param token: The token to identify the account, if any.
+        :type token: str
+
+        :return: The account matching the token, or None if no account matched.
+        :rtype: Account or None
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select a.user_id, a.created_ts, a.consent_version from accounts a, tokens t "
                           "where t.user_id = a.user_id and t.token = ?", (token,))
@@ -54,6 +63,15 @@ class AccountStore(object):
         self.sydent.db.commit()
 
     def setConsentVersion(self, user_id, consent_version):
+        """
+        Saves that the given user has agreed to all of the terms in the document of the
+        given version.
+
+        :param user_id: The Matrix ID of the user that has agreed to the terms.
+        :type user_id: str
+        :param consent_version: The version of the document the user has agreed to.
+        :type consent_version: str or None
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "update accounts set consent_version = ? where user_id = ?",

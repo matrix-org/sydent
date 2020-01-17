@@ -19,6 +19,15 @@ class TermsStore(object):
         self.sydent = sydent
 
     def getAgreedUrls(self, user_id):
+        """
+        Retrieves the URLs of the terms the given user has agreed to.
+
+        :param user_id: Matrix user ID to fetch the URLs for.
+        :type user_id: str
+
+        :return: A list of the URLs of the terms accepted by the user.
+        :rtype: list[str]
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "select url from accepted_terms_urls "
@@ -32,6 +41,14 @@ class TermsStore(object):
         return urls
 
     def addAgreedUrls(self, user_id, urls):
+        """
+        Saves that the given user has accepted the terms at the given URLs.
+
+        :param user_id: The Matrix user ID that has accepted the terms.
+        :type user_id: str
+        :param urls: The list of URLs.
+        :type urls: list[unicode]
+        """
         cur = self.sydent.db.cursor()
         res = cur.executemany(
             "insert or ignore into accepted_terms_urls (user_id, url) values (?, ?)",

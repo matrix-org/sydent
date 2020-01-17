@@ -23,12 +23,26 @@ logger = logging.getLogger(__name__)
 
 class Terms(object):
     def __init__(self, yamlObj):
+        """
+        :param yamlObj: The parsed YAML.
+        :type yamlObj: dict[str, any] or None
+        """
         self._rawTerms = yamlObj
 
     def getMasterVersion(self):
+        """
+        :return: The global (master) version of the terms, or None if there
+            are no terms of service for this server.
+        :rtype: str or None
+        """
         return None if self._rawTerms is None else self._rawTerms['master_version']
 
     def getForClient(self):
+        """
+        :return: A dict which value for the "policies" key is a dict which contains the
+            "docs" part of the terms' YAML. That nested dict is empty if no terms.
+        :rtype: dict[str, dict]
+        """
         policies = {}
         if self._rawTerms is not None:
             for docName, doc in self._rawTerms['docs'].items():
@@ -39,6 +53,10 @@ class Terms(object):
         return { 'policies': policies }
 
     def getUrlSet(self):
+        """
+        :return: All the URLs for the terms in a set. Empty set if no terms.
+        :rtype: set[str]
+        """
         urls = set()
         if self._rawTerms is not None:
             for docName, doc in self._rawTerms['docs'].items():
@@ -47,6 +65,17 @@ class Terms(object):
         return urls
 
     def urlListIsSufficient(self, urls):
+        """
+        Checks whether the provided list of URLs (which represents the list of terms
+        accepted by the user) is enough to allow the creation of the user's account.
+
+        :param urls: The list of URLs of terms the user has accepted.
+        :type urls: list[unicode]
+
+        :return: Whether the list is sufficient to allow the creation of the user's
+            account.
+        :rtype: bool
+        """
         agreed = set()
         urlset = set(urls)
 
