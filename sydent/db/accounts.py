@@ -96,6 +96,12 @@ class AccountStore(object):
         self.sydent.db.commit()
 
     def delToken(self, token):
+        """
+        Deletes an authentication token from the database.
+
+        :param token: The token to delete from the database.
+        :type token: str
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "delete from tokens where token = ?",
