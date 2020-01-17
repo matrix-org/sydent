@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 import time
@@ -22,6 +23,18 @@ from sydent.db.accounts import AccountStore
 logger = logging.getLogger(__name__)
 
 def issueToken(sydent, user_id):
+    """
+    Creates an account for the given Matrix user ID, then generates, saves and returns
+    an access token for that account.
+
+    :param sydent: The Sydent instance to use for storing the token.
+    :type sydent: sydent.sydent.Sydent
+    :param user_id: The Matrix user ID to issue a token for.
+    :type user_id: unicode
+
+    :return: The access token for that account.
+    :rtype: str
+    """
     accountStore = AccountStore(sydent)
     accountStore.storeAccount(user_id, int(time.time() * 1000), None)
 

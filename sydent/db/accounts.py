@@ -13,8 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from sydent.users.accounts import Account
+
 
 class AccountStore(object):
     def __init__(self, sydent):
@@ -32,6 +34,17 @@ class AccountStore(object):
         return Account(*row)
 
     def storeAccount(self, user_id, creation_ts, consent_version):
+        """
+        Stores an account for the given user ID.
+
+        :param user_id: The Matrix user ID to create an account for.
+        :type user_id: unicode
+        :param creation_ts: The timestamp in milliseconds.
+        :type creation_ts: int
+        :param consent_version: The version of the terms of services that the user last
+            accepted.
+        :type consent_version: str or None
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "insert or ignore into accounts (user_id, created_ts, consent_version) "
@@ -49,6 +62,14 @@ class AccountStore(object):
         self.sydent.db.commit()
 
     def addToken(self, user_id, token):
+        """
+        Stores the authentication token for a given user.
+
+        :param user_id: The Matrix user ID to save the given token for.
+        :type user_id: unicode
+        :param token: The token to store for that user ID.
+        :type token: str
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "insert into tokens (user_id, token) values (?, ?)",
