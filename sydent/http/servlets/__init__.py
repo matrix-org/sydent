@@ -51,7 +51,7 @@ def get_args(request, required_args):
     :type request: twisted.web.server.Request
     :param required_args: The args that needs to be found in the
         request's parameters.
-    :type required_args: tuple[bytes]
+    :type required_args: tuple[unicode]
 
     :return: A dict containing the requested args and their values. String values
         are of type unicode.
