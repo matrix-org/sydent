@@ -42,7 +42,7 @@ def get_args(request, required_args):
     """
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
-    www-form-urlencoded for backwards compatability on v1 endpoints only.
+    www-form-urlencoded for backwards comparability on v1 endpoints only.
     Returns a tuple (error, args) where if error is non-null,
     the request is malformed. Otherwise, args contains the
     parameters passed.
@@ -109,7 +109,7 @@ def jsonwrap(f):
     def inner(self, request, *args, **kwargs):
         """
         Runs a web handler function with the given request and parameters, then
-        converts its result in JSON and returns it. If an error happens, also sets
+        converts its result intoto JSON and returns it. If an error happens, also sets
         the HTTP response code.
 
         :param self: The current object.
