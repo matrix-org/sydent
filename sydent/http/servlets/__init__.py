@@ -87,7 +87,18 @@ def get_args(request, required_args):
         args = {}
         for k, v in args_bytes.items():
             if isinstance(v, list) and len(v) == 1:
-                args[k.decode("UTF-8")] = v[0].decode("UTF-8")
+                try:
+                    args[k.decode("UTF-8")] = v[0].decode("UTF-8")
+                except UnicodeDecodeError:
+                    # Get a version of the key that has non-UTF-8 characters replaced by
+                    # their \xNN escape sequence so it doesn't raise another exception.
+                    safe_k = k.decode("UTF-8", errors="backslashreplace")
+                    raise MatrixRestError(
+                        400,
+                        'M_INVALID_PARAM',
+                        "Parameter %s or its value must be UTF-8" % safe_k,
+                    )
+
     elif args is None:
         args = {}
 
