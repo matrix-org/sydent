@@ -120,7 +120,7 @@ def jsonwrap(f):
     def inner(self, request, *args, **kwargs):
         """
         Runs a web handler function with the given request and parameters, then
-        converts its result intoto JSON and returns it. If an error happens, also sets
+        converts its result into JSON and returns it. If an error happens, also sets
         the HTTP response code.
 
         :param self: The current object.
