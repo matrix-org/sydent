@@ -88,6 +88,11 @@ CONFIG_DEFAULTS = {
 
         # The following can be added to your local config file to enable sentry support.
         # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
+
+        # How long a user can wait before validating a session after starting it
+        'threepid.session_validation_timeout': '24h',
+        # How long we keep sessions for after they've been validated
+        'threepid.session_valid_lifetime': '24h',
     },
     'db': {
         'db.file': 'sydent.db',
@@ -204,6 +209,15 @@ class Sydent:
             # Store it in the database and rehash 3PIDs
             hashing_metadata_store.store_lookup_pepper(sha256_and_url_safe_base64,
                                                        lookup_pepper)
+
+        self.threepid_session_validation_timeout = parse_duration(
+            self.cfg.get('general', 'threepid.session_validation_timeout'),
+            default=24 * 60 * 60 * 1000,  # 24 hrs
+        )
+        self.threepid_session_valid_lifetime = parse_duration(
+            self.cfg.get('general', 'threepid.session_valid_lifetime'),
+            default=24 * 60 * 60 * 1000,  # 24 hrs
+        )
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
@@ -348,6 +362,48 @@ def parse_config_file(config_file):
     cfg.read(config_file)
 
     return cfg
+
+
+def parse_duration(value, default=None):
+    """Parse a string for a time. A string consisting solely of numbers will be
+    interpreted as ms. More complicated strings are possible, such as:
+
+    * '10s' - 10 seconds
+    * '30m' - 30 minutes
+    * '24h' - 24 hours
+    * '3d'  - 3 days
+    * '2w'  - 2 weeks
+    * '1y'  - 1 year
+
+    :param value: The string to parse
+    :type value: str
+
+    :param default: The value to return if `value` is empty
+    :type default: int|None
+
+    :return: The calculated time in milliseconds
+    """
+    if not len(value):
+        return default
+
+    try:
+        return int(value)
+    except ValueError:
+        pass
+
+    second = 1000
+    minute = 60 * second
+    hour = 60 * minute
+    day = 24 * hour
+    week = 7 * day
+    year = 365 * day
+    sizes = {"s": second, "m": minute, "h": hour, "d": day, "w": week, "y": year}
+    size = 1
+    suffix = value[-1]
+    if suffix in sizes:
+        value = value[:-1]
+        size = sizes[suffix]
+    return int(value) * size
 
 
 if __name__ == '__main__':
