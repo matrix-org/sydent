@@ -210,11 +210,11 @@ class Sydent:
             hashing_metadata_store.store_lookup_pepper(sha256_and_url_safe_base64,
                                                        lookup_pepper)
 
-        self.threepid_session_validation_timeout = parse_duration(
+        self.cfg.threepid_session_validation_timeout = parse_duration(
             self.cfg.get('general', 'threepid.session_validation_timeout'),
             default=24 * 60 * 60 * 1000,  # 24 hrs
         )
-        self.threepid_session_valid_lifetime = parse_duration(
+        self.cfg.threepid_session_valid_lifetime = parse_duration(
             self.cfg.get('general', 'threepid.session_valid_lifetime'),
             default=24 * 60 * 60 * 1000,  # 24 hrs
         )
