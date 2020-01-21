@@ -38,9 +38,7 @@ class ThreePidValSessionStore:
         row = cur.fetchone()
 
         if row:
-            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5])
-            s.token = row[6]
-            s.sendAttemptNumber = row[7]
+            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             return s
 
         sid = self.addValSession(medium, address, clientSecret, time_msec(), commit=False)
@@ -51,9 +49,7 @@ class ThreePidValSessionStore:
                     (sid, tokenString, -1))
         self.sydent.db.commit()
 
-        s = ValidationSession(sid, medium, address, clientSecret, False, time_msec())
-        s.token = tokenString
-        s.sendAttemptNumber = -1
+        s = ValidationSession(sid, medium, address, clientSecret, False, time_msec(), tokenString, -1)
         return s
 
     def addValSession(self, medium, address, clientSecret, mtime, commit=True):
@@ -97,7 +93,7 @@ class ThreePidValSessionStore:
          if not row:
              return None
 
-         return ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5])
+         return ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], None, None)
 
     def getTokenSessionById(self, sid):
         cur = self.sydent.db.cursor()
@@ -108,9 +104,7 @@ class ThreePidValSessionStore:
         row = cur.fetchone()
 
         if row:
-            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5])
-            s.token = row[6]
-            s.sendAttemptNumber = row[7]
+            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
             return s
 
         return None
