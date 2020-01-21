@@ -83,6 +83,10 @@ CONFIG_DEFAULTS = {
         # which defines the time during which an invite will be valid on this server
         # from the time it has been received.
         'invites.validity_period': '',
+        # How long a user can wait before validating a session after starting it
+        'threepid.session_validation_timeout': '24h',
+        # How long we keep sessions for after they've been validated
+        'threepid.session_valid_lifetime': '24h',
         # Path to file detailing the configuration of the /info and /internal-info servlets.
         # More information can be found in docs/info.md.
         'info_path': 'info.yaml',
@@ -186,6 +190,15 @@ class Sydent:
 
         self.invites_validity_period = parse_duration(
             self.cfg.get('general', 'invites.validity_period'),
+        )
+
+        self.threepid_session_validation_timeout = parse_duration(
+            self.cfg.get('general', 'threepid.session_validation_timeout'),
+            default=24 * 60 * 60 * 1000,  # 24 hrs
+        )
+        self.threepid_session_valid_lifetime = parse_duration(
+            self.cfg.get('general', 'threepid.session_valid_lifetime'),
+            default=24 * 60 * 60 * 1000,  # 24 hrs
         )
 
         self.validators = Validators()
@@ -307,9 +320,27 @@ def parse_config(config_file):
     return cfg
 
 
-def parse_duration(value):
+def parse_duration(value, default=None):
+    """Parse a string for a time. A string consisting solely of numbers will be
+    interpreted as ms. More complicated strings are possible, such as:
+
+    * '10s' - 10 seconds
+    * '30m' - 30 minutes
+    * '24h' - 24 hours
+    * '3d'  - 3 days
+    * '2w'  - 2 weeks
+    * '1y'  - 1 year
+
+    :param value: The string to parse
+    :type value: str
+
+    :param default: The value to return if `value` is empty
+    :type default: int|None
+
+    :return: The calculated time in milliseconds
+    """
     if not len(value):
-        return None
+        return default
 
     try:
         return int(value)

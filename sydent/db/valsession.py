@@ -133,7 +133,7 @@ class ThreePidValSessionStore:
         if not s.clientSecret == clientSecret:
             raise IncorrectClientSecretException()
 
-        if s.mtime + ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS < time_msec():
+        if s.mtime + self.sydent.cfg.threepid_session_valid_lifetime < time_msec():
             raise SessionExpiredException()
 
         if not s.validated:
@@ -147,7 +147,7 @@ class ThreePidValSessionStore:
 
         cur = self.sydent.db.cursor()
 
-        delete_before_ts = time_msec() - 5 * ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS
+        delete_before_ts = time_msec() - 5 * self.sydent.cfg.threepid_session_valid_lifetime
 
         sql = """
             DELETE FROM threepid_validation_sessions
