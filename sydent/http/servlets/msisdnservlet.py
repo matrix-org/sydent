@@ -25,6 +25,7 @@ from sydent.validators import (
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.http.auth import authIfV2
+from sydent.util.stringutils import is_valid_client_secret
 
 
 logger = logging.getLogger(__name__)
@@ -46,8 +47,15 @@ class MsisdnRequestCodeServlet(Resource):
 
         raw_phone_number = args['phone_number']
         country = args['country']
-        clientSecret = args['client_secret']
         sendAttempt = args['send_attempt']
+        clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid client_secret provided'
+            }
 
         try:
             phone_number_object = phonenumbers.parse(raw_phone_number, country)
@@ -116,6 +124,7 @@ class MsisdnValidateCodeServlet(Resource):
                     request.setResponseCode(302)
                     request.setHeader("Location", next_link)
             else:
+                request.setResponseCode(400)
                 msg = "Verification failed: you may need to request another verification text"
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
@@ -137,6 +146,12 @@ class MsisdnValidateCodeServlet(Resource):
         sid = args['sid']
         tokenString = args['token']
         clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid client_secret provided'
+            }
 
         try:
             resp = self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)
