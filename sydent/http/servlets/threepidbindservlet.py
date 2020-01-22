@@ -16,11 +16,13 @@
 
 from twisted.web.resource import Resource
 
+from sydent.util.stringutils import is_valid_client_secret
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 from sydent.threepid.bind import BindingNotPermittedException
+
 
 class ThreePidBindServlet(Resource):
     def __init__(self, sydent):
@@ -36,6 +38,13 @@ class ThreePidBindServlet(Resource):
         sid = args['sid']
         mxid = args['mxid']
         clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid value for client_secret',
+            }
 
         # Return the same error for not found / bad client secret otherwise people can get information about
         # sessions without knowing the secret
