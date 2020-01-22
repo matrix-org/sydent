@@ -13,17 +13,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
-import urllib
+from six.moves import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.emailutils import sendEmail
 from sydent.validators import common
 
 from sydent.util import time_msec
-
-from sydent.validators import IncorrectClientSecretException, SessionExpiredException
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +32,25 @@ class EmailValidator:
         self.sydent = sydent
 
     def requestToken(self, emailAddress, clientSecret, sendAttempt, nextLink, ipaddress=None):
+        """
+        Creates or retrieves a validation session and sends an email to the corresponding
+        email address with a token to use to verify the association.
+
+        :param emailAddress: The email address to send the email to.
+        :type emailAddress: unicode
+        :param clientSecret: The client secret to use.
+        :type clientSecret: unicode
+        :param sendAttempt: The current send attempt.
+        :type sendAttempt: int
+        :param nextLink: The link to redirect the user to once they have completed the
+            validation.
+        :type nextLink: unicode
+        :param ipaddress: The requester's IP address.
+        :type ipaddress: str or None
+
+        :return: The ID of the session created (or of the existing one if any)
+        :rtype: int
+        """
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
         valSession = valSessionStore.getOrCreateTokenSession(medium='email', address=emailAddress,
@@ -44,7 +62,7 @@ class EmailValidator:
             logger.info("Not mailing code because current send attempt (%d) is not less than given send attempt (%s)", int(sendAttempt), int(valSession.sendAttemptNumber))
             return valSession.id
 
-        ipstring = ipaddress if ipaddress else u"an unknown location"
+        ipstring = ipaddress if ipaddress else "an unknown location"
 
         substitutions = {
             'ipaddress': ipstring,
@@ -62,11 +80,25 @@ class EmailValidator:
         return valSession.id
 
     def makeValidateLink(self, valSession, clientSecret, nextLink):
+        """
+        Creates a validation link that can be sent via email to the user.
+
+        :param valSession: The current validation session.
+        :type valSession: sydent.validators.ValidationSession
+        :param clientSecret: The client secret to include in the link.
+        :type clientSecret: unicode
+        :param nextLink: The link to redirect the user to once they have completed the
+            validation.
+        :type nextLink: unicode
+
+        :return: The validation link.
+        :rtype: unicode
+        """
         base = self.sydent.cfg.get('http', 'client_http_base')
         link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
             base,
-            urllib.quote(valSession.token),
-            urllib.quote(clientSecret),
+            urllib.parse.quote(valSession.token),
+            urllib.parse.quote(clientSecret),
             valSession.id,
         )
         if nextLink:
@@ -77,9 +109,9 @@ class EmailValidator:
                 nextLink += '&'
             else:
                 nextLink += '?'
-            nextLink += "sid=" + urllib.quote(str(valSession.id))
+            nextLink += "sid=" + urllib.parse.quote(str(valSession.id))
 
-            link += "&nextLink=%s" % (urllib.quote(nextLink))
+            link += "&nextLink=%s" % (urllib.parse.quote(nextLink))
         return link
 
     def validateSessionWithToken(self, sid, clientSecret, token):

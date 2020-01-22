@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import sydent.util.tokenutils
 
@@ -29,6 +30,21 @@ class ThreePidValSessionStore:
         self.random = SystemRandom()
 
     def getOrCreateTokenSession(self, medium, address, clientSecret):
+        """
+        Retrieves the validation session for a given medium, address and client secret,
+        or creates one if none was found.
+
+        :param medium: The medium to use when looking up or creating the session.
+        :type medium: str
+        :param address: The address to use when looking up or creating the session.
+        :type address: unicode
+        :param clientSecret: The client secret to use when looking up or creating the
+            session.
+        :type clientSecret: unicode
+
+        :return: The session that was retrieved or created.
+        :rtype: ValidationSession
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
@@ -53,6 +69,25 @@ class ThreePidValSessionStore:
         return s
 
     def addValSession(self, medium, address, clientSecret, mtime, commit=True):
+        """
+        Creates a validation session with the given parameters.
+
+        :param medium: The medium to create the session for.
+        :type medium: str
+        :param address: The address to create the session for.
+        :type address: unicode
+        :param clientSecret: The client secret to use when looking up or creating the
+            session.
+        :type clientSecret: unicode
+        :param mtime: The current time in milliseconds.
+        :type mtime: int
+        :param commit: Whether to commit the transaction after executing the insert
+            statement.
+        :type commit: bool
+
+        :return: The ID of the created session.
+        :rtype: int
+        """
         cur = self.sydent.db.cursor()
 
         # Let's make up a random sid rather than using sequential ones. This
@@ -66,6 +101,14 @@ class ThreePidValSessionStore:
         return sid
 
     def setSendAttemptNumber(self, sid, attemptNo):
+        """
+        Updates the send attempt number for the session with the given ID.
+
+        :param sid: The ID of the session to update
+        :type sid: int
+        :param attemptNo: The send attempt number to update the session with.
+        :type attemptNo: int
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("update threepid_token_auths set sendAttemptNumber = ? where id = ?", (attemptNo, sid))
@@ -78,6 +121,14 @@ class ThreePidValSessionStore:
         self.sydent.db.commit()
 
     def setMtime(self, sid, mtime):
+        """
+        Set the time of the last send attempt for the session with the given ID
+
+        :param sid: The ID of the session to update.
+        :type sid: int
+        :param mtime: The time of the last send attempt for that session.
+        :type mtime: int
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("update threepid_validation_sessions set mtime = ? where id = ?", (mtime, sid))
