@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 from twisted.web.resource import Resource
@@ -66,26 +67,22 @@ class MsisdnRequestCodeServlet(Resource):
             phone_number_object, phonenumbers.PhoneNumberFormat.INTERNATIONAL
         )
 
-        resp = None
-
         try:
             sid = self.sydent.validators.msisdn.requestToken(
-                phone_number_object, clientSecret, sendAttempt, None
+                phone_number_object, clientSecret, sendAttempt
             )
+            resp = {
+                'success': True, 'sid': str(sid),
+                'msisdn': msisdn, 'intl_fmt': intl_fmt,
+            }
         except DestinationRejectedException:
             logger.error("Destination rejected for number: %s", msisdn);
             request.setResponseCode(400)
             resp = {'errcode': 'M_DESTINATION_REJECTED', 'error': 'Phone numbers in this country are not currently supported'}
         except Exception as e:
-            logger.error("Exception sending SMS: %r", e);
+            logger.error("Exception sending SMS: %r", e)
             request.setResponseCode(500)
-            resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
-
-        if not resp:
-            resp = {
-                'success': True, 'sid': str(sid),
-                'msisdn': msisdn, 'intl_fmt': intl_fmt,
-            }
+            resp = {'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}
 
         return resp
 
