@@ -96,7 +96,7 @@ def get_args(request, required_args):
                     raise MatrixRestError(
                         400,
                         'M_INVALID_PARAM',
-                        "Parameter %s or its value must be UTF-8" % safe_k,
+                        "Parameter %s and its value must be valid UTF-8" % safe_k,
                     )
 
     elif args is None:
