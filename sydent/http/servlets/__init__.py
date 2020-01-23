@@ -42,7 +42,7 @@ def get_args(request, required_args):
     """
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
-    www-form-urlencoded for backwards compatability on v1 endpoints only.
+    www-form-urlencoded for backwards compatibility on v1 endpoints only.
     Returns a tuple (error, args) where if error is non-null,
     the request is malformed. Otherwise, args contains the
     parameters passed.
@@ -51,7 +51,7 @@ def get_args(request, required_args):
     :type request: twisted.web.server.Request
     :param required_args: The args that needs to be found in the
         request's parameters.
-    :type required_args: tuple[bytes]
+    :type required_args: tuple[unicode]
 
     :return: A dict containing the requested args and their values. String values
         are of type unicode.
@@ -87,7 +87,18 @@ def get_args(request, required_args):
         args = {}
         for k, v in args_bytes.items():
             if isinstance(v, list) and len(v) == 1:
-                args[k.decode("UTF-8")] = v[0].decode("UTF-8")
+                try:
+                    args[k.decode("UTF-8")] = v[0].decode("UTF-8")
+                except UnicodeDecodeError:
+                    # Get a version of the key that has non-UTF-8 characters replaced by
+                    # their \xNN escape sequence so it doesn't raise another exception.
+                    safe_k = k.decode("UTF-8", errors="backslashreplace")
+                    raise MatrixRestError(
+                        400,
+                        'M_INVALID_PARAM',
+                        "Parameter %s and its value must be valid UTF-8" % safe_k,
+                    )
+
     elif args is None:
         args = {}
 
@@ -109,7 +120,7 @@ def jsonwrap(f):
     def inner(self, request, *args, **kwargs):
         """
         Runs a web handler function with the given request and parameters, then
-        converts its result in JSON and returns it. If an error happens, also sets
+        converts its result into JSON and returns it. If an error happens, also sets
         the HTTP response code.
 
         :param self: The current object.
