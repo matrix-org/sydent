@@ -26,6 +26,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.replication.peer import NoMatchingSignatureException, NoSignaturesException, RemotePeerError
 from signedjson.sign import SignatureVerifyException
+from collections import OrderedDict
 
 import logging
 import json
@@ -107,7 +108,9 @@ class ReplicationPushServlet(Resource):
             return
 
         # Process signed associations
-        sg_assocs = inJson.get('sg_assocs', {})
+        sg_assocs = OrderedDict(
+            sorted(inJson.get('sg_assocs', {}).items(), key=lambda k: k[0])
+        )
         if len(sg_assocs) > MAX_SG_ASSOCS_LIMIT:
             logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(sg_assocs), MAX_SG_ASSOCS_LIMIT)
             request.setResponseCode(400)
@@ -158,7 +161,9 @@ class ReplicationPushServlet(Resource):
         # Process any new invite tokens
 
         invite_tokens = inJson.get('invite_tokens', {})
-        new_invites = invite_tokens.get('added', {})
+        new_invites = OrderedDict(
+            sorted(invite_tokens.get('added', {}).items(), key=lambda k: k[0])
+        )
         if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
             self.sydent.db.rollback()
             logger.warning(
@@ -182,7 +187,9 @@ class ReplicationPushServlet(Resource):
 
         # Process any invite token update
 
-        invite_updates = invite_tokens.get('updated', {})
+        invite_updates = OrderedDict(
+            sorted(invite_tokens.get('updated', {}).items(), key=lambda k: k[0])
+        )
         if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
             self.sydent.db.rollback()
             logger.warning(
@@ -206,7 +213,9 @@ class ReplicationPushServlet(Resource):
 
         # Process any ephemeral public keys
 
-        ephemeral_public_keys = inJson.get('ephemeral_public_keys', {})
+        ephemeral_public_keys = OrderedDict(
+            sorted(inJson.get('ephemeral_public_keys', {}).items(), key=lambda k: k[0])
+        )
         if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
             self.sydent.db.rollback()
             logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(ephemeral_public_keys), MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT)
