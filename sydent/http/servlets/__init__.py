@@ -42,7 +42,7 @@ def get_args(request, required_args):
     """
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
-    www-form-urlencoded for backwards comparability on v1 endpoints only.
+    www-form-urlencoded for backwards compatibility on v1 endpoints only.
     Returns a tuple (error, args) where if error is non-null,
     the request is malformed. Otherwise, args contains the
     parameters passed.
