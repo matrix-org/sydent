@@ -116,7 +116,12 @@ class Pusher:
             )
             push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"] = keys
 
-            token_count = len(push_data["invite_tokens"])
+            # Count each of the inner dictionaries instead of the outer
+            # (which will always have len 2)
+            token_count = (
+                len(push_data["invite_tokens"]["added"]) +
+                len(push_data["invite_tokens"]["updated"])
+            )
             key_count = len(push_data["ephemeral_public_keys"])
             association_count = len(push_data["sg_assocs"])
 
