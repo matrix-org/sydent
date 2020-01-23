@@ -76,7 +76,7 @@ class MsisdnRequestCodeServlet(Resource):
                 'msisdn': msisdn, 'intl_fmt': intl_fmt,
             }
         except DestinationRejectedException:
-            logger.error("Destination rejected for number: %s", msisdn);
+            logger.error("Destination rejected for number: %s", msisdn)
             request.setResponseCode(400)
             resp = {'errcode': 'M_DESTINATION_REJECTED', 'error': 'Phone numbers in this country are not currently supported'}
         except Exception as e:

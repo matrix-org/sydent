@@ -48,8 +48,6 @@ class EmailRequestCodeServlet(Resource):
         if 'next_link' in args and not args['next_link'].startswith("file:///"):
             nextLink = args['next_link']
 
-        resp = None
-
         try:
             sid = self.sydent.validators.email.requestToken(
                 email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress
