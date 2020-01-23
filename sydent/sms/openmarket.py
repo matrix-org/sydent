@@ -87,10 +87,18 @@ class OpenMarketSMS:
                 "address": source['text'],
             }
 
-        b64creds = b64encode(b"%s:%s" % (
-            self.sydent.cfg.get('sms', 'username'),
-            self.sydent.cfg.get('sms', 'password'),
-        ))
+        # Make sure username and password are bytes otherwise we can't use them with
+        # b64encode.
+        username = self.sydent.cfg.get('sms', 'username')
+        password = self.sydent.cfg.get('sms', 'password')
+
+        if not isinstance(username, bytes):
+            username = username.encode("UTF-8")
+
+        if not isinstance(password, bytes):
+            password = password.encode("UTF-8")
+
+        b64creds = b64encode(b"%s:%s" % (username, password))
         headers = Headers({
             b"Authorization": [b"Basic " + b64creds],
             b"Content-Type": [b"application/json"],
