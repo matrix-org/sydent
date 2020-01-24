@@ -173,10 +173,22 @@ class SqliteDatabase:
             self.db.commit()
             logger.info("v4 -> v5 schema migration complete")
             self._setSchemaVersion(5)
+        if curVer < 6:
+            cur = self.db.cursor()
+            cur.execute(
+                """
+                ALTER TABLE threepid_token_auths
+                ADD COLUMN
+                    next_link_used TEXT
+                """
+            )
+            self.db.commit()
+            logger.info("v5 -> v6 schema migration complete")
+            self._setSchemaVersion(6)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
-        res = cur.execute("PRAGMA user_version");
+        res = cur.execute("PRAGMA user_version")
         row = cur.fetchone()
         return row[0]
 
@@ -184,4 +196,4 @@ class SqliteDatabase:
         cur = self.db.cursor()
         # NB. pragma doesn't support variable substitution so we
         # do it in python (as a decimal so we don't risk SQL injection)
-        res = cur.execute("PRAGMA user_version = %d" % (ver,));
+        res = cur.execute("PRAGMA user_version = %d" % (ver,))

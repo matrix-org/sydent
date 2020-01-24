@@ -23,8 +23,6 @@ from sydent.validators import common
 
 from sydent.util import time_msec
 
-from sydent.validators import IncorrectClientSecretException, SessionExpiredException
-
 logger = logging.getLogger(__name__)
 
 
@@ -82,5 +80,29 @@ class EmailValidator:
             link += "&nextLink=%s" % (urllib.quote(nextLink))
         return link
 
-    def validateSessionWithToken(self, sid, clientSecret, token):
-        return common.validateSessionWithToken(self.sydent, sid, clientSecret, token)
+    def validateSessionWithToken(self, sid, clientSecret, token, next_link=None):
+        """Validate a 3PID validation session
+
+        :param sid: The session ID
+        :type sid: str
+
+        :param clientSecret: The client_secret originally set when requesting the session
+        :type clientSecret: str
+
+        :param token: The validation token
+        :type token: str
+
+        :param next_link: The link to redirect the client to after validation, if provided
+        :type next_link: str|None
+
+        :return: The JSON to return to the client on success, or False on fail
+        :rtype: Dict|bool
+
+        :raises IncorrectClientSecretException if the client secret does not match the sid
+        :raises SessionExpiredException is the provided session has expired
+        :raises NextLinkValidationException if the next_link provided is different
+            from one provided in a previous, successful validation attempt
+        """
+        return common.validateSessionWithToken(
+            self.sydent, sid, clientSecret, token, next_link
+        )

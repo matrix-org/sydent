@@ -49,3 +49,7 @@ class SessionNotValidatedException(Exception):
 
 class DestinationRejectedException(Exception):
     pass
+
+
+class NextLinkValidationException(Exception):
+    pass

@@ -121,6 +121,61 @@ class ThreePidValSessionStore:
 
         return None
 
+    def next_link_differs(self, sid, token, next_link):
+        """Check whether the specified session has already been validated with a
+        next_link provided, and if  next_link value
+
+        :param sid: The session ID
+        :type sid: str
+
+        :param token: The validation token
+        :type token: str
+
+        :param next_link: The next_link parameter used in submitting this validation
+        :type next_link: str
+
+        :returns: Whether the provided next_link differs from the provided
+            token's associated next_link. Returns False if the stored next_link
+            value is NULL.
+        :rtype: bool
+        """
+        #TODO: Check if it's already been validated, and if so then check next_link is
+        # different. None or not
+        # Get the stored next_link value for this token
+        cur = self.sydent.db.cursor()
+
+        cur.execute("select next_link_used from threepid_token_auths "
+                    "where validationSession = ? and token = ?",
+                    (sid, token))
+
+        row = cur.fetchone()
+        if not row:
+            return False
+        token_next_link = row[0]
+
+        return token_next_link != next_link
+
+    def set_next_link_for_token(self, sid, token, next_link):
+        """Set which next_link was used when using a session token
+
+        :param sid: The session ID
+        :type sid: str
+
+        :param token: The validation token
+        :type token: str
+
+        :param next_link: The next_link parameter used in submitting this validation
+        :type next_link: str
+        """
+        cur = self.sydent.db.cursor()
+
+        cur.execute("update threepid_token_auths "
+                    "set next_link_used = ?"
+                    "where validationSession = ? and token = ?",
+                    (next_link, sid, token))
+
+        self.sydent.db.commit()
+
     def getValidatedSession(self, sid, clientSecret):
         """
         Retrieve a validated and still-valid session whose client secret matches the one passed in

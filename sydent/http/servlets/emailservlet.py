@@ -17,8 +17,11 @@
 from twisted.web.resource import Resource
 
 from sydent.util.emailutils import EmailAddressException, EmailSendException
-from sydent.validators.emailvalidator import SessionExpiredException
-from sydent.validators.emailvalidator import IncorrectClientSecretException
+from sydent.validators import (
+    SessionExpiredException,
+    IncorrectClientSecretException,
+    NextLinkValidationException,
+)
 from sydent.util.stringutils import is_valid_client_secret
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
@@ -129,14 +132,27 @@ class EmailValidateCodeServlet(Resource):
                 'error': 'Invalid value for client_secret',
             }
 
+        next_link = request.args.get('next_link')
+
         try:
-            resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)
+            resp = self.sydent.validators.email.validateSessionWithToken(
+                sid, clientSecret, tokenString, next_link
+            )
         except IncorrectClientSecretException:
             return {'success': False, 'errcode': 'M_INCORRECT_CLIENT_SECRET',
                     'error': "Client secret does not match the one given when requesting the token"}
         except SessionExpiredException:
             return {'success': False, 'errcode': 'M_SESSION_EXPIRED',
                     'error': "This validation session has expired: call requestToken again"}
+        except NextLinkValidationException:
+            return {
+                'success': False,
+                'errcode': 'M_UNKNOWN',
+                'error': (
+                    "The provided next_link is invalid for this session. "
+                    "Try requesting a new token"
+                )
+            }
 
         if not resp:
             resp = {'success': False}
