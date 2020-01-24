@@ -33,7 +33,7 @@ def issueToken(sydent, user_id):
     :type user_id: unicode
 
     :return: The access token for that account.
-    :rtype: str
+    :rtype: unicode
     """
     accountStore = AccountStore(sydent)
     accountStore.storeAccount(user_id, int(time.time() * 1000), None)
