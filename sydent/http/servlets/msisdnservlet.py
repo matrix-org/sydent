@@ -21,7 +21,11 @@ from twisted.web.resource import Resource
 import phonenumbers
 
 from sydent.validators import (
-    IncorrectClientSecretException, SessionExpiredException, DestinationRejectedException
+    DestinationRejectedException,
+    IncorrectClientSecretException,
+    InvalidSessionIdException,
+    IncorrectSessionTokenException,
+    SessionExpiredException,
 )
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
@@ -122,32 +126,45 @@ class MsisdnValidateCodeServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request):
-        send_cors(request)
-
         authIfV2(self.sydent, request)
+
+        return self.do_validate_request(request)
+
+    def do_validate_request(self, request):
+        """
+        Extracts information about a validation session from the request and
+        attempts to validate that session.
+
+        :param request: The request to extract information about the session from.
+        :type request: twisted.web.server.Request
+
+        :return: A dict with a "success" key which value indicates whether the
+            validation succeeded. If the validation failed, this dict also includes
+            a "errcode" and a "error" keys which include information about the failure.
+        :rtype: dict[str, bool or str]
+        """
+        send_cors(request)
 
         args = get_args(request, ('token', 'sid', 'client_secret'))
 
-        return self.do_validate_request(args)
-
-    def do_validate_request(self, args):
         sid = args['sid']
         tokenString = args['token']
         clientSecret = args['client_secret']
 
         try:
-            resp = self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)
+            return self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)
         except IncorrectClientSecretException:
-            return {'success': False, 'errcode': 'M_INCORRECT_CLIENT_SECRET',
+            return {'success': False, 'errcode': 'M_INVALID_PARAM',
                     'error': "Client secret does not match the one given when requesting the token"}
         except SessionExpiredException:
             return {'success': False, 'errcode': 'M_SESSION_EXPIRED',
                     'error': "This validation session has expired: call requestToken again"}
-
-        if not resp:
-            resp = {'success': False}
-
-        return resp
+        except InvalidSessionIdException:
+            return {'success': False, 'errcode': 'M_INVALID_PARAM',
+                    'error': "The token doesn't match"}
+        except IncorrectSessionTokenException:
+            return {'success': False, 'errcode': 'M_NO_VALID_SESSION',
+                    'error': "No session could be found with this sid"}
 
     def render_OPTIONS(self, request):
         send_cors(request)
