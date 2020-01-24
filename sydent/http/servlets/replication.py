@@ -15,11 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import twisted.python.log
 from twisted.web.resource import Resource
 from twisted.web import server
 from twisted.internet import defer
-from sydent.http.servlets import jsonwrap
 from sydent.threepid import threePidAssocFromDict
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
@@ -29,7 +27,6 @@ from signedjson.sign import SignatureVerifyException
 
 import logging
 import json
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +34,7 @@ MAX_SG_ASSOCS_LIMIT = 100
 MAX_INVITE_TOKENS_LIMIT = 100
 MAX_INVITE_UPDATES_LIMIT = 100
 MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT = 100
+
 
 class ReplicationPushServlet(Resource):
     def __init__(self, sydent):
@@ -107,7 +105,13 @@ class ReplicationPushServlet(Resource):
             return
 
         # Process signed associations
+
+        # Ensure associations are processed in order of origin_id.
+        # If we process them out of order, an association with an ID lesser
+        # than a previously processed association will be ignored.
         sg_assocs = inJson.get('sg_assocs', {})
+        sg_assocs = sorted(sg_assocs.items())
+
         if len(sg_assocs) > MAX_SG_ASSOCS_LIMIT:
             logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(sg_assocs), MAX_SG_ASSOCS_LIMIT)
             request.setResponseCode(400)
@@ -118,7 +122,7 @@ class ReplicationPushServlet(Resource):
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
         # Check that this message is signed by one of our trusted associated peers
-        for originId, sgAssoc in sg_assocs.items():
+        for originId, sgAssoc in sg_assocs:
             try:
                 yield peer.verifySignedAssociation(sgAssoc)
                 logger.debug("Signed association from %s with origin ID %s verified", peer.servername, originId)
@@ -157,8 +161,13 @@ class ReplicationPushServlet(Resource):
 
         # Process any new invite tokens
 
+        # New and updated invite tokens come is as lists instead of dictionaries
+        # They are wrapped in a dictionary. Extract that first
         invite_tokens = inJson.get('invite_tokens', {})
-        new_invites = invite_tokens.get('added', {})
+
+        # Then extract the list, ensuring tokens are processed in order of origin ID
+        new_invites = sorted(invite_tokens.get('added', []))
+
         if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
             self.sydent.db.rollback()
             logger.warning(
@@ -173,7 +182,7 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        for originId, inviteToken in new_invites.items():
+        for originId, inviteToken in new_invites:
             tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                 inviteToken['sender'], inviteToken['token'],
                                 originServer=peer.servername, originId=originId,
@@ -182,7 +191,8 @@ class ReplicationPushServlet(Resource):
 
         # Process any invite token update
 
-        invite_updates = invite_tokens.get('updated', {})
+        invite_updates = sorted(invite_tokens.get('updated', []))
+
         if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
             self.sydent.db.rollback()
             logger.warning(
@@ -206,7 +216,9 @@ class ReplicationPushServlet(Resource):
 
         # Process any ephemeral public keys
 
-        ephemeral_public_keys = inJson.get('ephemeral_public_keys', {})
+        ephemeral_public_keys = inJson.get("ephemeral_public_keys", {})
+        ephemeral_public_keys = sorted(ephemeral_public_keys.items())
+
         if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
             self.sydent.db.rollback()
             logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(ephemeral_public_keys), MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT)
@@ -215,13 +227,13 @@ class ReplicationPushServlet(Resource):
             request.finish()
             return
 
-        for originId, ephemeralKey in ephemeral_public_keys.items():
+        for originId, ephemeralKey in ephemeral_public_keys:
             tokensStore.storeEphemeralPublicKey(
                 ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'],
                 originServer=peer.servername, originId=originId, commit=False)
             logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
 
         self.sydent.db.commit()
-        request.write(json.dumps({'success':True}))
+        request.write(json.dumps({'success': True}))
         request.finish()
         return
