@@ -53,7 +53,7 @@ class EmailValidator:
         """
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
-        valSession = valSessionStore.getOrCreateTokenSession(medium='email', address=emailAddress,
+        valSession = valSessionStore.getOrCreateTokenSession(medium=u'email', address=emailAddress,
                                                              clientSecret=clientSecret)
 
         valSessionStore.setMtime(valSession.id, time_msec())
@@ -62,7 +62,7 @@ class EmailValidator:
             logger.info("Not mailing code because current send attempt (%d) is not less than given send attempt (%s)", int(sendAttempt), int(valSession.sendAttemptNumber))
             return valSession.id
 
-        ipstring = ipaddress if ipaddress else "an unknown location"
+        ipstring = ipaddress if ipaddress else u"an unknown location"
 
         substitutions = {
             'ipaddress': ipstring,

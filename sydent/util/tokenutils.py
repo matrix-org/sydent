@@ -19,24 +19,36 @@ import random
 
 r = random.SystemRandom()
 
+
 def generateTokenForMedium(medium):
     """
     Generates a token of a different format depending on the medium, a 32 characters
     alphanumeric one if the medium is email, a 6 characters numeric one otherwise.
 
     :param medium: The medium to generate a token for.
-    :type medium: str
+    :type medium: unicode
 
     :return: The generated token.
-    :rtype: str
+    :rtype: unicode
     """
     if medium == 'email':
         return generateAlphanumericTokenOfLength(32)
     else:
         return generateNumericTokenOfLength(6)
 
+
 def generateNumericTokenOfLength(length):
-    return "".join([r.choice(string.digits) for _ in range(length)])
+    """
+    Generates a token of the given length with the character set [0-9].
+
+    :param length: The length of the token to generate.
+    :type length: int
+
+    :return: The generated token.
+    :rtype: unicode
+    """
+    return u"".join([r.choice(string.digits) for _ in range(length)])
+
 
 def generateAlphanumericTokenOfLength(length):
     """
