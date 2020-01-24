@@ -19,6 +19,7 @@ from twisted.web.resource import Resource
 from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.validators.emailvalidator import SessionExpiredException
 from sydent.validators.emailvalidator import IncorrectClientSecretException
+from sydent.util.stringutils import is_valid_client_secret
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
@@ -40,6 +41,14 @@ class EmailRequestCodeServlet(Resource):
 
         email = args['email']
         clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid value for client_secret',
+            }
+
         sendAttempt = args['send_attempt']
 
         ipaddress = self.sydent.ip_from_request(request)
@@ -112,6 +121,13 @@ class EmailValidateCodeServlet(Resource):
         sid = args['sid']
         tokenString = args['token']
         clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid value for client_secret',
+            }
 
         try:
             resp = self.sydent.validators.email.validateSessionWithToken(sid, clientSecret, tokenString)

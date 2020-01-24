@@ -22,6 +22,7 @@ from sydent.http.servlets import jsonwrap, get_args
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
+from sydent.util.stringutils import is_valid_client_secret
 
 class GetValidated3pidServlet(Resource):
     isLeaf = True
@@ -37,6 +38,13 @@ class GetValidated3pidServlet(Resource):
 
         sid = args['sid']
         clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid value for client_secret',
+            }
 
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
