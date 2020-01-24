@@ -33,7 +33,8 @@ def tokenFromRequest(request):
     :param request: The request to look for an access token in.
     :type request: twisted.web.server.Request
 
-    :returns str|None: The token or None if not found
+    :return: The token or None if not found
+    :rtype: unicode or None
     """
     token = None
     # check for Authorization header first
@@ -44,6 +45,10 @@ def tokenFromRequest(request):
     # no? try access_token query param
     if token is None and 'access_token' in request.args:
         token = request.args['access_token'][0]
+
+    # Ensure we're dealing with unicode.
+    if token and isinstance(token, bytes):
+        token = token.decode("UTF-8")
 
     return token
 

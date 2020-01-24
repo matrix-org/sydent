@@ -36,6 +36,6 @@ def generateAlphanumericTokenOfLength(length):
     :type length: int
 
     :return: The generated token.
-    :rtype: str
+    :rtype: unicode
     """
-    return "".join([r.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for _ in range(length)])
+    return u"".join([r.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for _ in range(length)])

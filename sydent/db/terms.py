@@ -26,7 +26,7 @@ class TermsStore(object):
         :type user_id: str
 
         :return: A list of the URLs of the terms accepted by the user.
-        :rtype: list[str]
+        :rtype: list[unicode]
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -36,6 +36,10 @@ class TermsStore(object):
 
         urls = []
         for url, in res:
+            # Ensure we're dealing with unicode.
+            if url and isinstance(url, bytes):
+                url = url.decode("UTF-8")
+
             urls.append(url)
 
         return urls
