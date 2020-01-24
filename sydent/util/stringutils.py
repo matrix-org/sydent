@@ -14,7 +14,8 @@
 # limitations under the License.
 import re
 
-client_secret_regex = re.compile(r"^[0-9a-zA-Z.=_-]+$")
+# https://matrix.org/docs/spec/client_server/r0.6.0#post-matrix-client-r0-register-email-requesttoken
+client_secret_regex = re.compile(r"^[0-9a-zA-Z\.\=\_\-]+$")
 
 
 def is_valid_client_secret(client_secret):
