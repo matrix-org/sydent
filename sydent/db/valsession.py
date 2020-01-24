@@ -35,7 +35,7 @@ class ThreePidValSessionStore:
         or creates one if none was found.
 
         :param medium: The medium to use when looking up or creating the session.
-        :type medium: str
+        :type medium: unicode
         :param address: The address to use when looking up or creating the session.
         :type address: unicode
         :param clientSecret: The client secret to use when looking up or creating the
@@ -73,7 +73,7 @@ class ThreePidValSessionStore:
         Creates a validation session with the given parameters.
 
         :param medium: The medium to create the session for.
-        :type medium: str
+        :type medium: unicode
         :param address: The address to create the session for.
         :type address: unicode
         :param clientSecret: The client secret to use when looking up or creating the

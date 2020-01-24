@@ -33,9 +33,15 @@ class Terms(object):
         """
         :return: The global (master) version of the terms, or None if there
             are no terms of service for this server.
-        :rtype: str or None
+        :rtype: unicode or None
         """
-        return None if self._rawTerms is None else self._rawTerms['master_version']
+        version = None if self._rawTerms is None else self._rawTerms['master_version']
+
+        # Ensure we're dealing with unicode.
+        if version and isinstance(version, bytes):
+            version = version.decode("UTF-8")
+
+        return version
 
     def getForClient(self):
         """
@@ -55,13 +61,19 @@ class Terms(object):
     def getUrlSet(self):
         """
         :return: All the URLs for the terms in a set. Empty set if no terms.
-        :rtype: set[str]
+        :rtype: set[unicode]
         """
         urls = set()
         if self._rawTerms is not None:
             for docName, doc in self._rawTerms['docs'].items():
                 for langName, lang in doc['langs'].items():
-                    urls.add(lang['url'])
+                    url = lang['url']
+
+                    # Ensure we're dealing with unicode.
+                    if url and isinstance(url, bytes):
+                        url = url.decode("UTF-8")
+
+                    urls.add(url)
         return urls
 
     def urlListIsSufficient(self, urls):
