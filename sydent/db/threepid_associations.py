@@ -148,11 +148,24 @@ class GlobalAssociationStore:
         self.sydent = sydent
 
     def signedAssociationStringForThreepid(self, medium, address):
+        """
+        Retrieve the JSON for the signed association matching the provided 3PID,
+        if one exists.
+
+        :param medium: The medium of the 3PID.
+        :type medium: unicode
+        :param address: The address of the 3PID.
+        :type address: unicode
+
+        :return: The signed association, or None if no association was found for this
+            3PID.
+        :rtype: unicode or None
+        """
         cur = self.sydent.db.cursor()
-        # We treat address as case-insensitive because that's true for all the threepids
-        # we have currently (we treat the local part of email addresses as case insensitive
-        # which is technically incorrect). If we someday get a case-sensitive threepid,
-        # this can change.
+        # We treat address as case-insensitive because that's true for all the
+        # threepids we have currently (we treat the local part of email addresses as
+        # case insensitive which is technically incorrect). If we someday get a
+        # case-sensitive threepid, this can change.
         res = cur.execute("select sgAssoc from global_threepid_associations where "
                     "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
                     "order by ts desc limit 1",
@@ -163,9 +176,9 @@ class GlobalAssociationStore:
         if not row:
             return None
 
-        sgAssocBytes = row[0]
+        sgAssocStr = row[0]
 
-        return sgAssocBytes
+        return sgAssocStr
 
     def getMxid(self, medium, address):
         cur = self.sydent.db.cursor()
@@ -187,10 +200,10 @@ class GlobalAssociationStore:
         database for. Output is ordered by medium, address, timestamp DESC
 
         :param threepid_tuples: List containing (medium, address) tuples
-        :type threepid_tuples: [(str, str)]
+        :type threepid_tuples: list[tuple[unicode]]
 
-        :returns a list of (medium, address, mxid) tuples
-        :rtype [(str, str, str)]
+        :return: a list of (medium, address, mxid) tuples
+        :rtype: list[tuple[unicode]]
         """
         cur = self.sydent.db.cursor()
 
@@ -227,7 +240,7 @@ class GlobalAssociationStore:
                 results.append((row[0], row[1], row[3]))
 
         finally:
-            res = cur.execute("DROP TABLE tmp_getmxids")
+            cur.execute("DROP TABLE tmp_getmxids")
 
         return results
 
@@ -273,10 +286,10 @@ class GlobalAssociationStore:
         """Returns a mapping from hash: mxid from a list of given lookup_hash values
 
         :param addresses: An array of lookup_hash values to check against the db
-        :type addresses: list[str]
+        :type addresses: list[unicode]
 
         :returns a dictionary of lookup_hash values to mxids of all discovered matches
-        :rtype: dict[str, str]
+        :rtype: dict[unicode, unicode]
         """
         cur = self.sydent.db.cursor()
 

@@ -24,8 +24,9 @@ class HashingMetadataStore:
     def get_lookup_pepper(self):
         """Return the value of the current lookup pepper from the db
         
-        :returns a pepper if it exists in the database, or None if one does
+        :return: A pepper if it exists in the database, or None if one does
                  not exist
+        :rtype: unicode
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("select lookup_pepper from hashing_metadata")
@@ -33,7 +34,14 @@ class HashingMetadataStore:
 
         if not row:
             return None
-        return row[0]
+
+        pepper = row[0]
+
+        # Ensure we're dealing with unicode.
+        if isinstance(pepper, bytes):
+            pepper = pepper.decode("UTF-8")
+
+        return pepper
 
     def store_lookup_pepper(self, hashing_function, pepper):
         """Stores a new lookup pepper in the hashing_metadata db table and rehashes all 3PIDs
