@@ -19,6 +19,7 @@ from twisted.web.resource import Resource
 from sydent.http.servlets import jsonwrap, get_args
 from sydent.http.auth import authIfV2
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 
@@ -36,6 +37,13 @@ class GetValidated3pidServlet(Resource):
 
         sid = args['sid']
         clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid client_secret provided'
+            }
 
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
