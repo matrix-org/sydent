@@ -152,7 +152,7 @@ class EmailValidateCodeServlet(Resource):
                 'success': False,
                 'errcode': 'M_UNKNOWN',
                 'error': (
-                    "The provided next_link is invalid for this session. "
+                    "The provided 'next_link' is invalid for this session. "
                     "Try requesting a new token"
                 )
             }
