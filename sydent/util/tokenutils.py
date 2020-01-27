@@ -29,4 +29,13 @@ def generateNumericTokenOfLength(length):
     return "".join([r.choice(string.digits) for _ in range(length)])
 
 def generateAlphanumericTokenOfLength(length):
-    return "".join([r.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for _ in range(length)])
+    """
+    Generates a token of the given length with the character set [a-zA-Z0-9].
+
+    :param length: The length of the token to generate.
+    :type length: int
+
+    :return: The generated token.
+    :rtype: unicode
+    """
+    return u"".join([r.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for _ in range(length)])

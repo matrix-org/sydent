@@ -13,13 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 from twisted.internet import defer
 
 import logging
 import json
-import urllib
+from six.moves import urllib
 
 from sydent.http.servlets import get_args, jsonwrap, deferjsonwrap, send_cors
 from sydent.http.httpclient import FederationHttpClient
@@ -48,11 +49,11 @@ class RegisterServlet(Resource):
 
         result = yield self.client.get_json(
             "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s" % (
-                args['matrix_server_name'], urllib.quote(args['access_token']),
+                args['matrix_server_name'], urllib.parse.quote(args['access_token']),
             ),
         )
         if 'sub' not in result:
-            raise Exception("Invalid response from Homeserver")
+            raise Exception("Invalid response from homeserver")
 
         user_id = result['sub']
         tok = yield issueToken(self.sydent, user_id)

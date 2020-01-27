@@ -13,12 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
 import logging
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.servlets import jsonwrap, send_cors
 from sydent.db.accounts import AccountStore
 from sydent.http.auth import authIfV2, tokenFromRequest
 
@@ -39,7 +40,7 @@ class LogoutServlet(Resource):
         """
         send_cors(request)
 
-        account = authIfV2(self.sydent, request, False)
+        authIfV2(self.sydent, request, False)
 
         token = tokenFromRequest(request)
 

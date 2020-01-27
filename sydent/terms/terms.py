@@ -23,12 +23,32 @@ logger = logging.getLogger(__name__)
 
 class Terms(object):
     def __init__(self, yamlObj):
+        """
+        :param yamlObj: The parsed YAML.
+        :type yamlObj: dict[str, any] or None
+        """
         self._rawTerms = yamlObj
 
     def getMasterVersion(self):
-        return None if self._rawTerms is None else self._rawTerms['master_version']
+        """
+        :return: The global (master) version of the terms, or None if there
+            are no terms of service for this server.
+        :rtype: unicode or None
+        """
+        version = None if self._rawTerms is None else self._rawTerms['master_version']
+
+        # Ensure we're dealing with unicode.
+        if version and isinstance(version, bytes):
+            version = version.decode("UTF-8")
+
+        return version
 
     def getForClient(self):
+        """
+        :return: A dict which value for the "policies" key is a dict which contains the
+            "docs" part of the terms' YAML. That nested dict is empty if no terms.
+        :rtype: dict[str, dict]
+        """
         policies = {}
         if self._rawTerms is not None:
             for docName, doc in self._rawTerms['docs'].items():
@@ -39,14 +59,35 @@ class Terms(object):
         return { 'policies': policies }
 
     def getUrlSet(self):
+        """
+        :return: All the URLs for the terms in a set. Empty set if no terms.
+        :rtype: set[unicode]
+        """
         urls = set()
         if self._rawTerms is not None:
             for docName, doc in self._rawTerms['docs'].items():
                 for langName, lang in doc['langs'].items():
-                    urls.add(lang['url'])
+                    url = lang['url']
+
+                    # Ensure we're dealing with unicode.
+                    if url and isinstance(url, bytes):
+                        url = url.decode("UTF-8")
+
+                    urls.add(url)
         return urls
 
     def urlListIsSufficient(self, urls):
+        """
+        Checks whether the provided list of URLs (which represents the list of terms
+        accepted by the user) is enough to allow the creation of the user's account.
+
+        :param urls: The list of URLs of terms the user has accepted.
+        :type urls: list[unicode]
+
+        :return: Whether the list is sufficient to allow the creation of the user's
+            account.
+        :rtype: bool
+        """
         agreed = set()
         urlset = set(urls)
 
