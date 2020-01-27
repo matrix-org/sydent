@@ -89,34 +89,6 @@ class LookupServlet(Resource):
             )
         return sgassoc
 
-    @jsonwrap
-    def render_POST(self, request):
-        """
-        Bulk-lookup for threepids.
-        ** DEPRECATED **
-        Use /bulk_lookup which returns the result encapsulated in a dict
-        Params: 'threepids': list of threepids, each of which is a list of medium, address
-        Returns: List of results where each result is a 3 item list of medium, address, mxid
-        Threepids for which no mapping is found are omitted.
-        """
-        send_cors(request)
-
-        authIfV2(self.sydent, request)
-
-        args = get_args(request, ('threepids',))
-
-        threepids = args['threepids']
-        if not isinstance(threepids, list):
-            request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PARAM', 'error': 'threepids must be a list'}, None
-
-        logger.info("Bulk lookup of %d threepids (deprecated endpoint)", len(threepids))
-            
-        globalAssocStore = GlobalAssociationStore(self.sydent)
-        results = globalAssocStore.getMxids(threepids)
-
-        return json.dumps(results)
-
     def render_OPTIONS(self, request):
         send_cors(request)
         return b''
