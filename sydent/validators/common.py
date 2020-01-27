@@ -45,11 +45,11 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
     valSessionStore = ThreePidValSessionStore(sydent)
     s = valSessionStore.getTokenSessionById(sid)
     if not s:
-        logger.info("Session ID %s not found", (sid,))
+        logger.info("Session ID %s not found", sid)
         return False
 
     if not clientSecret == s.clientSecret:
-        logger.info("Incorrect client secret", (sid,))
+        logger.info("Incorrect client secret", sid)
         raise IncorrectClientSecretException()
 
     if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
@@ -61,7 +61,7 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
     # user may be getting phished. Reject the validation attempt.
     if next_link and valSessionStore.next_link_differs(sid, token, next_link):
         logger.info(
-            "Validation attempt rejected as provided next_link is different "
+            "Validation attempt rejected as provided 'next_link' is different "
             "from that in a previous, successful validation attempt with this "
             "session id"
         )
