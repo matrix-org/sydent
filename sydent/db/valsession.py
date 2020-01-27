@@ -147,7 +147,7 @@ class ThreePidValSessionStore:
         Retrieves the session matching the given sid.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: int
+        :type sid: unicode
 
         :return: The retrieved session, or None if no session could be found with that
             sid.
@@ -193,7 +193,7 @@ class ThreePidValSessionStore:
         one passed in.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: int
+        :type sid: unicode
         :param clientSecret: A client secret to check against the one retrieved from
             the database.
         :type clientSecret: unicode

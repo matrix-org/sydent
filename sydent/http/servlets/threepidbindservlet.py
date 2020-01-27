@@ -38,7 +38,7 @@ class ThreePidBindServlet(Resource):
 
         args = get_args(request, ('sid', 'client_secret', 'mxid'))
 
-        sid = int(args['sid'])
+        sid = args['sid']
         mxid = args['mxid']
         clientSecret = args['client_secret']
 
