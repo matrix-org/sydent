@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 import time
@@ -55,7 +56,13 @@ class Verifier(object):
 
     @defer.inlineCallbacks
     def _getKeysForServer(self, server_name):
-        """Get the signing key data from a home server.
+        """Get the signing key data from a homeserver.
+
+        :param server_name: The name of the server to request the keys from.
+        :type server_name: unicode
+
+        :return: The verification keys returned by the server.
+        :rtype: dict[unicode, dict[unicode, unicode]]
         """
 
         if server_name in self.cache:
@@ -89,11 +96,13 @@ class Verifier(object):
 
         :param acceptable_server_names: If provided and not None,
         only signatures from servers in this list will be accepted.
-        :type acceptable_server_names: list of strings
+        :type acceptable_server_names: list[unicode] or None
 
         :return a tuple of the server name and key name that was
-        successfully verified. If the json cannot be verified,
-        raises SignatureVerifyException.
+        successfully verified.
+        :rtype: tuple[unicode]
+
+        :raise SignatureVerifyException: The json cannot be verified.
         """
         if 'signatures' not in signed_json:
             raise SignatureVerifyException("Signature missing")
@@ -130,10 +139,12 @@ class Verifier(object):
         XXX: Copied largely from synapse
 
         :param request: The request object to authenticate
+        :type request: twisted.web.server.Request
         :param content: The content of the request, if any
-        :type content: bytes, None
+        :type content: bytes or None
 
-        :returns: The origin of the server whose signature was validated
+        :return: The origin of the server whose signature was validated
+        :rtype: unicode
         """
         json_request = {
             "method": request.method,
@@ -148,12 +159,22 @@ class Verifier(object):
         origin = None
 
         def parse_auth_header(header_str):
+            """
+            Extracts a server name, signing key and payload signature from an
+            authentication header.
+
+            :param header_str: The content of the header
+            :type header_str: unicode
+
+            :return: The server name, the signing key, and the payload signature.
+            :rtype: tuple[unicode]
+            """
             try:
-                params = auth.split(" ")[1].split(",")
-                param_dict = dict(kv.split("=") for kv in params)
+                params = header_str.split(u" ")[1].split(u",")
+                param_dict = dict(kv.split(u"=") for kv in params)
 
                 def strip_quotes(value):
-                    if value.startswith("\""):
+                    if value.startswith(u"\""):
                         return value[1:-1]
                     else:
                         return value
@@ -161,17 +182,17 @@ class Verifier(object):
                 origin = strip_quotes(param_dict["origin"])
                 key = strip_quotes(param_dict["key"])
                 sig = strip_quotes(param_dict["sig"])
-                return (origin, key, sig)
+                return origin, key, sig
             except Exception:
                 raise SignatureVerifyException("Malformed Authorization header")
 
-        auth_headers = request.requestHeaders.getRawHeaders(b"Authorization")
+        auth_headers = request.requestHeaders.getRawHeaders(u"Authorization")
 
         if not auth_headers:
             raise NoAuthenticationError("Missing Authorization headers")
 
         for auth in auth_headers:
-            if auth.startswith("X-Matrix"):
+            if auth.startswith(u"X-Matrix"):
                 (origin, key, sig) = parse_auth_header(auth)
                 json_request["origin"] = origin
                 json_request["signatures"].setdefault(origin, {})[key] = sig

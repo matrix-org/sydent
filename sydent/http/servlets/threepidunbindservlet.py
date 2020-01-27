@@ -138,12 +138,12 @@ class ThreePidUnbindServlet(Resource):
                     origin_server_name = yield self.sydent.sig_verifier.authenticate_request(request, body)
                 except SignatureVerifyException as ex:
                     request.setResponseCode(401)
-                    request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                    request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': str(ex)}))
                     request.finish()
                     return
                 except NoAuthenticationError as ex:
                     request.setResponseCode(401)
-                    request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                    request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': str(ex)}))
                     request.finish()
                     return
                 except:
@@ -166,5 +166,5 @@ class ThreePidUnbindServlet(Resource):
         except Exception as ex:
             logger.exception("Exception whilst handling unbind")
             request.setResponseCode(500)
-            request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': ex.message}))
+            request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': str(ex)}))
             request.finish()
