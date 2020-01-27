@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
+
 import json
 import logging
 import random
@@ -174,12 +176,11 @@ class MatrixFederationAgent(object):
     def _route_matrix_uri(self, parsed_uri, lookup_well_known=True):
         """Helper for `request`: determine the routing for a Matrix URI
 
-        :params parsed_uri: uri to route. Note that it should be parsed with
+        :param parsed_uri: uri to route. Note that it should be parsed with
             URI.fromBytes(uri, defaultPort=-1) to set the `port` to -1 if there
             is no explicit port given.
         :type parsed_uri: twisted.web.client.URI
-
-        :params lookup_well_known: True if we should look up the .well-known
+        :param lookup_well_known: True if we should look up the .well-known
             file if there is no SRV record.
         :type lookup_well_known: bool
 
