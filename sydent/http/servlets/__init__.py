@@ -164,7 +164,6 @@ def deferjsonwrap(f):
         :type request: twisted.web.server.Request
         """
         request.setHeader("Content-Type", "application/json")
-        request.setResponseCode(200)
         request.write(json.dumps(resp).encode("UTF-8"))
         request.finish()
 

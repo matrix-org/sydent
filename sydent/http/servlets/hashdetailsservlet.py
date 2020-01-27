@@ -53,7 +53,6 @@ class HashDetailsServlet(Resource):
 
         authIfV2(self.sydent, request)
 
-        request.setResponseCode(200)
         return {
             "algorithms": self.known_algorithms,
             "lookup_pepper": self.lookup_pepper,
@@ -61,5 +60,4 @@ class HashDetailsServlet(Resource):
 
     def render_OPTIONS(self, request):
         send_cors(request)
-        request.setResponseCode(200)
         return b''
