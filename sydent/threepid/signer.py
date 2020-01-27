@@ -16,18 +16,29 @@
 
 import signedjson.sign
 
+
 class Signer:
     def __init__(self, sydent):
         self.sydent = sydent
 
     def signedThreePidAssociation(self, assoc):
-        sgassoc = { 'medium': assoc.medium,
-                    'address': assoc.address,
-                    'mxid': assoc.mxid,
-                    'ts': assoc.ts,
-                    'not_before': assoc.not_before,
-                    'not_after': assoc.not_after
-                  }
+        """
+        Signs a 3PID association.
+
+        :param assoc: The association to sign.
+        :type assoc: sydent.threepid.ThreepidAssociation
+
+        :return: A signed representation of the association.
+        :rtype: dict[str, any]
+        """
+        sgassoc = {
+            'medium': assoc.medium,
+            'address': assoc.address,
+            'mxid': assoc.mxid,
+            'ts': assoc.ts,
+            'not_before': assoc.not_before,
+            'not_after': assoc.not_after
+        }
         sgassoc.update(assoc.extra_fields)
         sgassoc = signedjson.sign.sign_json(sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519)
         return sgassoc

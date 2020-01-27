@@ -143,16 +143,26 @@ class ThreePidValSessionStore:
         self.sydent.db.commit()
 
     def getSessionById(self, sid):
-         cur = self.sydent.db.cursor()
+        """
+        Retrieves the session matching the given sid.
 
-         cur.execute("select id, medium, address, clientSecret, validated, mtime from "+
-             "threepid_validation_sessions where id = ?", (sid,))
-         row = cur.fetchone()
+        :param sid: The ID of the session to retrieve.
+        :type sid: int
 
-         if not row:
-             return None
+        :return: The retrieved session, or None if no session could be found with that
+            sid.
+        :rtype: ValidationSession or None
+        """
+        cur = self.sydent.db.cursor()
 
-         return ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], None, None)
+        cur.execute("select id, medium, address, clientSecret, validated, mtime from "+
+            "threepid_validation_sessions where id = ?", (sid,))
+        row = cur.fetchone()
+
+        if not row:
+            return None
+
+        return ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], None, None)
 
     def getTokenSessionById(self, sid):
         """
@@ -179,7 +189,24 @@ class ThreePidValSessionStore:
 
     def getValidatedSession(self, sid, clientSecret):
         """
-        Retrieve a validated and still-valid session whose client secret matches the one passed in
+        Retrieve a validated and still-valid session whose client secret matches the
+        one passed in.
+
+        :param sid: The ID of the session to retrieve.
+        :type sid: int
+        :param clientSecret: A client secret to check against the one retrieved from
+            the database.
+        :type clientSecret: unicode
+
+        :return: The retrieved session.
+        :rtype: ValidationSession
+
+        :raise InvalidSessionIdException: No session could be found with this ID.
+        :raise IncorrectClientSecretException: The session's client secret doesn't
+            match the one passed in.
+        :raise SessionExpiredException: The session exists but has expired.
+        :raise SessionNotValidatedException: The session exists but hasn't been
+            validated yet.
         """
         s = self.getSessionById(sid)
 

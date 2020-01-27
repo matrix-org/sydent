@@ -14,11 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
+
 import collections
-import json
 import logging
 import math
-import random
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 
@@ -32,14 +32,7 @@ from sydent.http.httpclient import FederationHttpClient
 
 from sydent.threepid import ThreepidAssociation
 
-from OpenSSL import SSL
-from OpenSSL.SSL import VERIFY_NONE
-from StringIO import StringIO
-from twisted.internet import defer, ssl
-from twisted.names import client, dns
-from twisted.names.error import DNSNameError
-from twisted.web.client import FileBodyProducer, Agent
-from twisted.web.http_headers import Headers
+from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
 
@@ -53,15 +46,21 @@ class ThreepidBinder:
         self.hashing_store = HashingMetadataStore(sydent)
 
     def addBinding(self, medium, address, mxid):
-        """Binds the given 3pid to the given mxid.
+        """
+        Binds the given 3pid to the given mxid.
 
         It's assumed that we have somehow validated that the given user owns
         the given 3pid
 
-        Args:
-            medium (str): the type of 3pid
-            address (str): the 3pid
-            mxid (str): the mxid to bind it to
+        :param medium: The medium of the 3PID to bind.
+        :type medium: unicode
+        :param address: The address of the 3PID to bind.
+        :type address: unicode
+        :param mxid: The MXID to bind the 3PID to.
+        :type mxid: unicode
+
+        :return: The signed association.
+        :rtype: dict[str, any]
         """
         localAssocStore = LocalAssociationStore(self.sydent)
 
@@ -71,7 +70,7 @@ class ThreepidBinder:
 
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
-        str_to_hash = ' '.join(
+        str_to_hash = u' '.join(
             [address, medium, self.hashing_store.get_lookup_pepper()],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)
