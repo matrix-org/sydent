@@ -59,7 +59,7 @@ class Verifier(object):
         :type server_name: unicode
 
         :return: The verification keys returned by the server.
-        :rtype: dict[unicode, dict[unicode, unicode]]
+        :rtype: twisted.internet.defer.Deferred[dict[unicode, dict[unicode, unicode]]]
         """
 
         if server_name in self.cache:
@@ -97,7 +97,7 @@ class Verifier(object):
 
         :return a tuple of the server name and key name that was
         successfully verified.
-        :rtype: tuple[unicode]
+        :rtype: twisted.internet.defer.Deferred[tuple[unicode]]
 
         :raise SignatureVerifyException: The json cannot be verified.
         """
@@ -141,7 +141,7 @@ class Verifier(object):
         :type content: bytes or None
 
         :return: The origin of the server whose signature was validated
-        :rtype: unicode
+        :rtype: twisted.internet.defer.Deferred[unicode]
         """
         json_request = {
             "method": request.method,
