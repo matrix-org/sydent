@@ -132,7 +132,10 @@ class EmailValidateCodeServlet(Resource):
                 'error': 'Invalid value for client_secret',
             }
 
-        next_link = request.args.get('next_link')
+        # Safely extract next_link from request arguments
+        next_link = request.args.get('nextLink')
+        if next_link:
+            next_link = next_link[0]
 
         try:
             resp = self.sydent.validators.email.validateSessionWithToken(
