@@ -19,9 +19,6 @@ import logging
 import time
 
 from twisted.internet import defer
-from twisted.names.error import DNSNameError
-import twisted.names.client
-import twisted.names.dns
 from unpaddedbase64 import decode_base64
 import signedjson.sign
 import signedjson.key

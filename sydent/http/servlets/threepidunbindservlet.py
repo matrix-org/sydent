@@ -21,6 +21,7 @@ import logging
 
 from sydent.hs_federation.verifier import NoAuthenticationError
 from signedjson.sign import SignatureVerifyException
+
 from sydent.http.servlets import dict_to_json_bytes
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.stringutils import is_valid_client_secret
@@ -102,19 +103,14 @@ class ThreePidUnbindServlet(Resource):
 
                 valSessionStore = ThreePidValSessionStore(self.sydent)
 
-                noMatchError = {'errcode': 'M_NO_VALID_SESSION',
-                                'error': "No valid session was found matching that sid and client secret"}
-
                 try:
                     s = valSessionStore.getValidatedSession(sid, client_secret)
-                except IncorrectClientSecretException:
+                except (IncorrectClientSecretException, InvalidSessionIdException):
                     request.setResponseCode(401)
-                    request.write(dict_to_json_bytes(noMatchError))
-                    request.finish()
-                    return
-                except InvalidSessionIdException:
-                    request.setResponseCode(401)
-                    request.write(dict_to_json_bytes(noMatchError))
+                    request.write(dict_to_json_bytes({
+                        'errcode': 'M_NO_VALID_SESSION',
+                        'error': "No valid session was found matching that sid and client secret"
+                    }))
                     request.finish()
                     return
                 except SessionNotValidatedException:
