@@ -30,6 +30,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
 class ReplicationPushServlet(Resource):
     def __init__(self, sydent):
         self.sydent = sydent
@@ -71,7 +72,13 @@ class ReplicationPushServlet(Resource):
 
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
-        for originId, sgAssoc in inJson['sgAssocs'].items():
+        # Ensure items are pulled out of the dictionary in order of origin_id.
+        # If we process associations out of order, an association with an ID lesser
+        # than a previously processed association will be ignored.
+        sg_assocs = inJson.get('sgAssocs', {})
+        sg_assocs = sorted(sg_assocs.items())
+
+        for originId, sgAssoc in sg_assocs:
             try:
                 peer.verifySignedAssociation(sgAssoc)
                 logger.debug("Signed association from %s with origin ID %s verified", peer.servername, originId)

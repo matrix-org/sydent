@@ -18,12 +18,15 @@
 import json
 import logging
 
-from sydent.http.servlets import get_args, jsonwrap
 from sydent.hs_federation.verifier import NoAuthenticationError
 from signedjson.sign import SignatureVerifyException
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
-    SessionNotValidatedException
+from sydent.util.stringutils import is_valid_client_secret
+from sydent.validators import (
+    IncorrectClientSecretException,
+    InvalidSessionIdException,
+    SessionNotValidatedException,
+)
 
 from twisted.web.resource import Resource
 from twisted.web import server
@@ -84,6 +87,15 @@ class ThreePidUnbindServlet(Resource):
             if 'sid' in body and 'client_secret' in body:
                 sid = body['sid']
                 client_secret = body['client_secret']
+
+                if not is_valid_client_secret(client_secret):
+                    request.setResponseCode(400)
+                    request.write(json.dumps({
+                        'errcode': 'M_INVALID_PARAM',
+                        'error': 'Invalid client_secret provided'
+                    }))
+                    request.finish()
+                    return
 
                 valSessionStore = ThreePidValSessionStore(self.sydent)
 
