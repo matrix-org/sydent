@@ -73,9 +73,17 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
 
     if s.token == token:
         logger.info("Setting session %s as validated", s.id)
-        valSessionStore.setValidated(s.id, True)
+
+        # If a next_link parameter was provided, store it alongside the token in the
+        # database
+        # We want to do this action atomically with setting the session to validated,
+        # thud we disable the validation functino from committing to the db, and instead
+        # commit in `set_next_link_for_token`
         if next_link:
+            valSessionStore.setValidated(s.id, True, commit=False)
             valSessionStore.set_next_link_for_token(s.id, s.token, next_link)
+        else:
+            valSessionStore.setValidated(s.id, True, commit=True)
 
         return {'success': True}
     else:

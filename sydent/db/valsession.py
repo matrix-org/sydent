@@ -81,11 +81,26 @@ class ThreePidValSessionStore:
         cur.execute("update threepid_token_auths set sendAttemptNumber = ? where id = ?", (attemptNo, sid))
         self.sydent.db.commit()
 
-    def setValidated(self, sid, validated):
+    def setValidated(self, sid, validated, commit=True):
+        """Set the validation status of a threepid validation session
+
+        :param sid: The session ID
+        :type sid: str
+
+        :param validated: Whether a session is validated or not
+        :type validated: bool
+
+        :param commit: Whether to commit to the database. Used in applying other
+            database operations atomically. Defaults to True
+        :type bool: bool
+
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("update threepid_validation_sessions set validated = ? where id = ?", (validated, sid))
-        self.sydent.db.commit()
+
+        if commit:
+            self.sydent.db.commit()
 
     def setMtime(self, sid, mtime):
         cur = self.sydent.db.cursor()
@@ -123,7 +138,8 @@ class ThreePidValSessionStore:
 
     def next_link_differs(self, sid, token, next_link):
         """Check whether the specified session has already been validated with a
-        next_link provided, and if  next_link value
+        next_link provided, and if so, check whether the current attempt is using the
+        same next_link. If not, return True, otherwise return False
 
         :param sid: The session ID
         :type sid: str
@@ -136,7 +152,7 @@ class ThreePidValSessionStore:
 
         :returns: Whether the provided next_link differs from the provided
             token's associated next_link. Returns False if the stored next_link
-            value is NULL.
+            value is NULL. Returns False regardless if session has not been validated.
         :rtype: bool
         """
         cur = self.sydent.db.cursor()
@@ -147,9 +163,11 @@ class ThreePidValSessionStore:
             # This session has not been validated before, we allow it to be
             return False
 
-        cur.execute("select next_link_used from threepid_token_auths "
-                    "where validationSession = ? and token = ?",
-                    (sid, token))
+        sql = """
+        SELECT next_link_used FROM threepid_token_auths
+        WHERE validationSession = ? AND token = ?
+        """
+        cur.execute(sql, (sid, token))
 
         row = cur.fetchone()
         if not row:
@@ -172,10 +190,6 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("update threepid_token_auths "
-                    "set next_link_used = ?"
-                    "where validationSession = ? and token = ?",
-                    (next_link, sid, token))
 
         self.sydent.db.commit()
 
