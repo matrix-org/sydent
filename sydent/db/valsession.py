@@ -139,10 +139,13 @@ class ThreePidValSessionStore:
             value is NULL.
         :rtype: bool
         """
-        #TODO: Check if it's already been validated, and if so then check next_link is
-        # different. None or not
-        # Get the stored next_link value for this token
         cur = self.sydent.db.cursor()
+
+        # Check if this session has already been validated
+        s = self.getTokenSessionById(sid)
+        if not s.validated:
+            # This session has not been validated before, we allow it to be
+            return False
 
         cur.execute("select next_link_used from threepid_token_auths "
                     "where validationSession = ? and token = ?",
