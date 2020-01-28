@@ -21,6 +21,20 @@ class JoinTokenStore(object):
         self.sydent = sydent
 
     def storeToken(self, medium, address, roomId, sender, token):
+        """
+        Store a new invite token and its metadata.
+
+        :param medium: The medium of the 3PID the token is associated to.
+        :type medium: unicode
+        :param address: The address of the 3PID the token is associated to.
+        :type address: unicode
+        :param roomId: The ID of the room the 3PID is invited in.
+        :type roomId: unicode
+        :param sender: The MXID of the user that sent the invite.
+        :type sender: unicode
+        :param token: The token to store.
+        :type token: unicode
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("INSERT INTO invite_tokens"
@@ -98,6 +112,12 @@ class JoinTokenStore(object):
         self.sydent.db.commit()
 
     def storeEphemeralPublicKey(self, publicKey):
+        """
+        Saves the provided ephemeral public key.
+
+        :param publicKey: The key to store.
+        :type publicKey: unicode
+        """
         cur = self.sydent.db.cursor()
         cur.execute(
             "INSERT INTO ephemeral_public_keys"

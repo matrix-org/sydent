@@ -181,6 +181,17 @@ class GlobalAssociationStore:
         return sgAssocStr
 
     def getMxid(self, medium, address):
+        """
+        Retrieves the MXID associated with a 3PID.
+
+        :param medium: The medium of the 3PID.
+        :type medium: unicode
+        :param address: The address of the 3PID.
+        :type address: unicode
+
+        :return: The associated MXID, or None if no MXID is associated with this 3PID.
+        :rtype: unicode or None
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select mxid from global_threepid_associations where "
                     "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
