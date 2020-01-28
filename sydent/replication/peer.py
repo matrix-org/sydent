@@ -166,10 +166,11 @@ class RemotePeer(Peer):
         self.verify_key.version = 0
 
     def verifySignedAssociation(self, assoc):
-        """Verifies a signature on a signed association.
+        """Verifies a signature on a signed association. Raises an exception if the
+        signature is incorrect or couldn't be verified.
 
         :param assoc: A signed association.
-        :type assoc: Dict
+        :type assoc: dict[any, any]
         """
         if not 'signatures' in assoc:
             raise NoSignaturesException()

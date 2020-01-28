@@ -23,6 +23,15 @@ class PeerStore:
         self.sydent = sydent
 
     def getPeerByName(self, name):
+        """
+        Retrieves a remote peer using it's server name.
+
+        :param name: The server name of the peer.
+        :type name: unicode
+
+        :return: The retrieved peer.
+        :rtype: RemotePeer
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
                           "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
