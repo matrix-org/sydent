@@ -18,8 +18,13 @@ from twisted.internet import task
 
 import sydent.util.tokenutils
 
-from sydent.validators import ValidationSession, IncorrectClientSecretException, InvalidSessionIdException, \
-    SessionExpiredException, SessionNotValidatedException
+from sydent.validators import (
+    ValidationSession,
+    IncorrectClientSecretException,
+    InvalidSessionIdException,
+    SessionExpiredException,
+    SessionNotValidatedException,
+)
 from sydent.util import time_msec
 
 from random import SystemRandom
@@ -81,12 +86,6 @@ class ThreePidValSessionStore:
         cur.execute("update threepid_token_auths set sendAttemptNumber = ? where id = ?", (attemptNo, sid))
         self.sydent.db.commit()
 
-    def setValidated(self, sid, validated):
-        cur = self.sydent.db.cursor()
-
-        cur.execute("update threepid_validation_sessions set validated = ? where id = ?", (validated, sid))
-        self.sydent.db.commit()
-
     def setMtime(self, sid, mtime):
         cur = self.sydent.db.cursor()
 
@@ -120,6 +119,46 @@ class ThreePidValSessionStore:
             return s
 
         return None
+
+    def next_link_differs(self, sid, token, next_link):
+        """Check whether the specified session has already been validated with a
+        next_link provided, and if so, check whether the current attempt is using the
+        same next_link. If not, return True, otherwise return False
+
+        :param sid: The session ID
+        :type sid: str
+
+        :param token: The validation token
+        :type token: str
+
+        :param next_link: The next_link parameter used in submitting this validation
+        :type next_link: str
+
+        :returns: Whether the provided next_link differs from the provided
+            token's associated next_link. Returns False if the stored next_link
+            value is NULL. Returns False regardless if session has not been validated.
+        :rtype: bool
+        """
+        cur = self.sydent.db.cursor()
+
+        # Check if this session has already been validated
+        s = self.getTokenSessionById(sid)
+        if not s.validated:
+            # This session has not been validated before, we allow it to be
+            return False
+
+        sql = """
+        SELECT next_link_used FROM threepid_token_auths
+        WHERE validationSession = ? AND token = ?
+        """
+        cur.execute(sql, (sid, token))
+
+        row = cur.fetchone()
+        if not row:
+            return False
+        token_next_link = row[0]
+
+        return token_next_link != next_link
 
     def getValidatedSession(self, sid, clientSecret):
         """

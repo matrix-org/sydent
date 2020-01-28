@@ -49,3 +49,10 @@ class SessionNotValidatedException(Exception):
 
 class DestinationRejectedException(Exception):
     pass
+
+
+class NextLinkValidationException(Exception):
+    """Occurs when the next_link parameter provided by a client to 3PID
+    validation endpoints is invalid for some reason
+    """
+    pass
