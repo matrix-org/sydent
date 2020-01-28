@@ -104,10 +104,23 @@ class LocalPeer(Peer):
 
 
 class RemotePeer(Peer):
-    def __init__(self, sydent, server_name, port, pubkeys):
+    def __init__(self, sydent, server_name, port, pubkeys, lastSentVersion):
+        """
+        :param sydent: The current Sydent instance.
+        :type sydent: sydent.sydent.Sydent
+        :param server_name: The peer's server name.
+        :type server_name: unicode
+        :param port: The peer's port.
+        :type port: int
+        :param pubkeys: The peer's public keys in a dict[key_id, key_b64]
+        :type pubkeys: dict[unicode, unicode]
+        :param lastSentVersion: The ID of the last association sent to the peer.
+        :type lastSentVersion: int
+        """
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = port
+        self.lastSentVersion = lastSentVersion
 
         # look up or build the replication URL
         try:
@@ -172,6 +185,15 @@ class RemotePeer(Peer):
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
     def pushUpdates(self, sgAssocs):
+        """
+        Pushes the given associations to the peer.
+
+        :param sgAssocs: The associations to push.
+        :type sgAssocs: dict[int, dict[str, any]]
+
+        :return: A deferred which results in the response to the push request.
+        :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
+        """
         body = {'sgAssocs': sgAssocs}
 
         reqDeferred = self.sydent.replicationHttpsClient.postJson(
@@ -191,6 +213,16 @@ class RemotePeer(Peer):
         return updateDeferred
 
     def _pushSuccess(self, result, updateDeferred):
+        """
+        Processes a successful push request. If the request resulted in a status code
+        that's not a success, consider it a failure
+
+        :param result: The HTTP response.
+        :type result: twisted.web.iweb.IResponse
+        :param updateDeferred: The deferred to make either succeed or fail depending on
+            the status code.
+        :type updateDeferred: twisted.internet.defer.Deferred
+        """
         if result.code >= 200 and result.code < 300:
             updateDeferred.callback(result)
         else:
@@ -199,12 +231,30 @@ class RemotePeer(Peer):
             d.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
     def _failedPushBodyRead(self, body, updateDeferred):
+        """
+        Processes a response body from a failed push request, then calls the error
+        callback of the provided deferred.
+
+        :param body: The response body.
+        :type body: str
+        :param updateDeferred: The deferred to call the error callback of.
+        :type updateDeferred: twisted.internet.defer.Deferred
+        """
         errObj = json.loads(body)
         e = RemotePeerError()
         e.errorDict = errObj
         updateDeferred.errback(e)
 
     def _pushFailed(self, failure, updateDeferred):
+        """
+        Processes a failed push request, by calling the error callback of the given
+        deferred with it.
+
+        :param failure: The failure to process.
+        :type failure: twisted.python.failure.Failure
+        :param updateDeferred: The deferred to call the error callback of.
+        :type updateDeferred: twisted.internet.defer.Deferred
+        """
         updateDeferred.errback(failure)
         return None
 

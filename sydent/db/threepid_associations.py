@@ -297,6 +297,16 @@ class GlobalAssociationStore:
             self.sydent.db.commit()
 
     def lastIdFromServer(self, server):
+        """
+        Retrieves the ID of the last association received from the given peer.
+
+        :param server:
+        :type server: str
+
+        :return: The the ID of the last association received from the peer, or None if
+            no association has ever been received from that peer.
+        :rtype: int or None
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(originId),count(originId) from global_threepid_associations "
                           "where originServer = ?", (server,))
@@ -309,7 +319,7 @@ class GlobalAssociationStore:
 
     def removeAssociation(self, medium, address):
         """
-        Remove any association stored for the provided 3PID.
+        Removes any association stored for the provided 3PID.
 
         :param medium: The medium for the 3PID.
         :type medium: unicode
