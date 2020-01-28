@@ -8,6 +8,7 @@ from sydent.validators import (
     NextLinkValidationException,
 )
 from sydent.util import time_msec
+from sqlite3 import IntegrityError
 
 
 logger = logging.getLogger(__name__)
@@ -79,11 +80,37 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
         # We want to do this action atomically with setting the session to validated,
         # thud we disable the validation functino from committing to the db, and instead
         # commit in `set_next_link_for_token`
-        if next_link:
-            valSessionStore.setValidated(s.id, True, commit=False)
-            valSessionStore.set_next_link_for_token(s.id, s.token, next_link)
-        else:
-            valSessionStore.setValidated(s.id, True, commit=True)
+        try:
+            with sydent.db:
+                cursor = sydent.db.cursor()
+                if next_link:
+                    # Use a single cursor to complete both transactions
+                    cursor.execute(
+                        """
+                        update threepid_validation_sessions
+                        set validated = ? where id = ?
+                        """, (True, sid)
+                    )
+
+                    cursor.execute(
+                        """
+                        update threepid_token_auths 
+                        set next_link_used = ?
+                        where validationSession = ? and token = ?
+                        """, (next_link, sid, token)
+                    )
+                else:
+                    cursor.execute(
+                        """
+                        update threepid_validation_sessions
+                        set validated = ? where id = ?
+                        """, (True, sid),
+                    )
+        except IntegrityError as e:
+            logger.error(
+                "SQL execution failure during 3PID session validation: %r", e
+            )
+            return False
 
         return {'success': True}
     else:

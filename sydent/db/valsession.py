@@ -86,26 +86,6 @@ class ThreePidValSessionStore:
         cur.execute("update threepid_token_auths set sendAttemptNumber = ? where id = ?", (attemptNo, sid))
         self.sydent.db.commit()
 
-    def setValidated(self, sid, validated, commit=True):
-        """Set the validation status of a threepid validation session
-
-        :param sid: The session ID
-        :type sid: str
-
-        :param validated: Whether a session is validated or not
-        :type validated: bool
-
-        :param commit: Whether to commit to the database. Used in applying other
-            database operations atomically. Defaults to True
-        :type bool: bool
-        """
-        cur = self.sydent.db.cursor()
-
-        cur.execute("update threepid_validation_sessions set validated = ? where id = ?", (validated, sid))
-
-        if commit:
-            self.sydent.db.commit()
-
     def setMtime(self, sid, mtime):
         cur = self.sydent.db.cursor()
 
@@ -179,32 +159,6 @@ class ThreePidValSessionStore:
         token_next_link = row[0]
 
         return token_next_link != next_link
-
-    def set_next_link_for_token(self, sid, token, next_link):
-        """Set which next_link was used when using a session token
-
-        :param sid: The session ID
-        :type sid: str
-
-        :param token: The validation token
-        :type token: str
-
-        :param next_link: The next_link parameter used in submitting this validation
-        :type next_link: str
-
-        :raises IntegrityError: on database transaction failure
-        """
-        cur = self.sydent.db.cursor()
-
-        sql = """
-        update threepid_token_auths 
-        set next_link_used = ?
-        where validationSession = ? and token = ?
-        """
-
-        # Commits and rolls back in case of an exception
-        with self.sydent.db:
-            cur.execute(sql, (next_link, sid, token))
 
     def getValidatedSession(self, sid, clientSecret):
         """
