@@ -13,13 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.util.emailutils import EmailAddressException, EmailSendException
-from sydent.validators.emailvalidator import SessionExpiredException
-from sydent.validators.emailvalidator import IncorrectClientSecretException
+from sydent.validators import IncorrectClientSecretException, SessionExpiredException
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.http.auth import authIfV2
@@ -56,21 +56,17 @@ class EmailRequestCodeServlet(Resource):
         if 'next_link' in args and not args['next_link'].startswith("file:///"):
             nextLink = args['next_link']
 
-        resp = None
-
         try:
             sid = self.sydent.validators.email.requestToken(
                 email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress
             )
+            resp = {'success': True, 'sid': str(sid)}
         except EmailAddressException:
             request.setResponseCode(400)
-            resp = {'errcode': 'M_INVALID_EMAIL', 'error':'Invalid email address'}
+            resp = {'errcode': 'M_INVALID_EMAIL', 'error': 'Invalid email address'}
         except EmailSendException:
             request.setResponseCode(500)
             resp = {'errcode': 'M_EMAIL_SEND_ERROR', 'error': 'Failed to send email'}
-
-        if not resp:
-            resp = {'success': True, 'sid': str(sid)}
 
         return resp
 
