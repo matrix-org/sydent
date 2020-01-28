@@ -22,9 +22,11 @@ client_secret_regex = re.compile(r"^[0-9a-zA-Z\.\=\_\-\:]+$")
 
 def is_valid_client_secret(client_secret):
     """Validate that a given string matches the client_secret regex defined by the spec
+
     :param client_secret: The client_secret to validate
-    :type client_secret: str
-    :returns: Whether the client_secret is valid
+    :type client_secret: unicode
+
+    :return: Whether the client_secret is valid
     :rtype: bool
     """
     return client_secret_regex.match(client_secret) is not None

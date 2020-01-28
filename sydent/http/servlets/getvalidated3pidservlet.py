@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
@@ -20,8 +21,13 @@ from sydent.http.servlets import jsonwrap, get_args
 from sydent.http.auth import authIfV2
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.stringutils import is_valid_client_secret
-from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
-    SessionNotValidatedException
+from sydent.validators import (
+    IncorrectClientSecretException,
+    InvalidSessionIdException,
+    SessionExpiredException,
+    SessionNotValidatedException,
+)
+
 
 class GetValidated3pidServlet(Resource):
     isLeaf = True
@@ -64,4 +70,4 @@ class GetValidated3pidServlet(Resource):
             return {'errcode': 'M_SESSION_NOT_VALIDATED',
                     'error': "This validation session has not yet been completed"}
 
-        return { 'medium': s.medium, 'address': s.address, 'validated_at': s.mtime }
+        return {'medium': s.medium, 'address': s.address, 'validated_at': s.mtime}
