@@ -14,7 +14,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import ConfigParser
+from __future__ import absolute_import
+
+from six.moves import configparser
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -68,6 +70,16 @@ class LocalPeer(Peer):
             self.lastId = -1
 
     def pushUpdates(self, sgAssocs):
+        """
+        Saves the given associations in the global associations store. Only stores an
+        association if its ID is greater than the last seen ID.
+
+        :param sgAssocs: The associations to save.
+        :type sgAssocs: dict[int, dict[str, any]]
+
+        :return: True
+        :rtype: twisted.internet.defer.Deferred[bool]
+        """
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
             if localId > self.lastId:
@@ -75,7 +87,7 @@ class LocalPeer(Peer):
 
                 if assocObj.mxid is not None:
                     # Assign a lookup_hash to this association
-                    str_to_hash = ' '.join(
+                    str_to_hash = u' '.join(
                         [assocObj.address, assocObj.medium, self.hashing_store.get_lookup_pepper()],
                     )
                     assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
@@ -102,7 +114,7 @@ class RemotePeer(Peer):
             replication_url = sydent.cfg.get(
                 "peer.%s" % server_name, "base_replication_url",
             )
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        except (configparser.NoSectionError, configparser.NoOptionError):
             if not port:
                 port = 1001
             replication_url = "https://%s:%i" % (server_name, port)
