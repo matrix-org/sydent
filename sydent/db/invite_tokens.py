@@ -128,6 +128,17 @@ class JoinTokenStore(object):
         self.sydent.db.commit()
 
     def validateEphemeralPublicKey(self, publicKey):
+        """
+        Checks if an ephemeral public key is valid, and, if it is, updates its
+        verification count.
+
+        :param publicKey: The public key to validate.
+        :type publicKey: unicode
+
+        :return: Whether the key is valid.
+        :rtype: bool
+        """
+        print(type(publicKey))
         cur = self.sydent.db.cursor()
         cur.execute(
             "UPDATE ephemeral_public_keys"
