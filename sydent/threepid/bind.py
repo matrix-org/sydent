@@ -120,6 +120,15 @@ class ThreepidBinder:
 
     @defer.inlineCallbacks
     def _notify(self, assoc, attempt):
+        """
+        Sends data about a new association (and, if necessary, the associated invites)
+        to the associated MXID's homeserver.
+
+        :param assoc: The association to send down to the homeserver.
+        :type assoc: dict[str, any]
+        :param attempt: The number of previous attempts to send this association.
+        :type attempt: int
+        """
         mxid = assoc["mxid"]
         mxid_parts = mxid.split(":", 1)
         if len(mxid_parts) != 2:
@@ -166,8 +175,23 @@ class ThreepidBinder:
                 )
 
     def _notifyErrback(self, assoc, attempt, error):
-        logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
-        self.sydent.reactor.callLater(math.pow(2, attempt), self._notify, assoc, attempt + 1)
+        """
+        Handles errors when trying to send an association down to a homeserver by
+        logging the error and scheduling a new attempt.
+
+        :param assoc: The association to send down to the homeserver.
+        :type assoc: dict[str, any]
+        :param attempt: The number of previous attempts to send this association.
+        :type attempt: int
+        :param error: The error that was raised when trying to send the association.
+        :type error: Exception
+        """
+        logger.warning(
+            "Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error
+        )
+        self.sydent.reactor.callLater(
+            math.pow(2, attempt), self._notify, assoc, attempt + 1
+        )
 
     # The below is lovingly ripped off of synapse/http/endpoint.py
 

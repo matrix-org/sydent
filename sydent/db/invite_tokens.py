@@ -72,15 +72,15 @@ class JoinTokenStore(object):
             medium, address, roomId, sender, token = row
 
             # Ensure we're dealing with unicode.
-            if medium and isinstance(medium, bytes):
+            if isinstance(medium, bytes):
                 medium = medium.decode("UTF-8")
-            if address and isinstance(address, bytes):
+            if isinstance(address, bytes):
                 address = address.decode("UTF-8")
-            if roomId and isinstance(roomId, bytes):
+            if isinstance(roomId, bytes):
                 roomId = roomId.decode("UTF-8")
-            if sender and isinstance(sender, bytes):
+            if isinstance(sender, bytes):
                 sender = sender.decode("UTF-8")
-            if token and isinstance(token, bytes):
+            if isinstance(token, bytes):
                 token = token.decode("UTF-8")
 
             ret.append({
@@ -170,6 +170,14 @@ class JoinTokenStore(object):
         return None
 
     def deleteTokens(self, medium, address):
+        """
+        Deletes every token for a given 3PID.
+
+        :param medium: The medium of the 3PID to delete tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to delete tokens for.
+        :type address: unicode
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute(
