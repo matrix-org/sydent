@@ -13,8 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import time
+
 
 class JoinTokenStore(object):
     def __init__(self, sydent):
@@ -138,7 +138,6 @@ class JoinTokenStore(object):
         :return: Whether the key is valid.
         :rtype: bool
         """
-        print(type(publicKey))
         cur = self.sydent.db.cursor()
         cur.execute(
             "UPDATE ephemeral_public_keys"
