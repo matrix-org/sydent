@@ -93,7 +93,6 @@ class ThreePidValSessionStore:
         :param commit: Whether to commit to the database. Used in applying other
             database operations atomically. Defaults to True
         :type bool: bool
-
         """
         cur = self.sydent.db.cursor()
 
@@ -190,8 +189,15 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
+        sql = """
+        update threepid_token_auths 
+        set next_link_used = ?
+        where validationSession = ? and token = ?
+        """
 
-        self.sydent.db.commit()
+        # Commits and rollsback in case of an exception
+        with self.sydent.db:
+            cur.execute(sql, (next_link, sid, token))
 
     def getValidatedSession(self, sid, clientSecret):
         """

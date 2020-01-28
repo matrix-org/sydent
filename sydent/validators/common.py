@@ -56,8 +56,8 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
         logger.info("Session expired")
         raise SessionExpiredException()
 
-    # Check whether this session has already been validated with a next_link provided
-    # If so, and the next_link this time around is different than previously, then the
+    # Check whether this session has already been validated with a next_link
+    # If so, and the next_link this time around is different, then the
     # user may be getting phished. Reject the validation attempt.
     if next_link and valSessionStore.next_link_differs(sid, token, next_link):
         logger.info(
