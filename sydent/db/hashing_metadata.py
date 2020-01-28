@@ -17,6 +17,7 @@
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
 
+
 class HashingMetadataStore:
     def __init__(self, sydent):
         self.sydent = sydent
@@ -26,7 +27,7 @@ class HashingMetadataStore:
         
         :return: A pepper if it exists in the database, or None if one does
                  not exist
-        :rtype: unicode
+        :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("select lookup_pepper from hashing_metadata")
