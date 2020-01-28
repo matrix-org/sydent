@@ -130,6 +130,14 @@ class JoinTokenStore(object):
         return None
 
     def deleteTokens(self, medium, address):
+        """
+        Deletes every token for a given 3PID.
+
+        :param medium: The medium of the 3PID to delete tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to delete tokens for.
+        :type address: unicode
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute(
