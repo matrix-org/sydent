@@ -18,8 +18,13 @@ from twisted.internet import task
 
 import sydent.util.tokenutils
 
-from sydent.validators import ValidationSession, IncorrectClientSecretException, InvalidSessionIdException, \
-    SessionExpiredException, SessionNotValidatedException
+from sydent.validators import (
+    ValidationSession,
+    IncorrectClientSecretException,
+    InvalidSessionIdException,
+    SessionExpiredException,
+    SessionNotValidatedException,
+)
 from sydent.util import time_msec
 
 from random import SystemRandom
@@ -186,6 +191,8 @@ class ThreePidValSessionStore:
 
         :param next_link: The next_link parameter used in submitting this validation
         :type next_link: str
+
+        :raises IntegrityError: on database transaction failure
         """
         cur = self.sydent.db.cursor()
 
@@ -195,7 +202,7 @@ class ThreePidValSessionStore:
         where validationSession = ? and token = ?
         """
 
-        # Commits and rollsback in case of an exception
+        # Commits and rolls back in case of an exception
         with self.sydent.db:
             cur.execute(sql, (next_link, sid, token))
 
