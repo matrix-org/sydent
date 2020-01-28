@@ -13,11 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import json
 import logging
 
-from StringIO import StringIO
+from six import StringIO
 from twisted.internet import defer
 from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers
@@ -26,6 +27,7 @@ from sydent.http.matrixfederationagent import MatrixFederationAgent
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 
 logger = logging.getLogger(__name__)
+
 
 class HTTPClient(object):
     """A base HTTP class that contains methods for making GET and POST HTTP
@@ -36,9 +38,9 @@ class HTTPClient(object):
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
-        :type uri: str
+        :type uri: unicode
         :returns a deferred containing JSON parsed into a Python object.
-        :rtype: Deferred[any]
+        :rtype: twisted.internet.defer.Deferred[dict[any, any]]
         """
         logger.debug("HTTP GET %s", uri)
 
@@ -56,26 +58,26 @@ class HTTPClient(object):
 
     @defer.inlineCallbacks
     def post_json_get_nothing(self, uri, post_json, opts):
-        """Make a GET request to an endpoint returning JSON and parse result
+        """Make a POST request to an endpoint returning JSON and parse result
 
-        :param uri: The URI to make a GET request to.
-        :type uri: str
+        :param uri: The URI to make a POST request to.
+        :type uri: unicode
 
         :param post_json: A Python object that will be converted to a JSON
             string and POSTed to the given URI.
-        :type post_json: any
+        :type post_json: dict[any, any]
 
-        :opts: A dictionary of request options. Currently only opts.headers
+        :param opts: A dictionary of request options. Currently only opts.headers
             is supported.
-        :type opts: Dict[str,any]
+        :type opts: dict[str,any]
 
         :returns a response from the remote server.
-        :rtype: Deferred[twisted.web.iweb.IResponse]
+        :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
         json_str = json.dumps(post_json)
 
         headers = opts.get('headers', Headers({
-            b"Content-Type": [b"application/json"],
+            "Content-Type": ["application/json"],
         }))
 
         logger.debug("HTTP POST %s -> %s", json_str, uri)
