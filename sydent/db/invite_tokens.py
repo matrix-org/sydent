@@ -150,6 +150,16 @@ class JoinTokenStore(object):
         return cur.rowcount > 0
 
     def getSenderForToken(self, token):
+        """
+        Retrieves the MXID of the user that sent the invite the provided token is for.
+
+        :param token: The token to retrieve the sender of.
+        :type token: unicode
+
+        :return: The invite's sender, or None if the token doesn't match an existing
+            invite.
+        :rtype: unicode or None
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "SELECT sender FROM invite_tokens WHERE token = ?",
