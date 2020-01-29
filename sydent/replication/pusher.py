@@ -92,29 +92,33 @@ class Pusher:
             total_updates = 0
 
             # Push associations
-            associations = self.local_assoc_store.getSignedAssociationsAfterId(
+            associations, max_id = self.local_assoc_store.getSignedAssociationsAfterId(
                 p.lastSentAssocsId, ASSOCIATIONS_PUSH_LIMIT
             )
-            push_data["sg_assocs"], ids["sg_assocs"] = associations
+            push_data["sg_assocs"] = associations
+            ids["sg_assocs"] = max_id
 
             # Push invite tokens and ephemeral public keys
             push_data["invite_tokens"] = {}
             ids["invite_tokens"] = {}
 
-            tokens = self.join_token_store.getInviteTokensAfterId(
+            added, max_id = self.join_token_store.getInviteTokensAfterId(
                 p.lastSentInviteTokensId, INVITE_TOKENS_PUSH_LIMIT
             )
-            push_data["invite_tokens"]["added"], ids["invite_tokens"]["added"] = tokens
+            push_data["invite_tokens"]["added"] = added
+            ids["invite_tokens"]["added"] = max_id
 
-            updates = self.join_token_store.getInviteUpdatesAfterId(
+            updated, max_id = self.join_token_store.getInviteUpdatesAfterId(
                 p.lastSentInviteUpdatesId, INVITE_UPDATES_PUSH_LIMIT
             )
-            push_data["invite_tokens"]["updated"], ids["invite_tokens"]["updated"] = updates
+            push_data["invite_tokens"]["updated"] = updated
+            ids["invite_tokens"]["updated"] = max_id
 
-            keys = self.join_token_store.getEphemeralPublicKeysAfterId(
+            keys, max_id = self.join_token_store.getEphemeralPublicKeysAfterId(
                 p.lastSentEphemeralKeysId, EPHEMERAL_PUBLIC_KEYS_PUSH_LIMIT
             )
-            push_data["ephemeral_public_keys"], ids["ephemeral_public_keys"] = keys
+            push_data["ephemeral_public_keys"] = keys
+            ids["ephemeral_public_keys"] = max_id
 
             # Count each of the inner dictionaries instead of the outer
             # (which will always have len 2)

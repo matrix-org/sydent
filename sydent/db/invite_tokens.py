@@ -209,7 +209,7 @@ class JoinTokenStore(object):
                 "token": token,
             }
 
-        return (invite_tokens, maxId)
+        return invite_tokens, maxId
 
     def getLastTokenIdFromServer(self, server):
         """Returns the last known invite token that was received from the
@@ -352,7 +352,7 @@ class JoinTokenStore(object):
                 "persistence_ts": persistence_ts,
             }
 
-        return (ephemeral_keys, maxId)
+        return ephemeral_keys, maxId
 
     def getLastEphemeralPublicKeyIdFromServer(self, server):
         """Returns the last known ephemeral public key that was received from

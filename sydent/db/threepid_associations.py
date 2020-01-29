@@ -62,7 +62,7 @@ class LocalAssociationStore:
             assocs[row[0]] = assoc
             maxId = row[0]
 
-        return (assocs, maxId)
+        return assocs, maxId
 
     def getSignedAssociationsAfterId(self, afterId, limit, shadow=False):
         """Return max `limit` associations from the database after a given
