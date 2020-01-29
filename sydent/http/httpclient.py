@@ -39,13 +39,14 @@ class HTTPClient(object):
 
         :param uri: The URI to make a GET request to.
         :type uri: unicode
-        :returns a deferred containing JSON parsed into a Python object.
+
+        :return: A deferred containing JSON parsed into a Python object.
         :rtype: twisted.internet.defer.Deferred[dict[any, any]]
         """
         logger.debug("HTTP GET %s", uri)
 
         response = yield self.agent.request(
-            "GET",
+            b"GET",
             uri.encode("ascii"),
         )
         body = yield readBody(response)
@@ -71,19 +72,19 @@ class HTTPClient(object):
             is supported.
         :type opts: dict[str,any]
 
-        :returns a response from the remote server.
+        :return: a response from the remote server.
         :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
         json_str = json.dumps(post_json)
 
         headers = opts.get('headers', Headers({
-            "Content-Type": ["application/json"],
+            b"Content-Type": [b"application/json"],
         }))
 
         logger.debug("HTTP POST %s -> %s", json_str, uri)
 
         response = yield self.agent.request(
-            "POST",
+            b"POST",
             uri.encode("ascii"),
             headers,
             bodyProducer=FileBodyProducer(StringIO(json_str))
