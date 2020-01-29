@@ -41,7 +41,7 @@ class JoinTokenStore(object):
             coming from replication).
         :type originServer: str, None
         :param originId: The id of the token in the DB of originServer. Used
-        for determining if we've already received a token or not.
+            for determining if we've already received a token or not.
         :type originId: int, None
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
@@ -209,7 +209,7 @@ class JoinTokenStore(object):
                 "token": token,
             }
 
-        return (invite_tokens, maxId)
+        return invite_tokens, maxId
 
     def getLastTokenIdFromServer(self, server):
         """Returns the last known invite token that was received from the
@@ -352,7 +352,7 @@ class JoinTokenStore(object):
                 "persistence_ts": persistence_ts,
             }
 
-        return (ephemeral_keys, maxId)
+        return ephemeral_keys, maxId
 
     def getLastEphemeralPublicKeyIdFromServer(self, server):
         """Returns the last known ephemeral public key that was received from
