@@ -111,6 +111,8 @@ class EmailValidateCodeServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request):
+        send_cors(request)
+
         authIfV2(self.sydent, request)
 
         return self.do_validate_request(request)
@@ -128,8 +130,6 @@ class EmailValidateCodeServlet(Resource):
             a "errcode" and a "error" keys which include information about the failure.
         :rtype: dict[str, bool or str]
         """
-        send_cors(request)
-
         args = get_args(request, ('token', 'sid', 'client_secret'))
 
         sid = args['sid']
