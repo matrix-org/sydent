@@ -124,7 +124,7 @@ class ReplicationPushServlet(Resource):
         # than a previously processed association will be ignored.
         sg_assocs = inJson.get('sg_assocs', {})
         sg_assocs = sorted(
-            sg_assocs.items(), cmp=lambda k: int(k[0])
+            sg_assocs.items(), key=lambda k: int(k[0])
         )
 
         if len(sg_assocs) > MAX_SG_ASSOCS_LIMIT:
@@ -200,7 +200,7 @@ class ReplicationPushServlet(Resource):
         # Otherwise we have a risk of ignoring certain updates due to our behaviour of
         # ignoring old updates that may've been accidentally sent twice
         new_invites = sorted(
-            new_invites.items(), cmp=lambda k: int(k[0])
+            new_invites.items(), key=lambda k: int(k[0])
         )
 
         if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
@@ -247,7 +247,7 @@ class ReplicationPushServlet(Resource):
         # Then extract the list of invite token update dictionaries, ensuring
         # tokens are processed in order of origin_id
         invite_updates = sorted(
-            invite_updates, cmp=lambda k: int(k["origin_id"]),
+            invite_updates, key=lambda k: int(k["origin_id"]),
         )
 
         if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
@@ -285,7 +285,7 @@ class ReplicationPushServlet(Resource):
 
         ephemeral_public_keys = inJson.get("ephemeral_public_keys", {})
         ephemeral_public_keys = sorted(
-            ephemeral_public_keys.items(), cmp=lambda k: int(k[0])
+            ephemeral_public_keys.items(), key=lambda k: int(k[0])
         )
 
         if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
