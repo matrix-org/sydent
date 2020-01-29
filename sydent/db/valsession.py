@@ -105,7 +105,7 @@ class ThreePidValSessionStore:
         Updates the send attempt number for the session with the given ID.
 
         :param sid: The ID of the session to update
-        :type sid: int
+        :type sid: unicode
         :param attemptNo: The send attempt number to update the session with.
         :type attemptNo: int
         """
@@ -115,6 +115,14 @@ class ThreePidValSessionStore:
         self.sydent.db.commit()
 
     def setValidated(self, sid, validated):
+        """
+        Updates a session to set the validated flag to the given value.
+
+        :param sid: The ID of the session to update.
+        :type sid: unicode
+        :param validated: The value to set the validated flag.
+        :type validated: bool
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("update threepid_validation_sessions set validated = ? where id = ?", (validated, sid))
@@ -125,7 +133,7 @@ class ThreePidValSessionStore:
         Set the time of the last send attempt for the session with the given ID
 
         :param sid: The ID of the session to update.
-        :type sid: int
+        :type sid: unicode
         :param mtime: The time of the last send attempt for that session.
         :type mtime: int
         """
@@ -147,6 +155,15 @@ class ThreePidValSessionStore:
          return ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], None, None)
 
     def getTokenSessionById(self, sid):
+        """
+        Retrieves a validation session using the session's ID.
+
+        :param sid: The ID of the session to retrieve.
+        :type sid: unicode
+
+        :return: The validation session, or None if no session was found with that ID.
+        :rtype: ValidationSession or None
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute("select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "

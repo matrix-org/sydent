@@ -25,7 +25,8 @@ def is_valid_client_secret(client_secret):
 
     :param client_secret: The client_secret to validate
     :type client_secret: unicode
-    :returns: Whether the client_secret is valid
+
+    :return: Whether the client_secret is valid
     :rtype: bool
     """
     return client_secret_regex.match(client_secret) is not None
