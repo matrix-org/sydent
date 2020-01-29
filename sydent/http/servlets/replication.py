@@ -105,12 +105,27 @@ class ReplicationPushServlet(Resource):
             return
 
         # Process signed associations
+        #
+        # They come in roughly this structure:
+        # {
+        #   "sg_assocs": {
+        #     {
+        #       # The key is the origin id value
+        #       "1": {
+        #         ... association information ...
+        #       },
+        #       ...
+        #     }
+        #   }
+        # }
 
         # Ensure associations are processed in order of origin_id.
         # If we process them out of order, an association with an ID lesser
         # than a previously processed association will be ignored.
         sg_assocs = inJson.get('sg_assocs', {})
-        sg_assocs = sorted(sg_assocs.items(), cmp=lambda k: k[0])
+        sg_assocs = sorted(
+            sg_assocs.items(), cmp=lambda k: int(k[0])
+        )
 
         if len(sg_assocs) > MAX_SG_ASSOCS_LIMIT:
             logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(sg_assocs), MAX_SG_ASSOCS_LIMIT)
@@ -160,6 +175,19 @@ class ReplicationPushServlet(Resource):
         tokensStore = JoinTokenStore(self.sydent)
 
         # Process any new invite tokens
+        #
+        # They come in roughly this structure:
+        # {
+        #   "added": {
+        #     {
+        #       # The key is the origin id value
+        #       "1": {
+        #         ... invite token information ...
+        #       },
+        #       ...
+        #     }
+        #   }
+        # }
 
         # Get the container dictionary of new and updated invites
         invite_tokens = inJson.get('invite_tokens', {})
@@ -171,7 +199,9 @@ class ReplicationPushServlet(Resource):
         #
         # Otherwise we have a risk of ignoring certain updates due to our behaviour of
         # ignoring old updates that may've been accidentally sent twice
-        new_invites = sorted(new_invites.items(), cmp=lambda k: k[0])
+        new_invites = sorted(
+            new_invites.items(), cmp=lambda k: int(k[0])
+        )
 
         if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
             self.sydent.db.rollback()
@@ -195,6 +225,18 @@ class ReplicationPushServlet(Resource):
             logger.info("Stored invite token with origin ID %s from %s", originId, peer.servername)
 
         # Process any invite token update
+        #
+        # They come in roughly this structure:
+        # {
+        #   # Note `updated` is a list here instead of a dictionary
+        #   "updated": [
+        #     {
+        #       "origin_id": 1,
+        #       ... invite token information ...
+        #     },
+        #     ...
+        #   ]
+        # }
 
         # Updated invite tokens come as a list of dictionaries rather than a
         # dictionary of dictionaries
@@ -204,7 +246,9 @@ class ReplicationPushServlet(Resource):
 
         # Then extract the list of invite token update dictionaries, ensuring
         # tokens are processed in order of origin_id
-        invite_updates = sorted(invite_updates, cmp=lambda k: k["origin_id"])
+        invite_updates = sorted(
+            invite_updates, cmp=lambda k: int(k["origin_id"]),
+        )
 
         if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
             self.sydent.db.rollback()
@@ -228,9 +272,21 @@ class ReplicationPushServlet(Resource):
             logger.info("Stored invite update with origin ID %s from %s", updated_invite['origin_id'], peer.servername)
 
         # Process any ephemeral public keys
+        #
+        # They come in roughly this structure:
+        # {
+        #   "ephemeral_public_keys": {
+        #     "1": {
+        #       ... public key information ...
+        #     },
+        #     ...
+        #   }
+        # }
 
         ephemeral_public_keys = inJson.get("ephemeral_public_keys", {})
-        ephemeral_public_keys = sorted(ephemeral_public_keys.items(), cmp=lambda k: k[0])
+        ephemeral_public_keys = sorted(
+            ephemeral_public_keys.items(), cmp=lambda k: int(k[0])
+        )
 
         if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
             self.sydent.db.rollback()
