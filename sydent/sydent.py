@@ -96,7 +96,7 @@ CONFIG_DEFAULTS = {
     'http': {
         'clientapi.http.bind_address': '::',
         'clientapi.http.port': '8090',
-        # internalapi.http.bind_address defaults to '::1'
+        'internalapi.http.bind_address': '::1',
         'internalapi.http.port': '',
         'replication.https.certfile': '',
         'replication.https.cacert': '', # This should only be used for testing
@@ -104,9 +104,12 @@ CONFIG_DEFAULTS = {
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
         'federation.verifycerts': 'True',
+        'verify_response_template': '',
+        'client_http_base': '',
     },
     'email': {
         'email.template': 'res/email.template',
+        'email.invite_template': 'res/invite.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
         'email.invite.subject': '%(sender_display_name)s has invited you to chat',
@@ -119,6 +122,8 @@ CONFIG_DEFAULTS = {
     },
     'sms': {
         'bodyTemplate': 'Your code is {token}',
+        'username': '',
+        'password': '',
     },
     'crypto': {
         'ed25519.signingkey': '',
