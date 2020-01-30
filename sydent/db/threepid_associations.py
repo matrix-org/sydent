@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from sydent.util import time_msec
 
@@ -30,6 +31,12 @@ class LocalAssociationStore:
         self.sydent = sydent
 
     def addOrUpdateAssociation(self, assoc):
+        """
+        Updates an association, or creates one if none exists with these parameters.
+
+        :param assoc: The association to create or update.
+        :type assoc: ThreepidAssociation
+        """
         cur = self.sydent.db.cursor()
 
         # sqlite's support for upserts is atrocious

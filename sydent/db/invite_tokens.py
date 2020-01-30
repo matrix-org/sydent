@@ -30,6 +30,19 @@ class JoinTokenStore(object):
         self.sydent.db.commit()
 
     def getTokens(self, medium, address):
+        """
+        Retrieves the pending invites tokens for this 3PID that haven't been delivered
+        yet.
+
+        :param medium: The medium of the 3PID to get tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to get tokens for.
+        :type address: unicode
+
+        :return: A list of dicts, each containing a pending token and its metadata for
+            this 3PID.
+        :rtype: list[dict[str, unicode or dict[str, unicode]]
+        """
         cur = self.sydent.db.cursor()
 
         res = cur.execute(
@@ -43,6 +56,19 @@ class JoinTokenStore(object):
 
         for row in rows:
             medium, address, roomId, sender, token = row
+
+            # Ensure we're dealing with unicode.
+            if isinstance(medium, bytes):
+                medium = medium.decode("UTF-8")
+            if isinstance(address, bytes):
+                address = address.decode("UTF-8")
+            if isinstance(roomId, bytes):
+                roomId = roomId.decode("UTF-8")
+            if isinstance(sender, bytes):
+                sender = sender.decode("UTF-8")
+            if isinstance(token, bytes):
+                token = token.decode("UTF-8")
+
             ret.append({
                 "medium": medium,
                 "address": address,
@@ -54,6 +80,15 @@ class JoinTokenStore(object):
         return ret
 
     def markTokensAsSent(self, medium, address):
+        """
+        Updates the invite tokens associated with a given 3PID to mark them as
+        delivered to a homeserver so they're not delivered again in the future.
+
+        :param medium: The medium of the 3PID to update tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to update tokens for.
+        :type address: unicode
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute(
@@ -95,6 +130,14 @@ class JoinTokenStore(object):
         return None
 
     def deleteTokens(self, medium, address):
+        """
+        Deletes every token for a given 3PID.
+
+        :param medium: The medium of the 3PID to delete tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to delete tokens for.
+        :type address: unicode
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute(

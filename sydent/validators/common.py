@@ -42,11 +42,11 @@ def validateSessionWithToken(sydent, sid, clientSecret, token):
     valSessionStore = ThreePidValSessionStore(sydent)
     s = valSessionStore.getTokenSessionById(sid)
     if not s:
-        logger.info("Session ID %s not found", (sid,))
+        logger.info("Session ID %s not found", sid)
         raise InvalidSessionIdException()
 
     if not clientSecret == s.clientSecret:
-        logger.info("Incorrect client secret", (sid,))
+        logger.info("Incorrect client secret", sid)
         raise IncorrectClientSecretException()
 
     if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
@@ -58,7 +58,7 @@ def validateSessionWithToken(sydent, sid, clientSecret, token):
     #    return True
 
     if s.token == token:
-        logger.info("Setting session %s as validated", (s.id))
+        logger.info("Setting session %s as validated", s.id)
         valSessionStore.setValidated(s.id, True)
 
         return {'success': True}
