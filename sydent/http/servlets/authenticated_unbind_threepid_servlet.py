@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 New Vector Ltd
+# Copyright 2020 Dirk Klimpel
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 from twisted.web.resource import Resource
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 
 
 class AuthenticatedUnbindThreePidServlet(Resource):
