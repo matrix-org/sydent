@@ -14,12 +14,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import json
 import logging
 
 from sydent.hs_federation.verifier import NoAuthenticationError
 from signedjson.sign import SignatureVerifyException
+
+from sydent.http.servlets import dict_to_json_bytes
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
@@ -33,6 +36,7 @@ from twisted.web import server
 from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
+
 
 class ThreePidUnbindServlet(Resource):
     def __init__(self, sydent):
@@ -49,7 +53,7 @@ class ThreePidUnbindServlet(Resource):
                 body = json.load(request.content)
             except ValueError:
                 request.setResponseCode(400)
-                request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
+                request.write(dict_to_json_bytes({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
                 request.finish()
                 return
 
@@ -57,7 +61,7 @@ class ThreePidUnbindServlet(Resource):
             if len(missing) > 0:
                 request.setResponseCode(400)
                 msg = "Missing parameters: "+(",".join(missing))
-                request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': msg}))
+                request.write(dict_to_json_bytes({'errcode': 'M_MISSING_PARAMS', 'error': msg}))
                 request.finish()
                 return
 
@@ -66,7 +70,7 @@ class ThreePidUnbindServlet(Resource):
 
             if 'medium' not in threepid or 'address' not in threepid:
                 request.setResponseCode(400)
-                request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': 'Threepid lacks medium / address'}))
+                request.write(dict_to_json_bytes({'errcode': 'M_MISSING_PARAMS', 'error': 'Threepid lacks medium / address'}))
                 request.finish()
                 return
 
@@ -90,7 +94,7 @@ class ThreePidUnbindServlet(Resource):
 
                 if not is_valid_client_secret(client_secret):
                     request.setResponseCode(400)
-                    request.write(json.dumps({
+                    request.write(dict_to_json_bytes({
                         'errcode': 'M_INVALID_PARAM',
                         'error': 'Invalid client_secret provided'
                     }))
@@ -99,24 +103,19 @@ class ThreePidUnbindServlet(Resource):
 
                 valSessionStore = ThreePidValSessionStore(self.sydent)
 
-                noMatchError = {'errcode': 'M_NO_VALID_SESSION',
-                                'error': "No valid session was found matching that sid and client secret"}
-
                 try:
                     s = valSessionStore.getValidatedSession(sid, client_secret)
-                except IncorrectClientSecretException:
+                except (IncorrectClientSecretException, InvalidSessionIdException):
                     request.setResponseCode(401)
-                    request.write(json.dumps(noMatchError))
-                    request.finish()
-                    return
-                except InvalidSessionIdException:
-                    request.setResponseCode(401)
-                    request.write(json.dumps(noMatchError))
+                    request.write(dict_to_json_bytes({
+                        'errcode': 'M_NO_VALID_SESSION',
+                        'error': "No valid session was found matching that sid and client secret"
+                    }))
                     request.finish()
                     return
                 except SessionNotValidatedException:
                     request.setResponseCode(403)
-                    request.write(json.dumps({
+                    request.write(dict_to_json_bytes({
                         'errcode': 'M_SESSION_NOT_VALIDATED',
                         'error': "This validation session has not yet been completed"
                     }))
@@ -124,7 +123,7 @@ class ThreePidUnbindServlet(Resource):
                 
                 if s.medium != threepid['medium'] or s.address != threepid['address']:
                     request.setResponseCode(403)
-                    request.write(json.dumps({
+                    request.write(dict_to_json_bytes({
                         'errcode': 'M_FORBIDDEN',
                         'error': 'Provided session information does not match medium/address combo',
                     }))
@@ -135,33 +134,33 @@ class ThreePidUnbindServlet(Resource):
                     origin_server_name = yield self.sydent.sig_verifier.authenticate_request(request, body)
                 except SignatureVerifyException as ex:
                     request.setResponseCode(401)
-                    request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                    request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': str(ex)}))
                     request.finish()
                     return
                 except NoAuthenticationError as ex:
                     request.setResponseCode(401)
-                    request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': ex.message}))
+                    request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': str(ex)}))
                     request.finish()
                     return
                 except:
                     logger.exception("Exception whilst authenticating unbind request")
                     request.setResponseCode(500)
-                    request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
+                    request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
                     request.finish()
                     return
 
                 if not mxid.endswith(':' + origin_server_name):
                     request.setResponseCode(403)
-                    request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': 'Origin server name does not match mxid'}))
+                    request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': 'Origin server name does not match mxid'}))
                     request.finish()
                     return
 
-            res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
+            self.sydent.threepidBinder.removeBinding(threepid, mxid)
 
-            request.write(json.dumps({}))
+            request.write(dict_to_json_bytes({}))
             request.finish()
         except Exception as ex:
             logger.exception("Exception whilst handling unbind")
             request.setResponseCode(500)
-            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': ex.message}))
+            request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': str(ex)}))
             request.finish()

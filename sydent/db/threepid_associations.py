@@ -98,6 +98,16 @@ class LocalAssociationStore:
         return assocs, maxId
 
     def removeAssociation(self, threepid, mxid):
+        """
+        Delete the association between a 3PID and a MXID, if it exists. If the
+        association doesn't exist, log and do nothing.
+
+        :param threepid: The 3PID of the binding to remove.
+        :type threepid: dict[unicode, unicode]
+        :param mxid: The MXID of the binding to remove.
+        :type mxid: unicode
+        """
+
         cur = self.sydent.db.cursor()
 
         # check to see if we have any matching associations first.

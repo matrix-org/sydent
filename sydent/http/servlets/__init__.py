@@ -134,21 +134,18 @@ def jsonwrap(f):
         """
         try:
             request.setHeader("Content-Type", "application/json")
-            return json.dumps(f(self, request, *args, **kwargs)).encode("UTF-8")
+            return dict_to_json_bytes(f(self, request, *args, **kwargs))
         except MatrixRestError as e:
             request.setResponseCode(e.httpStatus)
-            return json.dumps({
-                "errcode": e.errcode,
-                "error": e.error,
-            }).encode("UTF-8")
+            return dict_to_json_bytes({"errcode": e.errcode, "error": e.error})
         except Exception:
-            logger.exception("Exception processing request");
+            logger.exception("Exception processing request")
             request.setHeader("Content-Type", "application/json")
             request.setResponseCode(500)
-            return json.dumps({
+            return dict_to_json_bytes({
                 "errcode": "M_UNKNOWN",
                 "error": "Internal Server Error",
-            }).encode("UTF-8")
+            })
     return inner
 
 
@@ -164,7 +161,7 @@ def deferjsonwrap(f):
         :type request: twisted.web.server.Request
         """
         request.setHeader("Content-Type", "application/json")
-        request.write(json.dumps(resp).encode("UTF-8"))
+        request.write(dict_to_json_bytes(resp))
         request.finish()
 
     def reqErr(failure, request):
@@ -180,11 +177,11 @@ def deferjsonwrap(f):
         request.setHeader("Content-Type", "application/json")
         if failure.check(MatrixRestError) is not None:
             request.setResponseCode(failure.value.httpStatus)
-            request.write(json.dumps({'errcode': failure.value.errcode, 'error': failure.value.error}).encode("UTF-8"))
+            request.write(dict_to_json_bytes({'errcode': failure.value.errcode, 'error': failure.value.error}))
         else:
             logger.error("Request processing failed: %r, %s", failure, failure.getTraceback())
             request.setResponseCode(500)
-            request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}).encode("UTF-8"))
+            request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
         request.finish()
 
     def inner(*args, **kwargs):
@@ -213,3 +210,16 @@ def send_cors(request):
     request.setHeader("Access-Control-Allow-Methods",
                       "GET, POST, PUT, DELETE, OPTIONS")
     request.setHeader("Access-Control-Allow-Headers", "*")
+
+
+def dict_to_json_bytes(content):
+    """
+    Converts a dict into JSON and encodes it to bytes.
+
+    :param content:
+    :type content: dict[any, any]
+
+    :return: The JSON bytes.
+    :rtype: bytes
+    """
+    return json.dumps(content).encode("UTF-8")
