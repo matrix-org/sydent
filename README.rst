@@ -76,8 +76,9 @@ Fetch pubkey key for a server::
 Internal bind and unbind api
 -----------------
 
-It is possible to enable an internal API which allows identifiers to be bound
-to matrix IDs without any validation. This is open to abuse, so is disabled by
+It is possible to enable an internal API which allows for binding and unbinding
+between identifiers and matrix IDs without any validation.
+This is open to abuse, so is disabled by
 default, and when it is enabled, is available only on a separate socket which
 is bound to 'localhost' by default.
 
@@ -90,13 +91,15 @@ To use bind::
 
     curl -XPOST 'http://localhost:8091/_matrix/identity/internal/bind' -H "Content-Type: application/json" -d '{"address": "matthew@arasphere.net", "medium": "email", "mxid": "@matthew:matrix.org"}'
 
-The response has the same format as ``/_matrix/identity/api/v1/3pid/bind``.
+The response has the same format as
+`/_matrix/identity/api/v1/3pid/bind <https://matrix.org/docs/spec/identity_service/r0.3.0#deprecated-post-matrix-identity-api-v1-3pid-bind>`_.
 
 To use unbind::
 
     curl -XPOST 'http://localhost:8091/_matrix/identity/internal/unbind' -H "Content-Type: application/json" -d '{"address": "matthew@arasphere.net", "medium": "email", "mxid": "@matthew:matrix.org"}'
 
-The response has the same format as ``/_matrix/identity/api/v1/3pid/unbind``.
+The response has the same format as
+`/_matrix/identity/api/v1/3pid/unbind <https://matrix.org/docs/spec/identity_service/r0.3.0#deprecated-post-matrix-identity-api-v1-3pid-unbind>`_.
 
 Replication
 ===========
