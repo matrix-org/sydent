@@ -1,16 +1,19 @@
 import json
 from io import BytesIO
+import logging
+import os
 
 import attr
 from six import text_type
 from twisted.internet import address
+import twisted.logger
 from twisted.web.http_headers import Headers
 from twisted.web.server import Request, Site
 from twisted.web.http import unquote
 from twisted.test.proto_helpers import MemoryReactorClock
 from OpenSSL import crypto
 
-from sydent.sydent import Sydent
+from sydent.sydent import Sydent, parse_config_dict
 
 
 # Expires on Jan 11 2030 at 17:53:40 GMT
@@ -47,12 +50,6 @@ def make_sydent(test_config={}):
         test_config (dict): any configuration variables for overriding the default sydent
             config
     """
-    # Send the Sydent logs to sydent.log in the _trial_temp directory instead of stderr.
-    if 'general' not in test_config:
-        test_config['general'] = {'log.path': 'sydent.log'}
-    else:
-        test_config['general'].setdefault('log.path', 'sydent.log')
-
     # Use an in-memory SQLite database. Note that the database isn't cleaned up between
     # tests, so by default the same database will be used for each test if changed to be
     # a file on disk.
@@ -62,7 +59,7 @@ def make_sydent(test_config={}):
         test_config['db'].setdefault('db.file', ':memory:')
 
     reactor = MemoryReactorClock()
-    return Sydent(reactor, config=test_config)
+    return Sydent(reactor=reactor, cfg=parse_config_dict(test_config))
 
 
 @attr.s
@@ -232,3 +229,41 @@ def make_request(
     req.requestReceived(method, path, b"1.1")
 
     return req, channel
+
+
+class ToTwistedHandler(logging.Handler):
+    """logging handler which sends the logs to the twisted log"""
+
+    tx_log = twisted.logger.Logger()
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        log_level = record.levelname.lower().replace("warning", "warn")
+        self.tx_log.emit(
+            twisted.logger.LogLevel.levelWithName(log_level),
+            log_entry.replace("{", r"(").replace("}", r")"),
+        )
+
+
+def setup_logging():
+    """Configure the python logging appropriately for the tests.
+
+    (Logs will end up in _trial_temp.)
+    """
+    root_logger = logging.getLogger()
+
+    log_format = (
+        "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
+        " - %(message)s"
+    )
+
+    handler = ToTwistedHandler()
+    formatter = logging.Formatter(log_format)
+    handler.setFormatter(formatter)
+    root_logger.addHandler(handler)
+
+    log_level = os.environ.get("SYDENT_TEST_LOG_LEVEL", "ERROR")
+    root_logger.setLevel(log_level)
+
+
+setup_logging()
