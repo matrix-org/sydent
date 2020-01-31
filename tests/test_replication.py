@@ -3,12 +3,10 @@ import json
 from mock import Mock
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
-from tests.utils import make_request, make_sydent, setup_logging
+from tests.utils import make_request, make_sydent
 from twisted.web.client import Response
 from twisted.internet import defer
 from twisted.trial import unittest
-
-setup_logging()
 
 
 class ReplicationTestCase(unittest.TestCase):

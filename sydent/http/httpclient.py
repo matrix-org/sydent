@@ -52,10 +52,7 @@ class HTTPClient(object):
         body = yield readBody(response)
         try:
             # json.loads doesn't allow bytes in Python 3.5
-            if isinstance(body, bytes):
-                body = body.decode("UTF-8")
-
-            json_body = json.loads(body)
+            json_body = json.loads(body.decode("UTF-8"))
         except Exception as e:
             logger.exception("Error parsing JSON from %s", uri)
             raise

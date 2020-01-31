@@ -134,7 +134,7 @@ CONFIG_DEFAULTS = {
 class Sydent:
     def __init__(self, cfg, reactor=twisted.internet.reactor):
         self.reactor = reactor
-        self.config_file = getConfigFilePath()
+        self.config_file = get_config_file_path()
 
         self.cfg = cfg
 
@@ -361,7 +361,7 @@ def get_config_file_path():
 
 
 if __name__ == '__main__':
-    cfg = parse_config_file(getConfigFilePath())
+    cfg = parse_config_file(get_config_file_path())
     setup_logging(cfg)
     syd = Sydent(cfg)
     syd.run()

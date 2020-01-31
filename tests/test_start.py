@@ -1,7 +1,5 @@
 from twisted.trial import unittest
-from tests.utils import make_sydent, setup_logging
-
-setup_logging()
+from tests.utils import make_sydent
 
 
 class StartupTestCase(unittest.TestCase):

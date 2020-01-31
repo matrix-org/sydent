@@ -264,3 +264,6 @@ def setup_logging():
 
     log_level = os.environ.get("SYDENT_TEST_LOG_LEVEL", "ERROR")
     root_logger.setLevel(log_level)
+
+
+setup_logging()
