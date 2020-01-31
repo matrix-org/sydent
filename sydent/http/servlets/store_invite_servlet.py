@@ -13,6 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
+
 import nacl.signing
 import random
 import string
@@ -22,7 +24,6 @@ from six import string_types
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
-import json
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
@@ -53,7 +54,7 @@ class StoreInviteServlet(Resource):
         if mxid:
             request.setResponseCode(400)
             return {
-                "errcode": "THREEPID_IN_USE",
+                "errcode": "M_THREEPID_IN_USE",
                 "error": "Binding already known",
                 "mxid": mxid,
             }
@@ -131,15 +132,46 @@ class StoreInviteServlet(Resource):
         return resp
 
     def redact(self, address):
-        return "@".join(map(self._redact, address.split("@", 1)))
+        """
+        Redacts the content of a 3PID address. If the address is an email address,
+        then redacts both the address's localpart and domain independently. Otherwise,
+        redacts the whole address.
+
+        :param address: The address to redact.
+        :type address: unicode
+
+        :return: The redacted address.
+        :rtype: unicode
+        """
+        return u"@".join(map(self._redact, address.split(u"@", 1)))
 
     def _redact(self, s):
+        """
+        Redacts the content of a 3PID address. If the address is an email address,
+        then redacts both the address's localpart and domain independently. Otherwise,
+        redacts the whole address.
+
+        :param s: The address to redact.
+        :type s: unicode
+
+        :return: The redacted address.
+        :rtype: unicode
+        """
         if len(s) > 5:
-            return s[:3] + "..."
+            return s[:3] + u"..."
         elif len(s) > 1:
-            return s[0] + "..."
+            return s[0] + u"..."
         else:
-            return "..."
+            return u"..."
 
     def _randomString(self, length):
-        return ''.join(self.random.choice(string.ascii_letters) for _ in xrange(length))
+        """
+        Generate a random string of the given length.
+
+        :param length: The length of the string to generate.
+        :type length: int
+
+        :return: The generated string.
+        :rtype: unicode
+        """
+        return u''.join(self.random.choice(string.ascii_letters) for _ in range(length))
