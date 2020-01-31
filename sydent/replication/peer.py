@@ -241,6 +241,10 @@ class RemotePeer(Peer):
         :param updateDeferred: The deferred to call the error callback of.
         :type updateDeferred: twisted.internet.defer.Deferred
         """
+        # json.loads doesn't allow bytes in Python 3.5
+        if isinstance(body, bytes):
+            body = body.decode("UTF-8")
+
         errObj = json.loads(body)
         e = RemotePeerError()
         e.errorDict = errObj
