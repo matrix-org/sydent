@@ -26,6 +26,9 @@ import twisted.internet.ssl
 from sydent.http.servlets.authenticated_bind_threepid_servlet import (
     AuthenticatedBindThreePidServlet,
 )
+from sydent.http.servlets.authenticated_unbind_threepid_servlet import (
+    AuthenticatedUnbindThreePidServlet,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -150,6 +153,9 @@ class InternalApiHttpServer(object):
 
         authenticated_bind = AuthenticatedBindThreePidServlet(self.sydent)
         internal.putChild(b'bind', authenticated_bind)
+
+        authenticated_unbind = AuthenticatedUnbindThreePidServlet(self.sydent)
+        internal.putChild(b'unbind', authenticated_unbind)
 
         factory = Site(root)
         factory.displayTracebacks = False
