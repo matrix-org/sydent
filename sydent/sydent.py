@@ -356,7 +356,7 @@ def setup_logging(cfg):
     observer.start()
 
 
-def getConfigFilePath():
+def get_config_file_path():
     return os.environ.get('SYDENT_CONF', "sydent.conf")
 
 
