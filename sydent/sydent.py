@@ -89,6 +89,9 @@ CONFIG_DEFAULTS = {
 
         # The following can be added to your local config file to enable sentry support.
         # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
+
+        # Whether clients and homeservers can register an association using v1 endpoints.
+        'enable_v1_associations': 'true',
     },
     'db': {
         'db.file': 'sydent.db',
@@ -168,6 +171,8 @@ class Sydent:
                 port=self.cfg.getint("general", "prometheus_port"),
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
+
+        self.enable_v1_associations = self.cfg.get("general", "enable_v1_associations")
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for

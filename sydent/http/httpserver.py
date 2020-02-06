@@ -87,10 +87,12 @@ class ClientApiHttpServer:
         pubkey.putChild(b'ephemeral', ephemeralPubkey)
         ephemeralPubkey.putChild(b'isvalid', self.sydent.servlets.ephemeralPubkeyIsValid)
 
-        v1.putChild(b'3pid', threepid)
         threepid.putChild(b'bind', bind)
         threepid.putChild(b'unbind', unbind)
         threepid.putChild(b'getValidated3pid', getValidated3pid)
+
+        if self.sydent.enable_v1_associations:
+            v1.putChild(b'3pid', threepid)
 
         email.putChild(b'requestToken', emailReqCode)
         email.putChild(b'submitToken', emailValCode)
