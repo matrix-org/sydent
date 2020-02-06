@@ -172,7 +172,9 @@ class Sydent:
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
 
-        self.enable_v1_associations = self.cfg.get("general", "enable_v1_associations")
+        self.enable_v1_associations = parse_cfg_bool(
+            self.cfg.get("general", "enable_v1_associations")
+        )
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
@@ -363,6 +365,10 @@ def setup_logging(cfg):
 
 def get_config_file_path():
     return os.environ.get('SYDENT_CONF', "sydent.conf")
+
+
+def parse_cfg_bool(value):
+    return value.lower() == "true"
 
 
 if __name__ == '__main__':
