@@ -59,7 +59,8 @@ class ClientApiHttpServer:
         hash_details = self.sydent.servlets.hash_details
         lookup_v2 = self.sydent.servlets.lookup_v2
 
-        threepid = Resource()
+        threepid_v1 = Resource()
+        threepid_v2 = Resource()
         bind = self.sydent.servlets.threepidBind
         unbind = self.sydent.servlets.threepidUnbind
 
@@ -88,12 +89,16 @@ class ClientApiHttpServer:
         pubkey.putChild(b'ephemeral', ephemeralPubkey)
         ephemeralPubkey.putChild(b'isvalid', self.sydent.servlets.ephemeralPubkeyIsValid)
 
-        threepid.putChild(b'bind', bind)
-        threepid.putChild(b'unbind', unbind)
-        threepid.putChild(b'getValidated3pid', getValidated3pid)
+        threepid_v2.putChild(b'getValidated3pid', getValidated3pid)
+        threepid_v2.putChild(b'bind', bind)
+        threepid_v2.putChild(b'unbind', unbind)
 
+        threepid_v1.putChild(b'getValidated3pid', getValidated3pid)
         if self.sydent.enable_v1_associations:
-            v1.putChild(b'3pid', threepid)
+            threepid_v1.putChild(b'bind', bind)
+            threepid_v1.putChild(b'unbind', unbind)
+
+        v1.putChild(b'3pid', threepid_v1)
 
         email.putChild(b'requestToken', emailReqCode)
         email.putChild(b'submitToken', emailValCode)
@@ -119,7 +124,7 @@ class ClientApiHttpServer:
         # v2 versions of existing APIs
         v2.putChild(b'validate', validate)
         v2.putChild(b'pubkey', pubkey)
-        v2.putChild(b'3pid', threepid)
+        v2.putChild(b'3pid', threepid_v2)
         v2.putChild(b'store-invite', self.sydent.servlets.storeInviteServlet)
         v2.putChild(b'sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
         v2.putChild(b'lookup', lookup_v2)
