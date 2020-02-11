@@ -77,8 +77,7 @@ class ClientApiHttpServer:
         validate.putChild(b'email', email)
         validate.putChild(b'msisdn', msisdn)
 
-        if self.sydent.enable_v1_associations:
-            v1.putChild(b'validate', validate)
+        v1.putChild(b'validate', validate)
 
         v1.putChild(b'lookup', lookup)
         v1.putChild(b'bulk_lookup', bulk_lookup)
