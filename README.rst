@@ -28,6 +28,22 @@ Where country code is the numeric country code, or 'default' to specify the orig
     originators.44 = short:12345
     originators.default = alpha:Matrix
 
+Testing
+=======
+
+Sydent uses matrix-is-tester (https://github.com/matrix-org/matrix-is-tester/) to provide black-box testing of its API.
+This can be run as follows:
+
+    pip install git+https://github.com/matrix-org/matrix-is-tester.git
+    trial matrix_is_tester
+
+The SYDENT_PYTHON enviroment variable can be set to launch sydent with a specific python binary:
+
+    SYDENT_PYTHON=/path/to/python trial matrix_is_tester
+
+The matrix_is_test directory contains sydent's launcher for matrix_is_tester: this needs to be on the
+python path.
+
 Requests
 ========
 
