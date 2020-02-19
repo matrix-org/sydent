@@ -231,6 +231,17 @@ class SqliteDatabase:
             logger.info("v7 -> v8 schema migration complete")
             self._setSchemaVersion(8)
 
+        if curVer < 5:
+            # Remove all associations from the database that have a NULL MXID
+            # We set the MXID to NULL when we removed the binding but we've switched it to
+            # removing the whole row to minimize personal information
+            # https://github.com/matrix-org/sydent/issues/192
+            cur = self.db.cursor()
+            cur.execute("DELETE FROM local_threepid_associations WHERE mxid IS NULL")
+            self.db.commit()
+            logger.info("v4 -> v5 schema migration complete")
+            self._setSchemaVersion(5)
+
     def _getSchemaVersion(self):
         cur = self.db.cursor()
         res = cur.execute("PRAGMA user_version")

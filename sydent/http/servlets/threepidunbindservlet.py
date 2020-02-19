@@ -144,7 +144,7 @@ class ThreePidUnbindServlet(Resource):
                     request.finish()
                     return
 
-            res = self.sydent.threepidBinder.removeBinding(threepid, mxid)
+            self.sydent.threepidBinder.removeBinding(threepid, mxid)
 
             request.write(json.dumps({}))
             request.finish()
