@@ -21,7 +21,6 @@ from StringIO import StringIO
 
 from zope.interface import implementer
 
-import twisted.internet.defer
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.iweb import IPolicyForHTTPS

@@ -66,9 +66,11 @@ class Pusher:
         localPeer.pushUpdates(signedAssocs)
 
     def scheduledPush(self):
-        """Push pending updates to a remote peer. To be called regularly.
+        """Push pending updates to all known remote peers. To be called regularly.
 
-        :returns deferred.DeferredList
+        :returns a deferred.DeferredList of defers, one per peer we're pushing to that will
+        resolve when pushing to that peer has completed, successfully or otherwise
+        :rtype deferred.DeferredList
         """
         peers = self.peerStore.getAllPeers()
 
@@ -83,6 +85,8 @@ class Pusher:
         if p.is_being_pushed_to:
             logger.debug("Waiting for %s:%d to finish pushing...", p.servername, p.port)
             return
+
+        p.is_being_pushed_to = True
 
         try:
             # Dictionary for holding all data to push
@@ -141,6 +145,7 @@ class Pusher:
             if not total_updates:
                 return
 
+            logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
             yield p.pushUpdates(push_data)
 
             yield self.peerStore.setLastSentIdAndPokeSucceeded(

@@ -44,8 +44,15 @@ class Peer(object):
     def __init__(self, servername, pubkeys):
         self.servername = servername
         self.pubkeys = pubkeys
-        self.shadow = False
         self.is_being_pushed_to = False
+
+    def pushUpdates(self, sgAssocs):
+        """
+        :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
+                        sgAssoc is the json object of the signed association
+        :return a deferred
+        """
+        pass
 
 
 class LocalPeer(Peer):
@@ -96,6 +103,7 @@ class RemotePeer(Peer):
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = port
+
         # look up or build the replication URL
         try:
             replication_url = sydent.cfg.get(
