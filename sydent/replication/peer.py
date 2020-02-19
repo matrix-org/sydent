@@ -147,7 +147,7 @@ class RemotePeer(Peer):
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
-    def pushUpdates(self, data):
+    def pushUpdates(self, sgAssocs):
         """Push updates to a remote peer.
 
         :param data: A dictionary of possible `sg_assocs`, `invite_tokens`
@@ -157,8 +157,10 @@ class RemotePeer(Peer):
         :rtype: Deferred
         """
 
+        body = {'sgAssocs': sgAssocs}
+
         reqDeferred = self.sydent.replicationHttpsClient.postJson(
-            self.replication_url, data
+            self.replication_url, body
         )
 
         # XXX: We'll also need to prune the deleted associations out of the
