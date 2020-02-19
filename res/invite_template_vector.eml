@@ -16,7 +16,7 @@ Hi,
 %(sender_display_name)s has invited you into a room %(bracketed_room_name)s on
 Riot. To join the conversation please follow the link below.
 
-https://riot.im/app/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
+https://riot.im/app/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
 Riot is an open source collaboration app built on the Matrix.org
 open standard for interoperable communication: supporting group chat,
@@ -128,7 +128,7 @@ Riot.</p>
 
 <p>
     <a
-    href="https://riot.im/app/#/room/%(room_id)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
+    href="https://riot.im/app/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
 </p>
 
 <p>Riot is an open source collaboration app built on the Matrix.org
