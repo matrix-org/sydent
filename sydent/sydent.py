@@ -38,6 +38,7 @@ from http.httpserver import (
 from http.httpsclient import ReplicationHttpsClient
 from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
+from http.servlets.termsservlet import TermsServlet
 from validators.emailvalidator import EmailValidator
 from validators.msisdnvalidator import MsisdnValidator
 from hs_federation.verifier import Verifier
@@ -64,6 +65,9 @@ from http.servlets.internalinfoservlet import InternalInfoServlet
 from http.servlets.profilereplicationservlet import ProfileReplicationServlet
 from http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
 from http.servlets.v1_servlet import V1Servlet
+from http.servlets.accountservlet import AccountServlet
+from http.servlets.registerservlet import RegisterServlet
+from http.servlets.logoutservlet import LogoutServlet
 from http.servlets.v2_servlet import V2Servlet
 from http.info import Info
 
@@ -88,6 +92,7 @@ CONFIG_DEFAULTS = {
         'log.path': '',
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
+        'terms.path': '',
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
         'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
@@ -273,6 +278,10 @@ class Sydent:
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
         self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.userDirectorySearchServlet = UserDirectorySearchServlet(self)
+        self.servlets.termsServlet = TermsServlet(self)
+        self.servlets.accountServlet = AccountServlet(self)
+        self.servlets.registerServlet = RegisterServlet(self)
+        self.servlets.logoutServlet = LogoutServlet(self)
 
         info = Info(self, self.cfg.get("general", "info_path"))
         self.servlets.info = InfoServlet(self, info)
