@@ -93,6 +93,7 @@ CONFIG_DEFAULTS = {
         'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
         'terms.path': '',
+        'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
         'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
