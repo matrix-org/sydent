@@ -17,6 +17,7 @@
 from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.hashing_metadata import HashingMetadataStore
+from sydent.http.auth import authIfV2
 
 import logging
 import json
@@ -49,6 +50,8 @@ class HashDetailsServlet(Resource):
                  information before hashing.
         """
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         request.setResponseCode(200)
         return {

@@ -25,6 +25,7 @@ from sydent.validators import (
 from sydent.util.stringutils import is_valid_client_secret
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.auth import authIfV2
 
 
 class EmailRequestCodeServlet(Resource):
@@ -36,6 +37,8 @@ class EmailRequestCodeServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         args = get_args(request, ('email', 'client_secret', 'send_attempt'))
 
@@ -113,6 +116,8 @@ class EmailValidateCodeServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request):
+        authIfV2(self.sydent, request)
+
         return self.do_validate_request(request)
 
     def do_validate_request(self, request):

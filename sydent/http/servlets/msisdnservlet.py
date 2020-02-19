@@ -25,6 +25,7 @@ from sydent.validators import (
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.util.stringutils import is_valid_client_secret
+from sydent.http.auth import authIfV2
 
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,8 @@ class MsisdnRequestCodeServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         args = get_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
 
@@ -132,6 +135,8 @@ class MsisdnValidateCodeServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         args = get_args(request, ('token', 'sid', 'client_secret'))
 

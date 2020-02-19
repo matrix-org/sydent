@@ -22,6 +22,7 @@ import json
 import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.auth import authIfV2
 
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,8 @@ class BulkLookupServlet(Resource):
         Threepids for which no mapping is found are omitted.
         """
         send_cors(request)
+
+        authIfV2(self.sydent, request)
 
         args = get_args(request, ('threepids',))
 
