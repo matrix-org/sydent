@@ -101,6 +101,7 @@ CONFIG_DEFAULTS = {
         'replication.https.bind_address': '::',
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
+        'federation.verifycerts': 'True',
     },
     'email': {
         'email.template': 'res/email.template',
