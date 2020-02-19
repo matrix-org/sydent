@@ -132,6 +132,7 @@ class LocalAssociationStore:
                 "No local assoc found for %s/%s/%s",
                 threepid['medium'], threepid['address'], mxid,
             )
+            raise ValueError("No match found between provided mxid and threepid")
 
 
 class GlobalAssociationStore:
