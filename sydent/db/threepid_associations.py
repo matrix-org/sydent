@@ -263,22 +263,54 @@ class GlobalAssociationStore:
         )
         self.sydent.db.commit()
 
-    def retrieveMxidFromHash(self, lookup_hash):
-        """Returns an mxid from a given lookup_hash value
+    def retrieveMxidsForHashes(self, addresses):
+        """Returns a mapping from hash: mxid from a list of given lookup_hash values
 
-        :param input_hash: The lookup_hash value to lookup in the database
-        :type input_hash: str
+        :param addresses: An array of lookup_hash values to check against the db
+        :type addresses: list[str]
 
-        :returns the mxid relating to the lookup_hash value if found,
-                 otherwise None
-        :rtype: str|None
+        :returns a dictionary of lookup_hash values to mxids of all discovered matches
+        :rtype: dict[str, str]
         """
         cur = self.sydent.db.cursor()
 
-        res = cur.execute(
-            "SELECT mxid FROM global_threepid_associations WHERE lookup_hash = ?", (lookup_hash,)
-        )
-        row = res.fetchone()
-        if not row:
-            return None
-        return row[0]
+        cur.execute("CREATE TEMPORARY TABLE tmp_retrieve_mxids_for_hashes "
+                    "(lookup_hash VARCHAR)")
+        cur.execute("CREATE INDEX tmp_retrieve_mxids_for_hashes_lookup_hash ON "
+                    "tmp_retrieve_mxids_for_hashes(lookup_hash)")
+
+        results = {}
+        try:
+            # Convert list of addresses to list of tuples of addresses
+            addresses = [(x,) for x in addresses]
+
+            inserted_cap = 0
+            while inserted_cap < len(addresses):
+                cur.executemany(
+                    "INSERT INTO tmp_retrieve_mxids_for_hashes(lookup_hash) "
+                    "VALUES (?)",
+                    addresses[inserted_cap:inserted_cap + 500]
+                )
+                inserted_cap += 500
+
+            res = cur.execute(
+                # 'notBefore' is the time the association starts being valid, 'notAfter' the the time at which
+                # it ceases to be valid, so the ts must be greater than 'notBefore' and less than 'notAfter'.
+                "SELECT gta.lookup_hash, gta.mxid FROM global_threepid_associations gta "
+                "JOIN tmp_retrieve_mxids_for_hashes "
+                "ON gta.lookup_hash = tmp_retrieve_mxids_for_hashes.lookup_hash "
+                "WHERE gta.notBefore < ? AND gta.notAfter > ? "
+                "ORDER BY gta.lookup_hash, gta.mxid, gta.ts",
+                (time_msec(), time_msec())
+            )
+
+            # Place the results from the query into a dictionary
+            # Results are sorted from oldest to newest, so if there are multiple mxid's for
+            # the same lookup hash, only the newest mapping will be returned
+            for lookup_hash, mxid in res.fetchall():
+                results[lookup_hash] = mxid
+
+        finally:
+            cur.execute("DROP TABLE tmp_retrieve_mxids_for_hashes")
+
+        return results
