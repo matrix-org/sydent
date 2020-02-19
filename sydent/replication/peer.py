@@ -18,6 +18,7 @@ import ConfigParser
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
+from sydent.config import ConfigError
 from unpaddedbase64 import decode_base64
 
 import signedjson.sign
@@ -25,6 +26,7 @@ import signedjson.key
 
 import logging
 import json
+import binascii
 
 import nacl
 
@@ -100,8 +102,27 @@ class RemotePeer(Peer):
         self.replication_url = replication_url
 
         # Get verify key for this peer
-        key_bytes = decode_base64(self.pubkeys[SIGNING_KEY_ALGORITHM])
-        self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", key_bytes)
+
+        # Check if their key is base64 or hex encoded
+        pubkey = self.pubkeys[SIGNING_KEY_ALGORITHM]
+        try:
+            # Check for hex encoding
+            int(pubkey, 16)
+
+            # Decode hex into bytes
+            pubkey_decoded = binascii.unhexlify(pubkey)
+
+            logger.warn("Peer public key of %s is hex encoded. Please update to base64 encoding", server_name)
+        except ValueError:
+            # Check for base64 encoding
+            try:
+                pubkey_decoded = decode_base64(pubkey)
+            except Exception as e:
+                raise ConfigError(
+                    "Unable to decode public key for peer %s: %s" % (server_name, e),
+                )
+
+        self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", pubkey_decoded)
 
         # Attach metadata
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
