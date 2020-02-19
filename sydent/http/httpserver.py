@@ -141,7 +141,6 @@ class InternalApiHttpServer(object):
 
         factory = Site(root)
         factory.displayTracebacks = False
-
         twisted.internet.reactor.listenTCP(port, factory, interface=interface)
 
 
