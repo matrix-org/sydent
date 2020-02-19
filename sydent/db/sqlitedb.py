@@ -136,8 +136,6 @@ class SqliteDatabase:
         if curVer < 2:
             logger.info("Migrating schema from v1 to v2")
             cur = self.db.cursor()
-
-            logger.info("Migrating schema from v1 to v2")
             cur.execute("ALTER TABLE profiles ADD COLUMN active BOOLEAN DEFAULT 1 NOT NULL")
             self.db.commit()
             logger.info("v1 -> v2 schema migration complete")
@@ -188,7 +186,7 @@ class SqliteDatabase:
             logger.info("v5 -> v6 schema migration complete")
             self._setSchemaVersion(6)
 
-        if curVer < 3:
+        if curVer < 7:
             cur = self.db.cursor()
 
             # Add lookup_hash columns to threepid association tables
@@ -220,18 +218,18 @@ class SqliteDatabase:
             )
 
             self.db.commit()
-            logger.info("v2 -> v3 schema migration complete")
-            self._setSchemaVersion(3)
+            logger.info("v6 -> v7 schema migration complete")
+            self._setSchemaVersion(7)
 
-        if curVer < 4:
+        if curVer < 8:
             cur = self.db.cursor()
             cur.execute("CREATE TABLE accounts(user_id TEXT NOT NULL PRIMARY KEY, created_ts BIGINT NOT NULL, consent_version TEXT)")
             cur.execute("CREATE TABLE tokens(token TEXT NOT NULL PRIMARY KEY, user_id TEXT NOT NULL)")
             cur.execute("CREATE TABLE accepted_terms_urls(user_id TEXT NOT NULL, url TEXT NOT NULL)")
             cur.execute("CREATE UNIQUE INDEX accepted_terms_urls_idx ON accepted_terms_urls (user_id, url)")
             self.db.commit()
-            logger.info("v3 -> v4 schema migration complete")
-            self._setSchemaVersion(4)
+            logger.info("v7 -> v8 schema migration complete")
+            self._setSchemaVersion(8)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
