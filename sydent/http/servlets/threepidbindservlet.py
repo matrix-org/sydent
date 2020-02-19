@@ -82,8 +82,7 @@ class ThreePidBindServlet(Resource):
             }
         return res
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return b''

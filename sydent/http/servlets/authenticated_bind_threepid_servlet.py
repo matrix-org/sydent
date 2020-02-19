@@ -37,8 +37,7 @@ class AuthenticatedBindThreePidServlet(Resource):
             args['medium'], args['address'], args['mxid'],
         )
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
         request.setResponseCode(200)
-        return {}
+        return b''
