@@ -153,7 +153,8 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self):
+    def __init__(self, reactor=twisted.internet.reactor):
+        self.reactor = reactor
         self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
         self.cfg = parse_config(self.config_file)
 
@@ -301,6 +302,7 @@ class Sydent:
         # A dedicated validation session store just to clean up old sessions every N minutes
         self.cleanupValSession = ThreePidValSessionStore(self)
         cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.clock = self.reactor
         cb.start(10 * 60.0)
 
     def save_config(self):
@@ -326,7 +328,7 @@ class Sydent:
             with open(self.pidfile, 'w') as pidfile:
                 pidfile.write(str(os.getpid()) + "\n")
 
-        twisted.internet.reactor.run()
+        self.reactor.run()
 
     def ip_from_request(self, request):
         if (self.cfg.get('http', 'obey_x_forwarded_for') and

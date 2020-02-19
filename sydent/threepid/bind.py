@@ -35,7 +35,7 @@ from sydent.threepid import ThreepidAssociation
 from OpenSSL import SSL
 from OpenSSL.SSL import VERIFY_NONE
 from StringIO import StringIO
-from twisted.internet import reactor, defer, ssl
+from twisted.internet import defer, ssl
 from twisted.names import client, dns
 from twisted.names.error import DNSNameError
 from twisted.web.client import FileBodyProducer, Agent
@@ -205,7 +205,7 @@ class ThreepidBinder:
 
     def _notifyErrback(self, assoc, attempt, error):
         logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
-        reactor.callLater(math.pow(2, attempt), self._notify, assoc, attempt + 1)
+        self.sydent.reactor.callLater(math.pow(2, attempt), self._notify, assoc, attempt + 1)
 
     # The below is lovingly ripped off of synapse/http/endpoint.py
 

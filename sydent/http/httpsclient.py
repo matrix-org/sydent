@@ -21,7 +21,6 @@ from StringIO import StringIO
 
 from zope.interface import implementer
 
-import twisted.internet.reactor
 import twisted.internet.defer
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
@@ -47,7 +46,7 @@ class ReplicationHttpsClient:
             #self.certOptions = twisted.internet.ssl.CertificateOptions(privateKey=cert.privateKey.original,
             #                                                      certificate=cert.original,
             #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
-            self.agent = Agent(twisted.internet.reactor, SydentPolicyForHTTPS(self.sydent))
+            self.agent = Agent(self.sydent.reactor, SydentPolicyForHTTPS(self.sydent))
 
     def postJson(self, uri, jsonObject):
         logger.debug("POSTing request to %s", uri)
