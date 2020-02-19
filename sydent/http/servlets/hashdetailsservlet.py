@@ -36,6 +36,7 @@ class HashDetailsServlet(Resource):
         self.sydent = syd
         self.lookup_pepper = lookup_pepper
 
+    @jsonwrap
     def render_GET(self, request):
         """
         Return the hashing algorithms and pepper that this IS supports. The
@@ -48,12 +49,12 @@ class HashDetailsServlet(Resource):
                  information before hashing.
         """
         send_cors(request)
-        
+
         request.setResponseCode(200)
-        return json.dumps({
+        return {
             "algorithms": self.known_algorithms,
             "lookup_pepper": self.lookup_pepper,
-        })
+        }
 
     @jsonwrap
     def render_OPTIONS(self, request):

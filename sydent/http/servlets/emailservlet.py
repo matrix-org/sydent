@@ -37,10 +37,7 @@ class EmailRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error, args = get_args(request, ('email', 'client_secret', 'send_attempt'))
-        if error:
-            request.setResponseCode(400)
-            return error
+        args = get_args(request, ('email', 'client_secret', 'send_attempt'))
 
         email = args['email']
         clientSecret = args['client_secret']
@@ -92,8 +89,12 @@ class EmailValidateCodeServlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
-        resp = self.do_validate_request(request)
-        if 'success' in resp and resp['success']:
+        resp = None
+        try:
+            resp = self.do_validate_request(request)
+        except:
+            pass
+        if resp and 'success' in resp and resp['success']:
             #msg = "Verification successful! Please return to your Matrix client to continue."
             msg = u"Vérification réussie! Vous pouvez maintenant utiliser l’application."
             if 'nextLink' in request.args:
@@ -117,9 +118,7 @@ class EmailValidateCodeServlet(Resource):
     def do_validate_request(self, request):
         send_cors(request)
 
-        err, args = get_args(request, ('token', 'sid', 'client_secret'))
-        if err:
-            return err
+        args = get_args(request, ('token', 'sid', 'client_secret'))
 
         sid = args['sid']
         tokenString = args['token']

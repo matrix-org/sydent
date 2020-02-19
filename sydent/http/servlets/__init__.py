@@ -14,8 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import json
 import copy
+import functools
+
+
+logger = logging.getLogger(__name__)
+
+
+class MatrixRestError(Exception):
+    """
+    Handled by the jsonwrap wrapper. Any servlets that don't use this
+    wrapper should catch this exception themselves.
+    """
+    def __init__(self, httpStatus, errcode, error):
+        super(Exception, self).__init__(error)
+        self.httpStatus = httpStatus
+        self.errcode = errcode
+        self.error = error
 
 
 def get_args(request, required_args):
@@ -35,8 +52,7 @@ def get_args(request, required_args):
         try:
             args = json.load(request.content)
         except ValueError:
-            request.setResponseCode(400)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}, None
+            raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
     # If we didn't get anything from that, try the request args
     # (riot-web's usage of the ed25519 sign servlet currently involves
@@ -60,13 +76,28 @@ def get_args(request, required_args):
     if len(missing) > 0:
         request.setResponseCode(400)
         msg = "Missing parameters: "+(",".join(missing))
-        return {'errcode': 'M_MISSING_PARAMS', 'error': msg}, None
+        raise MatrixRestError(400, 'M_MISSING_PARAMS', msg)
 
-    return None, args
+    return args
 
 def jsonwrap(f):
-    def inner(*args, **kwargs):
-        return json.dumps(f(*args, **kwargs)).encode("UTF-8")
+    @functools.wraps(f)
+    def inner(self, request, *args, **kwargs):
+        try:
+            return json.dumps(f(self, request, *args, **kwargs)).encode("UTF-8")
+        except MatrixRestError as e:
+            request.setResponseCode(e.httpStatus)
+            return json.dumps({
+                "errcode": e.errcode,
+                "error": e.error,
+            })
+        except Exception:
+            logger.exception("Exception processing request");
+            request.setResponseCode(500)
+            return json.dumps({
+                "errcode": "M_UNKNOWN",
+                "error": "Internal Server Error",
+            })
     return inner
 
 def send_cors(request):

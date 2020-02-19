@@ -21,7 +21,7 @@ import logging
 import json
 import signedjson.sign
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,7 @@ class BulkLookupServlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
+    @jsonwrap
     def render_POST(self, request):
         """
         Bulk-lookup for threepids.
@@ -43,21 +44,19 @@ class BulkLookupServlet(Resource):
         Threepids for which no mapping is found are omitted.
         """
         send_cors(request)
-        err, args = get_args(request, ('threepids',))
-        if err:
-            return json.dumps(err)
+
+        args = get_args(request, ('threepids',))
 
         threepids = args['threepids']
         if not isinstance(threepids, list):
-            request.setResponseCode(400)
-            return {'errcode': 'M_INVALID_PARAM', 'error': 'threepids must be a list'}, None
+            raise MatrixRestError(400, 'M_INVALID_PARAM', 'threepids must be a list')
 
         logger.info("Bulk lookup of %d threepids", len(threepids))
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
         results = globalAssocStore.getMxids(threepids)
 
-        return json.dumps({ 'threepids': results })
+        return { 'threepids': results }
 
 
     @jsonwrap
