@@ -75,6 +75,7 @@ CONFIG_DEFAULTS = {
     'general': {
         'server.name': '',
         'log.path': '',
+        'log.level': 'INFO',
         'pidfile.path': 'sydent.pid',
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
@@ -151,7 +152,7 @@ class Sydent:
 
         handler.setFormatter(formatter)
         rootLogger = logging.getLogger('')
-        rootLogger.setLevel(logging.INFO)
+        rootLogger.setLevel(self.cfg.get('general', 'log.level'))
         rootLogger.addHandler(handler)
 
         logger.info("Starting Sydent server")
