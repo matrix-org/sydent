@@ -65,7 +65,7 @@ class Verifier(object):
                 defer.returnValue(self.cache[server_name]['verify_keys'])
 
         client = FederationHttpClient(self.sydent)
-        result = yield client.get_json("https://%s/_matrix/key/v2/server/" % server_name)
+        result = yield client.get_json("matrix://%s/_matrix/key/v2/server/" % server_name)
         if 'verify_keys' not in result:
             raise SignatureVerifyException("No key found in response")
 
@@ -81,11 +81,11 @@ class Verifier(object):
     def verifyServerSignedJson(self, signed_json, acceptable_server_names=None):
         """Given a signed json object, try to verify any one
         of the signatures on it
+
         XXX: This contains a fairly noddy version of the home server
-        SRV lookup and signature verification. It only looks at
-        the first SRV result. It does no caching (just fetches the
-        signature each time and does not contact any other servers
-        to do perspectives checks.
+        SRV lookup and signature verification. It does no caching (just
+        fetches the signature each time and does not contact any other
+        servers to do perspective checks).
 
         :param acceptable_server_names: If provided and not None,
             only signatures from servers in this list will be accepted.
@@ -131,7 +131,7 @@ class Verifier(object):
 
         :param request: The request object to authenticate
         :param content: The content of the request, if any
-        :type content: bytes or None
+        :type content: bytes, None
 
         :returns: The origin of the server whose signature was validated
         """
