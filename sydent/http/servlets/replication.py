@@ -19,6 +19,10 @@ from twisted.web.resource import Resource
 from twisted.web import server
 from twisted.internet import defer
 from sydent.threepid import threePidAssocFromDict
+
+from sydent.util.hash import sha256_and_url_safe_base64
+
+from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.invite_tokens import JoinTokenStore
@@ -39,6 +43,7 @@ MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT = 100
 class ReplicationPushServlet(Resource):
     def __init__(self, sydent):
         self.sydent = sydent
+        self.hashing_store = HashingMetadataStore(sydent)
 
     def render_POST(self, request):
         self._async_render_POST(request)
@@ -159,6 +164,13 @@ class ReplicationPushServlet(Resource):
             assocObj = threePidAssocFromDict(sgAssoc)
 
             if assocObj.mxid is not None:
+                # Calculate the lookup hash with our own pepper for this association
+                str_to_hash = ' '.join(
+                    [assocObj.address, assocObj.medium,
+                     self.hashing_store.get_lookup_pepper()],
+                )
+                assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
+
                 # Add the association components and the original signed
                 # object (as assocs must be signed when requested by clients)
                 globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)

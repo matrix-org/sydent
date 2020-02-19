@@ -36,6 +36,9 @@ class LookupServlet(Resource):
     def render_GET(self, request):
         """
         Look up an individual threepid.
+
+        ** DEPRECATED **
+        
         Params: 'medium': the medium of the threepid
                 'address': the address of the threepid
         Returns: A signed association if the threepid has a corresponding mxid, otherwise the empty object.
