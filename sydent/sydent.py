@@ -22,6 +22,7 @@ import logging.handlers
 import os
 
 import twisted.internet.reactor
+from twisted.internet import task
 from twisted.python import log
 
 from db.sqlitedb import SqliteDatabase
@@ -58,6 +59,8 @@ from http.servlets.profilereplicationservlet import ProfileReplicationServlet
 from http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
 from http.servlets.v1_servlet import V1Servlet
 from http.info import Info
+
+from db.valsession import ThreePidValSessionStore
 
 from threepid.bind import ThreepidBinder
 
@@ -236,6 +239,11 @@ class Sydent:
         self.replicationHttpsClient = ReplicationHttpsClient(self)
 
         self.pusher = Pusher(self)
+
+        # A dedicated validation session store just to clean up old sessions every N minutes
+        self.cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.start(10 * 60.0)
 
     def save_config(self):
         fp = open(self.config_file, 'w')
