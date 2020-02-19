@@ -39,6 +39,10 @@ class ThreePidValSessionStore:
         cb = task.LoopingCall(self.deleteOldSessions)
         cb.start(10 * 60.0)
 
+        # Clean up old sessions every N minutes
+        cb = task.LoopingCall(self.deleteOldSessions)
+        cb.start(10 * 60.0)
+
     def getOrCreateTokenSession(self, medium, address, clientSecret):
         cur = self.sydent.db.cursor()
 
