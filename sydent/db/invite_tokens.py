@@ -26,7 +26,7 @@ class JoinTokenStore(object):
 
     def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, commit=True):
         """Stores an invite token.
-        
+
         :param medium: The medium of the token.
         :type medium: str
         :param address: The address of the token.
@@ -128,7 +128,7 @@ class JoinTokenStore(object):
     def getTokens(self, medium, address):
         """Retrieve the invite token(s) for a given 3PID medium and address.
         Filters out tokens which have expired.
-        
+
         :param medium: The medium of the 3PID.
         :type medium: str
         :param address: The address of the 3PID.
@@ -174,7 +174,7 @@ class JoinTokenStore(object):
 
     def getInviteTokensAfterId(self, afterId, limit):
         """Retrieves max `limit` invite tokens after a given DB id.
-        
+
         :param afterId: A database id to act as an offset. Tokens after this
             id are returned.
         :type afterId: int
@@ -235,7 +235,7 @@ class JoinTokenStore(object):
 
     def markTokensAsSent(self, medium, address):
         """Mark invite tokens as sent.
-        
+
         :param medium: The medium of the token.
         :type medium: str
         :param address: The address of the token.
@@ -265,10 +265,10 @@ class JoinTokenStore(object):
 
     def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None, commit=True):
         """Stores an ephemeral public key in the database.
-        
+
         :param publicKey: the ephemeral public key to store.
         :type publicKey: str
-        :param persistenceTs: 
+        :param persistenceTs:
         :type persistenceTs: int
         :param originServer: the server this key was received from (if
             retrieved through replication).
@@ -301,7 +301,7 @@ class JoinTokenStore(object):
 
     def validateEphemeralPublicKey(self, publicKey):
         """Mark an ephemeral public key as validated.
-        
+
         :param publicKey: An ephemeral public key.
         :type publicKey: str
         :returns true or false depending on whether validation was
@@ -320,7 +320,7 @@ class JoinTokenStore(object):
 
     def getEphemeralPublicKeysAfterId(self, afterId, limit):
         """Retrieves max `limit` ephemeral public keys after a given DB id.
-        
+
         :param afterId: A database id to act as an offset. Keys after this id
             are returned.
         :type afterId: int
@@ -376,7 +376,7 @@ class JoinTokenStore(object):
 
     def getSenderForToken(self, token):
         """Returns the sender for a given invite token.
-        
+
         :param token: The invite token.
         :type token: str
         :returns the sender of a given invite token or None if there isn't
@@ -392,6 +392,16 @@ class JoinTokenStore(object):
         if rows:
             return rows[0][0]
         return None
+
+    def deleteTokens(self, medium, address):
+        cur = self.sydent.db.cursor()
+
+        cur.execute(
+            "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
+            (medium, address,)
+        )
+
+        self.sydent.db.commit()
 
     def getInviteUpdatesAfterId(self, last_id, limit):
         """Returns every updated token for which its update id is higher than the provided
