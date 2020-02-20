@@ -16,5 +16,12 @@
 
 import time
 
+
 def time_msec():
+    """
+    Get the current time in milliseconds.
+
+    :return: The current time in milliseconds.
+    :rtype: int
+    """
     return int(time.time() * 1000)

@@ -22,13 +22,15 @@ class ValidationSession:
     # how long we keep sessions for after they've been validated
     THREEPID_SESSION_VALID_LIFETIME_MS = 24 * 60 * 60 * 1000
 
-    def __init__(self, _id, _medium, _address, _clientSecret, _validated, _mtime):
+    def __init__(self, _id, _medium, _address, _clientSecret, _validated, _mtime, _token, _sendAttemptNumber):
         self.id = _id
         self.medium = _medium
         self.address = _address
         self.clientSecret = _clientSecret
         self.validated = _validated
         self.mtime = _mtime
+        self.token = _token
+        self.sendAttemptNumber = _sendAttemptNumber
 
 
 class IncorrectClientSecretException(Exception):
