@@ -150,6 +150,14 @@ class ThreepidBinder:
         return None
 
     def removeBinding(self, threepid, mxid):
+        """
+        Removes the binding between a given 3PID and a given MXID.
+
+        :param threepid: The 3PID of the binding to remove.
+        :type threepid: dict[unicode, unicode]
+        :param mxid: The MXID of the binding to remove.
+        :type mxid: unicode
+        """
         localAssocStore = LocalAssociationStore(self.sydent)
         localAssocStore.removeAssociation(threepid, mxid)
         self.sydent.pusher.doLocalPush()
