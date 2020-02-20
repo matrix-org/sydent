@@ -115,27 +115,21 @@ class EmailValidator:
         return link
 
     def validateSessionWithToken(self, sid, clientSecret, token, next_link=None):
-        """Validate a 3PID validation session
+        """
+        Validates the session with the given ID.
 
-        :param sid: The session ID
-        :type sid: str
-
-        :param clientSecret: The client_secret originally set when requesting the session
-        :type clientSecret: str
-
-        :param token: The validation token
-        :type token: str
-
+        :param sid: The ID of the session to validate.
+        :type sid: unicode
+        :param clientSecret: The client secret to validate.
+        :type clientSecret: unicode
+        :param token: The token to validate.
+        :type token: unicode
         :param next_link: The link to redirect the client to after validation, if provided
-        :type next_link: str|None
+        :type next_link: unicode or None
 
-        :return: The JSON to return to the client on success, or False on fail
-        :rtype: Dict|bool
-
-        :raises IncorrectClientSecretException if the client secret does not match the sid
-        :raises SessionExpiredException is the provided session has expired
-        :raises NextLinkValidationException if the next_link provided is different
-            from one provided in a previous, successful validation attempt
+        :return: A dict with a "success" key which is True if the session
+            was successfully validated, False otherwise.
+        :rtype: dict[str, bool]
         """
         return common.validateSessionWithToken(
             self.sydent, sid, clientSecret, token, next_link

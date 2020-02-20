@@ -45,6 +45,10 @@ class InvalidSessionIdException(Exception):
     pass
 
 
+class IncorrectSessionTokenException(Exception):
+    pass
+
+
 class SessionNotValidatedException(Exception):
     pass
 

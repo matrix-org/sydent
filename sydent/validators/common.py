@@ -1,10 +1,14 @@
+from __future__ import absolute_import
+
 import logging
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.validators import (
-    ValidationSession,
-    SessionExpiredException,
     IncorrectClientSecretException,
+    InvalidSessionIdException,
+    IncorrectSessionTokenException,
+    SessionExpiredException,
+    ValidationSession,
     NextLinkValidationException,
 )
 from sydent.util import time_msec
@@ -19,35 +23,32 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
     Attempt to validate a session, identified by the sid, using
     the token from out-of-band. The client secret is given to
     prevent attempts to guess the token for a sid.
-    If the session was sucessfully validated, return a dict
-    with 'success': True that can be sent to the client,
-    otherwise return False.
 
-    :param sid: The session ID
-    :type sid: str
-
-    :param clientSecret: The client_secret originally set when requesting the session
-    :type clientSecret: str
-
-    :param token: The validation token
-    :type token: str
-
+    :param sid: The ID of the session to validate.
+    :type sid: unicode
+    :param clientSecret: The client secret to validate.
+    :type clientSecret: unicode
+    :param token: The token to validate.
+    :type token: unicode
     :param next_link: The link to redirect the client to after validation, if provided
-    :type next_link: str|None
+    :type next_link: unicode or None
 
-    :return: The JSON to return to the client on success, or False on fail
-    :rtype: Dict|bool
 
-    :raises IncorrectClientSecretException if the client secret does not match the sid
-    :raises SessionExpiredException is the provided session has expired
-    :raises NextLinkValidationException if the next_link provided is different
-        from one provided in a previous, successful validation attempt
+    :return: A dict with a "success" key which is True if the session
+        was successfully validated, False otherwise.
+    :rtype: dict[str, bool]
+
+    :raise IncorrectClientSecretException: The provided client_secret is incorrect.
+    :raise SessionExpiredException: The session has expired.
+    :raise InvalidSessionIdException: The session ID couldn't be matched with an
+        existing session.
+    :raise IncorrectSessionTokenException: The provided token is incorrect
     """
     valSessionStore = ThreePidValSessionStore(sydent)
     s = valSessionStore.getTokenSessionById(sid)
     if not s:
         logger.info("Session ID %s not found", sid)
-        return False
+        raise InvalidSessionIdException()
 
     if not clientSecret == s.clientSecret:
         logger.info("Incorrect client secret", sid)
@@ -115,4 +116,4 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
         return {'success': True}
     else:
         logger.info("Incorrect token submitted")
-        return False
+        return IncorrectSessionTokenException()
