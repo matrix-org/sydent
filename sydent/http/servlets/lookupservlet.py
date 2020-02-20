@@ -63,7 +63,7 @@ class LookupServlet(Resource):
         if not sgassoc:
             return {}
 
-        sgassoc = json.loads(sgassoc.encode('utf8'))
+        sgassoc = json.loads(sgassoc)
         if not self.sydent.server_name in sgassoc['signatures']:
             # We have not yet worked out what the proper trust model should be.
             #

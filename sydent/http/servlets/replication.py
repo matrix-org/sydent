@@ -94,7 +94,8 @@ class ReplicationPushServlet(Resource):
             return
 
         try:
-            inJson = json.load(request.content)
+            # json.loads doesn't allow bytes in Python 3.5
+            inJson = json.loads(request.content.read().decode("UTF-8"))
         except ValueError:
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
             request.setResponseCode(400)

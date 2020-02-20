@@ -158,37 +158,11 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, reactor=twisted.internet.reactor, config=None):
+    def __init__(self, cfg, reactor=twisted.internet.reactor):
         self.reactor = reactor
-        self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
-        if config:
-            self.cfg = parse_config_dict(config)
-        else:
-            self.cfg = parse_config_file(self.config_file)
+        self.config_file = get_config_file_path()
 
-        log_format = (
-            "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
-            " - %(message)s"
-        )
-        formatter = logging.Formatter(log_format)
-
-        logPath = self.cfg.get('general', "log.path")
-        if logPath != '':
-            handler = logging.handlers.TimedRotatingFileHandler(
-                logPath, when='midnight', backupCount=365
-            )
-            handler.setFormatter(formatter)
-            def sighup(signum, stack):
-                logger.info("Closing log file due to SIGHUP")
-                handler.doRollover()
-                logger.info("Opened new log file due to SIGHUP")
-        else:
-            handler = logging.StreamHandler()
-
-        handler.setFormatter(formatter)
-        rootLogger = logging.getLogger('')
-        rootLogger.setLevel(self.cfg.get('general', 'log.level'))
-        rootLogger.addHandler(handler)
+        self.cfg = cfg
 
         logger.info("Starting Sydent server")
 
@@ -201,9 +175,6 @@ class Sydent:
             ips = ips.split(',')
             for ip in ips:
                 self.nonshadow_ips.add(IPNetwork(ip))
-
-        observer = log.PythonLoggingObserver()
-        observer.start()
 
         self.db = SqliteDatabase(self).db
 
@@ -431,6 +402,42 @@ def parse_duration(value):
 
 
 
+def setup_logging(cfg):
+    log_format = (
+        "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
+        " - %(message)s"
+    )
+    formatter = logging.Formatter(log_format)
+
+    logPath = cfg.get('general', "log.path")
+    if logPath != '':
+        handler = logging.handlers.TimedRotatingFileHandler(
+            logPath, when='midnight', backupCount=365
+        )
+        handler.setFormatter(formatter)
+
+        def sighup(signum, stack):
+            logger.info("Closing log file due to SIGHUP")
+            handler.doRollover()
+            logger.info("Opened new log file due to SIGHUP")
+    else:
+        handler = logging.StreamHandler()
+
+    handler.setFormatter(formatter)
+    rootLogger = logging.getLogger('')
+    rootLogger.setLevel(cfg.get('general', 'log.level'))
+    rootLogger.addHandler(handler)
+
+    observer = log.PythonLoggingObserver()
+    observer.start()
+
+
+def get_config_file_path():
+    return os.environ.get('SYDENT_CONF', "sydent.conf")
+
+
 if __name__ == '__main__':
-    syd = Sydent()
+    cfg = parse_config_file(get_config_file_path())
+    setup_logging(cfg)
+    syd = Sydent(cfg)
     syd.run()

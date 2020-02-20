@@ -70,7 +70,8 @@ def get_args(request, required_args):
         )
     ):
         try:
-            args = json.load(request.content)
+            # json.loads doesn't allow bytes in Python 3.5
+            args = json.loads(request.content.read().decode("UTF-8"))
         except ValueError:
             raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
