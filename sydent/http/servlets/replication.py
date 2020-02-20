@@ -35,11 +35,6 @@ import json
 
 logger = logging.getLogger(__name__)
 
-MAX_SG_ASSOCS_LIMIT = 100
-MAX_INVITE_TOKENS_LIMIT = 100
-MAX_INVITE_UPDATES_LIMIT = 100
-MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT = 100
-
 
 class ReplicationPushServlet(Resource):
     def __init__(self, sydent):
@@ -134,13 +129,6 @@ class ReplicationPushServlet(Resource):
             sg_assocs.items(), key=lambda k: k[0]
         )
 
-        if len(sg_assocs) > MAX_SG_ASSOCS_LIMIT:
-            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(sg_assocs), MAX_SG_ASSOCS_LIMIT)
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"sg_assocs" has more than %d keys' % MAX_SG_ASSOCS_LIMIT}))
-            request.finish()
-            return
-
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
         # Check that this message is signed by one of our trusted associated peers
@@ -217,20 +205,6 @@ class ReplicationPushServlet(Resource):
             new_invites.items(), key=lambda k: k[0]
         )
 
-        if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
-            self.sydent.db.rollback()
-            logger.warning(
-                "Peer %s made push with 'invite_tokens.added' field containing %d "
-                "entries, which is greater than the maximum %d",
-                peer.servername,
-                len(new_invites),
-                MAX_INVITE_TOKENS_LIMIT,
-            )
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens.added" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}))
-            request.finish()
-            return
-
         for originId, inviteToken in new_invites:
             tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                 inviteToken['sender'], inviteToken['token'],
@@ -264,20 +238,6 @@ class ReplicationPushServlet(Resource):
             invite_updates, key=lambda k: k["origin_id"]
         )
 
-        if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
-            self.sydent.db.rollback()
-            logger.warning(
-                "Peer %s made push with 'invite_tokens.updated' field containing %d "
-                "entries, which is greater than the maximum %d",
-                peer.servername,
-                len(invite_updates),
-                MAX_INVITE_UPDATES_LIMIT,
-            )
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens.updated" has more than %d keys' % MAX_INVITE_UPDATES_LIMIT}))
-            request.finish()
-            return
-
         for updated_invite in invite_updates:
             tokensStore.updateToken(updated_invite['medium'], updated_invite['address'], updated_invite['room_id'],
                                 updated_invite['sender'], updated_invite['token'], updated_invite['sent_ts'],
@@ -301,14 +261,6 @@ class ReplicationPushServlet(Resource):
         ephemeral_public_keys = sorted(
             ephemeral_public_keys.items(), key=lambda k: k[0]
         )
-
-        if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
-            self.sydent.db.rollback()
-            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(ephemeral_public_keys), MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT)
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"ephemeral_public_keys" has more than %d keys' % MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT}))
-            request.finish()
-            return
 
         for originId, ephemeralKey in ephemeral_public_keys:
             tokensStore.storeEphemeralPublicKey(
