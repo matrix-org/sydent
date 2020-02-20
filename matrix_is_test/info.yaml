@@ -1,0 +1,13 @@
+# Dummy info.yaml file that's compatible with the test homeserver's used in matrix-is-tester
+# Change to suit your needs
+
+platforms:
+    - &fake-test
+        hs: fake.test
+        requires_invite: False
+
+medium:
+    email:
+        entries: []
+        patterns:
+            - .*: *fake-test 

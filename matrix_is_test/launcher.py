@@ -34,6 +34,7 @@ db.file = :memory:
 [general]
 server.name = test.local
 terms.path = {terms_path}
+info_path = {info_path}
 
 [email]
 email.tlsmode = 0
@@ -58,6 +59,7 @@ class MatrixIsTestLauncher(object):
             sydent_path, 'matrix_is_test',
         )
         terms_path = os.path.join(testsubject_path, 'terms.yaml') if self.with_terms else ''
+        info_path = os.path.join(testsubject_path, 'info.yaml')
         port = 8099 if self.with_terms else 8098
 
         self.tmpdir = tempfile.mkdtemp(prefix='sydenttest')
@@ -66,6 +68,7 @@ class MatrixIsTestLauncher(object):
             cfgfp.write(CFG_TEMPLATE.format(
                 testsubject_path=testsubject_path,
                 terms_path=terms_path,
+                info_path=info_path,
                 port=port,
             ))
 
