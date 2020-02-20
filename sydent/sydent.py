@@ -15,8 +15,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
-import ConfigParser
+from six.moves import configparser
 import logging
 import logging.handlers
 import os
@@ -25,57 +26,57 @@ import twisted.internet.reactor
 from twisted.internet import task
 from twisted.python import log
 
-from db.sqlitedb import SqliteDatabase
-
 from netaddr import IPSet, IPNetwork
 
-from http.httpcommon import SslComponents
-from http.httpserver import (
+from sydent.db.sqlitedb import SqliteDatabase
+
+from sydent.http.httpcommon import SslComponents
+from sydent.http.httpserver import (
     ClientApiHttpServer, ReplicationHttpsServer,
     InternalApiHttpServer,
 )
-from http.httpsclient import ReplicationHttpsClient
-from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
-from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
-from http.servlets.termsservlet import TermsServlet
-from validators.emailvalidator import EmailValidator
-from validators.msisdnvalidator import MsisdnValidator
-from hs_federation.verifier import Verifier
+from sydent.http.httpsclient import ReplicationHttpsClient
+from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
+from sydent.http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
+from sydent.http.servlets.termsservlet import TermsServlet
+from sydent.validators.emailvalidator import EmailValidator
+from sydent.validators.msisdnvalidator import MsisdnValidator
+from sydent.hs_federation.verifier import Verifier
 
-from util.hash import sha256_and_url_safe_base64
-from util.tokenutils import generateAlphanumericTokenOfLength
+from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 
-from sign.ed25519 import SydentEd25519
+from sydent.sign.ed25519 import SydentEd25519
 
-from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
-from http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
-from http.servlets.lookupservlet import LookupServlet
-from http.servlets.bulklookupservlet import BulkLookupServlet
-from http.servlets.lookupv2servlet import LookupV2Servlet
-from http.servlets.hashdetailsservlet import HashDetailsServlet
-from http.servlets.pubkeyservlets import Ed25519Servlet
-from http.servlets.threepidbindservlet import ThreePidBindServlet
-from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
-from http.servlets.replication import ReplicationPushServlet
-from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
-from http.servlets.store_invite_servlet import StoreInviteServlet
-from http.servlets.infoservlet import InfoServlet
-from http.servlets.internalinfoservlet import InternalInfoServlet
-from http.servlets.profilereplicationservlet import ProfileReplicationServlet
-from http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
-from http.servlets.v1_servlet import V1Servlet
-from http.servlets.accountservlet import AccountServlet
-from http.servlets.registerservlet import RegisterServlet
-from http.servlets.logoutservlet import LogoutServlet
-from http.servlets.v2_servlet import V2Servlet
-from http.info import Info
+from sydent.http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
+from sydent.http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
+from sydent.http.servlets.lookupservlet import LookupServlet
+from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
+from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
+from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
+from sydent.http.servlets.pubkeyservlets import Ed25519Servlet
+from sydent.http.servlets.threepidbindservlet import ThreePidBindServlet
+from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
+from sydent.http.servlets.replication import ReplicationPushServlet
+from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
+from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
+from sydent.http.servlets.v1_servlet import V1Servlet
+from sydent.http.servlets.accountservlet import AccountServlet
+from sydent.http.servlets.registerservlet import RegisterServlet
+from sydent.http.servlets.logoutservlet import LogoutServlet
+from sydent.http.servlets.v2_servlet import V2Servlet
+from sydent.http.servlets.infoservlet import InfoServlet
+from sydent.http.servlets.internalinfoservlet import InternalInfoServlet
+from sydent.http.servlets.profilereplicationservlet import ProfileReplicationServlet
+from sydent.http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
+from sydent.http.info import Info
 
-from db.valsession import ThreePidValSessionStore
-from db.hashing_metadata import HashingMetadataStore
+from sydent.db.valsession import ThreePidValSessionStore
+from sydent.db.hashing_metadata import HashingMetadataStore
 
-from threepid.bind import ThreepidBinder
+from sydent.threepid.bind import ThreepidBinder
 
-from replication.pusher import Pusher
+from sydent.replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +322,7 @@ class Sydent:
         if internalport:
             try:
                 interface = self.cfg.get('http', 'internalapi.http.bind_address')
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 interface = '::1'
             self.internalApiHttpServer = InternalApiHttpServer(self)
             self.internalApiHttpServer.setup(interface, int(internalport))
@@ -366,7 +367,7 @@ def parse_config_dict(config_dict):
             config[section][option] = config_dict[section][option]
 
     # Build a ConfigParser from the merged dictionary
-    cfg = ConfigParser.SafeConfigParser()
+    cfg = configparser.ConfigParser()
     for section, section_dict in config.items():
         cfg.add_section(section)
         for option, value in section_dict.items():
@@ -378,7 +379,6 @@ def parse_config_dict(config_dict):
 def parse_config_file(config_file):
     """Parse the given config from a filepath, populating missing items and
     sections
-
     Args:
         config_file (str): the file to be parsed
     """
@@ -390,11 +390,11 @@ def parse_config_file(config_file):
     # in their config file in the default section (which is likely,
     # because sydent used to be braindead).
     use_defaults = not os.path.exists(config_file)
-    cfg = ConfigParser.SafeConfigParser()
+    cfg = configparser.ConfigParser()
     for sect, entries in CONFIG_DEFAULTS.items():
         cfg.add_section(sect)
         for k, v in entries.items():
-            cfg.set(ConfigParser.DEFAULTSECT if use_defaults else sect, k, v)
+            cfg.set(configparser.DEFAULTSECT if use_defaults else sect, k, v)
 
     cfg.read(config_file)
 
