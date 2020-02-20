@@ -15,7 +15,9 @@
 import re
 
 # https://matrix.org/docs/spec/client_server/r0.6.0#post-matrix-client-r0-register-email-requesttoken
-client_secret_regex = re.compile(r"^[0-9a-zA-Z\.\=\_\-]+$")
+# Note: The : character is allowed here for older clients, but will be removed in a
+# future release. Context: https://github.com/matrix-org/sydent/issues/247
+client_secret_regex = re.compile(r"^[0-9a-zA-Z\.\=\_\-\:]+$")
 
 
 def is_valid_client_secret(client_secret):
@@ -23,7 +25,6 @@ def is_valid_client_secret(client_secret):
 
     :param client_secret: The client_secret to validate
     :type client_secret: str
-
     :returns: Whether the client_secret is valid
     :rtype: bool
     """

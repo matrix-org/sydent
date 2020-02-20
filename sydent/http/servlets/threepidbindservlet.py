@@ -21,9 +21,11 @@ from sydent.util.stringutils import is_valid_client_secret
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 from sydent.http.auth import authIfV2
+from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 from sydent.threepid.bind import BindingNotPermittedException
+
 
 
 class ThreePidBindServlet(Resource):

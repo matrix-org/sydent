@@ -19,6 +19,7 @@ from twisted.web.resource import Resource
 from sydent.http.servlets import jsonwrap, get_args
 from sydent.http.auth import authIfV2
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 from sydent.util.stringutils import is_valid_client_secret
