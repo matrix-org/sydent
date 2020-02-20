@@ -14,7 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 def threePidAssocFromDict(d):
+    """
+    Instantiates a ThreepidAssociation from the given dict.
+
+    :param d: The dict to use when instantiating the ThreepidAssociation.
+    :type d: dict[str, any]
+
+    :return: The instantiated ThreepidAssociation.
+    :rtype: ThreepidAssociation
+    """
     assoc = ThreepidAssociation(
         d['medium'],
         d['address'],
@@ -25,6 +35,7 @@ def threePidAssocFromDict(d):
         d['not_after'],
     )
     return assoc
+
 
 class ThreepidAssociation:
     def __init__(self, medium, address, lookup_hash, mxid, ts, not_before, not_after):

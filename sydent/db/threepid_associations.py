@@ -47,6 +47,19 @@ class LocalAssociationStore:
         self.sydent.db.commit()
 
     def getAssociationsAfterId(self, afterId, limit=None):
+        """
+        Retrieves every association after the given ID.
+
+        :param afterId: The ID after which to retrieve associations.
+        :type afterId: int
+        :param limit: The maximum number of associations to retrieve, or None if no
+            limit.
+        :type limit: int or None
+
+        :return: The retrieved associations (in a dict[id, assoc]), and the highest ID
+            retrieved (or None if no ID thus no association was retrieved).
+        :rtype: tuple[dict[int, ThreepidAssociation] or int or None]
+        """
         cur = self.sydent.db.cursor()
 
         if afterId is None:
@@ -71,6 +84,7 @@ class LocalAssociationStore:
             maxId = row[0]
 
         return assocs, maxId
+<<<<<<< HEAD
 
     def getSignedAssociationsAfterId(self, afterId, limit, shadow=False):
         """Return max `limit` associations from the database after a given
@@ -107,6 +121,8 @@ class LocalAssociationStore:
             assocs[localId] = signer.signedThreePidAssociation(assoc)
 
         return assocs, maxId
+=======
+>>>>>>> edc80d1
 
     def getSignedAssociationsAfterId(self, afterId, limit=None):
         """Get associations after a given ID, and sign them before returning
@@ -114,12 +130,14 @@ class LocalAssociationStore:
         :param afterId: The ID to return results after (not inclusive)
         :type afterId: int
 
-        :param limit: The maximum amount of signed associations to return. None for no limit
+        :param limit: The maximum amount of signed associations to return. None for no
+            limit.
         :type limit: int|None
 
-        :return: A tuple consisting of a dictionary containing the signed associations (id:
-            assoc dict) and an int representing the maximum ID
-        :rtype: Tuple[dict[int, int]]
+        :return: A tuple consisting of a dictionary containing the signed associations
+            (id: assoc dict) and an int representing the maximum ID (which is None if
+            there was no association to retrieve).
+        :rtype: tuple[dict[int, dict[str, any]] or int or None]
         """
         assocs = {}
 
@@ -293,11 +311,23 @@ class GlobalAssociationStore:
 
     def addAssociation(self, assoc, rawSgAssoc, originServer, originId, commit=True):
         """
-        :param assoc: (sydent.threepid.GlobalThreepidAssociation) The association to add as a high level object
-        :param sgAssoc: The original raw bytes of the signed association
+        Saves an association received through either a replication push or a local push.
+
+        :param assoc: The association to add as a high level object.
+        :type assoc: sydent.threepid.ThreepidAssociation
+        :param rawSgAssoc: The original raw bytes of the signed association.
+        :type rawSgAssoc: dict[str, any]
+        :param originServer: The name of the server the association was created on.
+        :type originServer: str
+        :param originId: The ID of the association on the server the association was
+            created on.
+        :type originId: int
+        :param commit: Whether to commit the database transaction after inserting the
+            association.
+        :type commit: bool
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("insert or ignore into global_threepid_associations "
+        cur.execute("insert or ignore into global_threepid_associations "
                           "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
                           "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                           (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
@@ -306,6 +336,16 @@ class GlobalAssociationStore:
             self.sydent.db.commit()
 
     def lastIdFromServer(self, server):
+        """
+        Retrieves the ID of the last association received from the given peer.
+
+        :param server:
+        :type server: str
+
+        :return: The the ID of the last association received from the peer, or None if
+            no association has ever been received from that peer.
+        :rtype: int or None
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select max(originId),count(originId) from global_threepid_associations "
                           "where originServer = ?", (server,))
@@ -317,6 +357,14 @@ class GlobalAssociationStore:
         return row[0]
 
     def removeAssociation(self, medium, address):
+        """
+        Removes any association stored for the provided 3PID.
+
+        :param medium: The medium for the 3PID.
+        :type medium: unicode
+        :param address: The address for the 3PID.
+        :type address: unicode
+        """
         cur = self.sydent.db.cursor()
         cur.execute(
             "DELETE FROM global_threepid_associations WHERE "

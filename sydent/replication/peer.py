@@ -14,7 +14,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import ConfigParser
+from __future__ import absolute_import
+
+from six.moves import configparser
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -70,7 +72,16 @@ class LocalPeer(Peer):
             self.lastId = -1
 
     def pushUpdates(self, sgAssocs):
-        """Push updates from local associations table to the global one."""
+        """
+        Saves the given associations in the global associations store. Only stores an
+        association if its ID is greater than the last seen ID.
+
+        :param sgAssocs: The associations to save.
+        :type sgAssocs: dict[int, dict[str, any]]
+
+        :return: True
+        :rtype: twisted.internet.defer.Deferred[bool]
+        """
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
             if localId > self.lastId:
@@ -78,7 +89,7 @@ class LocalPeer(Peer):
 
                 if assocObj.mxid is not None:
                     # Assign a lookup_hash to this association
-                    str_to_hash = ' '.join(
+                    str_to_hash = u' '.join(
                         [assocObj.address, assocObj.medium, self.hashing_store.get_lookup_pepper()],
                     )
                     assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
@@ -99,17 +110,54 @@ class LocalPeer(Peer):
 
 
 class RemotePeer(Peer):
-    def __init__(self, sydent, server_name, port, pubkeys):
+    def __init__(
+            self,
+            sydent,
+            server_name,
+            port,
+            pubkeys,
+            lastSentAssocsId,
+            lastSentInviteTokensId,
+            lastSentInviteUpdatesId,
+            lastSentEphemeralKeysId,
+            shadow,
+    ):
+        """
+        :param sydent: The current Sydent instance.
+        :type sydent: sydent.sydent.Sydent
+        :param server_name: The peer's server name.
+        :type server_name: unicode
+        :param port: The peer's port.
+        :type port: int
+        :param pubkeys: The peer's public keys in a dict[key_id, key_b64]
+        :type pubkeys: dict[unicode, unicode]
+        :param lastSentAssocsId: The ID of the last association sent to the peer.
+        :type lastSentAssocsId: int
+        :param lastSentInviteTokensId: The ID of the last invite token sent to the peer.
+        :type lastSentInviteTokensId: int
+        :param lastSentInviteUpdatesId: The ID of the last invite token update sent to
+            the peer.
+        :type lastSentInviteUpdatesId: int
+        :param lastSentEphemeralKeysId: The ID of the last ephemeral key sent to the peer.
+        :type lastSentEphemeralKeysId: int
+        :param shadow: Whether the peer is a shadow one.
+        :type shadow: bool
+        """
         super(RemotePeer, self).__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = port
+        self.lastSentAssocsId = lastSentAssocsId
+        self.lastSentInviteTokensId = lastSentInviteTokensId
+        self.lastSentInviteUpdatesId = lastSentInviteUpdatesId
+        self.lastSentEphemeralKeysId = lastSentEphemeralKeysId
+        self.shadow = shadow
 
         # look up or build the replication URL
         try:
             replication_url = sydent.cfg.get(
                 "peer.%s" % server_name, "base_replication_url",
             )
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        except (configparser.NoSectionError, configparser.NoOptionError):
             if not port:
                 port = 1001
             replication_url = "https://%s:%i" % (server_name, port)
@@ -148,10 +196,11 @@ class RemotePeer(Peer):
         self.verify_key.version = 0
 
     def verifySignedAssociation(self, assoc):
-        """Verifies a signature on a signed association.
+        """Verifies a signature on a signed association. Raises an exception if the
+        signature is incorrect or couldn't be verified.
 
         :param assoc: A signed association.
-        :type assoc: Dict
+        :type assoc: dict[any, any]
         """
         if not 'signatures' in assoc:
             raise NoSignaturesException()
@@ -166,20 +215,18 @@ class RemotePeer(Peer):
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
-    def pushUpdates(self, sgAssocs):
-        """Push updates to a remote peer.
-
-        :param data: A dictionary of possible `sg_assocs`, `invite_tokens`
-            and `ephemeral_public_keys` keys.
-        :type data: Dict
-        :returns a deferred.
-        :rtype: Deferred
+    def pushUpdates(self, data):
         """
+        Pushes the given associations to the peer.
 
-        body = {'sgAssocs': sgAssocs}
+        :param data: The data to push to the peer.
+        :type data: dict[str, dict[any, any]]
 
+        :return: A deferred which results in the response to the push request.
+        :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
+        """
         reqDeferred = self.sydent.replicationHttpsClient.postJson(
-            self.replication_url, body
+            self.replication_url, data
         )
 
         # XXX: We'll also need to prune the deleted associations out of the
@@ -195,6 +242,16 @@ class RemotePeer(Peer):
         return updateDeferred
 
     def _pushSuccess(self, result, updateDeferred):
+        """
+        Processes a successful push request. If the request resulted in a status code
+        that's not a success, consider it a failure
+
+        :param result: The HTTP response.
+        :type result: twisted.web.iweb.IResponse
+        :param updateDeferred: The deferred to make either succeed or fail depending on
+            the status code.
+        :type updateDeferred: twisted.internet.defer.Deferred
+        """
         if result.code >= 200 and result.code < 300:
             updateDeferred.callback(result)
         else:
@@ -203,12 +260,30 @@ class RemotePeer(Peer):
             d.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
     def _failedPushBodyRead(self, body, updateDeferred):
+        """
+        Processes a response body from a failed push request, then calls the error
+        callback of the provided deferred.
+
+        :param body: The response body.
+        :type body: str
+        :param updateDeferred: The deferred to call the error callback of.
+        :type updateDeferred: twisted.internet.defer.Deferred
+        """
         errObj = json.loads(body)
         e = RemotePeerError()
         e.errorDict = errObj
         updateDeferred.errback(e)
 
     def _pushFailed(self, failure, updateDeferred):
+        """
+        Processes a failed push request, by calling the error callback of the given
+        deferred with it.
+
+        :param failure: The failure to process.
+        :type failure: twisted.python.failure.Failure
+        :param updateDeferred: The deferred to call the error callback of.
+        :type updateDeferred: twisted.internet.defer.Deferred
+        """
         updateDeferred.errback(failure)
         return None
 

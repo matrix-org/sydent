@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 from twisted.web import server
@@ -184,6 +185,7 @@ class ReplicationPushServlet(Resource):
             # at this point, in order to tell the inviting HS that someone out there has just bound the 3PID.
             self.sydent.threepidBinder.notifyPendingInvites(assocObj)
 
+<<<<<<< HEAD
         tokensStore = JoinTokenStore(self.sydent)
 
         # Process any new invite tokens
@@ -301,6 +303,40 @@ class ReplicationPushServlet(Resource):
         )
 
         if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
+=======
+                # Don't bother adding if one has already failed: we add all of them or none so
+                # we're only going to roll back the transaction anyway (but we continue to try
+                # & verify the rest so we can give a complete list of the ones that don't
+                # verify)
+                if len(failedIds) > 0:
+                    continue
+
+                assocObj = threePidAssocFromDict(sgAssoc)
+
+                if assocObj.mxid is not None:
+                    # Calculate the lookup hash with our own pepper for this association
+                    str_to_hash = u' '.join(
+                        [assocObj.address, assocObj.medium,
+                         self.hashing_store.get_lookup_pepper()],
+                    )
+                    assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
+
+                    # Add this association
+                    globalAssocsStore.addAssociation(
+                        assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False
+                    )
+                else:
+                    logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
+                    globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
+                logger.info("Stored association origin ID %s from %s", originId, peer.servername)
+            except:
+                failedIds.append(originId)
+                logger.warn("Failed to verify signed association from %s with origin ID %s",
+                            peer.servername, originId)
+                twisted.python.log.err()
+
+        if len(failedIds) > 0:
+>>>>>>> edc80d1
             self.sydent.db.rollback()
             logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(ephemeral_public_keys), MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT)
             request.setResponseCode(400)
