@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
@@ -110,7 +111,7 @@ class LookupV2Servlet(Resource):
 
                 # Get the mxid for the address/medium combo if known
                 address, medium = address_medium_split
-                medium_address_tuples.append((str(medium), str(address)))
+                medium_address_tuples.append((medium, address))
 
             # Lookup the mxids
             medium_address_mxid_tuples = self.globalAssociationStore.getMxids(medium_address_tuples)

@@ -13,13 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
 
 import logging
-import json
-import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 from sydent.http.auth import authIfV2
@@ -59,7 +58,7 @@ class BulkLookupServlet(Resource):
         globalAssocStore = GlobalAssociationStore(self.sydent)
         results = globalAssocStore.getMxids(threepids)
 
-        return { 'threepids': results }
+        return {'threepids': results}
 
 
     def render_OPTIONS(self, request):
