@@ -14,35 +14,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import time
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class JoinTokenStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
     def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, commit=True):
-        """Stores an invite token.
+        """
+        Store a new invite token and its metadata.
 
-        :param medium: The medium of the token.
-        :type medium: str
-        :param address: The address of the token.
-        :type address: str
-        :param roomId: The room ID this token is tied to.
-        :type roomId: str
-        :param sender: The sender of the invite.
-        :type sender: str
-        :param token: The token itself.
-        :type token: str
+        :param medium: The medium of the 3PID the token is associated to.
+        :type medium: unicode
+        :param address: The address of the 3PID the token is associated to.
+        :type address: unicode
+        :param roomId: The ID of the room the 3PID is invited in.
+        :type roomId: unicode
+        :param sender: The MXID of the user that sent the invite.
+        :type sender: unicode
+        :param token: The token to store.
+        :type token: unicode
         :param originServer: The server this invite originated from (if
             coming from replication).
-        :type originServer: str, None
+        :type originServer: str or None
         :param originId: The id of the token in the DB of originServer. Used
             for determining if we've already received a token or not.
-        :type originId: int, None
+        :type originId: int or None
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
@@ -283,18 +284,20 @@ class JoinTokenStore(object):
         self.sydent.db.commit()
 
     def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None, commit=True):
-        """Stores an ephemeral public key in the database.
+        """
+        Saves the provided ephemeral public key.
 
-        :param publicKey: the ephemeral public key to store.
-        :type publicKey: str
-        :param persistenceTs:
-        :type persistenceTs: int
-        :param originServer: the server this key was received from (if
+        :param publicKey: The key to store.
+        :type publicKey: unicode
+        :param persistenceTs: The time of the key's creation (if received through
+            replication).
+        :type persistenceTs: int or None
+        :param originServer: The server this key was received from (if
             retrieved through replication).
-        :type originServer: str
+        :type originServer: str or None
         :param originId: The id of the key in the DB of originServer. Used
             for determining if we've already received a key or not.
-        :type originId: int
+        :type originId: int or None
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
@@ -308,6 +311,7 @@ class JoinTokenStore(object):
 
         if not persistenceTs:
             persistenceTs = int(time.time())
+
         cur = self.sydent.db.cursor()
         cur.execute(
             "INSERT INTO ephemeral_public_keys"
@@ -319,12 +323,14 @@ class JoinTokenStore(object):
             self.sydent.db.commit()
 
     def validateEphemeralPublicKey(self, publicKey):
-        """Mark an ephemeral public key as validated.
+        """
+        Checks if an ephemeral public key is valid, and, if it is, updates its
+        verification count.
 
-        :param publicKey: An ephemeral public key.
-        :type publicKey: str
-        :returns true or false depending on whether validation was
-            successful.
+        :param publicKey: The public key to validate.
+        :type publicKey: unicode
+
+        :return: Whether the key is valid.
         :rtype: bool
         """
         cur = self.sydent.db.cursor()
@@ -394,13 +400,15 @@ class JoinTokenStore(object):
         return row[0]
 
     def getSenderForToken(self, token):
-        """Returns the sender for a given invite token.
+        """
+        Retrieves the MXID of the user that sent the invite the provided token is for.
 
-        :param token: The invite token.
-        :type token: str
-        :returns the sender of a given invite token or None if there isn't
-            one.
-        :rtype: str, None
+        :param token: The token to retrieve the sender of.
+        :type token: unicode
+
+        :return: The invite's sender, or None if the token doesn't match an existing
+            invite.
+        :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(

@@ -13,14 +13,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
+
 from twisted.web.resource import Resource
 
-import json
+import logging
 import signedjson.key
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 from sydent.http.auth import authIfV2
+
+logger = logging.getLogger(__name__)
 
 
 class BlindlySignStuffServlet(Resource):
