@@ -84,23 +84,25 @@ class LocalAssociationStore:
             maxId = row[0]
 
         return assocs, maxId
-<<<<<<< HEAD
 
-    def getSignedAssociationsAfterId(self, afterId, limit, shadow=False):
-        """Return max `limit` associations from the database after a given
-        DB table id.
-        :param afterId: A database id to act as an offset. Rows after this id
-            are returned.
+    def getSignedAssociationsAfterId(self, afterId, limit=None, shadow=False):
+        """Get associations after a given ID, and sign them before returning
+
+        :param afterId: The ID to return results after (not inclusive)
         :type afterId: int
-        :param limit: Max amount of database rows to return.
+
+        :param limit: The maximum amount of signed associations to return. None for no
+            limit.
         :type limit: int|None
+
         :param shadow: Whether these associations are intended for a shadow
             server.
         :type shadow: bool
-        :returns a tuple with the first item being a dict of associations,
-            and the second being the maximum table id of the returned
-            associations.
-        :rtype: Tuple[Dict[Dict, Dict], int|None]
+
+        :return: A tuple consisting of a dictionary containing the signed associations
+            (id: assoc dict) and an int representing the maximum ID (which is None if
+            there was no association to retrieve).
+        :rtype: tuple[dict[int, dict[str, any]] or int or None]
         """
         assocs = {}
 
@@ -119,35 +121,6 @@ class LocalAssociationStore:
                     )
 
             assocs[localId] = signer.signedThreePidAssociation(assoc)
-
-        return assocs, maxId
-=======
->>>>>>> edc80d1
-
-    def getSignedAssociationsAfterId(self, afterId, limit=None):
-        """Get associations after a given ID, and sign them before returning
-
-        :param afterId: The ID to return results after (not inclusive)
-        :type afterId: int
-
-        :param limit: The maximum amount of signed associations to return. None for no
-            limit.
-        :type limit: int|None
-
-        :return: A tuple consisting of a dictionary containing the signed associations
-            (id: assoc dict) and an int representing the maximum ID (which is None if
-            there was no association to retrieve).
-        :rtype: tuple[dict[int, dict[str, any]] or int or None]
-        """
-        assocs = {}
-
-        (localAssocs, maxId) = self.getAssociationsAfterId(afterId, limit)
-
-        signer = Signer(self.sydent)
-
-        for localId in localAssocs:
-            sgAssoc = signer.signedThreePidAssociation(localAssocs[localId])
-            assocs[localId] = sgAssoc
 
         return assocs, maxId
 
