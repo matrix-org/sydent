@@ -62,7 +62,8 @@ class ClientApiHttpServer:
         hash_details = self.sydent.servlets.hash_details
         lookup_v2 = self.sydent.servlets.lookup_v2
 
-        threepid = Resource()
+        threepid_v1 = Resource()
+        threepid_v2 = Resource()
         bind = self.sydent.servlets.threepidBind
         unbind = self.sydent.servlets.threepidUnbind
 
@@ -79,9 +80,10 @@ class ClientApiHttpServer:
         identity.putChild(b'v2', v2)
         api.putChild(b'v1', v1)
 
-        v1.putChild(b'validate', validate)
         validate.putChild(b'email', email)
         validate.putChild(b'msisdn', msisdn)
+
+        v1.putChild(b'validate', validate)
 
         v1.putChild(b'lookup', lookup)
         v1.putChild(b'bulk_lookup', bulk_lookup)
@@ -92,13 +94,19 @@ class ClientApiHttpServer:
         pubkey.putChild(b'ephemeral', ephemeralPubkey)
         ephemeralPubkey.putChild(b'isvalid', self.sydent.servlets.ephemeralPubkeyIsValid)
 
+        threepid_v2.putChild(b'getValidated3pid', getValidated3pid)
+        threepid_v2.putChild(b'bind', bind)
+        threepid_v2.putChild(b'unbind', unbind)
+
+        threepid_v1.putChild(b'getValidated3pid', getValidated3pid)
+        if self.sydent.enable_v1_associations:
+            threepid_v1.putChild(b'bind', bind)
+            threepid_v1.putChild(b'unbind', unbind)
+
+        v1.putChild(b'3pid', threepid_v1)
+
         v1.putChild(b'info', info)
         v1.putChild(b'internal-info', internalInfo)
-
-        v1.putChild(b'3pid', threepid)
-        threepid.putChild(b'bind', bind)
-        threepid.putChild(b'unbind', unbind)
-        threepid.putChild(b'getValidated3pid', getValidated3pid)
 
         email.putChild(b'requestToken', emailReqCode)
         email.putChild(b'submitToken', emailValCode)
@@ -133,7 +141,7 @@ class ClientApiHttpServer:
         # v2 versions of existing APIs
         v2.putChild(b'validate', validate)
         v2.putChild(b'pubkey', pubkey)
-        v2.putChild(b'3pid', threepid)
+        v2.putChild(b'3pid', threepid_v2)
         v2.putChild(b'store-invite', self.sydent.servlets.storeInviteServlet)
         v2.putChild(b'sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
         v2.putChild(b'lookup', lookup_v2)
