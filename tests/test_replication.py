@@ -27,7 +27,7 @@ class ReplicationTestCase(unittest.TestCase):
         # Inject our fake peer into the database.
         cur = self.sydent.db.cursor()
         cur.execute(
-            "INSERT INTO peers (name, port, lastSentVersion, active) VALUES (?, ?, ?, ?)",
+            "INSERT INTO peers (name, port, lastSentAssocsId, active) VALUES (?, ?, ?, ?)",
             ("fake.server", 1234, 0, 1)
         )
         cur.execute(
@@ -83,13 +83,13 @@ class ReplicationTestCase(unittest.TestCase):
             signed_assocs[assoc_id] = signed_assoc
 
         # Send the replication push.
-        body = json.dumps({"sgAssocs": signed_assocs})
+        body = json.dumps({"sg_assocs": signed_assocs})
         request, channel = make_request(
             self.sydent.reactor, "POST", "/_matrix/identity/replicate/v1/push", body
         )
         request.render(self.sydent.servlets.replicationPush)
 
-        self.assertEqual(channel.code, 200)
+        self.assertEqual(channel.code, 200, channel.json_body)
 
         # Check that the recipient Sydent has correctly saved the associations in the
         # push.
@@ -161,7 +161,7 @@ class ReplicationTestCase(unittest.TestCase):
             # postJson calls the agent with a StringIO within a FileBodyProducer, so we
             # need to unpack the payload correctly.
             payload = json.loads(body._inputFile.read())
-            for assoc_id, assoc in payload['sgAssocs'].items():
+            for assoc_id, assoc in payload['sg_assocs'].items():
                 sent_assocs[assoc_id] = assoc
 
             # Return with a fake response wrapped in a Deferred.
