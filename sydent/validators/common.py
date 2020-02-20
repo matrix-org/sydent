@@ -75,6 +75,7 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
 
     if s.token == token:
         logger.info("Setting session %s as validated", s.id)
+        valSessionStore.setValidated(s.id, True)
 
         # If a next_link parameter was provided, store it alongside the token in the
         # database

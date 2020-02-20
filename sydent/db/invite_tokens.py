@@ -126,15 +126,18 @@ class JoinTokenStore(object):
             self.sydent.db.commit()
 
     def getTokens(self, medium, address):
-        """Retrieve the invite token(s) for a given 3PID medium and address.
-        Filters out tokens which have expired.
+        """
+        Retrieves the pending invites tokens for this 3PID that haven't been delivered
+        yet.
 
-        :param medium: The medium of the 3PID.
-        :type medium: str
-        :param address: The address of the 3PID.
-        :type address: str
-        :returns a list of invite tokens, or an empty list if no tokens found.
-        :rtype: list[Dict[str, str]]
+        :param medium: The medium of the 3PID to get tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to get tokens for.
+        :type address: unicode
+
+        :return: A list of dicts, each containing a pending token and its metadata for
+            this 3PID.
+        :rtype: list[dict[str, unicode or dict[str, unicode]]
         """
         cur = self.sydent.db.cursor()
 
@@ -153,6 +156,20 @@ class JoinTokenStore(object):
 
         for row in rows:
             medium, address, roomId, sender, token, origin_server, received_ts = row
+
+            # Ensure we're dealing with unicode.
+            if isinstance(medium, bytes):
+                medium = medium.decode("UTF-8")
+            if isinstance(address, bytes):
+                address = address.decode("UTF-8")
+            if isinstance(roomId, bytes):
+                roomId = roomId.decode("UTF-8")
+            if isinstance(sender, bytes):
+                sender = sender.decode("UTF-8")
+            if isinstance(token, bytes):
+                token = token.decode("UTF-8")
+            if isinstance(origin_server, bytes):
+                origin_server = origin_server.decode("UTF-8")
 
             if (
                 validity_period is not None
@@ -234,12 +251,14 @@ class JoinTokenStore(object):
 
 
     def markTokensAsSent(self, medium, address):
-        """Mark invite tokens as sent.
+        """
+        Updates the invite tokens associated with a given 3PID to mark them as
+        delivered to a homeserver so they're not delivered again in the future.
 
-        :param medium: The medium of the token.
-        :type medium: str
-        :param address: The address of the token.
-        :type address: str
+        :param medium: The medium of the 3PID to update tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to update tokens for.
+        :type address: unicode
         """
         cur = self.sydent.db.cursor()
 
@@ -394,6 +413,14 @@ class JoinTokenStore(object):
         return None
 
     def deleteTokens(self, medium, address):
+        """
+        Deletes every token for a given 3PID.
+
+        :param medium: The medium of the 3PID to delete tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to delete tokens for.
+        :type address: unicode
+        """
         cur = self.sydent.db.cursor()
 
         cur.execute(

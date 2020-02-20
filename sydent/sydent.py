@@ -119,7 +119,6 @@ CONFIG_DEFAULTS = {
     'http': {
         'clientapi.http.bind_address': '::',
         'clientapi.http.port': '8090',
-        # internalapi.http.bind_address defaults to '::1'
         'internalapi.http.bind_address': '::1',
         'internalapi.http.port': '',
         'replication.https.certfile': '',
