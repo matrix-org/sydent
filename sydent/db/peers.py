@@ -119,7 +119,7 @@ class PeerStore:
 
         return peers
 
-    def setLastSentVersionAndPokeSucceeded(self, peerName, ids, lastPokeSucceeded):
+    def setLastSentIdAndPokeSucceeded(self, peerName, ids, lastPokeSucceeded):
         """
         Sets the ID of the last association sent to a given peer and the time of the
         last successful request sent to that peer.
