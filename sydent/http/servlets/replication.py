@@ -127,6 +127,8 @@ class ReplicationPushServlet(Resource):
             sg_assocs.items(), key=lambda k: int(k[0])
         )
 
+        globalAssocsStore = GlobalAssociationStore(self.sydent)
+
         # Check that this message is signed by one of our trusted associated peers
         for originId, sgAssoc in sg_assocs:
             try:
