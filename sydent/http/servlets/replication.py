@@ -75,8 +75,6 @@ class ReplicationPushServlet(Resource):
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
         # Ensure items are pulled out of the dictionary in order of origin_id.
-        # If we process associations out of order, an association with an ID lesser
-        # than a previously processed association will be ignored.
         sg_assocs = inJson.get('sgAssocs', {})
         sg_assocs = sorted(sg_assocs.items())
 
