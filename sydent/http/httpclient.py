@@ -17,8 +17,8 @@ from __future__ import absolute_import
 
 import json
 import logging
+from io import BytesIO
 
-from six import StringIO
 from twisted.internet import defer
 from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers
@@ -88,7 +88,7 @@ class HTTPClient(object):
             b"POST",
             uri.encode("ascii"),
             headers,
-            bodyProducer=FileBodyProducer(StringIO(json_bytes))
+            bodyProducer=FileBodyProducer(BytesIO(json_bytes))
         )
 
         # Ensure the body object is read otherwise we'll leak HTTP connections
