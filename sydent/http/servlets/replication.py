@@ -78,7 +78,9 @@ class ReplicationPushServlet(Resource):
         # If we process associations out of order, an association with an ID lesser
         # than a previously processed association will be ignored.
         sg_assocs = inJson.get('sgAssocs', {})
-        sg_assocs = sorted(sg_assocs.items())
+        sg_assocs = sorted(
+            sg_assocs.items(), key=lambda k: int(k[0])
+        )
 
         for originId, sgAssoc in sg_assocs:
             try:
