@@ -18,7 +18,6 @@ from __future__ import absolute_import
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
-import json
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap
 
@@ -29,11 +28,12 @@ class Ed25519Servlet(Resource):
     def __init__(self, syd):
         self.sydent = syd
 
+    @jsonwrap
     def render_GET(self, request):
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
-        return json.dumps({'public_key': pubKeyBase64})
+        return {'public_key': pubKeyBase64}
 
 class PubkeyIsValidServlet(Resource):
     isLeaf = True
