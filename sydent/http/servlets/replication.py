@@ -121,15 +121,11 @@ class ReplicationPushServlet(Resource):
         #   }
         # }
 
-        # Ensure associations are processed in order of origin_id.
-        # If we process them out of order, an association with an ID lesser
-        # than a previously processed association will be ignored.
-        sg_assocs = inJson.get('sg_assocs', {})
+        # Ensure items are pulled out of the dictionary in order of origin_id.
+        sg_assocs = inJson.get('sgAssocs', {})
         sg_assocs = sorted(
-            sg_assocs.items(), key=lambda k: k[0]
+            sg_assocs.items(), key=lambda k: int(k[0])
         )
-
-        globalAssocsStore = GlobalAssociationStore(self.sydent)
 
         # Check that this message is signed by one of our trusted associated peers
         for originId, sgAssoc in sg_assocs:
