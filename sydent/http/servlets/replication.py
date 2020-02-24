@@ -76,7 +76,9 @@ class ReplicationPushServlet(Resource):
 
         # Ensure items are pulled out of the dictionary in order of origin_id.
         sg_assocs = inJson.get('sgAssocs', {})
-        sg_assocs = sorted(sg_assocs.items())
+        sg_assocs = sorted(
+            sg_assocs.items(), key=lambda k: int(k[0])
+        )
 
         for originId, sgAssoc in sg_assocs:
             try:
