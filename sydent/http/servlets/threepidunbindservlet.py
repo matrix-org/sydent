@@ -50,7 +50,8 @@ class ThreePidUnbindServlet(Resource):
     def _async_render_POST(self, request):
         try:
             try:
-                body = json.load(request.content)
+                # json.loads doesn't allow bytes in Python 3.5
+                body = json.loads(request.content.read().decode("UTF-8"))
             except ValueError:
                 request.setResponseCode(400)
                 request.write(dict_to_json_bytes({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
