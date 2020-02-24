@@ -94,9 +94,9 @@ class ClientApiHttpServer:
         threepid_v2.putChild(b'unbind', unbind)
 
         threepid_v1.putChild(b'getValidated3pid', getValidated3pid)
+        threepid_v1.putChild(b'unbind', unbind)
         if self.sydent.enable_v1_associations:
             threepid_v1.putChild(b'bind', bind)
-            threepid_v1.putChild(b'unbind', unbind)
 
         v1.putChild(b'3pid', threepid_v1)
 
