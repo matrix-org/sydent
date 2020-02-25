@@ -97,37 +97,9 @@ virtualenv activated from the root of the Sydent repository::
 
      trial tests
 
-Requests
-========
 
-The requests that synapse servers and clients submit to the identity server are, briefly, as follows:
-
-Request the validation of your email address::
-
-    curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/requestToken' -H "Content-Type: application/json" -d '{"email": "matthew@arasphere.net", "client_secret": "abcd", "send_attempt": 1}'
-    {"success": true, "sid": "1"}
-
-(Receive 943258 by mail)
-
-Use this code to validate your email address::
-
-    curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/validate/email/submitToken' -H "Content-Type: application/json" -d '{"token": "943258", "sid": "1", "client_secret": "abcd"}'
-    {"success": true}
-
-Use the validated email address to bind it to a matrix ID::
-
-    curl -XPOST 'http://localhost:8090/_matrix/identity/api/v1/3pid/bind' -H "Content-Type: application/json" -d '{"sid": "1", "client_secret": "abcd", "mxid": "%40matthew%3amatrix.org"}'
-
-Lookup::
-
-    curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=henry%40matrix.org'
-
-Fetch pubkey key for a server::
-
-    curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519:0
-
-Internal bind and unbind api
-----------------------------
+Internal bind and unbind API
+============================
 
 It is possible to enable an internal API which allows for binding and unbinding
 between identifiers and matrix IDs without any validation.
@@ -162,6 +134,7 @@ To use unbind::
 
 The response has the same format as
 `/_matrix/identity/api/v1/3pid/unbind <https://matrix.org/docs/spec/identity_service/r0.3.0#deprecated-post-matrix-identity-api-v1-3pid-unbind>`_.
+
 
 Replication
 ===========
