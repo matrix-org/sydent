@@ -20,8 +20,8 @@ To create the virtual environment in which Sydent will run, run::
     pip install --upgrade setuptools
 
 
-Installing using `pip`
-----------------------
+Installing the latest Sydent release from PyPI
+----------------------------------------------
 
 Sydent and its dependencies can be installed using ``pip`` by running::
 
@@ -30,7 +30,7 @@ Sydent and its dependencies can be installed using ``pip`` by running::
 Installing from source
 ----------------------
 
-An alternative installation method can be to clone this repository and install it in an editable install using ``pip``::
+Alternatively, Sydent can be installed using ``pip`` from a local git checkout::
 
     git clone https://github.com/matrix-org/sydent.git
     cd sydent
@@ -45,17 +45,17 @@ With the virtualenv activated, you can run Sydent using::
     python -m sydent.sydent
 
 This will create a configuration file in ``sydent.conf`` with some defaults. If a setting is
-defined in both the ``[DEFAULT]`` section and another section in that configuration file,
-then the value in that other section is used.
+defined in both the ``[DEFAULT]`` section and another section in the configuration file,
+then the value in the other section is used.
 
-You'll most likely want to change the server name (``server.name``) and specify a mail relay
+You'll most likely want to change the server name (``server.name``) and specify an email server
 (look for the settings starting with ``email.``).
 
 By default, Sydent will listen on ``0.0.0.0:8090``. This can be changed by changing the values for
 the configuration settings ``clientapi.http.bind_address`` and ``clientapi.http.port``.
 
 Sydent uses SQLite as its database backend. By default, it will create the database as ``sydent.db``
-in its working directory. You can override that by setting the ``db.file`` configuration setting.
+in its working directory. The name can be overridden by modifying the ``db.file`` configuration option.
 Sydent is known to be working with SQLite version 3.16.2 and later.
 
 SMS originators
