@@ -12,7 +12,7 @@ Features
 --------
  * Implement the items and MSCs from the [privacy project](https://matrix.org/blog/2019/09/27/privacy-improvements-in-synapse-1-4-and-riot-1-4)
    targeting identity servers
- * Add Python 3 compatibility to all of the codebase
+ * Add Python 3 compatibility to all of the codebase. Python 2 is still supported for now.
  * Delete stored invites upon successful delivery to a homeserver
  * Filter out delivered invites when delivering invites to a homeserver upon
    successful binding
@@ -22,7 +22,7 @@ Features
  * Handle `.well-known` files when talking to homeservers
  * Validate `client_secret` parameters according to the Matrix specification
  * Return 400/404 on incorrect session validation
- * Add a default 10,000 address limit on `/lookup`
+ * Add a default 10,000 address limit on v2 `/lookup` (which supports multiple lookups at once)
 
 Documentation
 -------------
