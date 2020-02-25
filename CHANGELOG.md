@@ -11,7 +11,8 @@ for more details.
 Features
 --------
  * Implement the items and MSCs from the [privacy project](https://matrix.org/blog/2019/09/27/privacy-improvements-in-synapse-1-4-and-riot-1-4)
-   targeting identity servers
+   targeting identity servers. This introduces v2 APIs for every existing endpoint. v1 APIs are now deprecated and
+   homeserver and client developers are encouraged to migrate their applications to the v2 APIs.
  * Add Python 3 compatibility to all of the codebase. Python 2 is still supported for now.
  * Delete stored invites upon successful delivery to a homeserver
  * Filter out delivered invites when delivering invites to a homeserver upon
