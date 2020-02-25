@@ -23,14 +23,14 @@ To create the virtual environment in which Sydent will run, run::
 Installing using `pip`
 ----------------------
 
-Sydent and its dependencies can be installed using `pip` by running::
+Sydent and its dependencies can be installed using ``pip`` by running::
 
     pip install matrix-sydent
 
 Installing from source
 ----------------------
 
-An alternative installation method can be to clone this repository and install it in an editable install via pip::
+An alternative installation method can be to clone this repository and install it in an editable install using ``pip``::
 
     git clone https://github.com/matrix-org/sydent.git
     cd sydent
@@ -45,28 +45,28 @@ With the virtualenv activated, you can run Sydent using::
     python -m sydent.sydent
 
 This will create a configuration file in sydent.conf with some defaults. If a setting is
-defined in both the `[DEFAULT]` section and another section in that configuration file,
+defined in both the ``[DEFAULT]`` section and another section in that configuration file,
 then the value in that other section is used.
 
-You'll most likely want to change the server name (`server.name`) and specify a mail relay
-(look for the settings starting with `email.`).
+You'll most likely want to change the server name (``server.name``) and specify a mail relay
+(look for the settings starting with ``email.``).
 
-By default, Sydent will listen on `0.0.0.0:8090`. This can be changed by changing the values for
-the configuration settings `clientapi.http.bind_address` and `clientapi.http.port`.
+By default, Sydent will listen on ``0.0.0.0:8090``. This can be changed by changing the values for
+the configuration settings ``clientapi.http.bind_address`` and ``clientapi.http.port``.
 
-Sydent uses SQLite as its database backend. By default, it will create the database as `sydent.db`
-in its working directory. You can override that by setting the `db.file` configuration setting.
+Sydent uses SQLite as its database backend. By default, it will create the database as ``sydent.db``
+in its working directory. You can override that by setting the ``db.file`` configuration setting.
 Sydent is known to be working with SQLite version 3.16.2 and later.
 
 SMS originators
 ---------------
 
 Defaults for SMS originators will not be added to the generated config file, these should
-be added to the `[sms]` section of that config file in the form::
+be added to the ``[sms]`` section of that config file in the form::
 
     originators.<country code> = <long|short|alpha>:<originator>
 
-Where country code is the numeric country code, or 'default' to specify the originator
+Where country code is the numeric country code, or ``default`` to specify the originator
 used for countries not listed. For example, to use a selection of long codes for the
 US/Canada, a short code for the UK and an alphanumertic originator for everywhere else::
 
@@ -84,16 +84,16 @@ This can be run as follows::
     pip install git+https://github.com/matrix-org/matrix-is-tester.git
     trial matrix_is_tester
 
-The SYDENT_PYTHON enviroment variable can be set to launch sydent with a specific python binary::
+The ``SYDENT_PYTHON`` enviroment variable can be set to launch sydent with a specific python binary::
 
     SYDENT_PYTHON=/path/to/python trial matrix_is_tester
 
-The `matrix_is_test` directory contains sydent's launcher for `matrix_is_tester`: this needs to be on the
-python path (e.g. `PYTHONPATH=/path/to/sydent`).
+The ``matrix_is_test`` directory contains sydent's launcher for ``matrix_is_tester``: this needs to be on the
+python path (e.g. ``PYTHONPATH=/path/to/sydent``).
 
 Sydent also has some unit tests to ensure some of its features that aren't part of the Matrix
 specification (e.g. replication) keep on working. To run these tests, run the following with Sydent's
-virtualenv activated::
+virtualenv activated from the root of the Sydent repository::
 
      trial tests
 
@@ -133,15 +133,15 @@ It is possible to enable an internal API which allows for binding and unbinding
 between identifiers and matrix IDs without any validation.
 This is open to abuse, so is disabled by
 default, and when it is enabled, is available only on a separate socket which
-is bound to `localhost` by default.
+is bound to ``localhost`` by default.
 
 To enable it, configure the port in the config file. For example::
 
     [http]
     internalapi.http.port = 8091
 
-To change the address to which that API is bound, set the `internalapi.http.bind_address` configuration
-setting in the `[http]` section, for example::
+To change the address to which that API is bound, set the ``internalapi.http.bind_address`` configuration
+setting in the ``[http]`` section, for example::
 
     [http]
     internalapi.http.port = 8091
