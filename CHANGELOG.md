@@ -15,7 +15,7 @@ Features
  * Handle `.well-known` files when talking to homeservers
  * Validate `client_secret` parameters according to the Matrix specification
  * Return 400/404 on incorrect session validation
- * Add a default 10,000 address /lookup limit
+ * Add a default 10,000 address limit on `/lookup`
 
 Bugfixes
 --------
@@ -25,10 +25,9 @@ Bugfixes
  * Fix a bug where multiple cleanup tasks would be unnecessary spawned
  * Fix logging so Sydent doesn't log 3PIDs when processing lookup requests
  * Fix incorrect HTTP response from `/3pid/getValidated3pid` endpoint on
-   failure. [#216](https://github.com/matrix-org/sydent/pull/216)
+   failure.
  * Prevent a single failure from aborting the federation loop
- * Fix federation lookups in onbind callbacks
- * Have 'mappings' contain medium as well as address
+ * Fix federation lookups in `/onBind` callbacks
  * Don't fail the unbind request if the binding doesn't exist
  * Fix the signing servlet missing a reference to the Sydent object
  * Fix content types & OPTIONS requests
@@ -36,7 +35,6 @@ Bugfixes
 Internal changes
 ----------------
 
- * Improve performance of hashed lookups
  * Add unit tests to test startup and replication
  * Add support for testing with `matrix-is-tester`
  * Remove instances of `setResponseCode(200)`
