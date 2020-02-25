@@ -1,6 +1,13 @@
 Changes in [2.0.0](https://github.com/matrix-org/sydent/releases/tag/v2.0.0) (2020-02-25)
 =========================================================================================
 
+**Note:** Starting with this release, Sydent releases are available on
+[PyPI](https://pypi.org/project/matrix-sydent). This means that the
+recommended method for stable installations is now by using the PyPI
+project rather than a tarball of the `master` branch of this repository.
+See [the README](https://github.com/matrix-org/sydent/blob/v2.0.0/README.rst)
+for more details.
+
 Features
 --------
  * Implement the items and MSC from the [privacy project](https://matrix.org/blog/2019/09/27/privacy-improvements-in-synapse-1-4-and-riot-1-4)
