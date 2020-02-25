@@ -88,8 +88,8 @@ The ``SYDENT_PYTHON`` enviroment variable can be set to launch Sydent with a spe
 
     SYDENT_PYTHON=/path/to/python trial matrix_is_tester
 
-The ``matrix_is_test`` directory contains Sydent's launcher for ``matrix_is_tester``: this needs to be on the
-python path (e.g. ``PYTHONPATH=/path/to/sydent``).
+The ``matrix_is_test`` directory contains Sydent's launcher for ``matrix_is_tester``: this means
+that Sydent's directory needs to be on the Python path (e.g. ``PYTHONPATH=/path/to/sydent``).
 
 Sydent also has some unit tests to ensure some of its features that aren't part of the Matrix
 specification (e.g. replication) keep on working. To run these tests, run the following with Sydent's
