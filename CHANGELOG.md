@@ -17,6 +17,11 @@ Features
  * Return 400/404 on incorrect session validation
  * Add a default 10,000 address limit on `/lookup`
 
+Documentation
+-------------
+
+ * Rewrite part of the README to make it more user-friendly
+
 Bugfixes
 --------
 
