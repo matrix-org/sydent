@@ -17,8 +17,7 @@ from __future__ import absolute_import
 
 import logging
 import json
-
-from six import StringIO
+from io import BytesIO
 
 from zope.interface import implementer
 
@@ -66,8 +65,10 @@ class ReplicationHttpsClient:
             return
 
         headers = Headers({'Content-Type': ['application/json'], 'User-Agent': ['Sydent']})
+
+        json_bytes = json.dumps(jsonObject).encode("utf8")
         reqDeferred = self.agent.request(b'POST', uri.encode('utf8'), headers,
-                                         FileBodyProducer(StringIO(json.dumps(jsonObject))))
+                                         FileBodyProducer(BytesIO(json_bytes)))
 
         return reqDeferred
 
