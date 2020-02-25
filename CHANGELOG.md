@@ -8,6 +8,10 @@ project rather than a tarball of the `master` branch of this repository.
 See [the README](https://github.com/matrix-org/sydent/blob/v2.0.0/README.rst)
 for more details.
 
+**Warning:** This release deprecates v1 APIs for existing endpoints in favour
+of v2 APIs. Homeserver and client developers are encouraged to migrate their
+applications to the v2 APIs. See below for more information.
+
 Features
 --------
  * Implement the items and MSCs from the [privacy project](https://matrix.org/blog/2019/09/27/privacy-improvements-in-synapse-1-4-and-riot-1-4)
