@@ -10,7 +10,7 @@ for more details.
 
 Features
 --------
- * Implement the items and MSC from the [privacy project](https://matrix.org/blog/2019/09/27/privacy-improvements-in-synapse-1-4-and-riot-1-4)
+ * Implement the items and MSCs from the [privacy project](https://matrix.org/blog/2019/09/27/privacy-improvements-in-synapse-1-4-and-riot-1-4)
    targeting identity servers
  * Add Python 3 compatibility to all of the codebase
  * Delete stored invites upon successful delivery to a homeserver
