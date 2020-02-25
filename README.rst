@@ -12,7 +12,7 @@ To install Sydent's dependencies on a Debian-based system, run::
 Creating the virtualenv
 -----------------------
 
-To create the virtual environment in which Sydent will run, run::
+To create the virtual environment in which Sydent will run::
 
     virtualenv -p python3 ~/.sydent
     source ~/.sydent/bin/activate
