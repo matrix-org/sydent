@@ -47,7 +47,7 @@ class HTTPClient(object):
 
         response = yield self.agent.request(
             b"GET",
-            uri.encode("ascii"),
+            uri.encode("utf8"),
         )
         body = yield readBody(response)
         try:
@@ -76,7 +76,7 @@ class HTTPClient(object):
         :return: a response from the remote server.
         :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
-        json_bytes = json.dumps(post_json).encode("ascii")
+        json_bytes = json.dumps(post_json).encode("utf8")
 
         headers = opts.get('headers', Headers({
             b"Content-Type": [b"application/json"],
@@ -86,7 +86,7 @@ class HTTPClient(object):
 
         response = yield self.agent.request(
             b"POST",
-            uri.encode("ascii"),
+            uri.encode("utf8"),
             headers,
             bodyProducer=FileBodyProducer(BytesIO(json_bytes))
         )
