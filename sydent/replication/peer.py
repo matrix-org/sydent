@@ -237,11 +237,11 @@ class RemotePeer(Peer):
         callback of the provided deferred.
 
         :param body: The response body.
-        :type body: str
+        :type body: bytes
         :param updateDeferred: The deferred to call the error callback of.
         :type updateDeferred: twisted.internet.defer.Deferred
         """
-        errObj = json.loads(body)
+        errObj = json.loads(body.decode("utf8"))
         e = RemotePeerError()
         e.errorDict = errObj
         updateDeferred.errback(e)
