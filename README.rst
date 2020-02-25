@@ -44,7 +44,7 @@ With the virtualenv activated, you can run Sydent using::
 
     python -m sydent.sydent
 
-This will create a configuration file in sydent.conf with some defaults. If a setting is
+This will create a configuration file in ``sydent.conf`` with some defaults. If a setting is
 defined in both the ``[DEFAULT]`` section and another section in that configuration file,
 then the value in that other section is used.
 
@@ -84,11 +84,11 @@ This can be run as follows::
     pip install git+https://github.com/matrix-org/matrix-is-tester.git
     trial matrix_is_tester
 
-The ``SYDENT_PYTHON`` enviroment variable can be set to launch sydent with a specific python binary::
+The ``SYDENT_PYTHON`` enviroment variable can be set to launch Sydent with a specific python binary::
 
     SYDENT_PYTHON=/path/to/python trial matrix_is_tester
 
-The ``matrix_is_test`` directory contains sydent's launcher for ``matrix_is_tester``: this needs to be on the
+The ``matrix_is_test`` directory contains Sydent's launcher for ``matrix_is_tester``: this needs to be on the
 python path (e.g. ``PYTHONPATH=/path/to/sydent``).
 
 Sydent also has some unit tests to ensure some of its features that aren't part of the Matrix
