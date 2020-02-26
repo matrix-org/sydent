@@ -153,7 +153,7 @@ class ReplicationTestCase(unittest.TestCase):
             :param headers: The headers of the request.
             :type headers: twisted.web.http_headers.Headers
             :param body: The body of the request.
-            :type body: twisted.web.client.FileBodyProducer[six.StringIO]
+            :type body: twisted.web.client.FileBodyProducer[io.BytesIO]
 
             :return: A deferred that resolves into a 200 OK response.
             :rtype: twisted.internet.defer.Deferred[Response]
@@ -162,9 +162,9 @@ class ReplicationTestCase(unittest.TestCase):
             assert method == b'POST'
             assert uri == b'https://fake.server:1234/_matrix/identity/replicate/v1/push'
 
-            # postJson calls the agent with a StringIO within a FileBodyProducer, so we
+            # postJson calls the agent with a BytesIO within a FileBodyProducer, so we
             # need to unpack the payload correctly.
-            payload = json.loads(body._inputFile.read())
+            payload = json.loads(body._inputFile.read().decode("utf8"))
             for assoc_id, assoc in payload['sgAssocs'].items():
                 sent_assocs[assoc_id] = assoc
 
