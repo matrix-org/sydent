@@ -61,10 +61,18 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
     # If so, and the next_link this time around is different, then the
     # user may be getting phished. Reject the validation attempt.
     if next_link and valSessionStore.next_link_differs(sid, token, next_link):
-        logger.info(
+        logger.warn(
             "Validation attempt rejected as provided 'next_link' is different "
             "from that in a previous, successful validation attempt with this "
             "session id"
+        )
+        raise NextLinkValidationException()
+
+    # Validate the value of next_link against the configured regex
+    if next_link and sydent.next_link_valid_regex.match(next_link) is None:
+        logger.warn(
+            "Validation attempt rejected as provided 'next_link' value is not "
+            "approved by the configured general.next_link.valid_regex value"
         )
         raise NextLinkValidationException()
 

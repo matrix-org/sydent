@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 from twisted.web.resource import Resource
 
 from sydent.util.emailutils import EmailAddressException, EmailSendException
@@ -25,6 +26,8 @@ from sydent.validators import (
 from sydent.util.stringutils import is_valid_client_secret
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+
+logger = logging.getLogger(__name__)
 
 
 class EmailRequestCodeServlet(Resource):
@@ -59,6 +62,14 @@ class EmailRequestCodeServlet(Resource):
         nextLink = None
         if 'next_link' in args and not args['next_link'].startswith("file:///"):
             nextLink = args['next_link']
+
+        # Validate the value of next_link against the configured regex
+        if nextLink and self.sydent.next_link_valid_regex.match(nextLink) is None:
+            logger.warn(
+                "Validation attempt rejected as provided 'next_link' value is not "
+                "approved by the configured general.next_link.valid_regex value"
+            )
+            return {'errcode': 'M_UNKNOWN', 'error': 'Invalid next_link'}
 
         resp = None
 

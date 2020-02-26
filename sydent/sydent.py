@@ -20,6 +20,7 @@ import ConfigParser
 import logging
 import logging.handlers
 import os
+import re
 
 import twisted.internet.reactor
 from twisted.python import log
@@ -86,6 +87,9 @@ CONFIG_DEFAULTS = {
         # Path to file detailing the configuration of the /info and /internal-info servlets.
         # More information can be found in docs/info.md.
         'info_path': 'info.yaml',
+        # A regex used to validate the next_link query parameter provided by the
+        # client to the /requestToken and /submitToken endpoints
+        'next_link.valid_regex': '.*'
     },
     'db': {
         'db.file': 'sydent.db',
@@ -183,6 +187,10 @@ class Sydent:
         self.user_dir_allowed_hses = set(list_from_comma_sep_string(
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
         ))
+
+        self.next_link_valid_regex = re.compile(
+            self.cfg.get('general', 'next_link.valid_regex')
+        )
 
         self.invites_validity_period = parse_duration(
             self.cfg.get('general', 'invites.validity_period'),
