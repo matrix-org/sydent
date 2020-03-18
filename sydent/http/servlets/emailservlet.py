@@ -69,7 +69,7 @@ class EmailRequestCodeServlet(Resource):
                 "Validation attempt rejected as provided 'next_link' value is not "
                 "approved by the configured general.next_link.valid_regex value"
             )
-            return {'errcode': 'M_UNKNOWN', 'error': 'Invalid next_link'}
+            return {'errcode': 'M_INVALID_PARAM', 'error': 'Invalid next_link'}
 
         resp = None
 
