@@ -87,9 +87,10 @@ CONFIG_DEFAULTS = {
         # Path to file detailing the configuration of the /info and /internal-info servlets.
         # More information can be found in docs/info.md.
         'info_path': 'info.yaml',
-        # A regex used to validate the next_link query parameter provided by the
-        # client to the /requestToken and /submitToken endpoints
-        'next_link.valid_regex': '.*'
+        # A comma-separated domain whitelist used to validate the next_link query parameter
+        # provided by the client to the /requestToken and /submitToken endpoints
+        # If empty, no whitelist is applied
+        'next_link.domain_whitelist': ''
     },
     'db': {
         'db.file': 'sydent.db',
@@ -188,9 +189,9 @@ class Sydent:
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
         ))
 
-        self.next_link_valid_regex = re.compile(
-            self.cfg.get('general', 'next_link.valid_regex')
-        )
+        self.next_link_domain_whitelist = set(list_from_comma_sep_string(
+            self.cfg.get('general', 'next_link.domain_whitelist')
+        ))
 
         self.invites_validity_period = parse_duration(
             self.cfg.get('general', 'invites.validity_period'),

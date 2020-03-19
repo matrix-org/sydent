@@ -9,6 +9,7 @@ from sydent.validators import (
 )
 from sydent.util import time_msec
 from sqlite3 import IntegrityError
+from urlparse import urlparse
 
 
 logger = logging.getLogger(__name__)
@@ -61,18 +62,20 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
     # If so, and the next_link this time around is different, then the
     # user may be getting phished. Reject the validation attempt.
     if next_link and valSessionStore.next_link_differs(sid, token, next_link):
-        logger.warn(
+        logger.warning(
             "Validation attempt rejected as provided 'next_link' is different "
             "from that in a previous, successful validation attempt with this "
             "session id"
         )
         raise NextLinkValidationException()
 
-    # Validate the value of next_link against the configured regex
-    if next_link and sydent.next_link_valid_regex.match(next_link) is None:
-        logger.warn(
+    # Validate the value of next_link
+    if next_link and validate_next_link(sydent, next_link):
+        logger.warning(
             "Validation attempt rejected as provided 'next_link' value is not "
-            "approved by the configured general.next_link.valid_regex value"
+            "http(s) or domain does not match "
+            "general.next_link.domain_whitelist config value: %s",
+            next_link,
         )
         raise NextLinkValidationException()
 
@@ -124,3 +127,34 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
     else:
         logger.info("Incorrect token submitted")
         return False
+
+
+def validate_next_link(sydent, next_link):
+    """Return whether a given next_link value is valid. next_link is valid if the scheme is
+    http(s) and the next_link.domain_whitelist config option is either empty or contains a
+    domain that matches the one in the given next_link
+
+    :param sydent: A global sydent object
+    :type sydent: Sydent
+
+    :param next_link: The value of the next_link query parameter
+    :type next_link: str
+
+    :returns: Whether a given next_link value is valid
+    :rtype: bool
+    """
+    # Parse the contents of the URL
+    next_link_parsed = urlparse(next_link)
+
+    # Scheme must be http(s)
+    if next_link_parsed.scheme not in ["http", "https"]:
+        return False
+
+    # If the domain whitelist is set, the domain must be in it
+    if (
+            sydent.next_link_domain_whitelist
+            and next_link_parsed.hostname not in sydent.next_link_domain_whitelist
+    ):
+        return False
+
+    return True

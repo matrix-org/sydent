@@ -23,6 +23,7 @@ from sydent.validators import (
     IncorrectClientSecretException,
     NextLinkValidationException,
 )
+from sydent.validators.common import validate_next_link
 from sydent.util.stringutils import is_valid_client_secret
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
@@ -60,16 +61,17 @@ class EmailRequestCodeServlet(Resource):
         ipaddress = self.sydent.ip_from_request(request)
 
         nextLink = None
-        if 'next_link' in args and not args['next_link'].startswith("file:///"):
+        if 'next_link' in args:
             nextLink = args['next_link']
 
-        # Validate the value of next_link against the configured regex
-        if nextLink and self.sydent.next_link_valid_regex.match(nextLink) is None:
-            logger.warn(
-                "Validation attempt rejected as provided 'next_link' value is not "
-                "approved by the configured general.next_link.valid_regex value"
-            )
-            return {'errcode': 'M_INVALID_PARAM', 'error': 'Invalid next_link'}
+            if not validate_next_link(self.sydent, nextLink):
+                logger.warning(
+                    "Validation attempt rejected as provided 'next_link' value is not "
+                    "http(s) or domain does not match "
+                    "general.next_link.domain_whitelist config value: %s",
+                    nextLink,
+                )
+                return {'errcode': 'M_INVALID_PARAM', 'error': 'Invalid next_link'}
 
         resp = None
 
