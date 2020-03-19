@@ -40,7 +40,9 @@ setup(
     install_requires=[
         "signedjson==1.0.0",
         "unpaddedbase64==1.1.0",
-        "Twisted>=16.0.0",
+
+        # We require defer.Deferred.addTimeout, which was introduced in 16.5
+        "Twisted>=16.5.0",
 
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
