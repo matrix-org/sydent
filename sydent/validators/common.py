@@ -70,7 +70,7 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
         raise NextLinkValidationException()
 
     # Validate the value of next_link
-    if next_link and validate_next_link(sydent, next_link):
+    if next_link and not validate_next_link(sydent, next_link):
         logger.warning(
             "Validation attempt rejected as provided 'next_link' value is not "
             "http(s) or domain does not match "
@@ -152,8 +152,8 @@ def validate_next_link(sydent, next_link):
 
     # If the domain whitelist is set, the domain must be in it
     if (
-            sydent.next_link_domain_whitelist
-            and next_link_parsed.hostname not in sydent.next_link_domain_whitelist
+        sydent.next_link_domain_whitelist is not None
+        and next_link_parsed.hostname not in sydent.next_link_domain_whitelist
     ):
         return False
 
