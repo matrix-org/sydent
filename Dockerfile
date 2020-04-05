@@ -12,7 +12,9 @@ RUN cd /sydent \
     && pip install -e .
 
 ENV SYDENT_CONF=/data/sydent.conf
+ENV SYDENT_PID_FILE=/data/sydent.pid
 ENV SYDENT_DB_PATH=/data/sydent.db
+
 VOLUME ["/data"]
 EXPOSE 8090/tcp
 ENTRYPOINT [ "python", "-m", "sydent.sydent" ]
