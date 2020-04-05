@@ -8,7 +8,7 @@ RUN apk add --no-cache --virtual .nacl_deps \
 COPY . /sydent
 WORKDIR /sydent
 RUN cd /sydent \
-    && pip install --upgrade pip setuptools \
+    && pip install --upgrade pip setuptools sentry-sdk \
     && pip install -e .
 
 ENV SYDENT_CONF=/data/sydent.conf
