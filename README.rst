@@ -80,6 +80,23 @@ Docker
 A Dockerfile is provided for sydent. To use it, run ``docker build -t sydent .`` in a sydent checkout.
 To run it, use ``docker run --env=SYDENT_SERVER_NAME=my-sydent-server --mount type=volume,source=sydent-data,destination=/data sydent``.
 
+Environment variables
+---------------------
+
+.. warning:: These variables are only taken into account at the first start and written to the configuration file.
+
++--------------------+-----------------+-----------------------+
+| Variable Name      | Sydent default  | Docker default        |
++====================+=================+=======================+
+| SYDENT_SERVER_NAME | *empty*         | *empty*               |
++--------------------+-----------------+-----------------------+
+| SYDENT_CONF        | ``sydent.conf`` | ``/data/sydent.conf`` |
++--------------------+-----------------+-----------------------+
+| SYDENT_PID_FILE    | ``sydent.pid``  | ``/data/sydent.pid``  |
++--------------------+-----------------+-----------------------+
+| SYDENT_DB_PATH     | ``sydent.db``   | ``/data/sydent.db``   |
++--------------------+-----------------+-----------------------+
+
 Testing
 =======
 
