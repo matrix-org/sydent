@@ -77,7 +77,8 @@ US/Canada, a short code for the UK and an alphanumertic originator for everywher
 Docker
 ======
 
-A Dockerfile is provided for sydent. To use it, run ``docker build -t sydent .`` in a sydent checkout. To run it, use ``docker run -v /path/to/mount:/data sydent``.
+A Dockerfile is provided for sydent. To use it, run ``docker build -t sydent .`` in a sydent checkout.
+To run it, use ``docker run --env=SYDENT_SERVER_NAME=my-sydent-server --mount type=volume,source=sydent-data,destination=/data sydent``.
 
 Testing
 =======
