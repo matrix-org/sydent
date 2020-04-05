@@ -9,7 +9,7 @@ COPY . /sydent
 WORKDIR /sydent
 RUN cd /sydent \
     && pip install --upgrade pip setuptools \
-    && pip install --upgrade .
+    && pip install -e .
 
 ENV SYDENT_CONF=/data/sydent.conf
 ENV SYDENT_DB_PATH=/data/sydent.db
