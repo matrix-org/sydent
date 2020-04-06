@@ -1,6 +1,9 @@
+# Development files
 *.pyc
 .idea/
+*.iml
 
+# Runtime files
 sydent.conf
 sydent.db
 /matrix_is_test/sydent.stderr
