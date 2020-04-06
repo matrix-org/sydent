@@ -9,17 +9,21 @@ RUN apk add --no-cache \
         libressl-dev \
         libffi-dev
 
+# Add user sydent
+RUN adduser -D --home /sydent sydent \
+    && echo "sydent:$(dd if=/dev/random bs=32 count=1 | base64)" | chpasswd
+
 # Copy resources
-COPY ["res", "/sydent/res"]
-COPY ["scripts", "/sydent/scripts"]
-COPY ["sydent", "/sydent/sydent"]
-COPY ["README.rst", "setup.cfg", "setup.py", "/sydent/"]
+COPY --chown=sydent:sydent ["res", "/sydent/res"]
+COPY --chown=sydent:sydent ["scripts", "/sydent/scripts"]
+COPY --chown=sydent:sydent ["sydent", "/sydent/sydent"]
+COPY --chown=sydent:sydent ["README.rst", "setup.cfg", "setup.py", "/sydent/"]
 
 # Install dependencies
 RUN cd /sydent \
-    && pip install --user --upgrade pip setuptools sentry-sdk \
-    && pip install --user -e . \
-    && rm -rf /root/.cache \
+    && su sydent -c 'pip install --user --upgrade pip setuptools sentry-sdk' \
+    && su sydent -c 'pip install --user -e .' \
+    && rm -rf /sydent/.cache \
     && find /sydent -name '*.pyc' -delete
 
 #
@@ -33,8 +37,13 @@ RUN apk add --no-cache \
         libressl \
         libffi
 
-# Copy dependencies and sydent
-COPY --from=builder ["/root/.local", "/root/.local"]
+# Add user sydent and create /data directory
+RUN adduser -D --home /sydent sydent \
+    && echo "sydent:$(dd if=/dev/random bs=32 count=1 | base64)" | chpasswd \
+    && mkdir /data \
+    && chown sydent:sydent /data
+
+# Copy sydent
 COPY --from=builder ["/sydent", "/sydent"]
 
 ENV SYDENT_CONF=/data/sydent.conf
@@ -42,6 +51,7 @@ ENV SYDENT_PID_FILE=/data/sydent.pid
 ENV SYDENT_DB_PATH=/data/sydent.db
 
 WORKDIR /sydent
+USER sydent:sydent
 VOLUME ["/data"]
 EXPOSE 8090/tcp
 CMD [ "python", "-m", "sydent.sydent" ]
