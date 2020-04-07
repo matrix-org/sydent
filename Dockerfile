@@ -10,7 +10,8 @@ RUN apk add --no-cache \
         libffi-dev
 
 # Add user sydent
-RUN adduser -D --home /sydent sydent \
+RUN addgroup -S -g 993 sydent \
+    && adduser -D --home /sydent -S -u 993 -G sydent -s /bin/ash sydent \
     && echo "sydent:$(dd if=/dev/random bs=32 count=1 | base64)" | chpasswd
 
 # Copy resources
@@ -38,7 +39,8 @@ RUN apk add --no-cache \
         libffi
 
 # Add user sydent and create /data directory
-RUN adduser -D --home /sydent sydent \
+RUN addgroup -S -g 993 sydent \
+    && adduser -D --home /sydent -S -u 993 -G sydent -s /bin/ash sydent \
     && echo "sydent:$(dd if=/dev/random bs=32 count=1 | base64)" | chpasswd \
     && mkdir /data \
     && chown sydent:sydent /data
