@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from six import string_types
 import nacl.signing
 import random
 import string
@@ -76,9 +77,9 @@ class StoreInviteServlet(Resource):
         tokenStore.storeToken(medium, address, roomId, sender, token)
 
         substitutions = {}
-        for key, values in request.args.items():
-            if len(values) == 1 and type(values[0]) == str:
-                substitutions[key] = values[0]
+        for key, value in args.items():
+            if value and isinstance(value, string_types):
+                substitutions[key] = value
         substitutions["token"] = token
 
         required = [
