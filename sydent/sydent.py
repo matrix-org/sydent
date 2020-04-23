@@ -58,11 +58,14 @@ from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from sydent.http.servlets.replication import ReplicationPushServlet
 from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
+from sydent.http.servlets.infoservlet import InfoServlet
+from sydent.http.servlets.internalinfoservlet import InternalInfoServlet
 from sydent.http.servlets.v1_servlet import V1Servlet
 from sydent.http.servlets.accountservlet import AccountServlet
 from sydent.http.servlets.registerservlet import RegisterServlet
 from sydent.http.servlets.logoutservlet import LogoutServlet
 from sydent.http.servlets.v2_servlet import V2Servlet
+from sydent.http.info import Info
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -92,6 +95,7 @@ CONFIG_DEFAULTS = {
 
         # Whether clients and homeservers can register an association using v1 endpoints.
         'enable_v1_associations': 'true',
+        'info_path': 'info.yaml',
     },
     'db': {
         'db.file': 'sydent.db',
@@ -223,6 +227,10 @@ class Sydent:
         self.servlets.accountServlet = AccountServlet(self)
         self.servlets.registerServlet = RegisterServlet(self)
         self.servlets.logoutServlet = LogoutServlet(self)
+
+        info = Info(self, self.cfg.get("general", "info_path"))
+        self.servlets.info = InfoServlet(self, info)
+        self.servlets.internalInfo = InternalInfoServlet(self, info)
 
         self.threepidBinder = ThreepidBinder(self)
 

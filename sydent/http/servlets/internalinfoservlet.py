@@ -41,15 +41,14 @@ class InternalInfoServlet(Resource):
         self.sydent = syd
         self.info = info
 
+    @jsonwrap
     def render_GET(self, request):
         """
         Returns: { hs: ..., [shadow_hs: ...], invited: true/false, requires_invite: true/false }
         """
 
         send_cors(request)
-        err, args = get_args(request, ('medium', 'address'))
-        if err:
-            return json.dumps(err)
+        args = get_args(request, ('medium', 'address'))
 
         medium = args['medium']
         address = args['address']
@@ -62,7 +61,7 @@ class InternalInfoServlet(Resource):
 
         # Report whether this user has been invited to a room
         result['invited'] = True if pendingJoinTokens else False
-        return json.dumps(result)
+        return result
 
     @jsonwrap
     def render_OPTIONS(self, request):

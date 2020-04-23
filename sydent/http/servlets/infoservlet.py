@@ -41,6 +41,7 @@ class InfoServlet(Resource):
         self.sydent = syd
         self.info = info
 
+    @jsonwrap
     def render_GET(self, request):
         """Clients who are "whitelisted" should receive both hs and shadow_hs in
         their response JSON. Clients that are not whitelisted should only
@@ -51,21 +52,13 @@ class InfoServlet(Resource):
         """
 
         send_cors(request)
-        err, args = get_args(request, ('medium', 'address'))
-        if err:
-            return json.dumps(err)
+        args = get_args(request, ('medium', 'address'))
 
         medium = args['medium']
         address = args['address']
 
         # Find an entry in the info file matching this user's ID
         result = self.info.match_user_id(medium, address)
-
-        # Check if this user is from a shadow hs/not whitelisted
-        ip = IPAddress(self.sydent.ip_from_request(request))
-        if self.sydent.nonshadow_ips and ip not in self.sydent.nonshadow_ips:
-            # This user is not whitelisted, present shadow_hs at their only hs
-            result['hs'] = result.pop('shadow_hs', None)
 
         # Check if there's a MXID associated with this address, if so use its domain as
         # the value for "hs" (so that the user can still access their account through
@@ -82,7 +75,7 @@ class InfoServlet(Resource):
         # Non-internal. Remove 'requires_invite' if found
         result.pop('requires_invite', None)
 
-        return json.dumps(result)
+        return result
 
     @jsonwrap
     def render_OPTIONS(self, request):
