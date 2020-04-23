@@ -49,6 +49,7 @@ from sydent.http.httpserver import (
     InternalApiHttpServer,
     ReplicationHttpsServer,
 )
+from sydent.http.info import Info
 from sydent.http.servlets.accountservlet import AccountServlet
 from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
@@ -58,6 +59,8 @@ from sydent.http.servlets.emailservlet import (
 )
 from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
 from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
+from sydent.http.servlets.infoservlet import InfoServlet
+from sydent.http.servlets.internalinfoservlet import InternalInfoServlet
 from sydent.http.servlets.logoutservlet import LogoutServlet
 from sydent.http.servlets.lookupservlet import LookupServlet
 from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
@@ -154,6 +157,7 @@ class Sydent:
         self.keyring.ed25519.alg = "ed25519"
 
         self.sig_verifier: Verifier = Verifier(self)
+        self.info: Info = Info(self)
 
         self.servlets: Servlets = Servlets(self, lookup_pepper)
 
@@ -309,6 +313,9 @@ class Servlets:
         self.accountServlet = AccountServlet(sydent)
         self.registerServlet = RegisterServlet(sydent)
         self.logoutServlet = LogoutServlet(sydent)
+
+        self.info = InfoServlet(sydent)
+        self.internalInfo = InternalInfoServlet(sydent)
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)

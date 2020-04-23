@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class Info(object):
     """Returns information from info.yaml, which contains user-specific metadata."""
 
-    def __init__(self, syd, info_file_path):
+    def __init__(self, syd):
         """
         :param syd: The global sydent object
         :type syd: Sydent
@@ -36,8 +36,8 @@ class Info(object):
         self.sydent = syd
 
         try:
-            file = open(info_file_path)
-            self.config = yaml.load(file)
+            file = open(syd.config.general.info_path)
+            self.config = yaml.safe_load(file)
             file.close()
 
             # medium:

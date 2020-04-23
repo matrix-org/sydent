@@ -77,6 +77,9 @@ class ClientApiHttpServer:
         v1.putChild(b"lookup", self.sydent.servlets.lookup)
         v1.putChild(b"bulk_lookup", self.sydent.servlets.bulk_lookup)
 
+        v1.putChild(b'info', self.sydent.servlets.info)
+        v1.putChild(b'internal-info', self.sydent.servlets.internalInfo)
+
         v1.putChild(b"pubkey", pubkey)
         pubkey.putChild(b"isvalid", self.sydent.servlets.pubkeyIsValid)
         pubkey.putChild(b"ed25519:0", self.sydent.servlets.pubkey_ed25519)

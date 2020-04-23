@@ -34,6 +34,7 @@ CONFIG_DEFAULTS = {
         "log.level": "INFO",
         "pidfile.path": os.environ.get("SYDENT_PID_FILE", "sydent.pid"),
         "terms.path": "",
+        'info.path': "info.yaml",
         "address_lookup_limit": "10000",  # Maximum amount of addresses in a single /lookup request
         # The root path to use for load templates. This should contain branded
         # directories. Each directory should contain the following templates:

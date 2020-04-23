@@ -32,37 +32,33 @@ class InternalInfoServlet(Resource):
 
     :param syd: A sydent instance.
     :type syd: Sydent
-    :param info: An instance of Info.
-    :type info: Sydent.http.Info
     """
     isLeaf = True
 
-    def __init__(self, syd, info):
+    def __init__(self, syd):
         self.sydent = syd
-        self.info = info
 
+    @jsonwrap
     def render_GET(self, request):
         """
         Returns: { hs: ..., [shadow_hs: ...], invited: true/false, requires_invite: true/false }
         """
 
         send_cors(request)
-        err, args = get_args(request, ('medium', 'address'))
-        if err:
-            return json.dumps(err)
+        args = get_args(request, ('medium', 'address'))
 
         medium = args['medium']
         address = args['address']
 
         # Find an entry in the info file matching this user's ID
-        result = self.info.match_user_id(medium, address)
+        result = self.sydent.info.match_user_id(medium, address)
 
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(medium, address)
 
         # Report whether this user has been invited to a room
         result['invited'] = True if pendingJoinTokens else False
-        return json.dumps(result)
+        return result
 
     @jsonwrap
     def render_OPTIONS(self, request):

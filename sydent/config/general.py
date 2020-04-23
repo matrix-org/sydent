@@ -71,6 +71,8 @@ class GeneralConfig(BaseConfig):
 
         self.terms_path = cfg.get("general", "terms.path")
 
+        self.info_path = cfg.get("general", "info.path")
+
         self.address_lookup_limit = cfg.getint("general", "address_lookup_limit")
 
         self.prometheus_port = cfg.getint("general", "prometheus_port", fallback=None)
