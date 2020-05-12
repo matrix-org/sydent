@@ -1,5 +1,6 @@
 import json
 import time
+import random
 
 from mock import Mock
 from sydent.threepid import ThreepidAssociation
@@ -245,6 +246,14 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         """
         self.sydent.run()
 
+        self._test_incoming_added()
+        self._test_incoming_updated()
+
+    def _test_incoming_added(self):
+        """Tests that sending new invite tokens results in these tokens being inserted in
+        the database.
+        """
+
         # Send the replication push.
         added = {token_id + 1: token for token_id, token in enumerate(self.tokens)}
         ephemeral_keys = {
@@ -302,7 +311,83 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
             self.assertDictEqual(self.tokens[i], res_tokens[i + 1])
             self.assertEqual(self.ephemeral_keys[i], res_keys[i + 1], i)
 
-        # TODO: Test replication of updates
+    def _test_incoming_updated(self):
+        """Tests that sending an updated to a token that's been added in
+        _test_incoming_added results in that token being updated in the database."""
+
+        # Randomly select which token will be updated.
+        token_id = random.randint(1, self.token_count)
+
+        # Fetch the token.
+        cur = self.sydent.db.cursor()
+        res = cur.execute(
+            """
+            SELECT medium, address, room_id, sender, token, origin_server
+            FROM invite_tokens
+            WHERE
+                origin_server = 'fake.server'
+                AND origin_id = ?
+            """,
+            (token_id,),
+        )
+        row = res.fetchone()
+
+        # Update the token by setting sent_ts to the current time.
+        updated_token = {
+            "medium": row[0],
+            "address": row[1],
+            "room_id": row[2],
+            "sender": row[3],
+            "token": row[4],
+            "sent_ts": int(time.time() * 1000),
+            "origin_server": row[5],
+            "origin_id": token_id,
+        }
+
+        # Send the update over replication.
+        body = json.dumps({
+            "invite_tokens": {
+                "updated": [updated_token]
+            },
+        })
+        request, channel = make_request(
+            self.sydent.reactor, "POST", "/_matrix/identity/replicate/v1/push", body
+        )
+        request.render(self.sydent.servlets.replicationPush)
+
+        self.assertEqual(channel.code, 200, channel.json_body)
+
+        # Re-fetch the token from the database, this time with all the properties that
+        # are sent over replication.
+        res = cur.execute(
+            """
+            SELECT
+                medium, address, room_id, sender, token, sent_ts,
+                origin_server, origin_id
+            FROM invite_tokens
+            WHERE
+                origin_server = 'fake.server'
+                AND origin_id = ?
+            """,
+            (token_id,),
+        )
+        row = res.fetchone()
+
+        # Create a dict that can be compare with the one sent over replication.
+        res_updated_token = {
+            "medium": row[0],
+            "address": row[1],
+            "room_id": row[2],
+            "sender": row[3],
+            "token": row[4],
+            "sent_ts": row[5],
+            "origin_server": row[6],
+            "origin_id": row[7],
+        }
+
+        # Check that the dict retrieved from the database matches the one sent over
+        # replication.
+        self.assertEqual(updated_token, res_updated_token)
 
     def test_outgoing_replication(self):
         """Make a fake peer and associations and make sure Sydent tries to push to it.
