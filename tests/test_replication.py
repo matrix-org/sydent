@@ -101,11 +101,15 @@ class ReplicationTestCase(unittest.TestCase):
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT originId, sgAssoc FROM global_threepid_associations")
 
+        res_assocs = {}
         for row in res.fetchall():
             originId = row[0]
             signed_assoc = json.loads(row[1])
 
-            self.assertDictEqual(signed_assoc, signed_assocs[originId])
+            res_assocs[originId] = signed_assoc
+
+        for assoc_id, signed_assoc in signed_assocs.items():
+            self.assertDictEqual(signed_assoc, res_assocs[assoc_id])
 
     def test_outgoing_replication(self):
         """Make a fake peer and associations and make sure Sydent tries to push to it.

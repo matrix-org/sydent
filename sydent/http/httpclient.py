@@ -17,8 +17,8 @@ from __future__ import absolute_import
 
 import json
 import logging
+from io import BytesIO
 
-from six import StringIO
 from twisted.internet import defer
 from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers
@@ -47,7 +47,7 @@ class HTTPClient(object):
 
         response = yield self.agent.request(
             b"GET",
-            uri.encode("ascii"),
+            uri.encode("utf8"),
         )
         body = yield readBody(response)
         try:
@@ -76,19 +76,19 @@ class HTTPClient(object):
         :return: a response from the remote server.
         :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
-        json_str = json.dumps(post_json)
+        json_bytes = json.dumps(post_json).encode("utf8")
 
         headers = opts.get('headers', Headers({
             b"Content-Type": [b"application/json"],
         }))
 
-        logger.debug("HTTP POST %s -> %s", json_str, uri)
+        logger.debug("HTTP POST %s -> %s", json_bytes, uri)
 
         response = yield self.agent.request(
             b"POST",
-            uri.encode("ascii"),
+            uri.encode("utf8"),
             headers,
-            bodyProducer=FileBodyProducer(StringIO(json_str))
+            bodyProducer=FileBodyProducer(BytesIO(json_bytes))
         )
 
         # Ensure the body object is read otherwise we'll leak HTTP connections
