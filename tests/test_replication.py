@@ -5,6 +5,7 @@ import random
 from mock import Mock
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
+from sydent.db.invite_tokens import JoinTokenStore
 from tests.utils import make_request, make_sydent
 from twisted.web.client import Response
 from twisted.internet import defer
@@ -359,32 +360,7 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
 
         # Re-fetch the token from the database, this time with all the properties that
         # are sent over replication.
-        res = cur.execute(
-            """
-            SELECT
-                medium, address, room_id, sender, token, sent_ts,
-                origin_server, origin_id
-            FROM invite_tokens
-            WHERE
-                origin_server = 'fake.server'
-                AND origin_id = ?
-            """,
-            (token_id,),
-        )
-        row = res.fetchone()
-
-        # Create a dict that can be compare with the one sent over replication.
-        res_updated_token = {
-            "medium": row[0],
-            "address": row[1],
-            "room_id": row[2],
-            "sender": row[3],
-            "token": row[4],
-            "sent_ts": row[5],
-            "origin_server": row[6],
-            "origin_id": row[7],
-        }
-
+        res_updated_token = self._get_token_dict(cur, token_id, "fake.server")
         # Check that the dict retrieved from the database matches the one sent over
         # replication.
         self.assertEqual(updated_token, res_updated_token)
@@ -420,8 +396,9 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
 
         self.sydent.db.commit()
 
-        sent_tokens = {}
-        sent_keys = {}
+        self.sent_tokens = {}
+        self.sent_keys = {}
+        self.sent_updates = []
 
         def request(method, uri, headers, body):
             """
@@ -447,13 +424,16 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
             # need to unpack the payload correctly.
             payload = json.loads(body._inputFile.read())
 
-            assert "added" in payload["invite_tokens"]
-            for token_id, token in payload['invite_tokens']["added"].items():
-                sent_tokens[token_id] = token
+            if "added" in payload["invite_tokens"]:
+                for token_id, token in payload['invite_tokens']["added"].items():
+                    self.sent_tokens[token_id] = token
 
-            assert "ephemeral_public_keys" in payload
-            for key_id, key in payload["ephemeral_public_keys"].items():
-                sent_keys[int(key_id)] = key["public_key"]
+            if "ephemeral_public_keys" in payload:
+                for key_id, key in payload["ephemeral_public_keys"].items():
+                    self.sent_keys[int(key_id)] = key["public_key"]
+
+            if "updated" in payload["invite_tokens"]:
+                self.sent_updates = payload["invite_tokens"]["updated"]
 
             # Return with a fake response wrapped in a Deferred.
             d = defer.Deferred()
@@ -472,8 +452,8 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
 
         # Check that, now that Sydent pushed all the invite tokens it was meant to, we
         # have all of the associations we initially inserted.
-        self.assertEqual(len(self.tokens), len(sent_tokens))
-        for token_id, token in sent_tokens.items():
+        self.assertEqual(len(self.tokens), len(self.sent_tokens))
+        for token_id, token in self.sent_tokens.items():
             self.assertEqual(token["origin_id"], int(token_id))
             del token["origin_id"]
             # Replication payloads use a specific format that causes the JSON encoder to
@@ -484,7 +464,67 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
             self.assertDictEqual(token, self.tokens[int(token_id) - 1])
             self.assertEqual(
                 self.ephemeral_keys[int(token_id) - 1],
-                sent_keys[int(token_id)],
+                self.sent_keys[int(token_id)],
             )
 
-        # TODO: Test replication of updates
+        # Randomly select which token will be updated.
+        token_id = random.randint(1, self.token_count)
+        token = self._get_token_dict(cur, token_id)
+
+        # Mark the token as sent to update it.
+        token_store = JoinTokenStore(self.sydent)
+        token_store.markTokensAsSent(token["medium"], token["address"])
+
+        # Advance the reactor to make Sydent send a replication payload.
+        self.sydent.reactor.advance(1000)
+
+        # Check that we've received one update via replication and the updated token is
+        # marked as sent.
+        self.assertEqual(len(self.sent_updates), 1)
+        self.assertIsNotNone(self.sent_updates[0]["sent_ts"])
+
+    def _get_token_dict(self, cur, token_id, origin_server=None):
+        """
+        Retrieves the token with the given token ID from the database and returns a
+        dict representation of it.
+
+        :param cur: The database cursor to use when retrieving the token.
+        :type cur: sqlite3.Cursor
+        :param token_id: The ID of the token to retrieve.
+        :type token_id: int
+        :param origin_server: The server of origin of the token. If provided, the token
+            ID will be matched against the origin_id column instead of the id one.
+        :type origin_server: str or None
+
+        :return: The dict representation of the token.
+        :rtype: dict[str, str or int or None]
+        """
+
+        sql = """
+            SELECT
+                medium, address, room_id, sender, token, sent_ts,
+                origin_server, origin_id
+            FROM invite_tokens
+            WHERE
+                %s = ?
+            """ % ("id" if origin_server is None else "origin_id")
+
+        params = (token_id,)
+
+        if origin_server is not None:
+            sql += "AND origin_server = ?"
+            params += (origin_server,)
+
+        res = cur.execute(sql, params)
+        row = res.fetchone()
+
+        return {
+            "medium": row[0],
+            "address": row[1],
+            "room_id": row[2],
+            "sender": row[3],
+            "token": row[4],
+            "sent_ts": row[5],
+            "origin_server": row[6],
+            "origin_id": row[7],
+        }
