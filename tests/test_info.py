@@ -166,6 +166,7 @@ class InfoNonShadowTestCase(InfoTestCase):
                 "invited": False,
                 "requires_invite": True,
             },
+            internal=True,
         )
 
         # Check that using an address containing a sub-domain matches a pattern which
