@@ -1,0 +1,26 @@
+# we use YAML references to define shortcuts for the {i, a, e} platforms
+platforms:
+    - &e_without_invite
+        hs: e.fake.server
+        requires_invite: False
+    - &e
+        hs: e.fake.server
+        requires_invite: True
+    - &a
+        hs: a.fake.server
+        requires_invite: False
+    - &p
+        hs: p.fake.server
+        shadow_hs: public.p.fake.server
+        requires_invite: False
+
+medium:
+    email:
+        entries:
+            john.doe@fake.server: *e_without_invite
+        patterns:
+            - .*@allowed.server: *a
+            - .*@(.*\.|)vip.fake.server: *a
+            - .*@(.*\.|)internal.fake.server: *p
+            - .*: *e
+
