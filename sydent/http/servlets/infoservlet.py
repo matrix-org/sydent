@@ -41,6 +41,7 @@ class InfoServlet(Resource):
         self.sydent = syd
         self.info = info
 
+    @jsonwrap
     def render_GET(self, request):
         """Clients who are "whitelisted" should receive both hs and shadow_hs in
         their response JSON. Clients that are not whitelisted should only
@@ -51,9 +52,7 @@ class InfoServlet(Resource):
         """
 
         send_cors(request)
-        err, args = get_args(request, ('medium', 'address'))
-        if err:
-            return json.dumps(err)
+        args = get_args(request, ('medium', 'address'))
 
         medium = args['medium']
         address = args['address']
@@ -82,7 +81,7 @@ class InfoServlet(Resource):
         # Non-internal. Remove 'requires_invite' if found
         result.pop('requires_invite', None)
 
-        return json.dumps(result)
+        return result
 
     @jsonwrap
     def render_OPTIONS(self, request):
