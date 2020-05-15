@@ -28,6 +28,7 @@ from six.moves import range
 
 if six.PY2:
     from cgi import escape
+    from io import open
 else:
     from html import escape
 
@@ -73,9 +74,17 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
     for k, v in substitutions.items():
         allSubstitutions[k] = v
         allSubstitutions[k+"_forhtml"] = escape(v)
+
+        if six.PY2 and isinstance(v, unicode):
+            # urllib.parse.quote doesn't support unicode in Python 2, because at that
+            # time unicode in URLs weren't a thing. So convert the value to ascii and
+            # ignore error so we don't return an error if a parameter (e.g. the room's
+            # name contains ascii).
+            v = v.encode("utf-8", errors="ignore")
+
         allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
 
-    mailString = open(mailTemplateFile).read() % allSubstitutions
+    mailString = open(mailTemplateFile, encoding="utf-8").read() % allSubstitutions
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
     if parsedFrom == '' or parsedTo == '':
