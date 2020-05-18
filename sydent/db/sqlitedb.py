@@ -241,7 +241,7 @@ class SqliteDatabase:
             cur.execute("ALTER TABLE updated_invites ADD COLUMN origin_id VARCHAR(256)")
             self.db.commit()
             logger.info("v9 -> v10 schema migration complete")
-            self._setSchemaVersion(9)
+            self._setSchemaVersion(10)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
