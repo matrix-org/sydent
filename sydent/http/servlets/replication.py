@@ -240,7 +240,7 @@ class ReplicationPushServlet(Resource):
             tokensStore.updateToken(updated_invite['medium'], updated_invite['address'], updated_invite['room_id'],
                                 updated_invite['sender'], updated_invite['token'], updated_invite['sent_ts'],
                                 origin_server=updated_invite['origin_server'], origin_id=updated_invite['origin_id'],
-                                commit=False)
+                                is_deletion=updated_invite.get('is_deletion', False), commit=False)
             logger.info("Stored invite update with origin ID %s from %s", updated_invite['origin_id'], peer.servername)
 
         # Process any ephemeral public keys

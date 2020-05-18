@@ -252,7 +252,8 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         self.sydent.run()
 
         self._test_incoming_added()
-        self._test_incoming_updated()
+        updated_token = self._test_incoming_updated()
+        self._test_incoming_deleted(updated_token)
 
     def _test_incoming_added(self):
         """Tests that sending new invite tokens results in these tokens being inserted in
@@ -369,6 +370,39 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         # replication.
         self.assertEqual(updated_token, res_updated_token)
 
+        return updated_token
+
+    def _test_incoming_deleted(self, token_dict):
+        """Tests that sending an updated token with is_deletion set to True results in
+        the token being deleted.
+
+        :param token_dict: A token dictionary as returned by _test_incoming_updated.
+        :type token_dict: dict[str, Any]
+        """
+
+        # Set the update type as deletion.
+        token_dict["is_deletion"] = True
+
+        # Send the update over replication.
+        body = json.dumps({
+            "invite_tokens": {
+                "updated": [token_dict]
+            },
+        })
+        request, channel = make_request(
+            self.sydent.reactor, "POST", "/_matrix/identity/replicate/v1/push", body
+        )
+        request.render(self.sydent.servlets.replicationPush)
+
+        self.assertEqual(channel.code, 200, channel.json_body)
+
+        # Check that trying to fetch this token after the replication payload has been
+        # processed returns no result.
+        cur = self.sydent.db.cursor()
+        self._get_token_dict(
+            cur, token_dict["origin_id"], token_dict["origin_server"], expect_none=True,
+        )
+
     def test_outgoing_replication(self):
         """Make a fake peer and associations and make sure Sydent tries to push to it.
         """
@@ -437,7 +471,7 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
                     self.sent_keys[int(key_id)] = key["public_key"]
 
             if "updated" in payload["invite_tokens"]:
-                self.sent_updates = payload["invite_tokens"]["updated"]
+                self.sent_updates += payload["invite_tokens"]["updated"]
 
             # Return with a fake response wrapped in a Deferred.
             d = defer.Deferred()
@@ -487,7 +521,17 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         self.assertEqual(len(self.sent_updates), 1)
         self.assertIsNotNone(self.sent_updates[0]["sent_ts"])
 
-    def _get_token_dict(self, cur, token_id, origin_server=None):
+        # Delete the token.
+        token_store.deleteTokens(token["medium"], token["address"])
+
+        # Advance the reactor to make Sydent send a replication payload.
+        self.sydent.reactor.advance(1000)
+
+        # Check that we've received another update, and that this update is a deletion.
+        self.assertEqual(len(self.sent_updates), 2)
+        self.assertTrue(self.sent_updates[1]["is_deletion"])
+
+    def _get_token_dict(self, cur, token_id, origin_server=None, expect_none=False):
         """
         Retrieves the token with the given token ID from the database and returns a
         dict representation of it.
@@ -499,6 +543,8 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         :param origin_server: The server of origin of the token. If provided, the token
             ID will be matched against the origin_id column instead of the id one.
         :type origin_server: str or None
+        :param expect_none: Whether to expect the query to return no result.
+        :type expect_none: bool
 
         :return: The dict representation of the token.
         :rtype: dict[str, str or int or None]
@@ -522,6 +568,11 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         res = cur.execute(sql, params)
         row = res.fetchone()
 
+        if expect_none:
+            self.assertIsNone(row)
+            return {}
+
+        self.assertIsNotNone(row)
         return {
             "medium": row[0],
             "address": row[1],

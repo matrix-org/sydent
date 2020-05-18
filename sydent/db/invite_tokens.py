@@ -64,8 +64,8 @@ class JoinTokenStore(object):
         if commit:
             self.sydent.db.commit()
 
-    def updateToken(self, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id, commit=True):
-        """Process an invite token update received over replication.
+    def updateToken(self, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id, is_deletion, commit=True):
+        """Process an invite token update or deletion received over replication.
 
         :param medium: The medium of the token.
         :type medium: str
@@ -86,13 +86,27 @@ class JoinTokenStore(object):
         :param origin_id: The id of the token in the DB of origin_server. Used
             for determining the row to update in the database.
         :type origin_id: int
+        :param is_deletion: Whether the update is a deletion.
+        :type is_deletion: bool
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
         """
         cur = self.sydent.db.cursor()
 
-        params = (medium, address, room_id, sender, token, sent_ts, origin_id)
+        if is_deletion:
+            sql = """
+                DELETE FROM invite_tokens
+            """
+            params = ()
+        else:
+            sql = """
+                UPDATE invite_tokens
+                SET
+                    medium = ?, address = ?, room_id = ?, sender = ?, token = ?,
+                    sent_ts = ?
+            """
+            params = (medium, address, room_id, sender, token, sent_ts)
 
         # Updates sent over replication include the origin_server and the origin_id as
         # seen from the server performing the update.
@@ -108,16 +122,12 @@ class JoinTokenStore(object):
             where_clause = """
                 WHERE id = ?
             """
+            params += (origin_id,)
         else:
             where_clause = """
                 WHERE origin_id = ? AND origin_server = ?
             """
-            params += (origin_server,)
-
-        sql = """
-            UPDATE invite_tokens
-            SET medium = ?, address = ?, room_id = ?, sender = ?, token = ?, sent_ts = ?
-        """
+            params += (origin_id, origin_server)
 
         sql += where_clause
 
@@ -271,14 +281,21 @@ class JoinTokenStore(object):
         # Insert a row for every updated invite in the updated_invites table so the
         # update is replicated to other servers.
         res = cur.execute(
-            "SELECT id FROM invite_tokens WHERE medium = ? AND address = ?",
-            (medium, address,)
+            """
+            SELECT id, origin_server, origin_id
+            FROM invite_tokens WHERE medium = ? AND address = ?
+            """,
+            (medium, address,),
         )
 
         rows = res.fetchall()
 
         cur.executemany(
-            "INSERT INTO updated_invites (invite_id) VALUES (?)", rows
+            """
+            INSERT INTO updated_invites (invite_id, origin_server, origin_id)
+            VALUES (?, ?, ?)
+            """,
+            rows,
         )
 
         self.sydent.db.commit()
@@ -431,6 +448,27 @@ class JoinTokenStore(object):
         """
         cur = self.sydent.db.cursor()
 
+        # Insert a row for every deleted invite in the updated_invites table so the
+        # deletion is replicated to other servers.
+        res = cur.execute(
+            """
+            SELECT id, origin_server, origin_id
+            FROM invite_tokens WHERE medium = ? AND address = ?
+            """,
+            (medium, address,),
+        )
+
+        rows = res.fetchall()
+
+        cur.executemany(
+            """
+            INSERT INTO updated_invites (invite_id, origin_server, origin_id)
+            VALUES (?, ?, ?)
+            """,
+            rows,
+        )
+
+        # Actually delete the invites.
         cur.execute(
             "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
             (medium, address,)
@@ -457,8 +495,8 @@ class JoinTokenStore(object):
         # Retrieve the IDs of the invites that have been updated since the last time.
         res = cur.execute(
             """
-                SELECT u.id, t.id, medium, address, room_id, sender, token, sent_ts,
-                    origin_server, origin_id
+                SELECT u.id, u.invite_id, t.id IS NULL, medium, address, room_id, sender,
+                    token, sent_ts, u.origin_server, u.origin_id
                 FROM updated_invites AS u
                     LEFT JOIN invite_tokens AS t ON (t.id = u.invite_id)
                 WHERE u.id > ? ORDER BY u.id ASC LIMIT ?;
@@ -473,7 +511,7 @@ class JoinTokenStore(object):
         # Retrieve each invite and append it to a list.
         invites = []
         for row in rows:
-            max_id, invite_id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
+            max_id, invite_id, is_deletion, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
             # Append a new dict to the list containing the token's metadata,
             # including an `origin_id` and an `origin_server` so that the receiving end
             # can figure out which invite to update in its local database. If the token
@@ -489,6 +527,7 @@ class JoinTokenStore(object):
                     "sender": sender,
                     "token": token,
                     "sent_ts": sent_ts,
+                    "is_deletion": is_deletion,
                 }
             )
 

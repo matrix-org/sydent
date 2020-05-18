@@ -226,14 +226,22 @@ class SqliteDatabase:
             logger.info("v7 -> v8 schema migration complete")
             self._setSchemaVersion(8)
 
-        if curVer < 5:
+        if curVer < 9:
             # Fix lookup_hash index for selecting on mxid instead of medium
             cur = self.db.cursor()
             cur.execute("DROP INDEX IF EXISTS lookup_hash_medium")
             cur.execute("CREATE INDEX global_threepid_lookup_hash ON global_threepid_associations(lookup_hash)")
             self.db.commit()
-            logger.info("v4 -> v5 schema migration complete")
-            self._setSchemaVersion(5)
+            logger.info("v8 -> v9 schema migration complete")
+            self._setSchemaVersion(9)
+
+        if curVer < 10:
+            cur = self.db.cursor()
+            cur.execute("ALTER TABLE updated_invites ADD COLUMN origin_server VARCHAR(256)")
+            cur.execute("ALTER TABLE updated_invites ADD COLUMN origin_id VARCHAR(256)")
+            self.db.commit()
+            logger.info("v9 -> v10 schema migration complete")
+            self._setSchemaVersion(9)
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
