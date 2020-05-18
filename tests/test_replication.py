@@ -252,8 +252,7 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         self.sydent.run()
 
         self._test_incoming_added()
-        updated_token = self._test_incoming_updated()
-        self._test_incoming_deleted(updated_token)
+        self._test_incoming_updated()
 
     def _test_incoming_added(self):
         """Tests that sending new invite tokens results in these tokens being inserted in
@@ -369,39 +368,6 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         # Check that the dict retrieved from the database matches the one sent over
         # replication.
         self.assertEqual(updated_token, res_updated_token)
-
-        return updated_token
-
-    def _test_incoming_deleted(self, token_dict):
-        """Tests that sending an updated token with is_deletion set to True results in
-        the token being deleted.
-
-        :param token_dict: A token dictionary as returned by _test_incoming_updated.
-        :type token_dict: dict[str, Any]
-        """
-
-        # Set the update type as deletion.
-        token_dict["is_deletion"] = True
-
-        # Send the update over replication.
-        body = json.dumps({
-            "invite_tokens": {
-                "updated": [token_dict]
-            },
-        })
-        request, channel = make_request(
-            self.sydent.reactor, "POST", "/_matrix/identity/replicate/v1/push", body
-        )
-        request.render(self.sydent.servlets.replicationPush)
-
-        self.assertEqual(channel.code, 200, channel.json_body)
-
-        # Check that trying to fetch this token after the replication payload has been
-        # processed returns no result.
-        cur = self.sydent.db.cursor()
-        self._get_token_dict(
-            cur, token_dict["origin_id"], token_dict["origin_server"], expect_none=True,
-        )
 
     def test_outgoing_replication(self):
         """Make a fake peer and associations and make sure Sydent tries to push to it.
@@ -520,16 +486,6 @@ class InviteTokensReplicationTestCase(unittest.TestCase):
         # marked as sent.
         self.assertEqual(len(self.sent_updates), 1)
         self.assertIsNotNone(self.sent_updates[0]["sent_ts"])
-
-        # Delete the token.
-        token_store.deleteTokens(token["medium"], token["address"])
-
-        # Advance the reactor to make Sydent send a replication payload.
-        self.sydent.reactor.advance(1000)
-
-        # Check that we've received another update, and that this update is a deletion.
-        self.assertEqual(len(self.sent_updates), 2)
-        self.assertTrue(self.sent_updates[1]["is_deletion"])
 
     def _get_token_dict(self, cur, token_id, origin_server=None, expect_none=False):
         """
