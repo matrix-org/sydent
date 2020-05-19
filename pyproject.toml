@@ -1,6 +1,6 @@
 [tool.towncrier]
     package = "sydent"
-    filename = "CHANGES.md"
+    filename = "CHANGELOG.md"
     directory = "changelog.d"
     issue_format = "[\\#{issue}](https://github.com/matrix-org/sydent/issues/{issue})"
 
@@ -28,4 +28,3 @@
         directory = "misc"
         name = "Internal Changes"
         showcontent = true
-
