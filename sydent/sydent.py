@@ -18,6 +18,7 @@
 from __future__ import absolute_import
 
 from six.moves import configparser
+import copy
 import logging
 import logging.handlers
 import os
@@ -296,7 +297,7 @@ def parse_config_dict(config_dict):
         config_dict (dict): the configuration dictionary to be parsed
     """
     # Build a config dictionary from the defaults merged with the given dictionary
-    config = CONFIG_DEFAULTS
+    config = copy.deepcopy(CONFIG_DEFAULTS)
     for section, section_dict in config_dict.items():
         if section not in config:
             config[section] = {}
