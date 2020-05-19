@@ -160,6 +160,10 @@ class ThreepidBinder:
         else:
             logger.info("Successfully notified on bind for %s" % (mxid,))
 
+            # Skip the deletion step if instructed so by the config.
+            if not self.sydent.delete_tokens_on_bind:
+                return
+
             # Only remove sent tokens when they've been successfully sent.
             try:
                 joinTokenStore = JoinTokenStore(self.sydent)

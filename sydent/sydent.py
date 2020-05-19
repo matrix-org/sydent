@@ -92,6 +92,7 @@ CONFIG_DEFAULTS = {
 
         # Whether clients and homeservers can register an association using v1 endpoints.
         'enable_v1_associations': 'true',
+        'delete_tokens_on_bind': 'true',
     },
     'db': {
         'db.file': 'sydent.db',
@@ -174,6 +175,10 @@ class Sydent:
 
         self.enable_v1_associations = parse_cfg_bool(
             self.cfg.get("general", "enable_v1_associations")
+        )
+
+        self.delete_tokens_on_bind = parse_cfg_bool(
+            self.cfg.get("general", "delete_tokens_on_bind")
         )
 
         # See if a pepper already exists in the database
