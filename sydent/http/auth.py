@@ -17,11 +17,9 @@ from __future__ import absolute_import
 
 import logging
 
-import twisted.internet.ssl
-
 from sydent.db.accounts import AccountStore
 from sydent.terms.terms import get_terms
-from sydent.http.servlets import MatrixRestError
+from sydent.http.servlets import MatrixRestError, get_args
 
 
 logger = logging.getLogger(__name__)
@@ -43,8 +41,9 @@ def tokenFromRequest(request):
         token = authHeader[len("Bearer "):]
 
     # no? try access_token query param
-    if token is None and 'access_token' in request.args:
-        token = request.args['access_token'][0]
+    if token is None:
+        args = get_args(request, ('access_token',), required=False)
+        token = args.get('access_token')
 
     # Ensure we're dealing with unicode.
     if token and isinstance(token, bytes):
