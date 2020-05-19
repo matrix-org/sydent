@@ -204,6 +204,20 @@ class ThreepidBinder:
         else:
             logger.info("Successfully notified on bind for %s" % (mxid,))
 
+            # Only remove sent tokens when they've been successfully sent.
+            try:
+                joinTokenStore = JoinTokenStore(self.sydent)
+                joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
+                logger.info(
+                    "Successfully deleted invite for %s from the store",
+                    assoc["address"],
+                )
+            except Exception as e:
+                logger.exception(
+                    "Couldn't remove invite for %s from the store",
+                    assoc["address"],
+                )
+
     def _notifyErrback(self, assoc, attempt, error):
         """
         Handles errors when trying to send an association down to a homeserver by
