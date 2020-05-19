@@ -1,5 +1,5 @@
 [tool.towncrier]
-    package = "synapse"
+    package = "sydent"
     filename = "CHANGES.md"
     directory = "changelog.d"
     issue_format = "[\\#{issue}](https://github.com/matrix-org/sydent/issues/{issue})"
