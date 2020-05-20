@@ -22,6 +22,7 @@ import copy
 import logging
 import logging.handlers
 import os
+import re
 
 import twisted.internet.reactor
 from twisted.internet import task
@@ -81,10 +82,11 @@ from sydent.replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
 
-def list_from_comma_sep_string(rawstr):
+
+def set_from_comma_sep_string(rawstr):
     if rawstr == '':
-        return []
-    return [x.strip() for x in rawstr.split(',')]
+        return set()
+    return {x.strip() for x in rawstr.split(',')}
 
 
 CONFIG_DEFAULTS = {
@@ -105,6 +107,10 @@ CONFIG_DEFAULTS = {
         # Path to file detailing the configuration of the /info and /internal-info servlets.
         # More information can be found in docs/info.md.
         'info_path': 'info.yaml',
+        # A comma-separated domain whitelist used to validate the next_link query parameter
+        # provided by the client to the /requestToken and /submitToken endpoints
+        # If empty, no whitelist is applied
+        'next_link.domain_whitelist': '',
 
         # The following can be added to your local config file to enable prometheus
         # support.
@@ -195,9 +201,15 @@ class Sydent:
         self.shadow_hs_master = self.cfg.get('general', 'shadow.hs.master')
         self.shadow_hs_slave  = self.cfg.get('general', 'shadow.hs.slave')
 
-        self.user_dir_allowed_hses = set(list_from_comma_sep_string(
+        self.user_dir_allowed_hses = set_from_comma_sep_string(
             self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
-        ))
+        )
+
+        next_link_whitelist = self.cfg.get('general', 'next_link.domain_whitelist')
+        if next_link_whitelist == '':
+            self.next_link_domain_whitelist = None
+        else:
+            self.next_link_domain_whitelist = set_from_comma_sep_string(next_link_whitelist)
 
         self.invites_validity_period = parse_duration(
             self.cfg.get('general', 'invites.validity_period'),

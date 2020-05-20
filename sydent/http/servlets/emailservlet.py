@@ -15,6 +15,8 @@
 # limitations under the License.
 from __future__ import absolute_import
 
+import logging
+
 from twisted.web.resource import Resource
 
 from sydent.util.stringutils import is_valid_client_secret
@@ -26,9 +28,12 @@ from sydent.validators import (
     SessionExpiredException,
     NextLinkValidationException,
 )
+from sydent.validators.common import validate_next_link
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.http.auth import authIfV2
+
+logger = logging.getLogger(__name__)
 
 
 class EmailRequestCodeServlet(Resource):
@@ -59,8 +64,17 @@ class EmailRequestCodeServlet(Resource):
         ipaddress = self.sydent.ip_from_request(request)
 
         nextLink = None
-        if 'next_link' in args and not args['next_link'].startswith("file:///"):
+        if 'next_link' in args:
             nextLink = args['next_link']
+
+            if not validate_next_link(self.sydent, nextLink):
+                logger.warning(
+                    "Validation attempt rejected as provided 'next_link' value is not "
+                    "http(s) or domain does not match "
+                    "general.next_link.domain_whitelist config value: %s",
+                    nextLink,
+                )
+                return {'errcode': 'M_INVALID_PARAM', 'error': 'Invalid next_link'}
 
         try:
             sid = self.sydent.validators.email.requestToken(
@@ -175,11 +189,6 @@ class EmailValidateCodeServlet(Resource):
                     "Try requesting a new token"
                 )
             }
-
-        if not resp:
-            resp = {'success': False}
-
-        return resp
 
     def render_OPTIONS(self, request):
         send_cors(request)

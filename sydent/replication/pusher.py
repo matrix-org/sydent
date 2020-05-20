@@ -36,6 +36,10 @@ INVITE_TOKENS_PUSH_LIMIT = 100
 INVITE_UPDATES_PUSH_LIMIT = 100
 ASSOCIATIONS_PUSH_LIMIT = 100
 
+# Amount of seconds before we'll timeout pushing to a single peer
+# Other peers will wait on this timeout before another round of pushes is triggered
+PUSH_TIMEOUT_S = 60
+
 
 class Pusher:
     def __init__(self, sydent):
@@ -76,7 +80,12 @@ class Pusher:
         peers = self.peerStore.getAllPeers()
 
         # Push to all peers in parallel
-        return defer.DeferredList([self._push_to_peer(p) for p in peers])
+        deferreds = [self._push_to_peer(p) for p in peers]
+
+        # Add timeout to each push
+        deferreds = [d.addTimeout(PUSH_TIMEOUT_S, twisted.internet.reactor) for d in deferreds]
+
+        return defer.DeferredList(deferreds)
 
     @defer.inlineCallbacks
     def _push_to_peer(self, p):
