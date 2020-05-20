@@ -10,7 +10,7 @@ Features
 Bugfixes
 --------
 
-- Fix a bug that prevented Sydent from checking for OpenID auth tokens in request parameters when running on Python3. ([\#294](https://github.com/matrix-org/sydent/issues/294))
+- Fix a bug that prevented Sydent from checking for access tokens in request parameters when running on Python3. ([\#294](https://github.com/matrix-org/sydent/issues/294))
 
 
 Internal Changes
