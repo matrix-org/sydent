@@ -1,3 +1,25 @@
+Sydent 2.0.1 (2020-05-20)
+=========================
+
+Features
+--------
+
+- Add a config option to disable deleting invite tokens on bind. ([\#293](https://github.com/matrix-org/sydent/issues/293))
+
+
+Bugfixes
+--------
+
+- Fix a bug that prevented Sydent from checking for OpenID auth tokens in request parameters when running on Python3. ([\#294](https://github.com/matrix-org/sydent/issues/294))
+
+
+Internal Changes
+----------------
+
+- Make replication tests more reliable. ([\#278](https://github.com/matrix-org/sydent/issues/278))
+- Add a configuration for towncrier. ([\#295](https://github.com/matrix-org/sydent/issues/295))
+
+
 Changes in [2.0.0](https://github.com/matrix-org/sydent/releases/tag/v2.0.0) (2020-02-25)
 =========================================================================================
 
