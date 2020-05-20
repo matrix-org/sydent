@@ -67,8 +67,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
-    """Tests that a Sydent configured to not delete 3PID invite tokens on bind skips that
-    deletion step
+    """Test that invite tokens are not deleted when that is disabled.
     """
 
     def setUp(self):
