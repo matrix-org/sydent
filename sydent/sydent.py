@@ -18,6 +18,7 @@
 from __future__ import absolute_import
 
 from six.moves import configparser
+import copy
 import logging
 import logging.handlers
 import os
@@ -115,6 +116,7 @@ CONFIG_DEFAULTS = {
 
         # Whether clients and homeservers can register an association using v1 endpoints.
         'enable_v1_associations': 'true',
+        'delete_tokens_on_bind': 'true',
     },
     'db': {
         'db.file': 'sydent.db',
@@ -219,6 +221,10 @@ class Sydent:
 
         self.enable_v1_associations = parse_cfg_bool(
             self.cfg.get("general", "enable_v1_associations")
+        )
+
+        self.delete_tokens_on_bind = parse_cfg_bool(
+            self.cfg.get("general", "delete_tokens_on_bind")
         )
 
         # See if a pepper already exists in the database
@@ -342,7 +348,7 @@ def parse_config_dict(config_dict):
         config_dict (dict): the configuration dictionary to be parsed
     """
     # Build a config dictionary from the defaults merged with the given dictionary
-    config = CONFIG_DEFAULTS
+    config = copy.deepcopy(CONFIG_DEFAULTS)
     for section, section_dict in config_dict.items():
         if section not in config:
             config[section] = {}
