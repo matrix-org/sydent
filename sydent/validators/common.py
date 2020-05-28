@@ -64,4 +64,4 @@ def validateSessionWithToken(sydent, sid, clientSecret, token):
         return {'success': True}
     else:
         logger.info("Incorrect token submitted")
-        return IncorrectSessionTokenException()
+        raise IncorrectSessionTokenException()
