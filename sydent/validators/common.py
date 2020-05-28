@@ -128,7 +128,7 @@ def validateSessionWithToken(sydent, sid, clientSecret, token, next_link=None):
         return {'success': True}
     else:
         logger.info("Incorrect token submitted")
-        return IncorrectSessionTokenException()
+        raise IncorrectSessionTokenException()
 
 
 def validate_next_link(sydent, next_link):
