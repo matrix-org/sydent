@@ -19,6 +19,7 @@ from __future__ import absolute_import
 
 from twisted.web.server import Site
 from twisted.web.resource import Resource
+from twisted.web.http import proxiedLogFormatter
 
 import logging
 import twisted.internet.ssl
@@ -130,7 +131,11 @@ class ClientApiHttpServer:
         v2.putChild(b'lookup', lookup_v2)
         v2.putChild(b'hash_details', hash_details)
 
-        self.factory = Site(root)
+        log_formatter = None
+        if self.sydent.cfg.get('http', 'obey_x_forwarded_for'):
+            log_formatter = proxiedLogFormatter
+
+        self.factory = Site(root, logFormatter=log_formatter)
         self.factory.displayTracebacks = False
 
     def setup(self):
@@ -165,7 +170,11 @@ class InternalApiHttpServer(object):
         authenticated_unbind = AuthenticatedUnbindThreePidServlet(self.sydent)
         internal.putChild(b'unbind', authenticated_unbind)
 
-        factory = Site(root)
+        log_formatter = None
+        if self.sydent.cfg.get('http', 'obey_x_forwarded_for'):
+            log_formatter = proxiedLogFormatter
+
+        factory = Site(root, logFormatter=log_formatter)
         factory.displayTracebacks = False
         self.sydent.reactor.listenTCP(port, factory, interface=interface)
 
@@ -188,6 +197,11 @@ class ReplicationHttpsServer:
         replicate.putChild(b'v1', replV1)
         replV1.putChild(b'push', self.sydent.servlets.replicationPush)
 
+        log_formatter = None
+        if self.sydent.cfg.get('http', 'obey_x_forwarded_for'):
+            log_formatter = proxiedLogFormatter
+
+        self.factory = Site(root, logFormatter=log_formatter)
         self.factory = Site(root)
         self.factory.displayTracebacks = False
 
