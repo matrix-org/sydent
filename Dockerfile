@@ -1,7 +1,7 @@
 #
 # Step 1: Build sydent and install dependencies
 #
-FROM docker.io/python:3-alpine as builder
+FROM docker.io/python:3.8-alpine as builder
 
 # Install dev packages
 RUN apk add --no-cache \
@@ -31,7 +31,7 @@ RUN cd /sydent \
 # Step 2: Reduce image size and layers
 #
 
-FROM docker.io/python:3-alpine
+FROM docker.io/python:3.8-alpine
 
 # Install packages
 RUN apk add --no-cache \
