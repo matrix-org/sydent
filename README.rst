@@ -85,7 +85,7 @@ Caution: All data will be lost when the container is terminated!
 Persistent data
 ---------------
 
-By default, all data is stored in `/data`.
+By default, all data is stored in ``/data``.
 The best method is to put the data in a Docker volume.
 
 .. code-block:: shell
