@@ -3,9 +3,9 @@
 .idea/
 .vscode/
 *.iml
+_trial_temp
 
 # Runtime files
 sydent.conf
 sydent.db
 /matrix_is_test/sydent.stderr
-_trial_temp
