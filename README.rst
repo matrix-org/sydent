@@ -78,7 +78,29 @@ Docker
 ======
 
 A Dockerfile is provided for sydent. To use it, run ``docker build -t sydent .`` in a sydent checkout.
-To run it, use ``docker run --env=SYDENT_SERVER_NAME=my-sydent-server -p 8090:8090 --mount type=volume,source=sydent-data,destination=/data sydent``.
+To run it, use ``docker run --env=SYDENT_SERVER_NAME=my-sydent-server -p 8090:8090 sydent``.
+
+Caution: All data will be lost when the container is terminated!
+
+Persistent data
+---------------
+
+By default, all data is stored in `/data`.
+The best method is to put the data in a Docker volume.
+
+.. code-block:: shell
+
+   docker volume create sydent-data
+   docker run ... --mount type=volume,source=sydent-data,destination=/data sydent
+
+But you can also bind a local directory to the container.
+However, you then have to pay attention to the file permissions.
+
+.. code-block:: shell
+
+   mkdir /path/to/sydent-data
+   chown 993:993 /path/to/sydent-data
+   docker run ... --mount type=bind,source=/path/to/sydent-data,destination=/data sydent
 
 Environment variables
 ---------------------
