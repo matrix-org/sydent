@@ -1,0 +1,7 @@
+*.pyc
+.idea/
+.vscode/
+
+sydent.conf
+sydent.db
+.git
