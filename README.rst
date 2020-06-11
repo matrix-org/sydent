@@ -78,7 +78,7 @@ Docker
 ======
 
 A Dockerfile is provided for sydent. To use it, run ``docker build -t sydent .`` in a sydent checkout.
-To run it, use ``docker run --env=SYDENT_SERVER_NAME=my-sydent-server --mount type=volume,source=sydent-data,destination=/data sydent``.
+To run it, use ``docker run --env=SYDENT_SERVER_NAME=my-sydent-server -p 8090:8090 --mount type=volume,source=sydent-data,destination=/data sydent``.
 
 Environment variables
 ---------------------
