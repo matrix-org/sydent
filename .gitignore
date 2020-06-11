@@ -1,6 +1,7 @@
 # Development files
 *.pyc
 .idea/
+.vscode/
 *.iml
 
 # Runtime files
