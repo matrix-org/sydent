@@ -108,7 +108,7 @@ Environment variables
 .. warning:: These variables are only taken into account at first start and are written to the configuration file.
 
 +--------------------+-----------------+-----------------------+
-| Variable Name      | Sydent default  | Docker default        |
+| Variable Name      | Sydent default  | Dockerfile default    |
 +====================+=================+=======================+
 | SYDENT_SERVER_NAME | *empty*         | *empty*               |
 +--------------------+-----------------+-----------------------+
