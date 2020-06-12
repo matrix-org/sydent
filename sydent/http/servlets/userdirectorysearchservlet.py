@@ -22,7 +22,7 @@ from signedjson.sign import SignatureVerifyException
 import logging
 import json
 
-from sydent.http.servlets import jsonwrap, send_cors
+from sydent.http.servlets import deferjsonwrap, jsonwrap, send_cors
 from sydent.db.profiles import ProfileStore
 
 
@@ -41,6 +41,7 @@ class UserDirectorySearchServlet(Resource):
         self._async_render_POST(request)
         return server.NOT_DONE_YET
 
+    @deferjsonwrap
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
         send_cors(request)
@@ -48,15 +49,11 @@ class UserDirectorySearchServlet(Resource):
             body = json.load(request.content)
         except ValueError:
             request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
-            request.finish()
-            defer.returnValue(None)
+            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
 
         if 'search_term' not in body:
             request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': 'Missing param: search_term'}))
-            request.finish()
-            defer.returnValue(None)
+            return {'errcode': 'M_MISSING_PARAMS', 'error': 'Missing param: search_term'}
 
         search_term = body['search_term']
         limit = min(body.get('limit', 10), MAX_SEARCH_LIMIT)
@@ -66,9 +63,7 @@ class UserDirectorySearchServlet(Resource):
         except SignatureVerifyException:
             request.setResponseCode(403)
             msg = "Signature verification failed or origin not whitelisted"
-            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': msg}))
-            request.finish()
-            defer.returnValue(None)
+            return {'errcode': 'M_FORBIDDEN', 'error': msg}
 
         profileStore = ProfileStore(self.sydent)
 
@@ -76,11 +71,7 @@ class UserDirectorySearchServlet(Resource):
         # are more results we could have returned
         results = profileStore.getProfilesMatchingSearchTerm(search_term, limit + 1)
 
-        request.write(json.dumps({
-            'results': results[0:limit],
-            'limited': len(results) > limit,
-        }))
-        request.finish()
+        return {'results': results[0:limit], 'limited': len(results) > limit}
 
     @jsonwrap
     def render_OPTIONS(self, request):
