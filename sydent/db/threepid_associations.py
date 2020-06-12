@@ -289,7 +289,7 @@ class GlobalAssociationStore:
         :param assoc: The association to add as a high level object.
         :type assoc: sydent.threepid.ThreepidAssociation
         :param rawSgAssoc: The original raw bytes of the signed association.
-        :type rawSgAssoc: dict[str, any]
+        :type rawSgAssoc: str
         :param originServer: The name of the server the association was created on.
         :type originServer: str
         :param originId: The ID of the association on the server the association was
