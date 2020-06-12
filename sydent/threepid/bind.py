@@ -61,7 +61,7 @@ class ThreepidBinder:
         self._info = info
         self.hashing_store = HashingMetadataStore(sydent)
 
-    def addBinding(self, medium, address, mxid):
+    def addBinding(self, medium, address, mxid, check_info=True):
         """
         Binds the given 3pid to the given mxid.
 
@@ -74,21 +74,26 @@ class ThreepidBinder:
         :type address: unicode
         :param mxid: The MXID to bind the 3PID to.
         :type mxid: unicode
+        :param check_info: Whether to check the address against the info file. Setting
+            this to False should only be done when testing.
+        :type check_info: bool
 
         :return: The signed association.
         :rtype: dict[str, any]
         """
         mxidParts = parseMxid(mxid)
-        result = self._info.match_user_id(medium, address)
-        possible_hses = []
-        if 'hs' in result:
-            possible_hses.append(result['hs'])
-        if 'shadow_hs' in result:
-            possible_hses.append(result['shadow_hs'])
 
-        if mxidParts[1] not in possible_hses:
-            logger.info("Denying bind of %r/%r -> %r (info result: %r)", medium, address, mxid, result)
-            raise BindingNotPermittedException()
+        if check_info:
+            result = self._info.match_user_id(medium, address)
+            possible_hses = []
+            if 'hs' in result:
+                possible_hses.append(result['hs'])
+            if 'shadow_hs' in result:
+                possible_hses.append(result['shadow_hs'])
+
+            if mxidParts[1] not in possible_hses:
+                logger.info("Denying bind of %r/%r -> %r (info result: %r)", medium, address, mxid, result)
+                raise BindingNotPermittedException()
 
         localAssocStore = LocalAssociationStore(self.sydent)
 

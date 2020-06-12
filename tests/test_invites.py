@@ -44,7 +44,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         # Bind the 3PID
         self.sydent.threepidBinder.addBinding(
-            medium, address, "@john:example.com",
+            medium, address, "@john:example.com", check_info=False,
         )
 
         # Give Sydent some time to call /onBind and delete the token.
@@ -107,7 +107,7 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
 
         # Bind the 3PID
         self.sydent.threepidBinder.addBinding(
-            medium, address, "@john:example.com",
+            medium, address, "@john:example.com", check_info=False,
         )
 
         # Give Sydent some time to call /onBind and delete the token.
