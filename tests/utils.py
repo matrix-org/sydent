@@ -171,7 +171,7 @@ def make_request(
         method (bytes or unicode): The HTTP request method ("verb").
         path (bytes or unicode): The HTTP path, suitably URL encoded (e.g.
         escaped UTF-8 & spaces and such).
-        content (bytes or dict): The body of the request. JSON-encoded, if
+        content (str or dict): The body of the request. JSON-encoded, if
         a dict.
         access_token (unicode): An access token to use to authenticate the request,
             None if no access token needs to be included.
