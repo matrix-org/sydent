@@ -20,8 +20,8 @@ from twisted.web import server
 from signedjson.sign import SignatureVerifyException
 import json
 import logging
-from sydent.http.servlets import jsonwrap
-from sydent.db.profiles  import ProfileStore
+from sydent.http.servlets import deferjsonwrap
+from sydent.db.profiles import ProfileStore
 
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class ProfileReplicationServlet(Resource):
         self._async_render_POST(request)
         return server.NOT_DONE_YET
 
-    @jsonwrap
+    @deferjsonwrap
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
         yield
@@ -74,9 +74,7 @@ class ProfileReplicationServlet(Resource):
         if batchnum <= latest_batch_on_host:
             logger.info("Ignoring batch %d from %s: we already have %d", batchnum, origin_server, latest_batch_on_host)
             # we already have this batch, thanks
-            request.write(json.dumps({}))
-            request.finish()
-            defer.returnValue(None)
+            return {}
         else:
             # good, this is the next batch
             if len(batch) > MAX_BATCH_SIZE:

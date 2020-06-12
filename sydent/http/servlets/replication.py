@@ -27,7 +27,7 @@ from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.invite_tokens import JoinTokenStore
-from sydent.http.servlets import jsonwrap
+from sydent.http.servlets import deferjsonwrap
 from sydent.replication.peer import NoMatchingSignatureException, NoSignaturesException, RemotePeerError
 from signedjson.sign import SignatureVerifyException
 
@@ -46,7 +46,7 @@ class ReplicationPushServlet(Resource):
         self._async_render_POST(request)
         return server.NOT_DONE_YET
 
-    @jsonwrap
+    @deferjsonwrap
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
         """Verify and store replicated information from trusted peer identity servers.
