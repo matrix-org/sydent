@@ -202,7 +202,7 @@ class Sydent:
         self.shadow_hs_slave  = self.cfg.get('general', 'shadow.hs.slave')
 
         self.user_dir_allowed_hses = set_from_comma_sep_string(
-            self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
+            self.cfg.get('userdir', 'userdir.allowed_homeservers')
         )
 
         next_link_whitelist = self.cfg.get('general', 'next_link.domain_whitelist')
