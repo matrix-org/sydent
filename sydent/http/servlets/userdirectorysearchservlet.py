@@ -46,7 +46,11 @@ class UserDirectorySearchServlet(Resource):
     def _async_render_POST(self, request):
         send_cors(request)
         try:
-            body = json.load(request.content)
+            content = request.content.read()
+            if isinstance(content, bytes):
+                content = content.decode("UTF-8")
+
+            body = json.loads(content)
         except ValueError:
             request.setResponseCode(400)
             return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
