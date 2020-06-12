@@ -17,12 +17,10 @@ from twisted.web.resource import Resource
 from twisted.internet import defer
 from twisted.web import server
 
-import signedjson.sign
-import signedjson.key
 from signedjson.sign import SignatureVerifyException
 import json
 import logging
-from sydent.http.servlets import get_args, jsonwrap
+from sydent.http.servlets import jsonwrap
 from sydent.db.profiles  import ProfileStore
 
 
@@ -41,7 +39,7 @@ class ProfileReplicationServlet(Resource):
         self._async_render_POST(request)
         return server.NOT_DONE_YET
 
-
+    @jsonwrap
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
         yield
@@ -49,26 +47,20 @@ class ProfileReplicationServlet(Resource):
             body = json.load(request.content)
         except ValueError:
             request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
-            request.finish()
-            defer.returnValue(None)
+            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
 
         missing = [k for k in ("batchnum", "batch", "origin_server") if k not in body]
         if len(missing) > 0:
             request.setResponseCode(400)
             msg = "Missing parameters: "+(",".join(missing))
-            request.write(json.dumps({'errcode': 'M_MISSING_PARAMS', 'error': msg}))
-            request.finish()
-            defer.returnValue(None)
+            return {'errcode': 'M_MISSING_PARAMS', 'error': msg}
 
         try:
             yield self.sydent.sig_verifier.verifyServerSignedJson(body, self.sydent.user_dir_allowed_hses)
         except SignatureVerifyException:
             request.setResponseCode(403)
             msg = "Signature verification failed or origin not whitelisted"
-            request.write(json.dumps({'errcode': 'M_FORBIDDEN', 'error': msg}))
-            request.finish()
-            defer.returnValue(None)
+            return {'errcode': 'M_FORBIDDEN', 'error': msg}
 
         batchnum = body["batchnum"]
         batch = body["batch"]
@@ -90,9 +82,7 @@ class ProfileReplicationServlet(Resource):
             if len(batch) > MAX_BATCH_SIZE:
                 logger.warn("Host %s sent batch of %s which exceeds max of %d", origin_server, len(batch), MAX_BATCH_SIZE)
                 request.setResponseCode(400)
-                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': 'batch size exceeds max of %d' % (MAX_BATCH_SIZE,)}))
-                request.finish()
-                defer.returnValue(None)
+                return {'errcode': 'M_UNKNOWN', 'error': 'batch size exceeds max of %d' % (MAX_BATCH_SIZE,)}
                 
             bad_uids = []
             for uid, info in batch.items():
@@ -102,12 +92,8 @@ class ProfileReplicationServlet(Resource):
                 logger.warn("Host %s sent batch with missing fields", origin_server)
                 request.setResponseCode(400)
                 msg = "Missing data for user IDs: %s (required: display_name, avatar_url" % (','.join(bad_uids,))
-                request.write(json.dumps({'errcode': 'M_UNKNOWN', 'error': msg}))
-                request.finish()
-                defer.returnValue(None)
+                return {'errcode': 'M_UNKNOWN', 'error': msg}
 
             logger.info("Storing %d profiles in batch %d from %s", len(batch), batchnum, origin_server)
             profile_store.addBatch(origin_server, batchnum, batch)
-            request.write((json.dumps({})))
-            request.finish()
-            defer.returnValue(None)
+            return {}
