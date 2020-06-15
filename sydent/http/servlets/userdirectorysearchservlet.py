@@ -53,11 +53,11 @@ class UserDirectorySearchServlet(Resource):
             body = json.loads(content)
         except ValueError:
             request.setResponseCode(400)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
+            defer.returnValue({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'})
 
         if 'search_term' not in body:
             request.setResponseCode(400)
-            return {'errcode': 'M_MISSING_PARAMS', 'error': 'Missing param: search_term'}
+            defer.returnValue({'errcode': 'M_MISSING_PARAMS', 'error': 'Missing param: search_term'})
 
         search_term = body['search_term']
         limit = min(body.get('limit', 10), MAX_SEARCH_LIMIT)
@@ -67,7 +67,7 @@ class UserDirectorySearchServlet(Resource):
         except SignatureVerifyException:
             request.setResponseCode(403)
             msg = "Signature verification failed or origin not whitelisted"
-            return {'errcode': 'M_FORBIDDEN', 'error': msg}
+            defer.returnValue({'errcode': 'M_FORBIDDEN', 'error': msg})
 
         profileStore = ProfileStore(self.sydent)
 
@@ -75,7 +75,7 @@ class UserDirectorySearchServlet(Resource):
         # are more results we could have returned
         results = profileStore.getProfilesMatchingSearchTerm(search_term, limit + 1)
 
-        return {'results': results[0:limit], 'limited': len(results) > limit}
+        defer.returnValue({'results': results[0:limit], 'limited': len(results) > limit})
 
     @jsonwrap
     def render_OPTIONS(self, request):

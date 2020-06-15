@@ -51,20 +51,20 @@ class ProfileReplicationServlet(Resource):
             body = json.loads(content)
         except ValueError:
             request.setResponseCode(400)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
+            defer.returnValue({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'})
 
         missing = [k for k in ("batchnum", "batch", "origin_server") if k not in body]
         if len(missing) > 0:
             request.setResponseCode(400)
             msg = "Missing parameters: "+(",".join(missing))
-            return {'errcode': 'M_MISSING_PARAMS', 'error': msg}
+            defer.returnValue({'errcode': 'M_MISSING_PARAMS', 'error': msg})
 
         try:
             yield self.sydent.sig_verifier.verifyServerSignedJson(body, self.sydent.user_dir_allowed_hses)
         except SignatureVerifyException:
             request.setResponseCode(403)
             msg = "Signature verification failed or origin not whitelisted"
-            return {'errcode': 'M_FORBIDDEN', 'error': msg}
+            defer.returnValue({'errcode': 'M_FORBIDDEN', 'error': msg})
 
         batchnum = body["batchnum"]
         batch = body["batch"]
@@ -78,13 +78,13 @@ class ProfileReplicationServlet(Resource):
         if batchnum <= latest_batch_on_host:
             logger.info("Ignoring batch %d from %s: we already have %d", batchnum, origin_server, latest_batch_on_host)
             # we already have this batch, thanks
-            return {}
+            defer.returnValue({})
         else:
             # good, this is the next batch
             if len(batch) > MAX_BATCH_SIZE:
                 logger.warn("Host %s sent batch of %s which exceeds max of %d", origin_server, len(batch), MAX_BATCH_SIZE)
                 request.setResponseCode(400)
-                return {'errcode': 'M_UNKNOWN', 'error': 'batch size exceeds max of %d' % (MAX_BATCH_SIZE,)}
+                defer.returnValue({'errcode': 'M_UNKNOWN', 'error': 'batch size exceeds max of %d' % (MAX_BATCH_SIZE,)})
                 
             bad_uids = []
             for uid, info in batch.items():
@@ -94,8 +94,8 @@ class ProfileReplicationServlet(Resource):
                 logger.warn("Host %s sent batch with missing fields", origin_server)
                 request.setResponseCode(400)
                 msg = "Missing data for user IDs: %s (required: display_name, avatar_url" % (','.join(bad_uids,))
-                return {'errcode': 'M_UNKNOWN', 'error': msg}
+                defer.returnValue({'errcode': 'M_UNKNOWN', 'error': msg})
 
             logger.info("Storing %d profiles in batch %d from %s", len(batch), batchnum, origin_server)
             profile_store.addBatch(origin_server, batchnum, batch)
-            return {}
+            defer.returnValue({})

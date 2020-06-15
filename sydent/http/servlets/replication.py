@@ -75,7 +75,7 @@ class ReplicationPushServlet(Resource):
         if not peer:
             logger.warn("Got connection from %s but no peer found by that name", peerCertCn)
             request.setResponseCode(403)
-            return {'errcode': 'M_UNKNOWN_PEER', 'error': 'This peer is not known to this server'}
+            defer.returnValue({'errcode': 'M_UNKNOWN_PEER', 'error': 'This peer is not known to this server'})
 
         logger.info("Push connection made from peer %s", peer.servername)
 
@@ -84,7 +84,7 @@ class ReplicationPushServlet(Resource):
             logger.warn("Peer %s made push connection with non-JSON content (type: %s)",
                         peer.servername, request.requestHeaders.getRawHeaders('Content-Type')[0])
             request.setResponseCode(400)
-            return {'errcode': 'M_NOT_JSON', 'error': 'This endpoint expects JSON'}
+            defer.returnValue({'errcode': 'M_NOT_JSON', 'error': 'This endpoint expects JSON'})
 
         try:
             # json.loads doesn't allow bytes in Python 3.5
@@ -92,13 +92,13 @@ class ReplicationPushServlet(Resource):
         except ValueError:
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
             request.setResponseCode(400)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
+            defer.returnValue({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'})
 
         # Ensure there is data we are able to process
         if 'sg_assocs' not in inJson and 'invite_tokens' not in inJson and 'ephemeral_public_keys' not in inJson:
             logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_public_keys' keys in JSON", peer.servername)
             request.setResponseCode(400)
-            return  {'errcode': 'M_BAD_JSON', 'error': 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON'}
+            defer.returnValue({'errcode': 'M_BAD_JSON', 'error': 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON'})
 
         # Process signed associations
         #
@@ -132,12 +132,12 @@ class ReplicationPushServlet(Resource):
                 self.sydent.db.rollback()
                 logger.warn("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
                 request.setResponseCode(400)
-                return {'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}
+                defer.returnValue({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'})
             except Exception:
                 self.sydent.db.rollback()
                 logger.error("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
                 request.setResponseCode(500)
-                return {'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}
+                defer.returnValue({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'})
 
             assocObj = threePidAssocFromDict(sgAssoc)
 
@@ -257,4 +257,4 @@ class ReplicationPushServlet(Resource):
             logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
 
         self.sydent.db.commit()
-        return {'success': True}
+        defer.returnValue({'success': True})
