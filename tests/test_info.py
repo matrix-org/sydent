@@ -38,7 +38,9 @@ class InfoTestCase(unittest.TestCase):
         request, channel = make_request(
             self.sydent.reactor,
             "GET",
-            "/_matrix/identity/v1/%s?medium=%s&address=%s" % (endpoint, medium, address),
+            "/_matrix/identity/api/v1/%s?medium=%s&address=%s" % (
+                endpoint, medium, address,
+            ),
         )
         request.render(servlet)
 

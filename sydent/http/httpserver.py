@@ -128,9 +128,6 @@ class ClientApiHttpServer:
         # note v2 loses the /api so goes on 'identity' not 'api'
         identity.putChild(b'v2', v2)
 
-        v2.putChild('lookup', lookup_v2)
-        v2.putChild('hash_details', hash_details)
-
         # v2 exclusive APIs
         v2.putChild(b'terms', self.sydent.servlets.termsServlet)
         account = self.sydent.servlets.accountServlet

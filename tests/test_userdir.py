@@ -95,7 +95,7 @@ class UserdirTestCase(unittest.TestCase):
         request, channel = make_request(
             self.sydent.reactor,
             "POST",
-            "/_matrix/identity/v1/replicate_profiles",
+            "/_matrix/identity/api/v1/replicate_profiles",
             json.dumps(signed_update),
         )
         request.render(self.sydent.servlets.profileReplicationServlet)
@@ -115,7 +115,7 @@ class UserdirTestCase(unittest.TestCase):
         request, channel = make_request(
             self.sydent.reactor,
             "POST",
-            "/_matrix/identity/v1/user_directory/search",
+            "/_matrix/identity/api/v1/user_directory/search",
             json.dumps(signed_search_request),
         )
         request.render(self.sydent.servlets.userDirectorySearchServlet)
