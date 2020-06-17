@@ -163,8 +163,8 @@ class EmailValidateCodeServlet(Resource):
 
         # Safely extract next_link from request arguments
         next_link = args.get("nextLink")
-        if next_link:
-            next_link = next_link[0].decode("UTF-8")
+        if next_link and isinstance(next_link, bytes):
+            next_link = next_link.decode("UTF-8")
 
         try:
             return self.sydent.validators.email.validateSessionWithToken(
