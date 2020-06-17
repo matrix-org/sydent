@@ -118,11 +118,11 @@ class ClientApiHttpServer:
 
         v1.putChild(b'sign-ed25519', self.sydent.servlets.blindlySignStuffServlet)
 
-        v1.putChild('user_directory', userDirectory)
+        v1.putChild(b'user_directory', userDirectory)
 
-        userDirectory.putChild('search', self.sydent.servlets.userDirectorySearchServlet)
+        userDirectory.putChild(b'search', self.sydent.servlets.userDirectorySearchServlet)
 
-        v1.putChild('replicate_profiles', self.sydent.servlets.profileReplicationServlet)
+        v1.putChild(b'replicate_profiles', self.sydent.servlets.profileReplicationServlet)
 
         # v2
         # note v2 loses the /api so goes on 'identity' not 'api'
