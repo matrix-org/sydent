@@ -1,0 +1,1 @@
+Fix a bug causing Sydent to ignore `nextLink` parameters.
