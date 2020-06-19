@@ -88,6 +88,8 @@ class EmailValidateCodeServlet(Resource):
         self.sydent = syd
 
     def render_GET(self, request):
+        args = get_args(request, ('nextLink',), required=False)
+
         resp = None
         try:
             resp = self.do_validate_request(request)
@@ -95,8 +97,8 @@ class EmailValidateCodeServlet(Resource):
             pass
         if resp and 'success' in resp and resp['success']:
             msg = "Verification successful! Please return to your Matrix client to continue."
-            if 'nextLink' in request.args:
-                next_link = request.args['nextLink'][0]
+            if 'nextLink' in args:
+                next_link = args['nextLink']
                 if not next_link.startswith("file:///"):
                     request.setResponseCode(302)
                     request.setHeader("Location", next_link)
