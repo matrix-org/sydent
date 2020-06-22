@@ -57,6 +57,7 @@ class ReplicationPushServlet(Resource):
                 request.requestHeaders.getRawHeaders('Content-Type')[0] != 'application/json':
             logger.warn("Peer %s made push connection with non-JSON content (type: %s)",
                         peer.servername, request.requestHeaders.getRawHeaders('Content-Type')[0])
+            request.setResponseCode(400)
             return {'errcode': 'M_NOT_JSON', 'error': 'This endpoint expects JSON'}
 
         try:
@@ -64,10 +65,12 @@ class ReplicationPushServlet(Resource):
             inJson = json.loads(request.content.read().decode("UTF-8"))
         except ValueError:
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
+            request.setResponseCode(400)
             return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
 
         if 'sgAssocs' not in inJson:
             logger.warn("Peer %s made push connection with no 'sgAssocs' key in JSON", peer.servername)
+            request.setResponseCode(400)
             return {'errcode': 'M_BAD_JSON', 'error': 'No "sgAssocs" key in JSON'}
 
         failedIds = []
