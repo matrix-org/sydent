@@ -1,0 +1,1 @@
+Fix the status code returned during an error response when binding a 3PID.
