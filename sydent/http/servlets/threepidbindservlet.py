@@ -71,7 +71,7 @@ class ThreePidBindServlet(Resource):
         except InvalidSessionIdException:
             raise noMatchError
         except SessionNotValidatedException:
-            return MatrixRestError(
+            raise MatrixRestError(
                 400,
                 'M_SESSION_NOT_VALIDATED',
                 "This validation session has not yet been completed")
