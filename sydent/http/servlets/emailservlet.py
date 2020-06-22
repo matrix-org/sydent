@@ -66,7 +66,7 @@ class EmailRequestCodeServlet(Resource):
             sid = self.sydent.validators.email.requestToken(
                 email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress
             )
-            resp = {'success': True, 'sid': str(sid)}
+            resp = {'sid': str(sid)}
         except EmailAddressException:
             request.setResponseCode(400)
             resp = {'errcode': 'M_INVALID_EMAIL', 'error': 'Invalid email address'}
