@@ -46,13 +46,6 @@ class ThreePidBindServlet(Resource):
             raise MatrixRestError(
                 400, 'M_INVALID_PARAM', 'Invalid client_secret provided')
 
-        # Return the same error for not found / bad client secret otherwise people can get information about
-        # sessions without knowing the secret
-        noMatchError = MatrixRestError(
-            404,
-            'M_NO_VALID_SESSION',
-            "No valid session was found matching that sid and client secret")
-
         if account:
             # This is a v2 API so only allow binding to the logged in user id
             if account.userId != mxid:
@@ -61,15 +54,19 @@ class ThreePidBindServlet(Resource):
         try:
             valSessionStore = ThreePidValSessionStore(self.sydent)
             s = valSessionStore.getValidatedSession(sid, clientSecret)
-        except IncorrectClientSecretException:
-            raise noMatchError
+        except (IncorrectClientSecretException, InvalidSessionIdException):
+            # Return the same error for not found / bad client secret otherwise
+            # people can get information about sessions without knowing the
+            # secret.
+            raise MatrixRestError(
+                404,
+                'M_NO_VALID_SESSION',
+                "No valid session was found matching that sid and client secret")
         except SessionExpiredException:
             raise MatrixRestError(
                 400,
                 'M_SESSION_EXPIRED',
                 "This validation session has expired: call requestToken again")
-        except InvalidSessionIdException:
-            raise noMatchError
         except SessionNotValidatedException:
             raise MatrixRestError(
                 400,
