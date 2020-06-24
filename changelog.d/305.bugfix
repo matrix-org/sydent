@@ -1,1 +1,1 @@
-Fix the status code returned during an error response when binding a 3PID.
+Fix the HTTP status code returned during some error responses.
