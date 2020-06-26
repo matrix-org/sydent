@@ -17,7 +17,7 @@ from __future__ import absolute_import
 
 import twisted.python.log
 from twisted.web.resource import Resource
-from sydent.http.servlets import jsonwrap
+from sydent.http.servlets import jsonwrap, MatrixRestError
 from sydent.threepid import threePidAssocFromDict
 
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -48,8 +48,7 @@ class ReplicationPushServlet(Resource):
 
         if not peer:
             logger.warn("Got connection from %s but no peer found by that name", peerCertCn)
-            request.setResponseCode(403)
-            return {'errcode': 'M_UNKNOWN_PEER', 'error': 'This peer is not known to this server'}
+            raise MatrixRestError(403, 'M_UNKNOWN_PEER', 'This peer is not known to this server')
 
         logger.info("Push connection made from peer %s", peer.servername)
 
@@ -57,18 +56,18 @@ class ReplicationPushServlet(Resource):
                 request.requestHeaders.getRawHeaders('Content-Type')[0] != 'application/json':
             logger.warn("Peer %s made push connection with non-JSON content (type: %s)",
                         peer.servername, request.requestHeaders.getRawHeaders('Content-Type')[0])
-            return {'errcode': 'M_NOT_JSON', 'error': 'This endpoint expects JSON'}
+            raise MatrixRestError(400, 'M_NOT_JSON', 'This endpoint expects JSON')
 
         try:
             # json.loads doesn't allow bytes in Python 3.5
             inJson = json.loads(request.content.read().decode("UTF-8"))
         except ValueError:
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
-            return {'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}
+            raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
         if 'sgAssocs' not in inJson:
             logger.warn("Peer %s made push connection with no 'sgAssocs' key in JSON", peer.servername)
-            return {'errcode': 'M_BAD_JSON', 'error': 'No "sgAssocs" key in JSON'}
+            raise MatrixRestError(400, 'M_BAD_JSON', 'No "sgAssocs" key in JSON')
 
         failedIds = []
 

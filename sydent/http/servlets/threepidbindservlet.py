@@ -43,16 +43,8 @@ class ThreePidBindServlet(Resource):
         clientSecret = args['client_secret']
 
         if not is_valid_client_secret(clientSecret):
-            request.setResponseCode(400)
-            return {
-                'errcode': 'M_INVALID_PARAM',
-                'error': 'Invalid client_secret provided'
-            }
-
-        # Return the same error for not found / bad client secret otherwise people can get information about
-        # sessions without knowing the secret
-        noMatchError = {'errcode': 'M_NO_VALID_SESSION',
-                        'error': "No valid session was found matching that sid and client secret"}
+            raise MatrixRestError(
+                400, 'M_INVALID_PARAM', 'Invalid client_secret provided')
 
         if account:
             # This is a v2 API so only allow binding to the logged in user id
@@ -62,16 +54,24 @@ class ThreePidBindServlet(Resource):
         try:
             valSessionStore = ThreePidValSessionStore(self.sydent)
             s = valSessionStore.getValidatedSession(sid, clientSecret)
-        except IncorrectClientSecretException:
-            return noMatchError
+        except (IncorrectClientSecretException, InvalidSessionIdException):
+            # Return the same error for not found / bad client secret otherwise
+            # people can get information about sessions without knowing the
+            # secret.
+            raise MatrixRestError(
+                404,
+                'M_NO_VALID_SESSION',
+                "No valid session was found matching that sid and client secret")
         except SessionExpiredException:
-            return {'errcode': 'M_SESSION_EXPIRED',
-                    'error': "This validation session has expired: call requestToken again"}
-        except InvalidSessionIdException:
-            return noMatchError
+            raise MatrixRestError(
+                400,
+                'M_SESSION_EXPIRED',
+                "This validation session has expired: call requestToken again")
         except SessionNotValidatedException:
-            return {'errcode': 'M_SESSION_NOT_VALIDATED',
-                    'error': "This validation session has not yet been completed"}
+            raise MatrixRestError(
+                400,
+                'M_SESSION_NOT_VALIDATED',
+                "This validation session has not yet been completed")
 
         res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
         return res
