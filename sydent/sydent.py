@@ -91,10 +91,10 @@ def set_from_comma_sep_string(rawstr):
 
 CONFIG_DEFAULTS = {
     'general': {
-        'server.name': '',
+        'server.name': os.environ.get('SYDENT_SERVER_NAME', ''),
         'log.path': '',
         'log.level': 'INFO',
-        'pidfile.path': 'sydent.pid',
+        'pidfile.path': os.environ.get('SYDENT_PID_FILE', 'sydent.pid'),
         'terms.path': '',
         'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
         'shadow.hs.master': '',
@@ -125,7 +125,7 @@ CONFIG_DEFAULTS = {
         'delete_tokens_on_bind': 'true',
     },
     'db': {
-        'db.file': 'sydent.db',
+        'db.file': os.environ.get('SYDENT_DB_PATH', 'sydent.db'),
     },
     'http': {
         'clientapi.http.bind_address': '::',

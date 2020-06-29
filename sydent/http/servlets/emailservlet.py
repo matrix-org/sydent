@@ -64,7 +64,7 @@ class EmailRequestCodeServlet(Resource):
         ipaddress = self.sydent.ip_from_request(request)
 
         nextLink = None
-        if 'next_link' in args:
+        if 'next_link' in args and not args['next_link'].startswith("file:///"):
             nextLink = args['next_link']
 
             if not validate_next_link(self.sydent, nextLink):
@@ -80,7 +80,7 @@ class EmailRequestCodeServlet(Resource):
             sid = self.sydent.validators.email.requestToken(
                 email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress
             )
-            resp = {'success': True, 'sid': str(sid)}
+            resp = {'sid': str(sid)}
         except EmailAddressException:
             request.setResponseCode(400)
             resp = {'errcode': 'M_INVALID_EMAIL', 'error': 'Invalid email address'}
@@ -158,7 +158,7 @@ class EmailValidateCodeServlet(Resource):
             request.setResponseCode(400)
             return {
                 'errcode': 'M_INVALID_PARAM',
-                'error': 'Invalid value for client_secret',
+                'error': 'Invalid client_secret provided'
             }
 
         # Safely extract next_link from request arguments

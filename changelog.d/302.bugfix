@@ -1,0 +1,1 @@
+Stop sending the unspecified `success` parameter in responses to `/requestToken` requests.

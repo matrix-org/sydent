@@ -19,6 +19,7 @@ from __future__ import absolute_import
 from twisted.web.resource import Resource
 from twisted.web import server
 from twisted.internet import defer
+from sydent.http.servlets import jsonwrap, MatrixRestError
 from sydent.threepid import threePidAssocFromDict
 
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -74,8 +75,7 @@ class ReplicationPushServlet(Resource):
 
         if not peer:
             logger.warn("Got connection from %s but no peer found by that name", peerCertCn)
-            request.setResponseCode(403)
-            defer.returnValue({'errcode': 'M_UNKNOWN_PEER', 'error': 'This peer is not known to this server'})
+            raise MatrixRestError(403, 'M_UNKNOWN_PEER', 'This peer is not known to this server')
 
         logger.info("Push connection made from peer %s", peer.servername)
 
@@ -83,22 +83,19 @@ class ReplicationPushServlet(Resource):
                 request.requestHeaders.getRawHeaders('Content-Type')[0] != 'application/json':
             logger.warn("Peer %s made push connection with non-JSON content (type: %s)",
                         peer.servername, request.requestHeaders.getRawHeaders('Content-Type')[0])
-            request.setResponseCode(400)
-            defer.returnValue({'errcode': 'M_NOT_JSON', 'error': 'This endpoint expects JSON'})
+            raise MatrixRestError(400, 'M_NOT_JSON', 'This endpoint expects JSON')
 
         try:
             # json.loads doesn't allow bytes in Python 3.5
             inJson = json.loads(request.content.read().decode("UTF-8"))
         except ValueError:
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
-            request.setResponseCode(400)
-            defer.returnValue({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'})
+            raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
         # Ensure there is data we are able to process
         if 'sg_assocs' not in inJson and 'invite_tokens' not in inJson and 'ephemeral_public_keys' not in inJson:
             logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_public_keys' keys in JSON", peer.servername)
-            request.setResponseCode(400)
-            defer.returnValue({'errcode': 'M_BAD_JSON', 'error': 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON'})
+            raise MatrixRestError(400, 'M_BAD_JSON', 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON')
 
         # Process signed associations
         #
@@ -131,13 +128,11 @@ class ReplicationPushServlet(Resource):
             except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
                 self.sydent.db.rollback()
                 logger.warn("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
-                request.setResponseCode(400)
-                defer.returnValue({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'})
+                raise MatrixRestError(400, 'M_VERIFICATION_FAILED', 'Signature verification failed')
             except Exception:
                 self.sydent.db.rollback()
                 logger.error("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
-                request.setResponseCode(500)
-                defer.returnValue({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'})
+                raise MatrixRestError(500, 'M_INTERNAL_SERVER_ERROR', 'Signature verification failed')
 
             assocObj = threePidAssocFromDict(sgAssoc)
 

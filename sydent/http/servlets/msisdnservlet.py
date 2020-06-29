@@ -169,6 +169,7 @@ class MsisdnValidateCodeServlet(Resource):
         clientSecret = args['client_secret']
 
         if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
             return {
                 'errcode': 'M_INVALID_PARAM',
                 'error': 'Invalid value for client_secret',
@@ -177,15 +178,19 @@ class MsisdnValidateCodeServlet(Resource):
         try:
             return self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)
         except IncorrectClientSecretException:
+            request.setResponseCode(400)
             return {'success': False, 'errcode': 'M_INVALID_PARAM',
                     'error': "Client secret does not match the one given when requesting the token"}
         except SessionExpiredException:
+            request.setResponseCode(400)
             return {'success': False, 'errcode': 'M_SESSION_EXPIRED',
                     'error': "This validation session has expired: call requestToken again"}
         except InvalidSessionIdException:
+            request.setResponseCode(400)
             return {'success': False, 'errcode': 'M_INVALID_PARAM',
                     'error': "The token doesn't match"}
         except IncorrectSessionTokenException:
+            request.setResponseCode(404)
             return {'success': False, 'errcode': 'M_NO_VALID_SESSION',
                     'error': "No session could be found with this sid"}
 
