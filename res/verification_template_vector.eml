@@ -13,7 +13,7 @@ Content-Disposition: inline
 
 Hello there!
 
-You have asked us to register this email address with riot.im - the open source,
+You have asked us to register this email address with element.io - the open source,
 distributed and secure shared workspace for the web that's built on Matrix.
 
 If it was really you who made this request, you can click on the following link to
@@ -124,7 +124,7 @@ pre, code {
 
                     <p>Hello there!</p>
 
-                    <p>You have asked us to register this email address with riot.im - the open source,
+                    <p>You have asked us to register this email address with element.io - the open source,
                     distributed and secure shared workspace for the web that's built on Matrix.</p>
 
                     <p>If it was really you who made this request, you can click on the following link to
