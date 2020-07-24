@@ -14,11 +14,11 @@ Content-Disposition: inline
 Hi,
 
 %(sender_display_name)s has invited you into a room %(bracketed_room_name)s on
-Riot. To join the conversation please follow the link below.
+Element. To join the conversation please follow the link below.
 
 https://riot.im/app/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
-Riot is an open source collaboration app built on the Matrix.org
+Element is an open source collaboration app built on the Matrix.org
 open standard for interoperable communication: supporting group chat,
 file transfer, voice and video calling, integrations to other apps, bridges
 to other communication systems and much more.
@@ -28,25 +28,25 @@ iOS or Android on mobile.
 
 Thanks,
 
-Riot
+Element
 
 
-About Riot:
+About Element:
 
-Break through - Riot allows teams to communicate across a wide range of collaboration
-apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-allow these team members to seamlessly work together. Riot offers the richest
+Break through - Element allows teams to communicate across a wide range of collaboration
+apps. If some team members use Element while others use IRC, Slack or Gitter, Element will
+allow these team members to seamlessly work together. Element offers the richest
 network of communication bridges.
 
-Own Your Own Data - No one should control your communication and data but you. Riot
+Own Your Own Data - No one should control your communication and data but you. Element
 lets you run your own server, and provides users and teams with the most advanced
 crypto ratchet technology available today for a decentralized secure Internet.
 
-Open Source - Riot is entirely open source: all the code is published on GitHub
+Open Source - Element is entirely open source: all the code is published on GitHub
 (Apache License) for anyone to see and extend. This means teams can customize or
 contribute to the code and everyone can benefit from the speed of community innovation.
 
-Made on Matrix - Riot is built on top of Matrix. Matrix is an open network for secure,
+Made on Matrix - Element is built on top of Matrix. Matrix is an open network for secure,
 decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.
@@ -116,7 +116,7 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://riot.im/img/external/riot-logo-email-small.png" width="64" height="64" alt="Riot"/>
+                                    <img src="https://riot.im/img/external/riot-logo-email-small.png" width="64" height="64" alt="Element"/>
                             </td>
                         </tr>
                     </table>
@@ -124,19 +124,19 @@ pre, code {
 <p>Hi,</p>
 
 <p>%(sender_display_name_forhtml)s has invited you into a room %(bracketed_room_name_forhtml)s on
-Riot.</p>
+Element.</p>
 
 <p>
     <a
     href="https://riot.im/app/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
 </p>
 
-<p>Riot is an open source collaboration app built on the Matrix.org
+<p>Element is an open source collaboration app built on the Matrix.org
 open standard for interoperable communication: supporting group chat, file
 transfer, voice and video calling, integrations to other apps, bridges
 to other communication systems and much more.</p>
 
-<p>Please note that Riot requires
+<p>Please note that Element requires
 <a href="https://www.google.com/chrome">Chrome</a>,
 <a href="https://www.getfirefox.com">Firefox</a> or
 <a href="https://www.apple.com/safari">Safari</a> on the web,
@@ -144,25 +144,25 @@ or iOS or Android on mobile.</p>
 
 <p>Thanks,</p>
 
-<p>Riot</p>
+<p>Element</p>
 
 <br>
-<p>About Riot:</p>
+<p>About Element:</p>
 
-<p><em>Break through</em> - Riot allows teams to communicate across a wide range of collaboration
-apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-allow these team members to seamlessly work together. Riot offers the richest
+<p><em>Break through</em> - Element allows teams to communicate across a wide range of collaboration
+apps. If some team members use Element while others use IRC, Slack or Gitter, Element will
+allow these team members to seamlessly work together. Element offers the richest
 network of communication bridges.</p>
 
-<p><em>Own Your Own Data</em> - No one should control your communication and data but you. Riot
+<p><em>Own Your Own Data</em> - No one should control your communication and data but you. Element
 lets you run your own server, and provides users and teams with the most advanced
 crypto ratchet technology available today for a decentralized secure Internet.</p>
 
-<p><em>Open Source</em> - Riot is entirely open source: all the code is published on GitHub
+<p><em>Open Source</em> - Element is entirely open source: all the code is published on GitHub
 (Apache License) for anyone to see and extend. This means teams can customize or
 contribute to the code and everyone can benefit from the speed of community innovation.</p>
 
-<p><em>Made on Matrix</em> - Riot is built on top of Matrix. Matrix is an open network for secure,
+<p><em>Made on Matrix</em> - Element is built on top of Matrix. Matrix is an open network for secure,
 decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.</p>
