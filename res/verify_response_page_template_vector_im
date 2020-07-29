@@ -40,7 +40,7 @@ body {
 </head>
 <body>
 <div id="vectorlogo">
-<img src="//static.element.io/images/email-logo.png" alt="riot.im" width="256" height="256" />
+<img src="//static.element.io/images/email-logo.png" alt="Element" width="256" height="256" />
 </div>
 <div id="message">
 <p>%(message)s</p>
