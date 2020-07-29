@@ -81,7 +81,7 @@ def get_args(request, args, required=True):
             raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
     # If we didn't get anything from that, and it's a v1 api path, try the request args
-    # (riot-web's usage of the ed25519 sign servlet currently involves
+    # (element-web's usage of the ed25519 sign servlet currently involves
     # sending the params in the query string with a json body of 'null')
     if request_args is None and (v1_path or request.method == b'GET'):
         request_args_bytes = copy.copy(request.args)
