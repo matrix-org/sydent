@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2014 OpenMarket Ltd
+# Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +14,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.auth import authIfV2
+from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import SessionExpiredException, IncorrectClientSecretException, InvalidSessionIdException,\
     SessionNotValidatedException
 from sydent.threepid.bind import BindingNotPermittedException
+
 
 
 class ThreePidBindServlet(Resource):
@@ -31,51 +36,56 @@ class ThreePidBindServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        err, args = get_args(request, ('sid', 'client_secret', 'mxid'))
-        if err:
-            return err
+
+        account = authIfV2(self.sydent, request)
+
+        args = get_args(request, ('sid', 'client_secret', 'mxid'))
 
         sid = args['sid']
         mxid = args['mxid']
         clientSecret = args['client_secret']
 
         if not is_valid_client_secret(clientSecret):
-            request.setResponseCode(400)
-            return {
-                'errcode': 'M_INVALID_PARAM',
-                'error': 'Invalid value for client_secret',
-            }
+            raise MatrixRestError(
+                400, 'M_INVALID_PARAM', 'Invalid client_secret provided')
 
-        # Return the same error for not found / bad client secret otherwise people can get information about
-        # sessions without knowing the secret
-        noMatchError = {'errcode': 'M_NO_VALID_SESSION',
-                        'error': "No valid session was found matching that sid and client secret"}
+        if account:
+            # This is a v2 API so only allow binding to the logged in user id
+            if account.userId != mxid:
+                raise MatrixRestError(403, 'M_UNAUTHORIZED', "This user is prohibited from binding to the mxid");
 
         try:
             valSessionStore = ThreePidValSessionStore(self.sydent)
             s = valSessionStore.getValidatedSession(sid, clientSecret)
-        except IncorrectClientSecretException:
-            return noMatchError
+        except (IncorrectClientSecretException, InvalidSessionIdException):
+            # Return the same error for not found / bad client secret otherwise
+            # people can get information about sessions without knowing the
+            # secret.
+            raise MatrixRestError(
+                404,
+                'M_NO_VALID_SESSION',
+                "No valid session was found matching that sid and client secret")
         except SessionExpiredException:
-            return {'errcode': 'M_SESSION_EXPIRED',
-                    'error': "This validation session has expired: call requestToken again"}
-        except InvalidSessionIdException:
-            return noMatchError
+            raise MatrixRestError(
+                400,
+                'M_SESSION_EXPIRED',
+                "This validation session has expired: call requestToken again")
         except SessionNotValidatedException:
-            return {'errcode': 'M_SESSION_NOT_VALIDATED',
-                    'error': "This validation session has not yet been completed"}
+            raise MatrixRestError(
+                400,
+                'M_SESSION_NOT_VALIDATED',
+                "This validation session has not yet been completed")
 
         try:
             res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
         except BindingNotPermittedException:
-            return {
-                'errcode': 'M_BINDING_NOT_PERMITTED',
-                'error': "This threepid may not be bound to this mxid",
-            }
+            raise MatrixRestError(
+                400,
+                'M_BINDING_NOT_PERMITTED',
+                "This threepid may not be bound to this mxid")
+
         return res
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
-        request.setResponseCode(200)
-        return {}
+        return b''

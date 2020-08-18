@@ -14,13 +14,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
-import urllib
 import phonenumbers
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.validators import ValidationSession, common
+from sydent.validators import common
 from sydent.sms.openmarket import OpenMarketSMS
 
 from sydent.validators import DestinationRejectedException
@@ -64,8 +64,21 @@ class MsisdnValidator:
 
                 self.smsRules[country] = action
 
+    def requestToken(self, phoneNumber, clientSecret, sendAttempt):
+        """
+        Creates or retrieves a validation session and sends an text message to the
+        corresponding phone number address with a token to use to verify the association.
 
-    def requestToken(self, phoneNumber, clientSecret, sendAttempt, nextLink):
+        :param phoneNumber: The phone number to send the email to.
+        :type phoneNumber: phonenumbers.PhoneNumber
+        :param clientSecret: The client secret to use.
+        :type clientSecret: unicode
+        :param sendAttempt: The current send attempt.
+        :type sendAttempt: int
+
+        :return: The ID of the session created (or of the existing one if any)
+        :rtype: int
+        """
         if str(phoneNumber.country_code) in self.smsRules:
             action = self.smsRules[str(phoneNumber.country_code)]
             if action == 'reject':
@@ -104,6 +117,15 @@ class MsisdnValidator:
         return valSession.id
 
     def getOriginator(self, destPhoneNumber):
+        """
+        Gets an originator for a given phone number.
+
+        :param destPhoneNumber: The phone number to find the originator for.
+        :type destPhoneNumber: phonenumbers.PhoneNumber
+
+        :return: The originator (a dict with a "type" key and a "text" key).
+        :rtype: dict[str, str]
+        """
         countryCode = str(destPhoneNumber.country_code)
 
         origs = [{
@@ -126,4 +148,18 @@ class MsisdnValidator:
         return origs[sum([int(i) for i in msisdn]) % len(origs)]
 
     def validateSessionWithToken(self, sid, clientSecret, token):
+        """
+        Validates the session with the given ID.
+
+        :param sid: The ID of the session to validate.
+        :type sid: unicode
+        :param clientSecret: The client secret to validate.
+        :type clientSecret: unicode
+        :param token: The token to validate.
+        :type token: unicode
+
+        :return: A dict with a "success" key which is True if the session
+            was successfully validated, False otherwise.
+        :rtype: dict[str, bool]
+        """
         return common.validateSessionWithToken(self.sydent, sid, clientSecret, token)

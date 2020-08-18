@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 import socket
@@ -21,8 +22,15 @@ import smtplib
 import email.utils
 import string
 import twisted.python.log
-import cgi
-import urllib
+import six
+from six.moves import urllib
+from six.moves import range
+
+if six.PY2:
+    from cgi import escape
+    from io import open
+else:
+    from html import escape
 
 import email.utils
 
@@ -32,68 +40,89 @@ logger = logging.getLogger(__name__)
 
 
 def sendEmail(sydent, templateName, mailTo, substitutions):
-        mailFrom = sydent.cfg.get('email', 'email.from')
-        mailTemplateFile = sydent.cfg.get('email', templateName)
+    """
+    Sends an email with the given parameters.
 
-        myHostname = sydent.cfg.get('email', 'email.hostname')
-        if myHostname == '':
-            myHostname = socket.getfqdn()
-        midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
-        messageid = "<%d%s@%s>" % (time_msec(), midRandom, myHostname)
+    :param sydent: The Sydent instance to use when building the configuration to send the
+        email with.
+    :type sydent: sydent.sydent.Sydent
+    :param templateName: The name of the template to use when building the body of the
+        email.
+    :type templateName: str
+    :param mailTo: The email address to send the email to.
+    :type mailTo: unicode
+    :param substitutions: The substitutions to use with the template.
+    :type substitutions: dict[str, str]
+    """
+    mailFrom = sydent.cfg.get('email', 'email.from')
+    mailTemplateFile = sydent.cfg.get('email', templateName)
 
-        allSubstitutions = {}
-        allSubstitutions.update(substitutions)
-        allSubstitutions.update({
-            'messageid': messageid,
-            'date': email.utils.formatdate(localtime=False),
-            'to': mailTo,
-            'from': mailFrom,
-        })
+    myHostname = sydent.cfg.get('email', 'email.hostname')
+    if myHostname == '':
+        myHostname = socket.getfqdn()
+    midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
+    messageid = "<%d%s@%s>" % (time_msec(), midRandom, myHostname)
 
-        for k,v in allSubstitutions.items():
-            allSubstitutions[k] = v.decode('utf8')
-            allSubstitutions[k+"_forhtml"] = cgi.escape(v.decode('utf8'))
-            allSubstitutions[k+"_forurl"] = urllib.quote(v)
+    substitutions.update({
+        'messageid': messageid,
+        'date': email.utils.formatdate(localtime=False),
+        'to': mailTo,
+        'from': mailFrom,
+    })
 
-        mailString = open(mailTemplateFile).read().decode('utf8') % allSubstitutions
-        parsedFrom = email.utils.parseaddr(mailFrom)[1]
-        parsedTo = email.utils.parseaddr(mailTo)[1]
-        if parsedFrom == '' or parsedTo == '':
-            logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
-            raise EmailAddressException()
+    allSubstitutions = {}
+    for k, v in substitutions.items():
+        allSubstitutions[k] = v
+        allSubstitutions[k+"_forhtml"] = escape(v)
 
-        if parsedTo != mailTo:
-            logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
-            raise EmailAddressException()
+        if six.PY2 and isinstance(v, unicode):
+            # urllib.parse.quote doesn't support unicode in Python 2, because at that
+            # time unicode in URLs weren't a thing. So convert the value to ascii and
+            # ignore error so we don't return an error if a parameter (e.g. the room's
+            # name contains ascii).
+            v = v.encode("utf-8", errors="ignore")
 
-        mailServer = sydent.cfg.get('email', 'email.smtphost')
-        mailPort = sydent.cfg.get('email', 'email.smtpport')
-        mailUsername = sydent.cfg.get('email', 'email.smtpusername')
-        mailPassword = sydent.cfg.get('email', 'email.smtppassword')
-        mailTLSMode = sydent.cfg.get('email', 'email.tlsmode')
-        logger.info("Sending mail to %s with mail server: %s" % (mailTo, mailServer,))
-        try:
-            if mailTLSMode == 'SSL' or mailTLSMode == 'TLS':
-                smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)
-            elif mailTLSMode == 'STARTTLS':
-                smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
-                smtp.starttls()
-            else:
-                smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
-            if mailUsername != '':
-                smtp.login(mailUsername, mailPassword)
+        allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
 
-            # We're using the parsing above to do basic validation, but instead of
-            # failing it may munge the address it returns. So we should *not* use
-            # that parsed address, as it may not match any validation done
-            # elsewhere.
-            smtp.sendmail(mailFrom, mailTo, mailString.encode('utf-8'))
-            smtp.quit()
-        except Exception as origException:
-            twisted.python.log.err()
-            ese = EmailSendException()
-            ese.cause = origException
-            raise ese
+    mailString = open(mailTemplateFile, encoding="utf-8").read() % allSubstitutions
+    parsedFrom = email.utils.parseaddr(mailFrom)[1]
+    parsedTo = email.utils.parseaddr(mailTo)[1]
+    if parsedFrom == '' or parsedTo == '':
+        logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
+        raise EmailAddressException()
+
+    if parsedTo != mailTo:
+        logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
+        raise EmailAddressException()
+
+    mailServer = sydent.cfg.get('email', 'email.smtphost')
+    mailPort = sydent.cfg.get('email', 'email.smtpport')
+    mailUsername = sydent.cfg.get('email', 'email.smtpusername')
+    mailPassword = sydent.cfg.get('email', 'email.smtppassword')
+    mailTLSMode = sydent.cfg.get('email', 'email.tlsmode')
+    logger.info("Sending mail to %s with mail server: %s" % (mailTo, mailServer,))
+    try:
+        if mailTLSMode == 'SSL' or mailTLSMode == 'TLS':
+            smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)
+        elif mailTLSMode == 'STARTTLS':
+            smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
+            smtp.starttls()
+        else:
+            smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
+        if mailUsername != '':
+            smtp.login(mailUsername, mailPassword)
+
+        # We're using the parsing above to do basic validation, but instead of
+        # failing it may munge the address it returns. So we should *not* use
+        # that parsed address, as it may not match any validation done
+        # elsewhere.
+        smtp.sendmail(mailFrom, mailTo, mailString.encode('utf-8'))
+        smtp.quit()
+    except Exception as origException:
+        twisted.python.log.err()
+        ese = EmailSendException()
+        ese.cause = origException
+        raise ese
 
 
 class EmailAddressException(Exception):

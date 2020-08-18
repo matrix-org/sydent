@@ -2,7 +2,7 @@ Date: %(date)s
 From: %(from)s
 To: %(to)s
 Message-ID: %(messageid)s
-Subject: Your Riot Validation Token
+Subject: Confirm your email address for Riot
 MIME-Version: 1.0
 Content-Type: multipart/alternative; 
 	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
@@ -117,7 +117,7 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://riot.im/img/riot-logo-email.png" width="64" height="64" alt="Riot"/>
+                                    <img src="https://riot.im/img/external/riot-logo-email-small.png" width="64" height="64" alt="Riot"/>
                             </td>
                         </tr>
                     </table>

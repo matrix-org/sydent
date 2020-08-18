@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+-- Note that this SQL file is not up to date, and migrations can be found in sydent/db/sqlitedb.py
 
 CREATE TABLE IF NOT EXISTS peers (
 	id integer primary key,
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS peers (
 	active integer not null default 0,
 	shadow integer not null default 0
 );
+
 CREATE UNIQUE INDEX IF NOT EXISTS name on peers(name);
 
 CREATE TABLE IF NOT EXISTS peer_pubkeys (

@@ -14,35 +14,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import time
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class JoinTokenStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
     def storeToken(self, medium, address, roomId, sender, token, originServer=None, originId=None, commit=True):
-        """Stores an invite token.
-        
-        :param medium: The medium of the token.
-        :type medium: str
-        :param address: The address of the token.
-        :type address: str
-        :param roomId: The room ID this token is tied to.
-        :type roomId: str
-        :param sender: The sender of the invite.
-        :type sender: str
-        :param token: The token itself.
-        :type token: str
+        """
+        Store a new invite token and its metadata.
+
+        :param medium: The medium of the 3PID the token is associated to.
+        :type medium: unicode
+        :param address: The address of the 3PID the token is associated to.
+        :type address: unicode
+        :param roomId: The ID of the room the 3PID is invited in.
+        :type roomId: unicode
+        :param sender: The MXID of the user that sent the invite.
+        :type sender: unicode
+        :param token: The token to store.
+        :type token: unicode
         :param originServer: The server this invite originated from (if
             coming from replication).
-        :type originServer: str, None
+        :type originServer: str or None
         :param originId: The id of the token in the DB of originServer. Used
             for determining if we've already received a token or not.
-        :type originId: int, None
+        :type originId: int or None
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
@@ -63,8 +64,8 @@ class JoinTokenStore(object):
         if commit:
             self.sydent.db.commit()
 
-    def updateToken(self, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id, commit=True):
-        """Process an invite token update received over replication.
+    def updateToken(self, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id, is_deletion, commit=True):
+        """Process an invite token update or deletion received over replication.
 
         :param medium: The medium of the token.
         :type medium: str
@@ -85,13 +86,27 @@ class JoinTokenStore(object):
         :param origin_id: The id of the token in the DB of origin_server. Used
             for determining the row to update in the database.
         :type origin_id: int
+        :param is_deletion: Whether the update is a deletion.
+        :type is_deletion: bool
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
         """
         cur = self.sydent.db.cursor()
 
-        params = (medium, address, room_id, sender, token, sent_ts, origin_id)
+        if is_deletion:
+            sql = """
+                DELETE FROM invite_tokens
+            """
+            params = ()
+        else:
+            sql = """
+                UPDATE invite_tokens
+                SET
+                    medium = ?, address = ?, room_id = ?, sender = ?, token = ?,
+                    sent_ts = ?
+            """
+            params = (medium, address, room_id, sender, token, sent_ts)
 
         # Updates sent over replication include the origin_server and the origin_id as
         # seen from the server performing the update.
@@ -107,16 +122,12 @@ class JoinTokenStore(object):
             where_clause = """
                 WHERE id = ?
             """
+            params += (origin_id,)
         else:
             where_clause = """
                 WHERE origin_id = ? AND origin_server = ?
             """
-            params += (origin_server,)
-
-        sql = """
-            UPDATE invite_tokens
-            SET medium = ?, address = ?, room_id = ?, sender = ?, token = ?, sent_ts = ?
-        """
+            params += (origin_id, origin_server)
 
         sql += where_clause
 
@@ -126,15 +137,18 @@ class JoinTokenStore(object):
             self.sydent.db.commit()
 
     def getTokens(self, medium, address):
-        """Retrieve the invite token(s) for a given 3PID medium and address.
-        Filters out tokens which have expired.
-        
-        :param medium: The medium of the 3PID.
-        :type medium: str
-        :param address: The address of the 3PID.
-        :type address: str
-        :returns a list of invite tokens, or an empty list if no tokens found.
-        :rtype: list[Dict[str, str]]
+        """
+        Retrieves the pending invites tokens for this 3PID that haven't been delivered
+        yet.
+
+        :param medium: The medium of the 3PID to get tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to get tokens for.
+        :type address: unicode
+
+        :return: A list of dicts, each containing a pending token and its metadata for
+            this 3PID.
+        :rtype: list[dict[str, unicode or dict[str, unicode]]
         """
         cur = self.sydent.db.cursor()
 
@@ -153,6 +167,20 @@ class JoinTokenStore(object):
 
         for row in rows:
             medium, address, roomId, sender, token, origin_server, received_ts = row
+
+            # Ensure we're dealing with unicode.
+            if isinstance(medium, bytes):
+                medium = medium.decode("UTF-8")
+            if isinstance(address, bytes):
+                address = address.decode("UTF-8")
+            if isinstance(roomId, bytes):
+                roomId = roomId.decode("UTF-8")
+            if isinstance(sender, bytes):
+                sender = sender.decode("UTF-8")
+            if isinstance(token, bytes):
+                token = token.decode("UTF-8")
+            if isinstance(origin_server, bytes):
+                origin_server = origin_server.decode("UTF-8")
 
             if (
                 validity_period is not None
@@ -174,7 +202,7 @@ class JoinTokenStore(object):
 
     def getInviteTokensAfterId(self, afterId, limit):
         """Retrieves max `limit` invite tokens after a given DB id.
-        
+
         :param afterId: A database id to act as an offset. Tokens after this
             id are returned.
         :type afterId: int
@@ -234,12 +262,14 @@ class JoinTokenStore(object):
 
 
     def markTokensAsSent(self, medium, address):
-        """Mark invite tokens as sent.
-        
-        :param medium: The medium of the token.
-        :type medium: str
-        :param address: The address of the token.
-        :type address: str
+        """
+        Updates the invite tokens associated with a given 3PID to mark them as
+        delivered to a homeserver so they're not delivered again in the future.
+
+        :param medium: The medium of the 3PID to update tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to update tokens for.
+        :type address: unicode
         """
         cur = self.sydent.db.cursor()
 
@@ -251,31 +281,40 @@ class JoinTokenStore(object):
         # Insert a row for every updated invite in the updated_invites table so the
         # update is replicated to other servers.
         res = cur.execute(
-            "SELECT id FROM invite_tokens WHERE medium = ? AND address = ?",
-            (medium, address,)
+            """
+            SELECT id, origin_server, origin_id
+            FROM invite_tokens WHERE medium = ? AND address = ?
+            """,
+            (medium, address,),
         )
 
         rows = res.fetchall()
 
         cur.executemany(
-            "INSERT INTO updated_invites (invite_id) VALUES (?)", rows
+            """
+            INSERT INTO updated_invites (invite_id, origin_server, origin_id)
+            VALUES (?, ?, ?)
+            """,
+            rows,
         )
 
         self.sydent.db.commit()
 
     def storeEphemeralPublicKey(self, publicKey, persistenceTs=None, originServer=None, originId=None, commit=True):
-        """Stores an ephemeral public key in the database.
-        
-        :param publicKey: the ephemeral public key to store.
-        :type publicKey: str
-        :param persistenceTs: 
-        :type persistenceTs: int
-        :param originServer: the server this key was received from (if
+        """
+        Saves the provided ephemeral public key.
+
+        :param publicKey: The key to store.
+        :type publicKey: unicode
+        :param persistenceTs: The time of the key's creation (if received through
+            replication).
+        :type persistenceTs: int or None
+        :param originServer: The server this key was received from (if
             retrieved through replication).
-        :type originServer: str
+        :type originServer: str or None
         :param originId: The id of the key in the DB of originServer. Used
             for determining if we've already received a key or not.
-        :type originId: int
+        :type originId: int or None
         :param commit: Whether DB changes should be committed by this
             function (or an external one).
         :type commit: bool
@@ -289,6 +328,7 @@ class JoinTokenStore(object):
 
         if not persistenceTs:
             persistenceTs = int(time.time())
+
         cur = self.sydent.db.cursor()
         cur.execute(
             "INSERT INTO ephemeral_public_keys"
@@ -300,12 +340,14 @@ class JoinTokenStore(object):
             self.sydent.db.commit()
 
     def validateEphemeralPublicKey(self, publicKey):
-        """Mark an ephemeral public key as validated.
-        
-        :param publicKey: An ephemeral public key.
-        :type publicKey: str
-        :returns true or false depending on whether validation was
-            successful.
+        """
+        Checks if an ephemeral public key is valid, and, if it is, updates its
+        verification count.
+
+        :param publicKey: The public key to validate.
+        :type publicKey: unicode
+
+        :return: Whether the key is valid.
         :rtype: bool
         """
         cur = self.sydent.db.cursor()
@@ -320,7 +362,7 @@ class JoinTokenStore(object):
 
     def getEphemeralPublicKeysAfterId(self, afterId, limit):
         """Retrieves max `limit` ephemeral public keys after a given DB id.
-        
+
         :param afterId: A database id to act as an offset. Keys after this id
             are returned.
         :type afterId: int
@@ -375,13 +417,15 @@ class JoinTokenStore(object):
         return row[0]
 
     def getSenderForToken(self, token):
-        """Returns the sender for a given invite token.
-        
-        :param token: The invite token.
-        :type token: str
-        :returns the sender of a given invite token or None if there isn't
-            one.
-        :rtype: str, None
+        """
+        Retrieves the MXID of the user that sent the invite the provided token is for.
+
+        :param token: The token to retrieve the sender of.
+        :type token: unicode
+
+        :return: The invite's sender, or None if the token doesn't match an existing
+            invite.
+        :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -392,6 +436,45 @@ class JoinTokenStore(object):
         if rows:
             return rows[0][0]
         return None
+
+    def deleteTokens(self, medium, address):
+        """
+        Deletes every token for a given 3PID.
+
+        :param medium: The medium of the 3PID to delete tokens for.
+        :type medium: unicode
+        :param address: The address of the 3PID to delete tokens for.
+        :type address: unicode
+        """
+        cur = self.sydent.db.cursor()
+
+        # Insert a row for every deleted invite in the updated_invites table so the
+        # deletion is replicated to other servers.
+        res = cur.execute(
+            """
+            SELECT id, origin_server, origin_id
+            FROM invite_tokens WHERE medium = ? AND address = ?
+            """,
+            (medium, address,),
+        )
+
+        rows = res.fetchall()
+
+        cur.executemany(
+            """
+            INSERT INTO updated_invites (invite_id, origin_server, origin_id)
+            VALUES (?, ?, ?)
+            """,
+            rows,
+        )
+
+        # Actually delete the invites.
+        cur.execute(
+            "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
+            (medium, address,)
+        )
+
+        self.sydent.db.commit()
 
     def getInviteUpdatesAfterId(self, last_id, limit):
         """Returns every updated token for which its update id is higher than the provided
@@ -412,8 +495,8 @@ class JoinTokenStore(object):
         # Retrieve the IDs of the invites that have been updated since the last time.
         res = cur.execute(
             """
-                SELECT u.id, t.id, medium, address, room_id, sender, token, sent_ts,
-                    origin_server, origin_id
+                SELECT u.id, u.invite_id, t.id IS NULL, medium, address, room_id, sender,
+                    token, sent_ts, u.origin_server, u.origin_id
                 FROM updated_invites AS u
                     LEFT JOIN invite_tokens AS t ON (t.id = u.invite_id)
                 WHERE u.id > ? ORDER BY u.id ASC LIMIT ?;
@@ -428,7 +511,7 @@ class JoinTokenStore(object):
         # Retrieve each invite and append it to a list.
         invites = []
         for row in rows:
-            max_id, invite_id, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
+            max_id, invite_id, is_deletion, medium, address, room_id, sender, token, sent_ts, origin_server, origin_id = row
             # Append a new dict to the list containing the token's metadata,
             # including an `origin_id` and an `origin_server` so that the receiving end
             # can figure out which invite to update in its local database. If the token
@@ -444,6 +527,7 @@ class JoinTokenStore(object):
                     "sender": sender,
                     "token": token,
                     "sent_ts": sent_ts,
+                    "is_deletion": is_deletion,
                 }
             )
 

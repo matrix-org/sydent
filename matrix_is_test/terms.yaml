@@ -1,0 +1,20 @@
+master_version: "someversion"
+docs:
+  terms_of_service:
+    version: "5.0"
+    langs:
+      en:
+        name: "Terms of Service"
+        url: "https://example.org/somewhere/terms-2.0-en.html"
+      fr:
+        name: "Conditions d'utilisation"
+        url: "https://example.org/somewhere/terms-2.0-fr.html"
+  privacy_policy:
+    version: "1.2"
+    langs:
+      en:
+        name: "Privacy Policy"
+        url: "https://example.org/somewhere/privacy-1.2-en.html"
+      fr:
+        name: "Politique de confidentialité"
+        url: "https://example.org/somewhere/privacy-1.2-fr.html"

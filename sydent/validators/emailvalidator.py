@@ -13,9 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
-import urllib
+from six.moves import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.emailutils import sendEmail
@@ -31,9 +32,28 @@ class EmailValidator:
         self.sydent = sydent
 
     def requestToken(self, emailAddress, clientSecret, sendAttempt, nextLink, ipaddress=None):
+        """
+        Creates or retrieves a validation session and sends an email to the corresponding
+        email address with a token to use to verify the association.
+
+        :param emailAddress: The email address to send the email to.
+        :type emailAddress: unicode
+        :param clientSecret: The client secret to use.
+        :type clientSecret: unicode
+        :param sendAttempt: The current send attempt.
+        :type sendAttempt: int
+        :param nextLink: The link to redirect the user to once they have completed the
+            validation.
+        :type nextLink: unicode
+        :param ipaddress: The requester's IP address.
+        :type ipaddress: str or None
+
+        :return: The ID of the session created (or of the existing one if any)
+        :rtype: int
+        """
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
-        valSession = valSessionStore.getOrCreateTokenSession(medium='email', address=emailAddress,
+        valSession = valSessionStore.getOrCreateTokenSession(medium=u'email', address=emailAddress,
                                                              clientSecret=clientSecret)
 
         valSessionStore.setMtime(valSession.id, time_msec())
@@ -60,11 +80,25 @@ class EmailValidator:
         return valSession.id
 
     def makeValidateLink(self, valSession, clientSecret, nextLink):
+        """
+        Creates a validation link that can be sent via email to the user.
+
+        :param valSession: The current validation session.
+        :type valSession: sydent.validators.ValidationSession
+        :param clientSecret: The client secret to include in the link.
+        :type clientSecret: unicode
+        :param nextLink: The link to redirect the user to once they have completed the
+            validation.
+        :type nextLink: unicode
+
+        :return: The validation link.
+        :rtype: unicode
+        """
         base = self.sydent.cfg.get('http', 'client_http_base')
         link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
             base,
-            urllib.quote(valSession.token),
-            urllib.quote(clientSecret),
+            urllib.parse.quote(valSession.token),
+            urllib.parse.quote(clientSecret),
             valSession.id,
         )
         if nextLink:
@@ -75,33 +109,27 @@ class EmailValidator:
                 nextLink += '&'
             else:
                 nextLink += '?'
-            nextLink += "sid=" + urllib.quote(str(valSession.id))
+            nextLink += "sid=" + urllib.parse.quote(str(valSession.id))
 
-            link += "&nextLink=%s" % (urllib.quote(nextLink))
+            link += "&nextLink=%s" % (urllib.parse.quote(nextLink))
         return link
 
     def validateSessionWithToken(self, sid, clientSecret, token, next_link=None):
-        """Validate a 3PID validation session
+        """
+        Validates the session with the given ID.
 
-        :param sid: The session ID
-        :type sid: str
-
-        :param clientSecret: The client_secret originally set when requesting the session
-        :type clientSecret: str
-
-        :param token: The validation token
-        :type token: str
-
+        :param sid: The ID of the session to validate.
+        :type sid: unicode
+        :param clientSecret: The client secret to validate.
+        :type clientSecret: unicode
+        :param token: The token to validate.
+        :type token: unicode
         :param next_link: The link to redirect the client to after validation, if provided
-        :type next_link: str|None
+        :type next_link: unicode or None
 
-        :return: The JSON to return to the client on success, or False on fail
-        :rtype: Dict|bool
-
-        :raises IncorrectClientSecretException if the client secret does not match the sid
-        :raises SessionExpiredException is the provided session has expired
-        :raises NextLinkValidationException if the next_link provided is different
-            from one provided in a previous, successful validation attempt
+        :return: A dict with a "success" key which is True if the session
+            was successfully validated, False otherwise.
+        :rtype: dict[str, bool]
         """
         return common.validateSessionWithToken(
             self.sydent, sid, clientSecret, token, next_link

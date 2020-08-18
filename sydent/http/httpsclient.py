@@ -13,16 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 import json
-
-from StringIO import StringIO
+from io import BytesIO
 
 from zope.interface import implementer
 
-import twisted.internet.reactor
-import twisted.internet.defer
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.iweb import IPolicyForHTTPS
@@ -47,17 +45,30 @@ class ReplicationHttpsClient:
             #self.certOptions = twisted.internet.ssl.CertificateOptions(privateKey=cert.privateKey.original,
             #                                                      certificate=cert.original,
             #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
-            self.agent = Agent(twisted.internet.reactor, SydentPolicyForHTTPS(self.sydent))
+            self.agent = Agent(self.sydent.reactor, SydentPolicyForHTTPS(self.sydent))
 
     def postJson(self, uri, jsonObject):
+        """
+        Sends an POST request over HTTPS.
+
+        :param uri: The URI to send the request to.
+        :type uri: unicode
+        :param jsonObject: The request's body.
+        :type jsonObject: dict[any, any]
+
+        :return: The request's response.
+        :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
+        """
         logger.debug("POSTing request to %s", uri)
         if not self.agent:
             logger.error("HTTPS post attempted but HTTPS is not configured")
             return
 
         headers = Headers({'Content-Type': ['application/json'], 'User-Agent': ['Sydent']})
-        reqDeferred = self.agent.request('POST', uri.encode('utf8'), headers,
-                                         FileBodyProducer(StringIO(json.dumps(jsonObject))))
+
+        json_bytes = json.dumps(jsonObject).encode("utf8")
+        reqDeferred = self.agent.request(b'POST', uri.encode('utf8'), headers,
+                                         FileBodyProducer(BytesIO(json_bytes)))
 
         return reqDeferred
 

@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from sydent.replication.peer import RemotePeer
 
@@ -22,6 +23,15 @@ class PeerStore:
         self.sydent = sydent
 
     def getPeerByName(self, name):
+        """
+        Retrieves a remote peer using it's server name.
+
+        :param name: The server name of the peer.
+        :type name: unicode
+
+        :return: The retrieved peer.
+        :rtype: RemotePeer
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select p.name, p.port, "
                           "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentInviteUpdatesId, p.lastSentEphemeralKeysId, "
@@ -49,16 +59,21 @@ class PeerStore:
         if len(pubkeys) == 0:
             return None
 
-        p = RemotePeer(self.sydent, serverName, port, pubkeys)
-        p.lastSentAssocsId = lastSentAssocsId
-        p.lastSentInviteTokensId = lastSentInviteTokensId
-        p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
-        p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
-        p.shadow = True if shadow else False
+        p = RemotePeer(
+            self.sydent, serverName, port, pubkeys, lastSentAssocsId,
+            lastSentInviteTokensId, lastSentInviteUpdatesId, lastSentEphemeralKeysId,
+            True if shadow else False
+        )
 
         return p
 
     def getAllPeers(self):
+        """
+        Retrieve all of the remote peers from the database.
+
+        :return: A list of the remote peers this server knows about.
+        :rtype: list[RemotePeer]
+        """
         cur = self.sydent.db.cursor()
         res = cur.execute("select p.name, p.port, "
                           "p.lastSentAssocsId, p.lastSentInviteTokensId, p.lastSentInviteUpdatesId, p.lastSentEphemeralKeysId, "
@@ -78,11 +93,11 @@ class PeerStore:
         for row in res.fetchall():
             if row[0] != peername:
                 if len(pubkeys) > 0:
-                    p = RemotePeer(self.sydent, peername, port, pubkeys)
-                    p.lastSentAssocsId = lastSentAssocsId
-                    p.lastSentInviteTokensId = lastSentInviteTokensId
-                    p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
-                    p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
+                    p = RemotePeer(
+                        self.sydent, peername, port, pubkeys, lastSentAssocsId,
+                        lastSentInviteTokensId, lastSentInviteUpdatesId,
+                        lastSentEphemeralKeysId, True if shadow else False
+                    )
                     peers.append(p)
                     pubkeys = {}
                 peername = row[0]
@@ -95,34 +110,29 @@ class PeerStore:
             pubkeys[row[7]] = row[8]
 
         if len(pubkeys) > 0:
-            p = RemotePeer(self.sydent, peername, port, pubkeys)
-            p.lastSentAssocsId = lastSentAssocsId
-            p.lastSentInviteTokensId = lastSentInviteTokensId
-            p.lastSentInviteUpdatesId = lastSentInviteUpdatesId
-            p.lastSentEphemeralKeysId = lastSentEphemeralKeysId
-            p.shadow = True if shadow else False
+            p = RemotePeer(
+                self.sydent, peername, port, pubkeys, lastSentAssocsId,
+                lastSentInviteTokensId, lastSentInviteUpdatesId,
+                lastSentEphemeralKeysId, True if shadow else False
+            )
             peers.append(p)
-            pubkeys = {}
 
         return peers
 
     def setLastSentIdAndPokeSucceeded(self, peerName, ids, lastPokeSucceeded):
-        """Set last successful replication of data to this peer.
+        """
+        Sets the ID of the last association sent to a given peer and the time of the
+        last successful request sent to that peer.
 
-        If an id for a replicated database table is None, the last sent value
-        will not be updated.
-
-        :param peerName: The name of the peer.
-        :type peerName: str
-        :param ids: A Dictionary of ids that represent the last database
-            table ids that were replicated to this peer.
-        :type ids: Dict[str, int]
-        :param lastPokeSucceeded: The time of when the last successful
-            replication succeeded (even if no actual replication of data was
-            necessary).
+        :param peerName: The server name of the peer.
+        :type peerName: unicode
+        :param ids: The ID of the last instance of each type of replicated data sent to
+            the peer.
+        :type ids: dict[str, int]
+        :param lastPokeSucceeded: The timestamp in milliseconds of the last successful
+            request sent to that peer.
         :type lastPokeSucceeded: int
         """
-
         invite_token_ids = ids.get("invite_tokens", {})
 
         cur = self.sydent.db.cursor()

@@ -1,0 +1,1 @@
+Fix a bug in the error handling of 3PID session validation, if the token submitted is incorrect.

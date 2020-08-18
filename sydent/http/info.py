@@ -37,7 +37,7 @@ class Info(object):
 
         try:
             file = open(info_file_path)
-            self.config = yaml.load(file)
+            self.config = yaml.safe_load(file)
             file.close()
 
             # medium:

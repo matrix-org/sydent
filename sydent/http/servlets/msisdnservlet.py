@@ -14,16 +14,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 from twisted.web.resource import Resource
 import phonenumbers
 
 from sydent.validators import (
-    IncorrectClientSecretException, SessionExpiredException, DestinationRejectedException
+    DestinationRejectedException,
+    IncorrectClientSecretException,
+    InvalidSessionIdException,
+    IncorrectSessionTokenException,
+    SessionExpiredException,
 )
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.util.stringutils import is_valid_client_secret
+from sydent.http.auth import authIfV2
 from sydent.util.stringutils import is_valid_client_secret
 
 
@@ -40,15 +47,21 @@ class MsisdnRequestCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        error, args = get_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
-        if error:
-            request.setResponseCode(400)
-            return error
+        authIfV2(self.sydent, request)
+
+        args = get_args(request, ('phone_number', 'country', 'client_secret', 'send_attempt'))
 
         raw_phone_number = args['phone_number']
         country = args['country']
-        clientSecret = args['client_secret']
         sendAttempt = args['send_attempt']
+        clientSecret = args['client_secret']
+
+        if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid client_secret provided'
+            }
 
         if not is_valid_client_secret(clientSecret):
             request.setResponseCode(400)
@@ -74,34 +87,28 @@ class MsisdnRequestCodeServlet(Resource):
             phone_number_object, phonenumbers.PhoneNumberFormat.INTERNATIONAL
         )
 
-        resp = None
-
         try:
             sid = self.sydent.validators.msisdn.requestToken(
-                phone_number_object, clientSecret, sendAttempt, None
+                phone_number_object, clientSecret, sendAttempt
             )
-        except DestinationRejectedException:
-            logger.error("Destination rejected for number: %s", msisdn);
-            request.setResponseCode(400)
-            resp = {'errcode': 'M_DESTINATION_REJECTED', 'error': 'Phone numbers in this country are not currently supported'}
-        except Exception as e:
-            logger.error("Exception sending SMS: %r", e);
-            request.setResponseCode(500)
-            resp = {'errcode': 'M_UNKNOWN', 'error':'Internal Server Error'}
-
-        if not resp:
             resp = {
                 'success': True, 'sid': str(sid),
                 'msisdn': msisdn, 'intl_fmt': intl_fmt,
             }
+        except DestinationRejectedException:
+            logger.error("Destination rejected for number: %s", msisdn)
+            request.setResponseCode(400)
+            resp = {'errcode': 'M_DESTINATION_REJECTED', 'error': 'Phone numbers in this country are not currently supported'}
+        except Exception as e:
+            logger.error("Exception sending SMS: %r", e)
+            request.setResponseCode(500)
+            resp = {'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}
 
         return resp
 
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
-        request.setResponseCode(200)
-        return {}
+        return b''
 
 
 class MsisdnValidateCodeServlet(Resource):
@@ -125,6 +132,7 @@ class MsisdnValidateCodeServlet(Resource):
                     request.setResponseCode(302)
                     request.setHeader("Location", next_link)
             else:
+                request.setResponseCode(400)
                 msg = "Verification failed: you may need to request another verification text"
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
@@ -136,39 +144,56 @@ class MsisdnValidateCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        err, args = get_args(request, ('token', 'sid', 'client_secret'))
-        if err:
-            return err
+        authIfV2(self.sydent, request)
 
-        return self.do_validate_request(args)
+        return self.do_validate_request(request)
 
-    def do_validate_request(self, args):
+    def do_validate_request(self, request):
+        """
+        Extracts information about a validation session from the request and
+        attempts to validate that session.
+
+        :param request: The request to extract information about the session from.
+        :type request: twisted.web.server.Request
+
+        :return: A dict with a "success" key which value indicates whether the
+            validation succeeded. If the validation failed, this dict also includes
+            a "errcode" and a "error" keys which include information about the failure.
+        :rtype: dict[str, bool or str]
+        """
+
+        args = get_args(request, ('token', 'sid', 'client_secret'))
+
         sid = args['sid']
         tokenString = args['token']
         clientSecret = args['client_secret']
 
         if not is_valid_client_secret(clientSecret):
+            request.setResponseCode(400)
             return {
                 'errcode': 'M_INVALID_PARAM',
                 'error': 'Invalid value for client_secret',
             }
 
         try:
-            resp = self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)
+            return self.sydent.validators.msisdn.validateSessionWithToken(sid, clientSecret, tokenString)
         except IncorrectClientSecretException:
-            return {'success': False, 'errcode': 'M_INCORRECT_CLIENT_SECRET',
+            request.setResponseCode(400)
+            return {'success': False, 'errcode': 'M_INVALID_PARAM',
                     'error': "Client secret does not match the one given when requesting the token"}
         except SessionExpiredException:
+            request.setResponseCode(400)
             return {'success': False, 'errcode': 'M_SESSION_EXPIRED',
                     'error': "This validation session has expired: call requestToken again"}
+        except InvalidSessionIdException:
+            request.setResponseCode(400)
+            return {'success': False, 'errcode': 'M_INVALID_PARAM',
+                    'error': "The token doesn't match"}
+        except IncorrectSessionTokenException:
+            request.setResponseCode(404)
+            return {'success': False, 'errcode': 'M_NO_VALID_SESSION',
+                    'error': "No session could be found with this sid"}
 
-        if not resp:
-            resp = {'success': False}
-
-        return resp
-
-    @jsonwrap
     def render_OPTIONS(self, request):
         send_cors(request)
-        request.setResponseCode(200)
-        return {}
+        return b''

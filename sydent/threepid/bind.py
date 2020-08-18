@@ -14,29 +14,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
+
 import collections
-import json
 import logging
 import math
-import random
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 
 from sydent.db.threepid_associations import LocalAssociationStore
 
 from sydent.util import time_msec
+from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.threepid.signer import Signer
+from sydent.http.httpclient import FederationHttpClient
 
 from sydent.threepid import ThreepidAssociation
 
-from OpenSSL import SSL
-from OpenSSL.SSL import VERIFY_NONE
-from StringIO import StringIO
-from twisted.internet import reactor, defer, ssl
-from twisted.names import client, dns
-from twisted.names.error import DNSNameError
-from twisted.web.client import FileBodyProducer, Agent
-from twisted.web.http_headers import Headers
+from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
 
@@ -63,37 +59,58 @@ class ThreepidBinder:
     def __init__(self, sydent, info):
         self.sydent = sydent
         self._info = info
+        self.hashing_store = HashingMetadataStore(sydent)
 
-
-    def addBinding(self, medium, address, mxid):
-        """Binds the given 3pid to the given mxid.
+    def addBinding(self, medium, address, mxid, check_info=True):
+        """
+        Binds the given 3pid to the given mxid.
 
         It's assumed that we have somehow validated that the given user owns
         the given 3pid
 
-        Args:
-            medium (str): the type of 3pid
-            address (str): the 3pid
-            mxid (str): the mxid to bind it to
-        Returns: The resulting signed association
+        :param medium: The medium of the 3PID to bind.
+        :type medium: unicode
+        :param address: The address of the 3PID to bind.
+        :type address: unicode
+        :param mxid: The MXID to bind the 3PID to.
+        :type mxid: unicode
+        :param check_info: Whether to check the address against the info file. Setting
+            this to False should only be done when testing.
+        :type check_info: bool
+
+        :return: The signed association.
+        :rtype: dict[str, any]
         """
         mxidParts = parseMxid(mxid)
-        result = self._info.match_user_id(medium, address)
-        possible_hses = []
-        if 'hs' in result:
-            possible_hses.append(result['hs'])
-        if 'shadow_hs' in result:
-            possible_hses.append(result['shadow_hs'])
 
-        if mxidParts[1] not in possible_hses:
-            logger.info("Denying bind of %r/%r -> %r (info result: %r)", medium, address, mxid, result)
-            raise BindingNotPermittedException()
+        if check_info:
+            result = self._info.match_user_id(medium, address)
+            possible_hses = []
+            if 'hs' in result:
+                possible_hses.append(result['hs'])
+            if 'shadow_hs' in result:
+                possible_hses.append(result['shadow_hs'])
+
+            if mxidParts[1] not in possible_hses:
+                logger.info("Denying bind of %r/%r -> %r (info result: %r)", medium, address, mxid, result)
+                raise BindingNotPermittedException()
 
         localAssocStore = LocalAssociationStore(self.sydent)
 
+        # Fill out the association details
         createdAt = time_msec()
         expires = createdAt + ThreepidBinder.THREEPID_ASSOCIATION_LIFETIME_MS
-        assoc = ThreepidAssociation(medium, address, mxid, createdAt, createdAt, expires)
+
+        # Hash the medium + address and store that hash for the purposes of
+        # later lookups
+        str_to_hash = u' '.join(
+            [address, medium, self.hashing_store.get_lookup_pepper()],
+        )
+        lookup_hash = sha256_and_url_safe_base64(str_to_hash)
+
+        assoc = ThreepidAssociation(
+            medium, address, lookup_hash, mxid, createdAt, createdAt, expires,
+        )
 
         localAssocStore.addOrUpdateAssociation(assoc)
 
@@ -138,111 +155,97 @@ class ThreepidBinder:
         return None
 
     def removeBinding(self, threepid, mxid):
+        """
+        Removes the binding between a given 3PID and a given MXID.
+
+        :param threepid: The 3PID of the binding to remove.
+        :type threepid: dict[unicode, unicode]
+        :param mxid: The MXID of the binding to remove.
+        :type mxid: unicode
+        """
         localAssocStore = LocalAssociationStore(self.sydent)
         localAssocStore.removeAssociation(threepid, mxid)
         self.sydent.pusher.doLocalPush()
 
     @defer.inlineCallbacks
     def _notify(self, assoc, attempt):
+        """
+        Sends data about a new association (and, if necessary, the associated invites)
+        to the associated MXID's homeserver.
+
+        :param assoc: The association to send down to the homeserver.
+        :type assoc: dict[str, any]
+        :param attempt: The number of previous attempts to send this association.
+        :type attempt: int
+        """
         mxid = assoc["mxid"]
-        domain = mxid.split(":")[-1]
-        server = yield self._pickServer(domain)
-        callbackUrl = "https://%s/_matrix/federation/v1/3pid/onbind" % (
-            server,
+        mxid_parts = mxid.split(":", 1)
+        if len(mxid_parts) != 2:
+            logger.error(
+                "Can't notify on bind for unparseable mxid %s. Not retrying.",
+                assoc["mxid"],
+            )
+            return
+
+        post_url = "matrix://%s/_matrix/federation/v1/3pid/onbind" % (
+            mxid_parts[1],
         )
 
-        logger.info("Making bind callback to: %s", callbackUrl)
-        # TODO: Not be woefully insecure
-        agent = Agent(reactor, InsecureInterceptableContextFactory())
-        reqDeferred = agent.request(
-            "POST",
-            callbackUrl.encode("utf8"),
-            Headers({
-                "Content-Type": ["application/json"],
-                "User-Agent": ["Sydent"],
-            }),
-            FileBodyProducer(StringIO(json.dumps(assoc)))
-        )
-        reqDeferred.addCallback(
-            lambda _: logger.info("Successfully notified on bind for %s" % (mxid,))
-        )
+        logger.info("Making bind callback to: %s", post_url)
 
-        reqDeferred.addErrback(
-            lambda err: self._notifyErrback(assoc, attempt, err)
-        )
+        # Make a POST to the chosen Synapse server
+        http_client = FederationHttpClient(self.sydent)
+        try:
+            response = yield http_client.post_json_get_nothing(post_url, assoc, {})
+        except Exception as e:
+            self._notifyErrback(assoc, attempt, e)
+            return
+
+        # If the request failed, try again with exponential backoff
+        if response.code != 200:
+            self._notifyErrback(
+                assoc, attempt, "Non-OK error code received (%d)" % response.code
+            )
+        else:
+            logger.info("Successfully notified on bind for %s" % (mxid,))
+
+            # Skip the deletion step if instructed so by the config.
+            if not self.sydent.delete_tokens_on_bind:
+                return
+
+            # Only remove sent tokens when they've been successfully sent.
+            try:
+                joinTokenStore = JoinTokenStore(self.sydent)
+                joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
+                logger.info(
+                    "Successfully deleted invite for %s from the store",
+                    assoc["address"],
+                )
+            except Exception as e:
+                logger.exception(
+                    "Couldn't remove invite for %s from the store",
+                    assoc["address"],
+                )
 
     def _notifyErrback(self, assoc, attempt, error):
-        logger.warn("Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error)
-        reactor.callLater(math.pow(2, attempt), self._notify, assoc, attempt + 1)
+        """
+        Handles errors when trying to send an association down to a homeserver by
+        logging the error and scheduling a new attempt.
+
+        :param assoc: The association to send down to the homeserver.
+        :type assoc: dict[str, any]
+        :param attempt: The number of previous attempts to send this association.
+        :type attempt: int
+        :param error: The error that was raised when trying to send the association.
+        :type error: Exception
+        """
+        logger.warning(
+            "Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error
+        )
+        self.sydent.reactor.callLater(
+            math.pow(2, attempt), self._notify, assoc, attempt + 1
+        )
 
     # The below is lovingly ripped off of synapse/http/endpoint.py
 
     _Server = collections.namedtuple("_Server", "priority weight host port")
-
-    @defer.inlineCallbacks
-    def _pickServer(self, host):
-        servers = yield self._fetchServers(host)
-        if not servers:
-            defer.returnValue("%s:8448" % (host,))
-
-        min_priority = servers[0].priority
-        weight_indexes = list(
-            (index, server.weight + 1)
-            for index, server in enumerate(servers)
-            if server.priority == min_priority
-        )
-
-        total_weight = sum(weight for index, weight in weight_indexes)
-        target_weight = random.randint(0, total_weight)
-
-        for index, weight in weight_indexes:
-            target_weight -= weight
-            if target_weight <= 0:
-                server = servers[index]
-                defer.returnValue("%s:%d" % (server.host, server.port,))
-                return
-
-    @defer.inlineCallbacks
-    def _fetchServers(self, host):
-        try:
-            service = "_matrix._tcp.%s" % host
-            answers, auth, add = yield client.lookupService(service)
-        except DNSNameError:
-            answers = []
-
-        if (len(answers) == 1
-                and answers[0].type == dns.SRV
-                and answers[0].payload
-                and answers[0].payload.target == dns.Name(".")):
-            raise DNSNameError("Service %s unavailable", service)
-
-        servers = []
-
-        for answer in answers:
-            if answer.type != dns.SRV or not answer.payload:
-                continue
-            payload = answer.payload
-            servers.append(ThreepidBinder._Server(
-                host=str(payload.target),
-                port=int(payload.port),
-                priority=int(payload.priority),
-                weight=int(payload.weight)
-            ))
-
-        servers.sort()
-        defer.returnValue(servers)
-
-
-class InsecureInterceptableContextFactory(ssl.ContextFactory):
-    """
-    Factory for PyOpenSSL SSL contexts which accepts any certificate for any domain.
-
-    Do not use this since it allows an attacker to intercept your communications.
-    """
-
-    def __init__(self):
-        self._context = SSL.Context(SSL.SSLv23_METHOD)
-        self._context.set_verify(VERIFY_NONE, lambda *_: None)
-
-    def getContext(self, hostname, port):
-        return self._context

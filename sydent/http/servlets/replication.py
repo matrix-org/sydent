@@ -14,14 +14,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 from twisted.web import server
 from twisted.internet import defer
+from sydent.http.servlets import jsonwrap, MatrixRestError
 from sydent.threepid import threePidAssocFromDict
+
+from sydent.util.hash import sha256_and_url_safe_base64
+
+from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.invite_tokens import JoinTokenStore
+from sydent.http.servlets import deferjsonwrap
 from sydent.replication.peer import NoMatchingSignatureException, NoSignaturesException, RemotePeerError
 from signedjson.sign import SignatureVerifyException
 
@@ -30,20 +37,17 @@ import json
 
 logger = logging.getLogger(__name__)
 
-MAX_SG_ASSOCS_LIMIT = 100
-MAX_INVITE_TOKENS_LIMIT = 100
-MAX_INVITE_UPDATES_LIMIT = 100
-MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT = 100
-
 
 class ReplicationPushServlet(Resource):
     def __init__(self, sydent):
         self.sydent = sydent
+        self.hashing_store = HashingMetadataStore(sydent)
 
     def render_POST(self, request):
         self._async_render_POST(request)
         return server.NOT_DONE_YET
 
+    @deferjsonwrap
     @defer.inlineCallbacks
     def _async_render_POST(self, request):
         """Verify and store replicated information from trusted peer identity servers.
@@ -71,10 +75,7 @@ class ReplicationPushServlet(Resource):
 
         if not peer:
             logger.warn("Got connection from %s but no peer found by that name", peerCertCn)
-            request.setResponseCode(403)
-            request.write(json.dumps({'errcode': 'M_UNKNOWN_PEER', 'error': 'This peer is not known to this server'}))
-            request.finish()
-            return
+            raise MatrixRestError(403, 'M_UNKNOWN_PEER', 'This peer is not known to this server')
 
         logger.info("Push connection made from peer %s", peer.servername)
 
@@ -82,27 +83,19 @@ class ReplicationPushServlet(Resource):
                 request.requestHeaders.getRawHeaders('Content-Type')[0] != 'application/json':
             logger.warn("Peer %s made push connection with non-JSON content (type: %s)",
                         peer.servername, request.requestHeaders.getRawHeaders('Content-Type')[0])
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_NOT_JSON', 'error': 'This endpoint expects JSON'}))
-            request.finish()
-            return
+            raise MatrixRestError(400, 'M_NOT_JSON', 'This endpoint expects JSON')
 
         try:
-            inJson = json.load(request.content)
+            # json.loads doesn't allow bytes in Python 3.5
+            inJson = json.loads(request.content.read().decode("UTF-8"))
         except ValueError:
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
-            request.finish()
-            return
+            raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
         # Ensure there is data we are able to process
         if 'sg_assocs' not in inJson and 'invite_tokens' not in inJson and 'ephemeral_public_keys' not in inJson:
             logger.warn("Peer %s made push connection with no 'sg_assocs', 'invite_tokens' or 'ephemeral_public_keys' keys in JSON", peer.servername)
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON'}))
-            request.finish()
-            return
+            raise MatrixRestError(400, 'M_BAD_JSON', 'No "sg_assocs", "invite_tokens" or "ephemeral_public_keys" key in JSON')
 
         # Process signed associations
         #
@@ -119,20 +112,11 @@ class ReplicationPushServlet(Resource):
         #   }
         # }
 
-        # Ensure associations are processed in order of origin_id.
-        # If we process them out of order, an association with an ID lesser
-        # than a previously processed association will be ignored.
+        # Ensure items are pulled out of the dictionary in order of origin_id.
         sg_assocs = inJson.get('sg_assocs', {})
         sg_assocs = sorted(
-            sg_assocs.items(), key=lambda k: k[0]
+            sg_assocs.items(), key=lambda k: int(k[0])
         )
-
-        if len(sg_assocs) > MAX_SG_ASSOCS_LIMIT:
-            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(sg_assocs), MAX_SG_ASSOCS_LIMIT)
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"sg_assocs" has more than %d keys' % MAX_SG_ASSOCS_LIMIT}))
-            request.finish()
-            return
 
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
@@ -144,21 +128,22 @@ class ReplicationPushServlet(Resource):
             except (NoSignaturesException, NoMatchingSignatureException, RemotePeerError, SignatureVerifyException):
                 self.sydent.db.rollback()
                 logger.warn("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
-                request.setResponseCode(400)
-                request.write(json.dumps({'errcode': 'M_VERIFICATION_FAILED', 'error': 'Signature verification failed'}))
-                request.finish()
-                return
+                raise MatrixRestError(400, 'M_VERIFICATION_FAILED', 'Signature verification failed')
             except Exception:
                 self.sydent.db.rollback()
                 logger.error("Failed to verify signed association from %s with origin ID %s", peer.servername, originId)
-                request.setResponseCode(500)
-                request.write(json.dumps({'errcode': 'M_INTERNAL_SERVER_ERROR', 'error': 'Signature verification failed'}))
-                request.finish()
-                return
+                raise MatrixRestError(500, 'M_INTERNAL_SERVER_ERROR', 'Signature verification failed')
 
             assocObj = threePidAssocFromDict(sgAssoc)
 
             if assocObj.mxid is not None:
+                # Calculate the lookup hash with our own pepper for this association
+                str_to_hash = ' '.join(
+                    [assocObj.address, assocObj.medium,
+                     self.hashing_store.get_lookup_pepper()],
+                )
+                assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
+
                 # Add the association components and the original signed
                 # object (as assocs must be signed when requested by clients)
                 globalAssocsStore.addAssociation(assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False)
@@ -203,20 +188,6 @@ class ReplicationPushServlet(Resource):
             new_invites.items(), key=lambda k: int(k[0])
         )
 
-        if len(new_invites) > MAX_INVITE_TOKENS_LIMIT:
-            self.sydent.db.rollback()
-            logger.warning(
-                "Peer %s made push with 'invite_tokens.added' field containing %d "
-                "entries, which is greater than the maximum %d",
-                peer.servername,
-                len(new_invites),
-                MAX_INVITE_TOKENS_LIMIT,
-            )
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens.added" has more than %d keys' % MAX_INVITE_TOKENS_LIMIT}))
-            request.finish()
-            return
-
         for originId, inviteToken in new_invites:
             tokensStore.storeToken(inviteToken['medium'], inviteToken['address'], inviteToken['room_id'],
                                 inviteToken['sender'], inviteToken['token'],
@@ -250,25 +221,11 @@ class ReplicationPushServlet(Resource):
             invite_updates, key=lambda k: int(k["origin_id"])
         )
 
-        if len(invite_updates) > MAX_INVITE_UPDATES_LIMIT:
-            self.sydent.db.rollback()
-            logger.warning(
-                "Peer %s made push with 'invite_tokens.updated' field containing %d "
-                "entries, which is greater than the maximum %d",
-                peer.servername,
-                len(invite_updates),
-                MAX_INVITE_UPDATES_LIMIT,
-            )
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"invite_tokens.updated" has more than %d keys' % MAX_INVITE_UPDATES_LIMIT}))
-            request.finish()
-            return
-
         for updated_invite in invite_updates:
             tokensStore.updateToken(updated_invite['medium'], updated_invite['address'], updated_invite['room_id'],
                                 updated_invite['sender'], updated_invite['token'], updated_invite['sent_ts'],
                                 origin_server=updated_invite['origin_server'], origin_id=updated_invite['origin_id'],
-                                commit=False)
+                                is_deletion=updated_invite.get('is_deletion', False), commit=False)
             logger.info("Stored invite update with origin ID %s from %s", updated_invite['origin_id'], peer.servername)
 
         # Process any ephemeral public keys
@@ -288,14 +245,6 @@ class ReplicationPushServlet(Resource):
             ephemeral_public_keys.items(), key=lambda k: int(k[0])
         )
 
-        if len(ephemeral_public_keys) > MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT:
-            self.sydent.db.rollback()
-            logger.warn("Peer %s made push with 'sg_assocs' field containing %d entries, which is greater than the maximum %d", peer.servername, len(ephemeral_public_keys), MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT)
-            request.setResponseCode(400)
-            request.write(json.dumps({'errcode': 'M_BAD_JSON', 'error': '"ephemeral_public_keys" has more than %d keys' % MAX_EPHEMERAL_PUBLIC_KEYS_LIMIT}))
-            request.finish()
-            return
-
         for originId, ephemeralKey in ephemeral_public_keys:
             tokensStore.storeEphemeralPublicKey(
                 ephemeralKey['public_key'], persistenceTs=ephemeralKey['persistence_ts'],
@@ -303,6 +252,4 @@ class ReplicationPushServlet(Resource):
             logger.info("Stored ephemeral key with origin ID %s from %s", originId, peer.servername)
 
         self.sydent.db.commit()
-        request.write(json.dumps({'success': True}))
-        request.finish()
-        return
+        defer.returnValue({'success': True})

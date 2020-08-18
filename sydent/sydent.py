@@ -15,54 +15,70 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
-import ConfigParser
+from six.moves import configparser
+import copy
 import logging
 import logging.handlers
 import os
 import re
 
 import twisted.internet.reactor
+from twisted.internet import task
 from twisted.python import log
-
-from db.sqlitedb import SqliteDatabase
 
 from netaddr import IPSet, IPNetwork
 
-from http.httpcommon import SslComponents
-from http.httpserver import (
+from sydent.db.sqlitedb import SqliteDatabase
+
+from sydent.http.httpcommon import SslComponents
+from sydent.http.httpserver import (
     ClientApiHttpServer, ReplicationHttpsServer,
     InternalApiHttpServer,
 )
-from http.httpsclient import ReplicationHttpsClient
-from http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
-from http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
-from validators.emailvalidator import EmailValidator
-from validators.msisdnvalidator import MsisdnValidator
-from hs_federation.verifier import Verifier
+from sydent.http.httpsclient import ReplicationHttpsClient
+from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
+from sydent.http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
+from sydent.http.servlets.termsservlet import TermsServlet
+from sydent.validators.emailvalidator import EmailValidator
+from sydent.validators.msisdnvalidator import MsisdnValidator
+from sydent.hs_federation.verifier import Verifier
 
-from sign.ed25519 import SydentEd25519
+from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 
-from http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
-from http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
-from http.servlets.lookupservlet import LookupServlet
-from http.servlets.bulklookupservlet import BulkLookupServlet
-from http.servlets.pubkeyservlets import Ed25519Servlet
-from http.servlets.threepidbindservlet import ThreePidBindServlet
-from http.servlets.threepidunbindservlet import ThreePidUnbindServlet
-from http.servlets.replication import ReplicationPushServlet
-from http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
-from http.servlets.store_invite_servlet import StoreInviteServlet
-from http.servlets.infoservlet import InfoServlet
-from http.servlets.internalinfoservlet import InternalInfoServlet
-from http.servlets.profilereplicationservlet import ProfileReplicationServlet
-from http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
-from http.servlets.v1_servlet import V1Servlet
-from http.info import Info
+from sydent.sign.ed25519 import SydentEd25519
 
-from threepid.bind import ThreepidBinder
+from sydent.http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
+from sydent.http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
+from sydent.http.servlets.lookupservlet import LookupServlet
+from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
+from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
+from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
+from sydent.http.servlets.pubkeyservlets import Ed25519Servlet
+from sydent.http.servlets.threepidbindservlet import ThreePidBindServlet
+from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
+from sydent.http.servlets.replication import ReplicationPushServlet
+from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
+from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
+from sydent.http.servlets.v1_servlet import V1Servlet
+from sydent.http.servlets.accountservlet import AccountServlet
+from sydent.http.servlets.registerservlet import RegisterServlet
+from sydent.http.servlets.logoutservlet import LogoutServlet
+from sydent.http.servlets.v2_servlet import V2Servlet
+from sydent.http.servlets.infoservlet import InfoServlet
+from sydent.http.servlets.internalinfoservlet import InternalInfoServlet
+from sydent.http.servlets.profilereplicationservlet import ProfileReplicationServlet
+from sydent.http.servlets.userdirectorysearchservlet import UserDirectorySearchServlet
+from sydent.http.info import Info
 
-from replication.pusher import Pusher
+from sydent.db.valsession import ThreePidValSessionStore
+from sydent.db.hashing_metadata import HashingMetadataStore
+
+from sydent.threepid.bind import ThreepidBinder
+
+from sydent.replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +91,12 @@ def set_from_comma_sep_string(rawstr):
 
 CONFIG_DEFAULTS = {
     'general': {
-        'server.name': '',
+        'server.name': os.environ.get('SYDENT_SERVER_NAME', ''),
         'log.path': '',
-        'pidfile.path': 'sydent.pid',
+        'log.level': 'INFO',
+        'pidfile.path': os.environ.get('SYDENT_PID_FILE', 'sydent.pid'),
+        'terms.path': '',
+        'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
         'shadow.hs.master': '',
         'shadow.hs.slave': '',
         'ips.nonshadow': '',  # comma separated list of CIDR ranges which /info will return non-shadow HS to.
@@ -91,21 +110,40 @@ CONFIG_DEFAULTS = {
         # A comma-separated domain whitelist used to validate the next_link query parameter
         # provided by the client to the /requestToken and /submitToken endpoints
         # If empty, no whitelist is applied
-        'next_link.domain_whitelist': ''
+        'next_link.domain_whitelist': '',
+
+        # The following can be added to your local config file to enable prometheus
+        # support.
+        # 'prometheus_port': '8080',  # The port to serve metrics on
+        # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
+
+        # The following can be added to your local config file to enable sentry support.
+        # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
+
+        # Whether clients and homeservers can register an association using v1 endpoints.
+        'enable_v1_associations': 'true',
+        'delete_tokens_on_bind': 'true',
     },
     'db': {
-        'db.file': 'sydent.db',
+        'db.file': os.environ.get('SYDENT_DB_PATH', 'sydent.db'),
     },
     'http': {
+        'clientapi.http.bind_address': '::',
         'clientapi.http.port': '8090',
+        'internalapi.http.bind_address': '::1',
         'internalapi.http.port': '',
         'replication.https.certfile': '',
         'replication.https.cacert': '', # This should only be used for testing
+        'replication.https.bind_address': '::',
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
+        'federation.verifycerts': 'True',
+        'verify_response_template': '',
+        'client_http_base': '',
     },
     'email': {
         'email.template': 'res/email.template',
+        'email.invite_template': 'res/invite.template',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
         'email.invite.subject': '%(sender_display_name)s has invited you to chat',
@@ -118,6 +156,8 @@ CONFIG_DEFAULTS = {
     },
     'sms': {
         'bodyTemplate': 'Your code is {token}',
+        'username': '',
+        'password': '',
     },
     'crypto': {
         'ed25519.signingkey': '',
@@ -129,33 +169,11 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self):
-        self.config_file = os.environ.get('SYDENT_CONF', "sydent.conf")
-        self.cfg = parse_config(self.config_file)
+    def __init__(self, cfg, reactor=twisted.internet.reactor):
+        self.reactor = reactor
+        self.config_file = get_config_file_path()
 
-        log_format = (
-            "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
-            " - %(message)s"
-        )
-        formatter = logging.Formatter(log_format)
-
-        logPath = self.cfg.get('general', "log.path")
-        if logPath != '':
-            handler = logging.handlers.TimedRotatingFileHandler(
-                logPath, when='midnight', backupCount=365
-            )
-            handler.setFormatter(formatter)
-            def sighup(signum, stack):
-                logger.info("Closing log file due to SIGHUP")
-                handler.doRollover()
-                logger.info("Opened new log file due to SIGHUP")
-        else:
-            handler = logging.StreamHandler()
-
-        handler.setFormatter(formatter)
-        rootLogger = logging.getLogger('')
-        rootLogger.setLevel(logging.INFO)
-        rootLogger.addHandler(handler)
+        self.cfg = cfg
 
         logger.info("Starting Sydent server")
 
@@ -169,16 +187,13 @@ class Sydent:
             for ip in ips:
                 self.nonshadow_ips.add(IPNetwork(ip))
 
-        observer = log.PythonLoggingObserver()
-        observer.start()
-
         self.db = SqliteDatabase(self).db
 
         self.server_name = self.cfg.get('general', 'server.name')
         if self.server_name == '':
             self.server_name = os.uname()[1]
             logger.warn(("You had not specified a server name. I have guessed that this server is called '%s' "
-                        + " and saved this in the config file. If this is incorrect, you should edit server.name in "
+                        + "and saved this in the config file. If this is incorrect, you should edit server.name in "
                         + "the config file.") % (self.server_name,))
             self.cfg.set('general', 'server.name', self.server_name)
             self.save_config()
@@ -187,7 +202,7 @@ class Sydent:
         self.shadow_hs_slave  = self.cfg.get('general', 'shadow.hs.slave')
 
         self.user_dir_allowed_hses = set_from_comma_sep_string(
-            self.cfg.get('userdir', 'userdir.allowed_homeservers', '')
+            self.cfg.get('userdir', 'userdir.allowed_homeservers')
         )
 
         next_link_whitelist = self.cfg.get('general', 'next_link.domain_whitelist')
@@ -199,6 +214,43 @@ class Sydent:
         self.invites_validity_period = parse_duration(
             self.cfg.get('general', 'invites.validity_period'),
         )
+
+        if self.cfg.has_option("general", "sentry_dsn"):
+            # Only import and start sentry SDK if configured.
+            import sentry_sdk
+            sentry_sdk.init(
+                dsn=self.cfg.get("general", "sentry_dsn"),
+            )
+            with sentry_sdk.configure_scope() as scope:
+                scope.set_tag("sydent_server_name", self.server_name)
+
+        if self.cfg.has_option("general", "prometheus_port"):
+            import prometheus_client
+            prometheus_client.start_http_server(
+                port=self.cfg.getint("general", "prometheus_port"),
+                addr=self.cfg.get("general", "prometheus_addr"),
+            )
+
+        self.enable_v1_associations = parse_cfg_bool(
+            self.cfg.get("general", "enable_v1_associations")
+        )
+
+        self.delete_tokens_on_bind = parse_cfg_bool(
+            self.cfg.get("general", "delete_tokens_on_bind")
+        )
+
+        # See if a pepper already exists in the database
+        # Note: This MUST be run before we start serving requests, otherwise lookups for
+        # 3PID hashes may come in before we've completed generating them
+        hashing_metadata_store = HashingMetadataStore(self)
+        lookup_pepper = hashing_metadata_store.get_lookup_pepper()
+        if not lookup_pepper:
+            # No pepper defined in the database, generate one
+            lookup_pepper = generateAlphanumericTokenOfLength(5)
+
+            # Store it in the database and rehash 3PIDs
+            hashing_metadata_store.store_lookup_pepper(sha256_and_url_safe_base64,
+                                                       lookup_pepper)
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
@@ -212,12 +264,15 @@ class Sydent:
 
         self.servlets = Servlets()
         self.servlets.v1 = V1Servlet(self)
+        self.servlets.v2 = V2Servlet(self)
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
         self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.bulk_lookup = BulkLookupServlet(self)
+        self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
+        self.servlets.lookup_v2 = LookupV2Servlet(self, lookup_pepper)
         self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
@@ -229,6 +284,10 @@ class Sydent:
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
         self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.userDirectorySearchServlet = UserDirectorySearchServlet(self)
+        self.servlets.termsServlet = TermsServlet(self)
+        self.servlets.accountServlet = AccountServlet(self)
+        self.servlets.registerServlet = RegisterServlet(self)
+        self.servlets.logoutServlet = LogoutServlet(self)
 
         info = Info(self, self.cfg.get("general", "info_path"))
         self.servlets.info = InfoServlet(self, info)
@@ -244,6 +303,12 @@ class Sydent:
 
         self.pusher = Pusher(self)
 
+        # A dedicated validation session store just to clean up old sessions every N minutes
+        self.cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.clock = self.reactor
+        cb.start(10 * 60.0)
+
     def save_config(self):
         fp = open(self.config_file, 'w')
         self.cfg.write(fp)
@@ -258,7 +323,7 @@ class Sydent:
         if internalport:
             try:
                 interface = self.cfg.get('http', 'internalapi.http.bind_address')
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 interface = '::1'
             self.internalApiHttpServer = InternalApiHttpServer(self)
             self.internalApiHttpServer.setup(interface, int(internalport))
@@ -267,7 +332,7 @@ class Sydent:
             with open(self.pidfile, 'w') as pidfile:
                 pidfile.write(str(os.getpid()) + "\n")
 
-        twisted.internet.reactor.run()
+        self.reactor.run()
 
     def ip_from_request(self, request):
         if (self.cfg.get('http', 'obey_x_forwarded_for') and
@@ -288,33 +353,51 @@ class Keyring:
     pass
 
 
-def parse_config(config_file):
-    """Parse the given config file, populating missing items and sections
+def parse_config_dict(config_dict):
+    """Parse the given config from a dictionary, populating missing items and sections
 
+    Args:
+        config_dict (dict): the configuration dictionary to be parsed
+    """
+    # Build a config dictionary from the defaults merged with the given dictionary
+    config = copy.deepcopy(CONFIG_DEFAULTS)
+    for section, section_dict in config_dict.items():
+        if section not in config:
+            config[section] = {}
+        for option in section_dict.keys():
+            config[section][option] = config_dict[section][option]
+
+    # Build a ConfigParser from the merged dictionary
+    cfg = configparser.ConfigParser()
+    for section, section_dict in config.items():
+        cfg.add_section(section)
+        for option, value in section_dict.items():
+            cfg.set(section, option, value)
+
+    return cfg
+
+
+def parse_config_file(config_file):
+    """Parse the given config from a filepath, populating missing items and
+    sections
     Args:
         config_file (str): the file to be parsed
     """
-
-    cfg = ConfigParser.SafeConfigParser()
-
     # if the config file doesn't exist, prepopulate the config object
     # with the defaults, in the right section.
-    if not os.path.exists(config_file):
-        for sect, entries in CONFIG_DEFAULTS.items():
-            cfg.add_section(sect)
-            for k, v in entries.items():
-                cfg.set(sect, k, v)
-    else:
-        # otherwise, we have to put the defaults in the DEFAULT section,
-        # to ensure that they don't override anyone's settings which are
-        # in their config file in the default section (which is likely,
-        # because sydent used to be braindead).
-        for sect, entries in CONFIG_DEFAULTS.items():
-            cfg.add_section(sect)
-            for k, v in entries.items():
-                cfg.set(ConfigParser.DEFAULTSECT, k, v)
+    #
+    # otherwise, we have to put the defaults in the DEFAULT section,
+    # to ensure that they don't override anyone's settings which are
+    # in their config file in the default section (which is likely,
+    # because sydent used to be braindead).
+    use_defaults = not os.path.exists(config_file)
+    cfg = configparser.ConfigParser()
+    for sect, entries in CONFIG_DEFAULTS.items():
+        cfg.add_section(sect)
+        for k, v in entries.items():
+            cfg.set(configparser.DEFAULTSECT if use_defaults else sect, k, v)
 
-        cfg.read(config_file)
+    cfg.read(config_file)
 
     return cfg
 
@@ -343,6 +426,47 @@ def parse_duration(value):
     return int(value) * size
 
 
+
+def setup_logging(cfg):
+    log_format = (
+        "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
+        " - %(message)s"
+    )
+    formatter = logging.Formatter(log_format)
+
+    logPath = cfg.get('general', "log.path")
+    if logPath != '':
+        handler = logging.handlers.TimedRotatingFileHandler(
+            logPath, when='midnight', backupCount=365
+        )
+        handler.setFormatter(formatter)
+
+        def sighup(signum, stack):
+            logger.info("Closing log file due to SIGHUP")
+            handler.doRollover()
+            logger.info("Opened new log file due to SIGHUP")
+    else:
+        handler = logging.StreamHandler()
+
+    handler.setFormatter(formatter)
+    rootLogger = logging.getLogger('')
+    rootLogger.setLevel(cfg.get('general', 'log.level'))
+    rootLogger.addHandler(handler)
+
+    observer = log.PythonLoggingObserver()
+    observer.start()
+
+
+def get_config_file_path():
+    return os.environ.get('SYDENT_CONF', "sydent.conf")
+
+
+def parse_cfg_bool(value):
+    return value.lower() == "true"
+
+
 if __name__ == '__main__':
-    syd = Sydent()
+    cfg = parse_config_file(get_config_file_path())
+    setup_logging(cfg)
+    syd = Sydent(cfg)
     syd.run()

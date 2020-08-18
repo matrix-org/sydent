@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import logging
 
@@ -50,6 +51,7 @@ class Pusher:
 
     def setup(self):
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
+        cb.clock = self.sydent.reactor
         cb.start(10.0)
 
     def doLocalPush(self):
@@ -69,9 +71,11 @@ class Pusher:
         localPeer.pushUpdates(signedAssocs)
 
     def scheduledPush(self):
-        """Push pending updates to a remote peer. To be called regularly.
+        """Push pending updates to all known remote peers. To be called regularly.
 
-        :returns deferred.DeferredList
+        :returns a deferred.DeferredList of defers, one per peer we're pushing to that will
+        resolve when pushing to that peer has completed, successfully or otherwise
+        :rtype deferred.DeferredList
         """
         peers = self.peerStore.getAllPeers()
 
@@ -85,12 +89,22 @@ class Pusher:
 
     @defer.inlineCallbacks
     def _push_to_peer(self, p):
+        """
+        For a given peer, retrieves the list of associations that were created since
+        the last successful push to this peer (limited to ASSOCIATIONS_PUSH_LIMIT) and
+        sends them.
+
+        :param p: The peer to send associations to.
+        :type p: sydent.replication.peer.RemotePeer
+        """
         logger.debug("Looking for updates to push to %s", p.servername)
 
         # Check if a push operation is already active. If so, don't start another
         if p.is_being_pushed_to:
             logger.debug("Waiting for %s:%d to finish pushing...", p.servername, p.port)
             return
+
+        p.is_being_pushed_to = True
 
         try:
             # Dictionary for holding all data to push
@@ -149,6 +163,7 @@ class Pusher:
             if not total_updates:
                 return
 
+            logger.info("Pushing %d updates to %s:%d", total_updates, p.servername, p.port)
             yield p.pushUpdates(push_data)
 
             yield self.peerStore.setLastSentIdAndPokeSucceeded(
