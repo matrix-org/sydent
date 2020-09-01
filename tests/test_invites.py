@@ -4,6 +4,7 @@ from sydent.db.invite_tokens import JoinTokenStore
 from tests.utils import make_sydent
 from twisted.web.client import Response
 from twisted.trial import unittest
+from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
 
 
 class ThreepidInvitesTestCase(unittest.TestCase):
@@ -11,7 +12,14 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
     def setUp(self):
         # Create a new sydent
-        self.sydent = make_sydent()
+        config = {
+            "email": {
+                # Used by test_invited_email_address_obfuscation
+                "email.third_party_invite_username_obfuscate_characters": "6",
+                "email.third_party_invite_domain_obfuscate_characters": "8",
+            },
+        }
+        self.sydent = make_sydent(test_config=config)
 
     def test_delete_on_bind(self):
         """Tests that 3PID invite tokens are deleted upon delivery after a successful
@@ -64,6 +72,23 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         # Check that we didn't get any result.
         self.assertEqual(len(rows), 0, rows)
+
+    def test_invited_email_address_obfuscation(self):
+        """Test that email addresses included in third-party invites are properly
+        obfuscated according to the relevant config options
+        """
+        store_invite_servlet = StoreInviteServlet(self.sydent)
+
+        email_address = "1234567890@1234567890.com"
+        redacted_address = store_invite_servlet.redact_email_address(email_address)
+
+        self.assertEqual(redacted_address, "123456...@12345678...")
+
+        # Even short addresses are redacted
+        short_email_address = "1@1.com"
+        redacted_address = store_invite_servlet.redact_email_address(short_email_address)
+
+        self.assertEqual(redacted_address, "...@1...")
 
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
