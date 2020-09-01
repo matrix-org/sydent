@@ -129,9 +129,6 @@ CONFIG_DEFAULTS = {
         # address. These config options determine how much of the email address to
         # obfuscate. Note that the '@' sign is always included.
         #
-        # If the given username or domain is shorter than the threshold defined here,
-        # the string is then redacted based on its length. The rules are as follows:
-        #
         # If the string is longer than a configured limit below, it is truncated to that limit
         # with '...' added. Otherwise:
         #
