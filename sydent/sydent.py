@@ -130,8 +130,17 @@ CONFIG_DEFAULTS = {
         # obfuscate. Note that the '@' sign is always included.
         #
         # If the given username or domain is shorter than the threshold defined here,
-        # the string is then redacted based on its length. This ensure that a full email
-        # address is never shown, even if it is extremely short.
+        # the string is then redacted based on its length. The rules are as follows:
+        #
+        # If the string is longer than a configured limit below, it is truncated to that limit
+        # with '...' added. Otherwise:
+        #
+        # * If the string is longer than 5 characters, it is truncated to 3 characters + '...'
+        # * If the string is longer than 1 character, it is truncated to 1 character + '...'
+        # * If the string is 1 character long, it is converted to '...'
+        #
+        # This ensures that a full email address is never shown, even if it is extremely
+        # short.
         #
         # The number of characters from the beginning to reveal of the email's username
         # portion (left of the '@' sign)
