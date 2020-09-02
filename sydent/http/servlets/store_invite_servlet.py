@@ -128,16 +128,15 @@ class StoreInviteServlet(Resource):
             "token": token,
             "public_key": pubKeyBase64,
             "public_keys": keysToReturn,
-            "display_name": self.redact(address),
+            "display_name": self.redact_email_address(address),
         }
 
         return resp
 
-    def redact(self, address):
+    def redact_email_address(self, address):
         """
-        Redacts the content of a 3PID address. If the address is an email address,
-        then redacts both the address's localpart and domain independently. Otherwise,
-        redacts the whole address.
+        Redacts the content of a 3PID address. Redacts both the email's username and
+        domain independently.
 
         :param address: The address to redact.
         :type address: unicode
@@ -145,26 +144,40 @@ class StoreInviteServlet(Resource):
         :return: The redacted address.
         :rtype: unicode
         """
-        return u"@".join(map(self._redact, address.split(u"@", 1)))
+        # Extract strings from the address
+        username, domain = address.split(u"@", 1)
 
-    def _redact(self, s):
+        # Obfuscate strings
+        redacted_username = self._redact(username, self.sydent.username_obfuscate_characters)
+        redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
+
+        return redacted_username + u"@" + redacted_domain
+
+    def _redact(self, s, characters_to_reveal):
         """
-        Redacts the content of a 3PID address. If the address is an email address,
-        then redacts both the address's localpart and domain independently. Otherwise,
-        redacts the whole address.
+        Redacts the content of a string, using a given amount of characters to reveal.
+        If the string is shorter than the given threshold, redact it based on length.
 
-        :param s: The address to redact.
+        :param s: The string to redact.
         :type s: unicode
 
-        :return: The redacted address.
+        :param characters_to_reveal: How many characters of the string to leave before
+            the '...'
+        :type characters_to_reveal: int
+
+        :return: The redacted string.
         :rtype: unicode
         """
-        if len(s) > 5:
-            return s[:3] + u"..."
-        elif len(s) > 1:
-            return s[0] + u"..."
-        else:
+        # If the string is shorter than the defined threshold, redact based on length
+        if len(s) <= characters_to_reveal:
+            if len(s) > 5:
+                return s[3] + u"..."
+            if len(s) > 1:
+                return s[0] + u"..."
             return u"..."
+
+        # Otherwise truncate it and add an ellipses
+        return s[:characters_to_reveal] + u"..."
 
     def _randomString(self, length):
         """

@@ -2,7 +2,7 @@ Date: %(date)s
 From: %(from)s
 To: %(to)s
 Message-ID: %(messageid)s
-Subject: Confirm your email address for Riot
+Subject: Confirm your email address for Element
 MIME-Version: 1.0
 Content-Type: multipart/alternative; 
 	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
@@ -13,7 +13,7 @@ Content-Disposition: inline
 
 Hello there!
 
-You have asked us to register this email address with riot.im - the open source,
+You have asked us to register this email address with element.io - the open source,
 distributed and secure shared workspace for the web that's built on Matrix.
 
 If it was really you who made this request, you can click on the following link to
@@ -28,25 +28,25 @@ If you didn't make this request, you can safely disregard this email.
 
 Thanks!
 
-Riot
+Element
 
 
-About Riot:
+About Element:
 
-Break through - Riot allows teams to communicate across a wide range of collaboration
-apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-allow these team members to seamlessly work together. Riot offers the richest
+Break through - Element allows teams to communicate across a wide range of collaboration
+apps. If some team members use Element while others use IRC, Slack or Gitter, Element will
+allow these team members to seamlessly work together. Element offers the richest
 network of communication bridges.
 
-Own Your Own Data - No one should control your communication and data but you. Riot
+Own Your Own Data - No one should control your communication and data but you. Element
 lets you run your own server, and provides users and teams with the most advanced
 crypto ratchet technology available today for a decentralized secure Internet.
 
-Open Source - Riot is entirely open source: all the code is published on GitHub
+Open Source - Element is entirely open source: all the code is published on GitHub
 (Apache License) for anyone to see and extend. This means teams can customize or
 contribute to the code and everyone can benefit from the speed of community innovation.
 
-Made on Matrix - Riot is built on top of Matrix. Matrix is an open network for secure,
+Made on Matrix - Element is built on top of Matrix. Matrix is an open network for secure,
 decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.
@@ -117,14 +117,14 @@ pre, code {
                             <td>
                             </td>
                             <td class="logo">
-                                    <img src="https://riot.im/img/external/riot-logo-email-small.png" width="64" height="64" alt="Riot"/>
+                                    <img src="https://static.element.io/images/email-logo.png" width="64" height="64" alt="Element"/>
                             </td>
                         </tr>
                     </table>
 
                     <p>Hello there!</p>
 
-                    <p>You have asked us to register this email address with riot.im - the open source,
+                    <p>You have asked us to register this email address with element.io - the open source,
                     distributed and secure shared workspace for the web that's built on Matrix.</p>
 
                     <p>If it was really you who made this request, you can click on the following link to
@@ -132,7 +132,7 @@ pre, code {
 
                     <p><a href="%(link)s">Complete email verification</a></p>
 
-                    <p>Please note that Riot requires
+                    <p>Please note that Element requires
                     <a href="https://www.google.com/chrome">Chrome</a>,
                     <a href="https://www.getfirefox.com">Firefox</a> or
                     <a href="https://www.apple.com/safari">Safari</a> on the web,
@@ -142,25 +142,25 @@ pre, code {
 
                     <p>Thanks!</p>
 
-                    <p>Riot</p>
+                    <p>Element</p>
 
                     <br>
-                    <p>About Riot:</p>
+                    <p>About Element:</p>
 
-                    <p><em>Break through</em> - Riot allows teams to communicate across a wide range of collaboration
-                    apps. If some team members use Riot while others use IRC, Slack or Gitter, Riot will
-                    allow these team members to seamlessly work together. Riot offers the richest
+                    <p><em>Break through</em> - Element allows teams to communicate across a wide range of collaboration
+                    apps. If some team members use Element while others use IRC, Slack or Gitter, Element will
+                    allow these team members to seamlessly work together. Element offers the richest
                     network of communication bridges.</p>
 
-                    <p><em>Own Your Own Data</em> - No one should control your communication and data but you. Riot
+                    <p><em>Own Your Own Data</em> - No one should control your communication and data but you. Element
                     lets you run your own server, and provides users and teams with the most advanced
                     crypto ratchet technology available today for a decentralized secure Internet.</p>
 
-                    <p><em>Open Source</em> - Riot is entirely open source: all the code is published on GitHub
+                    <p><em>Open Source</em> - Element is entirely open source: all the code is published on GitHub
                     (Apache License) for anyone to see and extend. This means teams can customize or
                     contribute to the code and everyone can benefit from the speed of community innovation.</p>
 
-                    <p><em>Made on Matrix</em> - Riot is built on top of Matrix. Matrix is an open network for secure,
+                    <p><em>Made on Matrix</em> - Element is built on top of Matrix. Matrix is an open network for secure,
                     decentralized communication delivering a community of users, bridged networks,
                     integrated bots and applications plus full end-to-end encryption. To learn more about
                     Matrix visit https://matrix.org.</p>
