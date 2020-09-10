@@ -1,1 +1,0 @@
-Add config options for controlling how email addresses are obfuscated in third party invites.

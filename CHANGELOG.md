@@ -1,3 +1,29 @@
+Sydent 2.1.0 (2020-09-10)
+=========================
+
+Features
+--------
+
+- Add a Dockerfile and allow environment variables `SYDENT_SERVER_NAME`, `SYDENT_PID_FILE` and `SYDENT_DB_PATH` to modify default configuration values. ([\#290](https://github.com/matrix-org/sydent/issues/290))
+- Add config options for controlling how email addresses are obfuscated in third party invites. ([\#311](https://github.com/matrix-org/sydent/issues/311))
+
+
+Bugfixes
+--------
+
+- Fix a bug in the error handling of 3PID session validation, if the token submitted is incorrect. ([\#296](https://github.com/matrix-org/sydent/issues/296))
+- Stop sending the unspecified `success` parameter in responses to `/requestToken` requests. ([\#302](https://github.com/matrix-org/sydent/issues/302))
+- Fix a bug causing Sydent to ignore `nextLink` parameters. ([\#303](https://github.com/matrix-org/sydent/issues/303))
+- Fix the HTTP status code returned during some error responses. ([\#305](https://github.com/matrix-org/sydent/issues/305))
+- Sydent now correctly enforces the valid characters in the `client_secret` parameter used in various endpoints. ([\#309](https://github.com/matrix-org/sydent/issues/309))
+
+
+Internal Changes
+----------------
+
+- Replace instances of Riot with Element. ([\#308](https://github.com/matrix-org/sydent/issues/308))
+
+
 Sydent 2.0.1 (2020-05-20)
 =========================
 
