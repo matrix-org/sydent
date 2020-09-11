@@ -1,3 +1,12 @@
+Sydent 2.2.0 (2020-09-11)
+=========================
+
+Bugfixes
+--------
+
+- Fix intermittent deadlock in Sentry integration. ([\#312](https://github.com/matrix-org/sydent/issues/312))
+
+
 Sydent 2.1.0 (2020-09-10)
 =========================
 
