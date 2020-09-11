@@ -1,0 +1,1 @@
+Fix intermittent deadlock in Sentry integration.

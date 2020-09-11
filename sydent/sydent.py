@@ -17,6 +17,8 @@
 # limitations under the License.
 from __future__ import absolute_import
 
+import gc
+
 from six.moves import configparser
 import copy
 import logging
@@ -274,6 +276,13 @@ class Sydent:
         cb.clock = self.reactor
         cb.start(10 * 60.0)
 
+        # workaround for https://github.com/getsentry/sentry-python/issues/803: we
+        # disable automatic GC and run it periodically instead.
+        gc.disable()
+        cb = task.LoopingCall(run_gc)
+        cb.clock = self.reactor
+        cb.start(1.0)
+
     def save_config(self):
         fp = open(self.config_file, 'w')
         self.cfg.write(fp)
@@ -403,6 +412,14 @@ def get_config_file_path():
 
 def parse_cfg_bool(value):
     return value.lower() == "true"
+
+
+def run_gc():
+    threshold = gc.get_threshold()
+    counts = gc.get_count()
+    for i in reversed(range(len(threshold))):
+        if threshold[i] < counts[i]:
+            gc.collect(i)
 
 
 if __name__ == '__main__':
