@@ -169,7 +169,7 @@ class StoreInviteServlet(Resource):
         # If the string is shorter than the defined threshold, redact based on length
         if len(s) <= characters_to_reveal:
             if len(s) > 5:
-                return s[3] + u"..."
+                return s[:3] + u"..."
             if len(s) > 1:
                 return s[0] + u"..."
             return u"..."
