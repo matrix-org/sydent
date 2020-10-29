@@ -207,31 +207,33 @@ class ThreepidBinder:
                 "Attempted to notify on bind for %s but received 403. Not retrying."
                 % (mxid,)
             )
+            return
         elif response.code != 200:
             # Otherwise, try again with exponential backoff
             self._notifyErrback(
                 assoc, attempt, "Non-OK error code received (%d)" % response.code
             )
-        else:
-            logger.info("Successfully notified on bind for %s" % (mxid,))
+            return
 
-            # Skip the deletion step if instructed so by the config.
-            if not self.sydent.delete_tokens_on_bind:
-                return
+        logger.info("Successfully notified on bind for %s" % (mxid,))
 
-            # Only remove sent tokens when they've been successfully sent.
-            try:
-                joinTokenStore = JoinTokenStore(self.sydent)
-                joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
-                logger.info(
-                    "Successfully deleted invite for %s from the store",
-                    assoc["address"],
-                )
-            except Exception as e:
-                logger.exception(
-                    "Couldn't remove invite for %s from the store",
-                    assoc["address"],
-                )
+        # Skip the deletion step if instructed so by the config.
+        if not self.sydent.delete_tokens_on_bind:
+            return
+
+        # Only remove sent tokens when they've been successfully sent.
+        try:
+            joinTokenStore = JoinTokenStore(self.sydent)
+            joinTokenStore.deleteTokens(assoc["medium"], assoc["address"])
+            logger.info(
+                "Successfully deleted invite for %s from the store",
+                assoc["address"],
+            )
+        except Exception as e:
+            logger.exception(
+                "Couldn't remove invite for %s from the store",
+                assoc["address"],
+            )
 
     def _notifyErrback(self, assoc, attempt, error):
         """
