@@ -201,8 +201,14 @@ class ThreepidBinder:
             self._notifyErrback(assoc, attempt, e)
             return
 
-        # If the request failed, try again with exponential backoff
-        if response.code != 200:
+        if response.code == 403:
+            # If the request failed with a 403, then the token is not recognised
+            logger.warning(
+                "Attempted to notify on bind for %s but received 403. Not retrying."
+                % (mxid,)
+            )
+        elif response.code != 200:
+            # Otherwise, try again with exponential backoff
             self._notifyErrback(
                 assoc, attempt, "Non-OK error code received (%d)" % response.code
             )
