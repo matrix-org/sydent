@@ -153,6 +153,7 @@ CONFIG_DEFAULTS = {
         'email.smtppassword': '',
         'email.hostname': '',
         'email.tlsmode': '0',
+
         # When a user is invited to a room via their email address, that invite is
         # displayed in the room list using an obfuscated version of the user's email
         # address. These config options determine how much of the email address to
@@ -174,6 +175,18 @@ CONFIG_DEFAULTS = {
         # The number of characters from the beginning to reveal of the email's domain
         # portion (right of the '@' sign)
         'email.third_party_invite_domain_obfuscate_characters': '3',
+
+        # Adds an extra layer of obfuscation, ensuring that even in the case of a username, domain
+        # or component containing very few characters - the entire string will not be shown.
+        #
+        # The algorithm works like so:
+        #   * If the string's length is greater than the cutoff value specified
+        #     by the above options, stop. Otherwise,
+        #   * If the string's length > 5, obfuscate to 3 characters.
+        #   * If the string's length > 1, obfuscate to 1 character
+        #
+        # The default value is "true".
+        'email.always_obfuscate': 'true',
     },
     'sms': {
         'bodyTemplate': 'Your code is {token}',
@@ -266,6 +279,10 @@ class Sydent:
         self.domain_obfuscate_characters = int(self.cfg.get(
             "email", "email.third_party_invite_domain_obfuscate_characters"
         ))
+
+        self.always_obfuscate = parse_cfg_bool(
+            self.cfg.get("email", "email.always_obfuscate")
+        )
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
