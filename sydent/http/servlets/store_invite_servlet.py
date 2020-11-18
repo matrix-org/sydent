@@ -147,8 +147,26 @@ class StoreInviteServlet(Resource):
         # Extract strings from the address
         username, domain = address.split(u"@", 1)
 
-        # Obfuscate strings
-        redacted_username = self._redact(username, self.sydent.username_obfuscate_characters)
+        # Obfuscate the username portion
+
+        # Break up the username by the configured separator string
+        separator = self.sydent.third_party_invite_username_separator_string
+        username_components = username.split(separator) if separator else [username]
+
+        # Obfuscate each individual component
+        redacted_components = [
+            self._redact(component, self.sydent.username_obfuscate_characters)
+            for component in username_components if component != ""
+        ]
+        if redacted_components:
+            # Join the components back together
+            redacted_username = separator.join(redacted_components)
+        else:
+            # We ended up with an empty username. This can happen if the username was
+            # only comprised of the separator character
+            redacted_username = username
+
+        # Obfuscate the domain portion
         redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
 
         return redacted_username + u"@" + redacted_domain
