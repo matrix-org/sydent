@@ -180,6 +180,18 @@ CONFIG_DEFAULTS = {
         'email.third_party_invite_domain_reveal_characters': '3',
         # Legacy name equivalent to the above option
         'email.third_party_invite_domain_obfuscate_characters': '3',
+
+        # Adds an extra layer of obfuscation, ensuring that even in the case of a username, domain
+        # or component containing very few characters - the entire string will not be shown.
+        #
+        # The algorithm works like so:
+        #   * If the string's length is greater than the cutoff value specified
+        #     by the above options, stop. Otherwise,
+        #   * If the string's length > 5, obfuscate to 3 characters.
+        #   * If the string's length > 1, obfuscate to 1 character.
+        #
+        # The default value is "true".
+        'email.always_obfuscate': 'true',
     },
     'sms': {
         'bodyTemplate': 'Your code is {token}',
@@ -295,6 +307,10 @@ class Sydent:
             self.domain_reveal_characters = int(self.cfg.get(
                 "email", "email.third_party_invite_domain_obfuscate_characters"
             ))
+
+        self.always_obfuscate = parse_cfg_bool(
+            self.cfg.get("email", "email.always_obfuscate")
+        )
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
