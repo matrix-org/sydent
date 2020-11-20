@@ -153,18 +153,18 @@ class StoreInviteServlet(Resource):
             # Redact each component individually, if it has content.
             # (No content implies multiple sequential separators.)
             redacted_components = [
-                self._redact(component, self.sydent.username_obfuscate_characters)
+                self._redact(component, self.sydent.username_reveal_characters)
                 if component else ""
                 for component in username.split(separator)
             ]
             redacted_username = separator.join(redacted_components)
         else:
             redacted_username = self._redact(
-                username, self.sydent.username_obfuscate_characters
+                username, self.sydent.username_reveal_characters
             )
 
         # Obfuscate the domain portion
-        redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
+        redacted_domain = self._redact(domain, self.sydent.domain_reveal_characters)
 
         return redacted_username + u"@" + redacted_domain
 

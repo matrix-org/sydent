@@ -15,8 +15,8 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         config = {
             "email": {
                 # Used by test_invited_email_address_obfuscation
-                "email.third_party_invite_username_obfuscate_characters": "6",
-                "email.third_party_invite_domain_obfuscate_characters": "8",
+                "email.third_party_invite_username_reveal_characters": "6",
+                "email.third_party_invite_domain_reveal_characters": "8",
             },
         }
         self.sydent = make_sydent(test_config=config)
@@ -108,12 +108,40 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         self.assertEqual(redacted_address, "-@someexam...")
 
         # Try multiple, sequential separators
-        self.sydent.username_obfuscate_characters = 3
-        self.sydent.domain_obfuscate_characters = 3
+        self.sydent.username_reveal_characters = 3
+        self.sydent.domain_reveal_characters = 3
 
         email_address = "donuld--fauntleboy--puck@disnie.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
         self.assertEqual(redacted_address, "don...--fau...--puc...@dis...")
+
+class ThreepidInvitesFallbackConfigTestCase(unittest.TestCase):
+    """Tests that any fallback config options work."""
+
+    def setUp(self):
+        # Create a new sydent
+        config = {
+            "email": {
+                # Test that the values of fallback config options are still used when their
+                # equivalent and new counterparts are not set
+
+                # Fallback of email.third_party_invite_username_reveal_characters
+                "email.third_party_invite_username_obfuscate_characters": "9",
+                # Fallback of email.third_party_invite_domain_reveal_characters
+                "email.third_party_invite_domain_obfuscate_characters": "4",
+            },
+        }
+        self.sydent = make_sydent(test_config=config)
+
+    def test_invited_email_address_obfuscation_fallback_config(self):
+        """Test fallback options relating to email address obfuscation"""
+        store_invite_servlet = StoreInviteServlet(self.sydent)
+
+        email_address = "1234567890@1234567890.com"
+        redacted_address = store_invite_servlet.redact_email_address(email_address)
+
+        self.assertEqual(redacted_address, "123456789...@1234...")
+
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
     """Test that invite tokens are not deleted when that is disabled.

@@ -153,6 +153,7 @@ CONFIG_DEFAULTS = {
         'email.smtppassword': '',
         'email.hostname': '',
         'email.tlsmode': '0',
+
         # When a user is invited to a room via their email address, that invite is
         # displayed in the room list using an obfuscated version of the user's email
         # address. These config options determine how much of the email address to
@@ -170,9 +171,14 @@ CONFIG_DEFAULTS = {
         #
         # The number of characters from the beginning to reveal of the email's username
         # portion (left of the '@' sign)
+        'email.third_party_invite_username_reveal_characters': '3',
+        # Legacy name equivalent to the above option
         'email.third_party_invite_username_obfuscate_characters': '3',
+
         # The number of characters from the beginning to reveal of the email's domain
         # portion (right of the '@' sign)
+        'email.third_party_invite_domain_reveal_characters': '3',
+        # Legacy name equivalent to the above option
         'email.third_party_invite_domain_obfuscate_characters': '3',
 
         # A string to separate multiple components of the username portion of an email address.
@@ -272,12 +278,35 @@ class Sydent:
             self.cfg.get("general", "delete_tokens_on_bind")
         )
 
-        self.username_obfuscate_characters = int(self.cfg.get(
-            "email", "email.third_party_invite_username_obfuscate_characters"
+        self.username_reveal_characters = int(self.cfg.get(
+            "email", "email.third_party_invite_username_reveal_characters"
         ))
-        self.domain_obfuscate_characters = int(self.cfg.get(
-            "email", "email.third_party_invite_domain_obfuscate_characters"
+
+        # Fallback to the old config option name if the new one is not set.
+        # There isn't a clear way to check if a config option is set or not, so we have
+        # to rely on comparing with default values.
+        if (
+           self.username_reveal_characters ==
+           int(CONFIG_DEFAULTS["email"]["email.third_party_invite_username_reveal_characters"])
+        ):
+            # This value is no different from the default. Let's take the value of the
+            # old option instead (which will also fall back to the default if not set)
+            self.username_reveal_characters = int(self.cfg.get(
+                "email", "email.third_party_invite_username_obfuscate_characters"
+            ))
+
+        self.domain_reveal_characters = int(self.cfg.get(
+            "email", "email.third_party_invite_domain_reveal_characters"
         ))
+
+        # Do the same fallback dance for this option
+        if (
+            self.domain_reveal_characters ==
+            int(CONFIG_DEFAULTS["email"]["email.third_party_invite_domain_reveal_characters"])
+        ):
+            self.domain_reveal_characters = int(self.cfg.get(
+                "email", "email.third_party_invite_domain_obfuscate_characters"
+            ))
 
         self.third_party_invite_username_separator_string = self.cfg.get(
             "email", "email.third_party_invite_username_separator_string"
