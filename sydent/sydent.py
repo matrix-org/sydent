@@ -176,9 +176,9 @@ CONFIG_DEFAULTS = {
         'email.third_party_invite_domain_obfuscate_characters': '3',
 
         # A string to separate multiple components of the username portion of an email address.
-        # For instance, if "." is set, then "alice.smith@example.com" would result
+        # For instance, if "-" is set, then "alice-smith@example.com" would result
         # in both "alice" and "smith" being individually obfuscated. Resulting in
-        # "ali...smi...@example.com" for example.
+        # "ali...-smi...@example.com" for example.
         #
         # The obfuscation amount for each component is set via the
         # `third_party_invite_username_reveal_characters` config option.
