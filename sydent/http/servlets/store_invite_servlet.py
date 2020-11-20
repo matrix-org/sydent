@@ -148,7 +148,6 @@ class StoreInviteServlet(Resource):
         username, domain = address.split(u"@", 1)
 
         # Obfuscate the username portion
-
         separator = self.sydent.third_party_invite_username_separator_string
         if separator:
             # Redact each component individually, if it has content.
