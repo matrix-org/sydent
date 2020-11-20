@@ -92,10 +92,10 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         # Try using a username separator string
         self.sydent.third_party_invite_username_separator_string = "-"
-        email_address = "johnathon-jingle-smithington@smiths.notarealtld"
+        email_address = "johnathon-jingle-smithington@john-smith.notarealtld"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
         # Each individual component of the username should be obfuscated, but not the domain
-        self.assertEqual(redacted_address, "johnat...-jin...-smithi...@smiths.n...")
+        self.assertEqual(redacted_address, "johnat...-jin...-smithi...@john-smi...")
 
         # Try one with a separator at a word boundary
         email_address = "applejack-@someexample.com"
