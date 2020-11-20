@@ -275,7 +275,7 @@ class Sydent:
         # to rely on comparing with default values.
         if (
            self.username_reveal_characters ==
-           CONFIG_DEFAULTS["email"]["email.third_party_invite_username_reveal_characters"]
+           int(CONFIG_DEFAULTS["email"]["email.third_party_invite_username_reveal_characters"])
         ):
             # This value is no different from the default. Let's take the value of the
             # old option instead (which will also fall back to the default if not set)
@@ -290,7 +290,7 @@ class Sydent:
         # Do the same fallback dance for this option
         if (
             self.domain_reveal_characters ==
-            CONFIG_DEFAULTS["email"]["email.third_party_invite_domain_reveal_characters"]
+            int(CONFIG_DEFAULTS["email"]["email.third_party_invite_domain_reveal_characters"])
         ):
             self.domain_reveal_characters = int(self.cfg.get(
                 "email", "email.third_party_invite_domain_obfuscate_characters"
