@@ -1,0 +1,2 @@
+Rename the "obfuscate" portion of config options `third_party_invite_*` as they configure the number of characters to reveal, not obfuscate.
+

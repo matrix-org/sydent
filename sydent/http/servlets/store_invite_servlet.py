@@ -148,8 +148,8 @@ class StoreInviteServlet(Resource):
         username, domain = address.split(u"@", 1)
 
         # Obfuscate strings
-        redacted_username = self._redact(username, self.sydent.username_obfuscate_characters)
-        redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
+        redacted_username = self._redact(username, self.sydent.username_reveal_characters)
+        redacted_domain = self._redact(domain, self.sydent.domain_reveal_characters)
 
         return redacted_username + u"@" + redacted_domain
 
