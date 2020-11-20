@@ -149,22 +149,30 @@ class StoreInviteServlet(Resource):
 
         # Obfuscate the username portion
 
-        # Break up the username by the configured separator string
         separator = self.sydent.third_party_invite_username_separator_string
-        username_components = username.split(separator) if separator else [username]
+        if separator:
+            # If a separator string has been configured, we redact each component of the
+            # username individually.
+            redacted_username = ""
 
-        # Obfuscate each individual component
-        redacted_components = [
-            self._redact(component, self.sydent.username_obfuscate_characters)
-            for component in username_components if component != ""
-        ]
-        if redacted_components:
-            # Join the components back together
-            redacted_username = separator.join(redacted_components)
+            username_components = username.split(separator)
+            for index, component in enumerate(username_components):
+                if component:
+                    # Redact this component and append it to the final string
+                    redacted_username += (
+                        self._redact(component, self.sydent.username_obfuscate_characters)
+                    )
+
+                # Append the separator separately. This handles the case of multiple
+                # separators appearing sequentially in the username.
+                #
+                # The conditional here is to prevent a separator being appended to the end.
+                if index != len(username_components) - 1:
+                    redacted_username += separator
         else:
-            # We ended up with an empty username. This can happen if the username was
-            # only comprised of the separator character
-            redacted_username = username
+            redacted_username = self._redact(
+                username, self.sydent.username_obfuscate_characters
+            )
 
         # Obfuscate the domain portion
         redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)

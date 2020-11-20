@@ -92,25 +92,28 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         # Try using a username separator string
         self.sydent.third_party_invite_username_separator_string = "-"
-
-        email_address = "johnathon-jingle-smithington@company-town.notarealtld"
+        email_address = "johnathon-jingle-smithington@smiths.notarealtld"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
         # Each individual component of the username should be obfuscated, but not the domain
-        self.assertEqual(redacted_address, "johnat...-jin...-smithi...@company-...")
+        self.assertEqual(redacted_address, "johnat...-jin...-smithi...@smiths.n...")
 
         # Try one with a separator at a word boundary
-        self.sydent.third_party_invite_username_separator_string = "."
-
-        email_address = "applejack.@someexample.com"
+        email_address = "applejack-@someexample.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
-        self.assertEqual(redacted_address, "applej...@someexam...")
+        self.assertEqual(redacted_address, "applej...-@someexam...")
 
-        # Try one where a separator is the username
-        self.sydent.third_party_invite_username_separator_string = "."
-
-        email_address = ".@someexample.com"
+        # Try one where the username is just the separator.
+        email_address = "-@someexample.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
-        self.assertEqual(redacted_address, ".@someexam...")
+        self.assertEqual(redacted_address, "-@someexam...")
+
+        # Try multiple, sequential separators
+        self.sydent.username_obfuscate_characters = 3
+        self.sydent.domain_obfuscate_characters = 3
+
+        email_address = "donuld--fauntleboy--puck@disnie.com"
+        redacted_address = store_invite_servlet.redact_email_address(email_address)
+        self.assertEqual(redacted_address, "don...--fau...--puc...@dis...")
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
     """Test that invite tokens are not deleted when that is disabled.
