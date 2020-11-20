@@ -151,24 +151,14 @@ class StoreInviteServlet(Resource):
 
         separator = self.sydent.third_party_invite_username_separator_string
         if separator:
-            # If a separator string has been configured, we redact each component of the
-            # username individually.
-            redacted_username = ""
-
-            username_components = username.split(separator)
-            for index, component in enumerate(username_components):
-                if component:
-                    # Redact this component and append it to the final string
-                    redacted_username += (
-                        self._redact(component, self.sydent.username_obfuscate_characters)
-                    )
-
-                # Append the separator separately. This handles the case of multiple
-                # separators appearing sequentially in the username.
-                #
-                # The conditional here is to prevent a separator being appended to the end.
-                if index != len(username_components) - 1:
-                    redacted_username += separator
+            # Redact each component individually, if it has content.
+            # (No content implies multiple sequential separators.)
+            redacted_components = [
+                self._redact(component, self.sydent.username_obfuscate_characters)
+                if component else ""
+                for component in username.split(separator)
+            ]
+            redacted_username = separator.join(redacted_components)
         else:
             redacted_username = self._redact(
                 username, self.sydent.username_obfuscate_characters
