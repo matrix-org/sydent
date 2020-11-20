@@ -17,6 +17,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
                 # Used by test_invited_email_address_obfuscation
                 "email.third_party_invite_username_reveal_characters": "6",
                 "email.third_party_invite_domain_reveal_characters": "8",
+                "email.always_obfuscate": "false",
             },
         }
         self.sydent = make_sydent(test_config=config)
@@ -84,10 +85,15 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         self.assertEqual(redacted_address, "123456...@12345678...")
 
-        # Even short addresses are redacted
+        # Addresses that are shorter than the configured reveal length are not redacted if
+        # always_obfuscate is false
         short_email_address = "1@1.com"
         redacted_address = store_invite_servlet.redact_email_address(short_email_address)
+        self.assertEqual(redacted_address, "1@1.com")
 
+        # Set always_obfuscate to true
+        self.sydent.always_obfuscate = True
+        redacted_address = store_invite_servlet.redact_email_address(short_email_address)
         self.assertEqual(redacted_address, "...@1...")
 
         # Try using a username separator string

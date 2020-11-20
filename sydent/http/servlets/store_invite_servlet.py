@@ -171,7 +171,8 @@ class StoreInviteServlet(Resource):
     def _redact(self, s, characters_to_reveal):
         """
         Redacts the content of a string, using a given amount of characters to reveal.
-        If the string is shorter than the given threshold, redact it based on length.
+        If the always_obfuscate config option is true, and the string is shorter than the
+        given threshold, redact it based on length.
 
         :param s: The string to redact.
         :type s: unicode
@@ -183,15 +184,22 @@ class StoreInviteServlet(Resource):
         :return: The redacted string.
         :rtype: unicode
         """
-        # If the string is shorter than the defined threshold, redact based on length
         if len(s) <= characters_to_reveal:
-            if len(s) > 5:
-                return s[:3] + u"..."
-            if len(s) > 1:
-                return s[0] + u"..."
-            return u"..."
+            # The string is shorter than the configured amount of characters to show.
+            if self.sydent.always_obfuscate:
+                # If the string is shorter than the defined threshold, then we'll
+                # redact based on size instead. This ensures that at least *some*
+                # part of the string is obfuscated, regardless of its total length.
+                if len(s) > 5:
+                    return s[:3] + u"..."
+                if len(s) > 1:
+                    return s[0] + u"..."
+                return u"..."
 
-        # Otherwise truncate it and add an ellipses
+            # Otherwise just return the original string.
+            return s
+
+        # Truncate to the configured length and add an ellipses.
         return s[:characters_to_reveal] + u"..."
 
     def _randomString(self, length):
