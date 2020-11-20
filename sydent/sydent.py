@@ -183,7 +183,7 @@ CONFIG_DEFAULTS = {
         #   * If the string's length is greater than the cutoff value specified
         #     by the above options, stop. Otherwise,
         #   * If the string's length > 5, obfuscate to 3 characters.
-        #   * If the string's length > 1, obfuscate to 1 character
+        #   * If the string's length > 1, obfuscate to 1 character.
         #
         # The default value is "true".
         'email.always_obfuscate': 'true',
