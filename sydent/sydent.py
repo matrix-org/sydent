@@ -181,6 +181,18 @@ CONFIG_DEFAULTS = {
         # Legacy name equivalent to the above option
         'email.third_party_invite_domain_obfuscate_characters': '3',
 
+        # A string to separate multiple components of the username portion of an email address.
+        # For instance, if "-" is set, then "alice-smith@example.com" would result
+        # in both "alice" and "smith" being individually obfuscated. Resulting in
+        # "ali...-smi...@example.com" for example.
+        #
+        # The obfuscation amount for each component is set via the
+        # `third_party_invite_username_reveal_characters` config option.
+        #
+        # The default value is an empty string, meaning this option is ignored. In that case,
+        # the username is considered a single component.
+        'email.third_party_invite_username_separator_string': '',
+
         # Adds an extra layer of obfuscation, ensuring that even in the case of a username, domain
         # or component containing very few characters - the entire string will not be shown.
         #
@@ -307,6 +319,10 @@ class Sydent:
             self.domain_reveal_characters = int(self.cfg.get(
                 "email", "email.third_party_invite_domain_obfuscate_characters"
             ))
+
+        self.third_party_invite_username_separator_string = self.cfg.get(
+            "email", "email.third_party_invite_username_separator_string"
+        )
 
         self.always_obfuscate = parse_cfg_bool(
             self.cfg.get("email", "email.always_obfuscate")
