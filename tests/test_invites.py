@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from mock import Mock
 from sydent.http.httpclient import FederationHttpClient
 from sydent.db.invite_tokens import JoinTokenStore
