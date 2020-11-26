@@ -178,12 +178,14 @@ class StoreInviteServlet(Resource):
         :type s: unicode
 
         :param characters_to_reveal: How many characters of the string to leave before
-            the '...'
+            the ellipsis
         :type characters_to_reveal: int
 
         :return: The redacted string.
         :rtype: unicode
         """
+        ellipsis_character = u"…"
+
         if len(s) <= characters_to_reveal:
             # The string is shorter than the configured amount of characters to show.
             if self.sydent.always_obfuscate:
@@ -191,16 +193,16 @@ class StoreInviteServlet(Resource):
                 # redact based on size instead. This ensures that at least *some*
                 # part of the string is obfuscated, regardless of its total length.
                 if len(s) > 5:
-                    return s[:3] + u"..."
+                    return s[:3] + ellipsis_character
                 if len(s) > 1:
-                    return s[0] + u"..."
-                return u"..."
+                    return s[0] + ellipsis_character
+                return ellipsis_character
 
             # Otherwise just return the original string.
             return s
 
         # Truncate to the configured length and add an ellipses.
-        return s[:characters_to_reveal] + u"..."
+        return s[:characters_to_reveal] + ellipsis_character
 
     def _randomString(self, length):
         """
