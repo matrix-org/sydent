@@ -1,0 +1,1 @@
+Switch out triple-period sequences in third-party invites for an ellipsis character.

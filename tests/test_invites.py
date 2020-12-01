@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from mock import Mock
 from sydent.http.httpclient import FederationHttpClient
 from sydent.db.invite_tokens import JoinTokenStore
@@ -83,35 +85,35 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         email_address = "1234567890@1234567890.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
 
-        self.assertEqual(redacted_address, "123456...@12345678...")
+        self.assertEqual(redacted_address, u"123456…@12345678…")
 
         # Addresses that are shorter than the configured reveal length are not redacted if
         # always_obfuscate is false
         short_email_address = "1@1.com"
         redacted_address = store_invite_servlet.redact_email_address(short_email_address)
-        self.assertEqual(redacted_address, "1@1.com")
+        self.assertEqual(redacted_address, u"1@1.com")
 
         # Set always_obfuscate to true
         self.sydent.always_obfuscate = True
         redacted_address = store_invite_servlet.redact_email_address(short_email_address)
-        self.assertEqual(redacted_address, "...@1...")
+        self.assertEqual(redacted_address, u"…@1…")
 
         # Try using a username separator string
         self.sydent.third_party_invite_username_separator_string = "-"
         email_address = "johnathon-jingle-smithington@john-smith.notarealtld"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
         # Each individual component of the username should be obfuscated, but not the domain
-        self.assertEqual(redacted_address, "johnat...-jin...-smithi...@john-smi...")
+        self.assertEqual(redacted_address, u"johnat…-jin…-smithi…@john-smi…")
 
         # Try one with a separator at a word boundary
         email_address = "applejack-@someexample.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
-        self.assertEqual(redacted_address, "applej...-@someexam...")
+        self.assertEqual(redacted_address, u"applej…-@someexam…")
 
         # Try one where the username is just the separator.
         email_address = "-@someexample.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
-        self.assertEqual(redacted_address, "-@someexam...")
+        self.assertEqual(redacted_address, u"-@someexam…")
 
         # Try multiple, sequential separators
         self.sydent.username_reveal_characters = 3
@@ -119,7 +121,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         email_address = "donuld--fauntleboy--puck@disnie.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
-        self.assertEqual(redacted_address, "don...--fau...--puc...@dis...")
+        self.assertEqual(redacted_address, u"don…--fau…--puc…@dis…")
 
 class ThreepidInvitesFallbackConfigTestCase(unittest.TestCase):
     """Tests that any fallback config options work."""
@@ -146,7 +148,7 @@ class ThreepidInvitesFallbackConfigTestCase(unittest.TestCase):
         email_address = "1234567890@1234567890.com"
         redacted_address = store_invite_servlet.redact_email_address(email_address)
 
-        self.assertEqual(redacted_address, "123456789...@1234...")
+        self.assertEqual(redacted_address, u"123456789…@1234…")
 
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
