@@ -22,7 +22,7 @@ COPY --chown=sydent:sydent ["README.rst", "setup.cfg", "setup.py", "/sydent/"]
 
 # Install dependencies
 RUN cd /sydent \
-    && su sydent -c 'pip install --user --upgrade pip setuptools sentry-sdk' \
+    && su sydent -c 'pip install --user --upgrade pip setuptools sentry-sdk prometheus_client' \
     && su sydent -c 'pip install --user -e .' \
     && rm -rf /sydent/.cache \
     && find /sydent -name '*.pyc' -delete
