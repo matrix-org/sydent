@@ -79,19 +79,22 @@ class StoreInviteServlet(Resource):
         tokenStore.storeEphemeralPublicKey(ephemeralPublicKeyBase64)
         tokenStore.storeToken(medium, address, roomId, sender, token)
 
+        # Variables to substitute in the template.
         substitutions = {}
+        # Include all arguments sent via the request.
         for k, v in args.items():
             if isinstance(v, string_types):
                 substitutions[k] = v
         substitutions["token"] = token
 
+        # Additional arguments that are optional, but the template might expect.
         required = [
             'sender_display_name',
             'token',
             'room_name',
             'bracketed_room_name',
             'room_avatar_url',
-            'sender_display_name',
+            'sender_avatar_url',
             'guest_user_id',
             'guest_access_token',
         ]
@@ -101,6 +104,9 @@ class StoreInviteServlet(Resource):
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
         if substitutions["room_name"] != '':
             substitutions["bracketed_room_name"] = "(%s)" % substitutions["room_name"]
+
+        if 'web_client_location' not in substitutions:
+            substitutions["web_client_location"] = 'https://app.element.io'
 
         subject_header = Header(self.sydent.cfg.get('email', 'email.invite.subject', raw=True) % substitutions, 'utf8')
         substitutions["subject_header_value"] = subject_header.encode()
