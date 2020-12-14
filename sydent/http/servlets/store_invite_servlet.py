@@ -87,8 +87,9 @@ class StoreInviteServlet(Resource):
                 substitutions[k] = v
         substitutions["token"] = token
 
-        # Additional arguments that are optional, but the template might expect.
-        required = [
+        # Substitutions that the template requires, but are optional to provide
+        # to the API.
+        extra_substitutions = [
             'sender_display_name',
             'token',
             'room_name',
@@ -98,7 +99,7 @@ class StoreInviteServlet(Resource):
             'guest_user_id',
             'guest_access_token',
         ]
-        for k in required:
+        for k in extra_substitutions:
             substitutions.setdefault(k, '')
 
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
