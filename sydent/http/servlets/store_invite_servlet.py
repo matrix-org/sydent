@@ -106,8 +106,9 @@ class StoreInviteServlet(Resource):
         if substitutions["room_name"] != '':
             substitutions["bracketed_room_name"] = "(%s)" % substitutions["room_name"]
 
-        if 'web_client_location' not in substitutions:
-            substitutions["web_client_location"] = self.sydent.default_web_client_location
+        substitutions["web_client_location"] = self.sydent.default_web_client_location
+        if 'org.matrix.web_client_location' in substitutions:
+            substitutions["web_client_location"] = substitutions.pop("org.matrix.web_client_location")
 
         subject_header = Header(self.sydent.cfg.get('email', 'email.invite.subject', raw=True) % substitutions, 'utf8')
         substitutions["subject_header_value"] = subject_header.encode()
