@@ -126,6 +126,12 @@ CONFIG_DEFAULTS = {
         'email.smtppassword': '',
         'email.hostname': '',
         'email.tlsmode': '0',
+        # The web client location which will be used if it is not provided by
+        # the homeserver.
+        #
+        # This should be the scheme and hostname only, see res/invite_template.eml
+        # for the full URL that gets generated.
+        'email.default_web_client_location': 'https://app.element.io',
         # When a user is invited to a room via their email address, that invite is
         # displayed in the room list using an obfuscated version of the user's email
         # address. These config options determine how much of the email address to
@@ -205,6 +211,9 @@ class Sydent:
             self.cfg.get("general", "delete_tokens_on_bind")
         )
 
+        self.default_web_client_location = self.cfg.get(
+            "email", "email.default_web_client_location"
+        )
         self.username_obfuscate_characters = int(self.cfg.get(
             "email", "email.third_party_invite_username_obfuscate_characters"
         ))

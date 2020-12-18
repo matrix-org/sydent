@@ -4,6 +4,9 @@
 .vscode/
 *.iml
 _trial_temp
+*.egg
+*.egg-info
+.python-version
 
 # Runtime files
 sydent.conf
