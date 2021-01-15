@@ -220,6 +220,14 @@ class Sydent:
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
 
+        if self.cfg.has_option("general", "templates.path"):
+            # Get the possible brands by looking at directories under the
+            # templates.path directory.
+            root_template_path = self.cfg.get("general", "templates.path")
+            self.valid_brands = {
+                p for p in os.listdir(root_template_path) if os.path.isdir(os.path.join(root_template_path, p))
+            }
+
         self.enable_v1_associations = parse_cfg_bool(
             self.cfg.get("general", "enable_v1_associations")
         )
@@ -380,18 +388,16 @@ class Sydent:
         except configparser.NoOptionError:
             pass
 
-        root_template_path = self.cfg.get('general', 'templates.path')
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:
-            # Get the possible brands.
-            valid_brands = {p for p in os.listdir(root_template_path) if os.path.isdir(os.path.join(root_template_path, p))}
-            if brand not in valid_brands:
+            if brand not in self.valid_brands:
                 brand = None
 
         # If the brand hint is not valid, or not provided, fallback to the default brand.
         if not brand:
             brand = self.cfg.get('general', 'brand.default')
 
+        root_template_path = self.cfg.get('general', 'templates.path')
         return os.path.join(root_template_path, brand, template_name)
 
 
