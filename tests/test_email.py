@@ -27,12 +27,7 @@ from tests.utils import make_request, make_sydent
 class TestRequestCode(unittest.TestCase):
     def setUp(self):
         # Create a new sydent
-        config = {
-            "general": {
-                # TODO How to get this dynamically.
-                "templates.path": "/Users/clokep/matrix/sydent/res",
-            }
-        }
+        config = {}
         self.sydent = make_sydent(test_config=config)
 
     def _render_request(self, request):
