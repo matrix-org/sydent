@@ -359,7 +359,6 @@ class Sydent:
         :rtype: str or None
         """
         if b"brand" in request.args:
-            # TODO Protect this against relative directory attacks.
             return request.args[b"brand"][0].decode("utf-8")
         return None
 
