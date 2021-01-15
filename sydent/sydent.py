@@ -375,21 +375,22 @@ class Sydent:
         """
 
         # If the deprecated setting is defined, return it.
-        template_file = self.cfg.get(*deprecated_template_name)
-        if template_file:
-            return template_file
+        try:
+            return self.cfg.get(*deprecated_template_name)
+        except configparser.NoOptionError:
+            pass
 
         root_template_path = self.cfg.get('general', 'templates.path')
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:
             # Get the possible brands.
-            valid_brands = {p for p in os.listdir(root_template_path) if os.path.isdir(p)}
+            valid_brands = {p for p in os.listdir(root_template_path) if os.path.isdir(os.path.join(root_template_path, p))}
             if brand not in valid_brands:
                 brand = None
 
         # If the brand hint is not valid, or not provided, fallback to the default brand.
         if not brand:
-            brand = self.cfg.get('general', 'default.brand')
+            brand = self.cfg.get('general', 'brand.default')
 
         return os.path.join(root_template_path, brand, template_name)
 
