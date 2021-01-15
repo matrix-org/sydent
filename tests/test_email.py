@@ -27,7 +27,11 @@ from tests.utils import make_request, make_sydent
 class TestRequestCode(unittest.TestCase):
     def setUp(self):
         # Create a new sydent
-        config = {}
+        config = {
+            "general": {
+                "templates.path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "res"),
+            },
+        }
         self.sydent = make_sydent(test_config=config)
 
     def _render_request(self, request):

@@ -224,9 +224,14 @@ class Sydent:
             # Get the possible brands by looking at directories under the
             # templates.path directory.
             root_template_path = self.cfg.get("general", "templates.path")
-            self.valid_brands = {
-                p for p in os.listdir(root_template_path) if os.path.isdir(os.path.join(root_template_path, p))
-            }
+            if os.path.exists(root_template_path):
+                self.valid_brands = {
+                    p for p in os.listdir(root_template_path) if os.path.isdir(os.path.join(root_template_path, p))
+                }
+            else:
+                # This is a legacy code-path and assumes that verify_response_template,
+                # email.template, and email.invite_template are defined.
+                self.valid_brands = set()
 
         self.enable_v1_associations = parse_cfg_bool(
             self.cfg.get("general", "enable_v1_associations")

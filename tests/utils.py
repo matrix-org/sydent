@@ -58,11 +58,6 @@ def make_sydent(test_config={}):
     else:
         test_config['db'].setdefault('db.file', ':memory:')
 
-    # Provide the default template directory.
-    general = test_config.setdefault("general", {})
-    if "templates.path" not in general:
-        general["templates.path"] = os.path.join(os.path.dirname(os.path.dirname(__file__)), "res")
-
     reactor = MemoryReactorClock()
     return Sydent(reactor=reactor, cfg=parse_config_dict(test_config))
 
