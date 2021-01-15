@@ -58,13 +58,18 @@ class EmailRequestCodeServlet(Resource):
 
         ipaddress = self.sydent.ip_from_request(request)
 
+        if 'brand' in request.args:
+            brand = request.args['brand'][0]
+        else:
+            brand = self.sydent.cfg.get('general', 'default.brand')
+
         nextLink = None
         if 'next_link' in args and not args['next_link'].startswith("file:///"):
             nextLink = args['next_link']
 
         try:
             sid = self.sydent.validators.email.requestToken(
-                email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress
+                email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress, brand
             )
             resp = {'sid': str(sid)}
         except EmailAddressException:
@@ -106,6 +111,12 @@ class EmailValidateCodeServlet(Resource):
             msg = "Verification failed: you may need to request another verification email"
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
+        if not templateFile:
+            if 'brand' in request.args:
+                brand = request.args['brand'][0]
+            else:
+                brand = self.sydent.cfg.get('general', 'default.brand')
+            templateFile = self.sydent.cfg.get('general', 'templates.path') + "/" + brand + "/verify_response_template.html"
 
         request.setHeader("Content-Type", "text/html")
         res = open(templateFile).read() % {'message': msg}

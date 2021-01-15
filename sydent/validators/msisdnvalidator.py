@@ -64,7 +64,7 @@ class MsisdnValidator:
 
                 self.smsRules[country] = action
 
-    def requestToken(self, phoneNumber, clientSecret, sendAttempt):
+    def requestToken(self, phoneNumber, clientSecret, sendAttempt, brand=None):
         """
         Creates or retrieves a validation session and sends an text message to the
         corresponding phone number address with a token to use to verify the association.
