@@ -79,9 +79,10 @@ class MsisdnRequestCodeServlet(Resource):
             phone_number_object, phonenumbers.PhoneNumberFormat.INTERNATIONAL
         )
 
+        brand = self.sydent.brand_from_request(request)
         try:
             sid = self.sydent.validators.msisdn.requestToken(
-                phone_number_object, clientSecret, sendAttempt
+                phone_number_object, clientSecret, sendAttempt, brand
             )
             resp = {
                 'success': True, 'sid': str(sid),
@@ -127,7 +128,12 @@ class MsisdnValidateCodeServlet(Resource):
                 request.setResponseCode(400)
                 msg = "Verification failed: you may need to request another verification text"
 
-        templateFile = self.sydent.cfg.get('http', 'verify_response_template')
+        brand = self.sydent.brand_from_request(request)
+        templateFile = self.sydent.get_branded_template(
+            brand,
+            "verify_response_template.html",
+            ('http', 'verify_response_template'),
+        )
 
         request.setHeader("Content-Type", "text/html")
         return open(templateFile).read() % {'message': msg}

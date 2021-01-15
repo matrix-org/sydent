@@ -85,6 +85,17 @@ CONFIG_DEFAULTS = {
         'terms.path': '',
         'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
 
+        # The root path to use for load templates. This should contain branded
+        # directories. Each directory should contain the following templates:
+        #
+        # * invite_template.eml
+        # * verification_template.eml
+        # * verify_response_template.html
+        'templates.path': 'res',
+        # The brand directory to use if no brand hint (or an invalid brand hint)
+        # is provided by the request.
+        'brand.default': 'matrix-org',
+
         # The following can be added to your local config file to enable prometheus
         # support.
         # 'prometheus_port': '8080',  # The port to serve metrics on
@@ -111,12 +122,18 @@ CONFIG_DEFAULTS = {
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
         'federation.verifycerts': 'True',
-        'verify_response_template': '',
+        # verify_response_template is deprecated, but still used if defined Define
+        # templates.path and brand.default under general instead.
+        #
+        # 'verify_response_template': 'res/verify_response_page_template',
         'client_http_base': '',
     },
     'email': {
-        'email.template': 'res/email.template',
-        'email.invite_template': 'res/invite.template',
+        # email.template and email.invite_template are deprecated, but still used
+        # if defined. Define templates.path and brand.default under general instead.
+        #
+        # 'email.template': 'res/verification_template.eml',
+        # 'email.invite_template': 'res/invite_template.eml',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
         'email.invite.subject': '%(sender_display_name)s has invited you to chat',
@@ -202,6 +219,19 @@ class Sydent:
                 port=self.cfg.getint("general", "prometheus_port"),
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
+
+        if self.cfg.has_option("general", "templates.path"):
+            # Get the possible brands by looking at directories under the
+            # templates.path directory.
+            root_template_path = self.cfg.get("general", "templates.path")
+            if os.path.exists(root_template_path):
+                self.valid_brands = {
+                    p for p in os.listdir(root_template_path) if os.path.isdir(os.path.join(root_template_path, p))
+                }
+            else:
+                # This is a legacy code-path and assumes that verify_response_template,
+                # email.template, and email.invite_template are defined.
+                self.valid_brands = set()
 
         self.enable_v1_associations = parse_cfg_bool(
             self.cfg.get("general", "enable_v1_associations")
@@ -322,6 +352,57 @@ class Sydent:
                 request.requestHeaders.hasHeader("X-Forwarded-For")):
             return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
         return request.getClientIP()
+
+    def brand_from_request(self, request):
+        """
+        If the brand GET parameter is passed, returns that as a string, otherwise returns None.
+
+        :param request: The incoming request.
+        :type request: twisted.web.http.Request
+
+        :return: The brand to use or None if no hint is found.
+        :rtype: str or None
+        """
+        if b"brand" in request.args:
+            return request.args[b"brand"][0].decode("utf-8")
+        return None
+
+    def get_branded_template(self, brand, template_name, deprecated_template_name):
+        """
+        Calculate a (maybe) branded template filename to use.
+
+        If the deprecated email.template setting is defined, always use it.
+        Otherwise, attempt to use the hinted brand from the request if the brand
+        is valid. Otherwise, fallback to the default brand.
+
+        :param brand: The hint of which brand to use.
+        :type brand: str or None
+        :param template_name: The name of the template file to load.
+        :type template_name: str
+        :param deprecated_template_name: The deprecated setting to use, if provided.
+        :type deprecated_template_name: Tuple[str]
+
+        :return: The template filename to use.
+        :rtype: str
+        """
+
+        # If the deprecated setting is defined, return it.
+        try:
+            return self.cfg.get(*deprecated_template_name)
+        except configparser.NoOptionError:
+            pass
+
+        # If a brand hint is provided, attempt to use it if it is valid.
+        if brand:
+            if brand not in self.valid_brands:
+                brand = None
+
+        # If the brand hint is not valid, or not provided, fallback to the default brand.
+        if not brand:
+            brand = self.cfg.get("general", "brand.default")
+
+        root_template_path = self.cfg.get("general", "templates.path")
+        return os.path.join(root_template_path, brand, template_name)
 
 
 class Validators:

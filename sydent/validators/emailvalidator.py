@@ -31,7 +31,7 @@ class EmailValidator:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def requestToken(self, emailAddress, clientSecret, sendAttempt, nextLink, ipaddress=None):
+    def requestToken(self, emailAddress, clientSecret, sendAttempt, nextLink, ipaddress=None, brand=None):
         """
         Creates or retrieves a validation session and sends an email to the corresponding
         email address with a token to use to verify the association.
@@ -47,6 +47,8 @@ class EmailValidator:
         :type nextLink: unicode
         :param ipaddress: The requester's IP address.
         :type ipaddress: str or None
+        :param brand: A hint at a brand from the request.
+        :type brand: str or None
 
         :return: The ID of the session created (or of the existing one if any)
         :rtype: int
@@ -57,6 +59,12 @@ class EmailValidator:
                                                              clientSecret=clientSecret)
 
         valSessionStore.setMtime(valSession.id, time_msec())
+
+        templateFile = self.sydent.get_branded_template(
+            brand,
+            "verification_template.eml",
+            ('email', 'email.template'),
+        )
 
         if int(valSession.sendAttemptNumber) >= int(sendAttempt):
             logger.info("Not mailing code because current send attempt (%d) is not less than given send attempt (%s)", int(sendAttempt), int(valSession.sendAttemptNumber))
@@ -73,7 +81,7 @@ class EmailValidator:
             "Attempting to mail code %s (nextLink: %s) to %s",
             valSession.token, nextLink, emailAddress,
         )
-        sendEmail(self.sydent, 'email.template', emailAddress, substitutions)
+        sendEmail(self.sydent, templateFile, emailAddress, substitutions)
 
         valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
 

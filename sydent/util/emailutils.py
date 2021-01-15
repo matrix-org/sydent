@@ -38,23 +38,22 @@ from sydent.util import time_msec
 logger = logging.getLogger(__name__)
 
 
-def sendEmail(sydent, templateName, mailTo, substitutions):
+def sendEmail(sydent, templateFile, mailTo, substitutions):
     """
     Sends an email with the given parameters.
 
     :param sydent: The Sydent instance to use when building the configuration to send the
         email with.
     :type sydent: sydent.sydent.Sydent
-    :param templateName: The name of the template to use when building the body of the
+    :param templateFile: The filename of the template to use when building the body of the
         email.
-    :type templateName: str
+    :type templateFile: str
     :param mailTo: The email address to send the email to.
     :type mailTo: unicode
     :param substitutions: The substitutions to use with the template.
     :type substitutions: dict[str, str]
     """
     mailFrom = sydent.cfg.get('email', 'email.from')
-    mailTemplateFile = sydent.cfg.get('email', templateName)
 
     myHostname = sydent.cfg.get('email', 'email.hostname')
     if myHostname == '':
@@ -75,7 +74,7 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
         allSubstitutions[k+"_forhtml"] = escape(v)
         allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
 
-    mailString = open(mailTemplateFile).read() % allSubstitutions
+    mailString = open(templateFile).read() % allSubstitutions
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
     if parsedFrom == '' or parsedTo == '':

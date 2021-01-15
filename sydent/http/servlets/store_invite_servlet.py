@@ -113,7 +113,14 @@ class StoreInviteServlet(Resource):
         subject_header = Header(self.sydent.cfg.get('email', 'email.invite.subject', raw=True) % substitutions, 'utf8')
         substitutions["subject_header_value"] = subject_header.encode()
 
-        sendEmail(self.sydent, "email.invite_template", address, substitutions)
+        brand = self.sydent.brand_from_request(request)
+        templateFile = self.sydent.get_branded_template(
+            brand,
+            "invite_template.eml",
+            ('email', 'email.invite_template'),
+        )
+
+        sendEmail(self.sydent, templateFile, address, substitutions)
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())

@@ -201,6 +201,8 @@ def make_request(
     if not path.startswith(b"/"):
         path = b"/" + path
 
+    if isinstance(content, dict):
+        content = json.dumps(content)
     if isinstance(content, text_type):
         content = content.encode("utf8")
 
