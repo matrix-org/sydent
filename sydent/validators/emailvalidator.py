@@ -47,6 +47,8 @@ class EmailValidator:
         :type nextLink: unicode
         :param ipaddress: The requester's IP address.
         :type ipaddress: str or None
+        :param brand: A hint at a brand from the request.
+        :type brand: str or None
 
         :return: The ID of the session created (or of the existing one if any)
         :rtype: int
