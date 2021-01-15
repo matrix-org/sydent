@@ -128,10 +128,12 @@ class MsisdnValidateCodeServlet(Resource):
                 request.setResponseCode(400)
                 msg = "Verification failed: you may need to request another verification text"
 
-        templateFile = self.sydent.cfg.get('http', 'verify_response_template')
-        if not templateFile:
-            brand = self.sydent.brand_from_request(request)
-            templateFile = self.sydent.cfg.get('general', 'templates.path') + "/" + brand + "/verify_response_template.html"
+        brand = self.sydent.brand_from_request(request)
+        templateFile = self.sydent.get_branded_template(
+            brand,
+            "verify_response_template.html",
+            ('http', 'verify_response_template'),
+        )
 
         request.setHeader("Content-Type", "text/html")
         return open(templateFile).read() % {'message': msg}

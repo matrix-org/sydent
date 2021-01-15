@@ -60,9 +60,11 @@ class EmailValidator:
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
-        templateFile = self.sydent.cfg.get('email', 'email.template')
-        if not templateFile:
-            templateFile = self.sydent.cfg.get('general', 'templates.path') + "/" + brand + "/verification_template.eml"
+        templateFile = self.sydent.get_branded_template(
+            brand,
+            "verification_template.eml",
+            ('email', 'email.template'),
+        )
 
         if int(valSession.sendAttemptNumber) >= int(sendAttempt):
             logger.info("Not mailing code because current send attempt (%d) is not less than given send attempt (%s)", int(sendAttempt), int(valSession.sendAttemptNumber))

@@ -328,19 +328,56 @@ class Sydent:
 
     def brand_from_request(self, request):
         """
-        If the brand GET parameter is passed, returns that as a string. Otherwise fall back to the default brand.
+        If the brand GET parameter is passed, returns that as a string, otherwise returns None.
 
         :param request: The incoming request.
         :type request: twisted.web.http.Request
 
-        :return: The brand to use.
-        :rtype: str
+        :return: The brand to use or None if no hint is found.
+        :rtype: str or None
         """
         if b'brand' in request.args:
             # TODO Protect this against relative directory attacks.
             return request.args[b'brand'][0].decode('utf-8')
-        else:
-            return self.cfg.get('general', 'default.brand')
+        return None
+
+    def get_branded_template(self, brand, template_name, deprecated_template_name):
+        """
+        Calculate a (maybe) branded template filename to use.
+
+        If the deprecated email.template setting is defined, always use it.
+        Otherwise, attempt to use the hinted brand from the request if the brand
+        is valid. Otherwise, fallback to the default brand.
+
+        :param brand: The hint of which brand to use.
+        :type brand: str or None
+        :param template_name: The name of the template file to load.
+        :type template_name: str
+        :param deprecated_template_name: The deprecated setting to use, if provided.
+        :type deprecated_template_name: Tuple[str]
+
+        :return: The template filename to use.
+        :rtype: str
+        """
+
+        # If the deprecated setting is defined, return it.
+        template_file = self.cfg.get(*deprecated_template_name)
+        if template_file:
+            return template_file
+
+        root_template_path = self.cfg.get('general', 'templates.path')
+        # If a brand hint is provided, attempt to use it if it is valid.
+        if brand:
+            # Get the possible brands.
+            valid_brands = {p for p in os.listdir(root_template_path) if os.path.isdir(p)}
+            if brand not in valid_brands:
+                brand = None
+
+        # If the brand hint is not valid, or not provided, fallback to the default brand.
+        if not brand:
+            brand = self.cfg.get('general', 'default.brand')
+
+        return os.path.join(root_template_path, brand, template_name)
 
 
 class Validators:
