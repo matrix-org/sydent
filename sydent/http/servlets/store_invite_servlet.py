@@ -115,10 +115,7 @@ class StoreInviteServlet(Resource):
 
         templateFile = self.sydent.cfg.get('email', 'email.invite_template')
         if not templateFile:
-            if 'brand' in request.args:
-                brand = request.args['brand'][0]
-            else:
-                brand = self.sydent.cfg.get('general', 'default.brand')
+            brand = self.sydent.brand_from_request(request)
             templateFile = self.sydent.cfg.get('general', 'templates.path') + "/" + brand + "/invite_template.eml"
 
         sendEmail(self.sydent, templateFile, address, substitutions)

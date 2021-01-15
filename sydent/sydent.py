@@ -326,6 +326,22 @@ class Sydent:
             return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
         return request.getClientIP()
 
+    def brand_from_request(self, request):
+        """
+        If the brand GET parameter is passed, returns that as a string. Otherwise fall back to the default brand.
+
+        :param request: The incoming request.
+        :type request: twisted.web.http.Request
+
+        :return: The brand to use.
+        :rtype: str
+        """
+        if b'brand' in request.args:
+            # TODO Protect this against relative directory attacks.
+            return request.args[b'brand'][0].decode('utf-8')
+        else:
+            return self.cfg.get('general', 'default.brand')
+
 
 class Validators:
     pass

@@ -57,11 +57,7 @@ class EmailRequestCodeServlet(Resource):
             }
 
         ipaddress = self.sydent.ip_from_request(request)
-
-        if 'brand' in request.args:
-            brand = request.args['brand'][0]
-        else:
-            brand = self.sydent.cfg.get('general', 'default.brand')
+        brand = self.sydent.brand_from_request(request)
 
         nextLink = None
         if 'next_link' in args and not args['next_link'].startswith("file:///"):
@@ -112,10 +108,7 @@ class EmailValidateCodeServlet(Resource):
 
         templateFile = self.sydent.cfg.get('http', 'verify_response_template')
         if not templateFile:
-            if 'brand' in request.args:
-                brand = request.args['brand'][0]
-            else:
-                brand = self.sydent.cfg.get('general', 'default.brand')
+            brand = self.sydent.brand_from_request(request)
             templateFile = self.sydent.cfg.get('general', 'templates.path') + "/" + brand + "/verify_response_template.html"
 
         request.setHeader("Content-Type", "text/html")
