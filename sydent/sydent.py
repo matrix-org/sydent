@@ -358,9 +358,9 @@ class Sydent:
         :return: The brand to use or None if no hint is found.
         :rtype: str or None
         """
-        if b'brand' in request.args:
+        if b"brand" in request.args:
             # TODO Protect this against relative directory attacks.
-            return request.args[b'brand'][0].decode('utf-8')
+            return request.args[b"brand"][0].decode("utf-8")
         return None
 
     def get_branded_template(self, brand, template_name, deprecated_template_name):
@@ -395,9 +395,9 @@ class Sydent:
 
         # If the brand hint is not valid, or not provided, fallback to the default brand.
         if not brand:
-            brand = self.cfg.get('general', 'brand.default')
+            brand = self.cfg.get("general", "brand.default")
 
-        root_template_path = self.cfg.get('general', 'templates.path')
+        root_template_path = self.cfg.get("general", "templates.path")
         return os.path.join(root_template_path, brand, template_name)
 
 
