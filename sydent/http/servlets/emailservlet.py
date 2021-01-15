@@ -69,7 +69,7 @@ class EmailRequestCodeServlet(Resource):
 
         try:
             sid = self.sydent.validators.email.requestToken(
-                email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress, brand
+                email, clientSecret, sendAttempt, nextLink, ipaddress=ipaddress, brand=brand,
             )
             resp = {'sid': str(sid)}
         except EmailAddressException:
