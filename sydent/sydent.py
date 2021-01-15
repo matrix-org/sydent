@@ -85,8 +85,16 @@ CONFIG_DEFAULTS = {
         'terms.path': '',
         'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
 
+        # The root path to use for load templates. This should contain branded
+        # directories. Each directory should contain the following templates:
+        #
+        # * invite_template.eml
+        # * verification_template.eml
+        # * verify_response_template.html
         'templates.path': 'res',
-        'brand.default': 'matrix-org', # fish templates from res/matrix-org/*
+        # The brand directory to use if no brand hint (or an invalid brand hint)
+        # is provided by the request.
+        'brand.default': 'matrix-org',
 
         # The following can be added to your local config file to enable prometheus
         # support.
@@ -114,12 +122,18 @@ CONFIG_DEFAULTS = {
         'replication.https.port': '4434',
         'obey_x_forwarded_for': 'False',
         'federation.verifycerts': 'True',
-        # 'verify_response_template': 'res/verify_response_page_template', # obsolete
+        # verify_response_template is deprecated, but still used if defined Define
+        # templates.path and brand.default under general instead.
+        #
+        # 'verify_response_template': 'res/verify_response_page_template',
         'client_http_base': '',
     },
     'email': {
-        # 'email.template': 'res/verification_template.eml', # obsolete
-        # 'email.invite_template': 'res/invite_template.eml', # obsolete
+        # email.template and email.invite_template are deprecated, but still used
+        # if defined. Define templates.path and brand.default under general instead.
+        #
+        # 'email.template': 'res/verification_template.eml',
+        # 'email.invite_template': 'res/invite_template.eml',
         'email.from': 'Sydent Validation <noreply@{hostname}>',
         'email.subject': 'Your Validation Token',
         'email.invite.subject': '%(sender_display_name)s has invited you to chat',
