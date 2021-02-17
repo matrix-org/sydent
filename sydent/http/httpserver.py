@@ -56,6 +56,9 @@ class ClientApiHttpServer:
         lookup = self.sydent.servlets.lookup
         bulk_lookup = self.sydent.servlets.bulk_lookup
 
+        info = self.sydent.servlets.info
+        internalInfo = self.sydent.servlets.internalInfo
+
         hash_details = self.sydent.servlets.hash_details
         lookup_v2 = self.sydent.servlets.lookup_v2
 
@@ -82,6 +85,9 @@ class ClientApiHttpServer:
 
         v1.putChild(b'lookup', lookup)
         v1.putChild(b'bulk_lookup', bulk_lookup)
+
+        v1.putChild(b'info', info)
+        v1.putChild(b'internal-info', internalInfo)
 
         v1.putChild(b'pubkey', pubkey)
         pubkey.putChild(b'isvalid', self.sydent.servlets.pubkeyIsValid)
