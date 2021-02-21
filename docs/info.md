@@ -64,7 +64,7 @@ medium:
 {
     "hs": "<protected HS>",
     "shadow_hs": "<shadow HS>",
-    "new_server": "<new HS>"
+    "new_hs": "<new HS>"
 }
 ```
 
