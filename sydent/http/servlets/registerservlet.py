@@ -51,6 +51,7 @@ class RegisterServlet(Resource):
             "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s" % (
                 args['matrix_server_name'], urllib.parse.quote(args['access_token']),
             ),
+            1024 * 5,
         )
         if 'sub' not in result:
             raise Exception("Invalid response from homeserver")
