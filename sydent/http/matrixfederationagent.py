@@ -26,11 +26,12 @@ from zope.interface import implementer
 from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
-from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent, readBody
+from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent
 
+from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
 from sydent.util.ttlcache import TTLCache
 
@@ -45,6 +46,9 @@ WELL_KNOWN_INVALID_CACHE_PERIOD = 1 * 3600
 
 # cap for .well-known cache period
 WELL_KNOWN_MAX_CACHE_PERIOD = 48 * 3600
+
+# The maximum size (in bytes) to allow a well-known file to be.
+WELL_KNOWN_MAX_SIZE = 50 * 1024  # 50 KiB
 
 logger = logging.getLogger(__name__)
 well_known_cache = TTLCache('well-known')
@@ -316,7 +320,7 @@ class MatrixFederationAgent(object):
         logger.info("Fetching %s", uri_str)
         try:
             response = yield self._well_known_agent.request(b"GET", uri)
-            body = yield readBody(response)
+            body = yield read_body_with_max_size(response, WELL_KNOWN_MAX_SIZE)
             if response.code != 200:
                 raise Exception("Non-200 response %s" % (response.code, ))
 
@@ -334,6 +338,7 @@ class MatrixFederationAgent(object):
             cache_period = WELL_KNOWN_INVALID_CACHE_PERIOD
             cache_period += random.uniform(0, WELL_KNOWN_DEFAULT_CACHE_PERIOD_JITTER)
             defer.returnValue((None, cache_period))
+            return
 
         result = parsed_body["m.server"].encode("ascii")
 
