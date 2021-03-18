@@ -1,17 +1,15 @@
 #
 # Step 1: Build sydent and install dependencies
 #
-FROM docker.io/python:3.8-alpine as builder
+FROM docker.io/python:3.8-slim as builder
 
 # Install dev packages
-RUN apk add --no-cache \
-        build-base \
-        libressl-dev \
-        libffi-dev
+RUN apt-get update && apt-get install -y \
+    build-essential
 
 # Add user sydent
-RUN addgroup -S -g 993 sydent \
-    && adduser -D --home /sydent -S -u 993 -G sydent -s /bin/ash sydent \
+RUN addgroup --system --gid 993 sydent \
+    && adduser --disabled-password --home /sydent --system --uid 993 --gecos sydent sydent \
     && echo "sydent:$(dd if=/dev/random bs=32 count=1 | base64)" | chpasswd
 
 # Copy resources
@@ -21,26 +19,22 @@ COPY --chown=sydent:sydent ["sydent", "/sydent/sydent"]
 COPY --chown=sydent:sydent ["README.rst", "setup.cfg", "setup.py", "/sydent/"]
 
 # Install dependencies
-RUN cd /sydent \
-    && su sydent -c 'pip install --user --upgrade pip setuptools sentry-sdk prometheus_client' \
-    && su sydent -c 'pip install --user -e .' \
-    && rm -rf /sydent/.cache \
-    && find /sydent -name '*.pyc' -delete
+USER sydent
+WORKDIR /sydent
+RUN pip install --user --upgrade pip setuptools sentry-sdk prometheus_client
+RUN pip install --user .
+RUN rm -rf /sydent/.cache
+RUN find /sydent -name '*.pyc' -delete
 
 #
 # Step 2: Reduce image size and layers
 #
 
-FROM docker.io/python:3.8-alpine
-
-# Install packages
-RUN apk add --no-cache \
-        libressl \
-        libffi
+FROM docker.io/python:3.8-slim
 
 # Add user sydent and create /data directory
-RUN addgroup -S -g 993 sydent \
-    && adduser -D --home /sydent -S -u 993 -G sydent -s /bin/ash sydent \
+RUN addgroup --system --gid 993 sydent \
+    && adduser --disabled-password --home /sydent --system --uid 993 --gecos sydent sydent \
     && echo "sydent:$(dd if=/dev/random bs=32 count=1 | base64)" | chpasswd \
     && mkdir /data \
     && chown sydent:sydent /data
