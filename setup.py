@@ -38,7 +38,7 @@ setup(
     packages=find_packages(),
     description="Reference Matrix Identity Verification and Lookup Server",
     install_requires=[
-        "signedjson==1.0.0",
+        "signedjson==1.1.1",
         "unpaddedbase64==1.1.0",
         "Twisted>=16.0.0",
 
