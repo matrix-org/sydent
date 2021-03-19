@@ -21,10 +21,10 @@ COPY --chown=sydent:sydent ["README.rst", "setup.cfg", "setup.py", "/sydent/"]
 # Install dependencies
 USER sydent
 WORKDIR /sydent
-RUN pip install --user --upgrade pip setuptools sentry-sdk prometheus_client
-RUN pip install --user .
-RUN rm -rf /sydent/.cache
-RUN find /sydent -name '*.pyc' -delete
+RUN pip install --user --upgrade pip setuptools sentry-sdk prometheus_client \
+    && pip install --user . \
+    && rm -rf /sydent/.cache \
+    && find /sydent -name '*.pyc' -delete
 
 #
 # Step 2: Reduce image size and layers
