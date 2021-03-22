@@ -21,7 +21,7 @@ import logging
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 from sydent.terms.terms import get_terms
-from sydent.http.auth import authIfV2
+from sydent.http.auth import authV2
 from sydent.db.terms import TermsStore
 from sydent.db.accounts import AccountStore
 
@@ -54,7 +54,7 @@ class TermsServlet(Resource):
         """
         send_cors(request)
 
-        account = authIfV2(self.sydent, request, False)
+        account = authV2(self.sydent, request, False)
 
         args = get_args(request, ("user_accepts",))
 
