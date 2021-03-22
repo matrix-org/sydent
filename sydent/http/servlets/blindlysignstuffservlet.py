@@ -22,7 +22,7 @@ import signedjson.key
 import signedjson.sign
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
-from sydent.http.auth import authIfV2
+from sydent.http.auth import authV2
 
 logger = logging.getLogger(__name__)
 
@@ -30,16 +30,18 @@ logger = logging.getLogger(__name__)
 class BlindlySignStuffServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd, require_auth=False):
         self.sydent = syd
         self.server_name = syd.server_name
         self.tokenStore = JoinTokenStore(syd)
+        self.require_auth = require_auth
 
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
 
-        authIfV2(self.sydent, request)
+        if self.require_auth:
+            authV2(self.sydent, request)
 
         args = get_args(request, ("private_key", "token", "mxid"))
 

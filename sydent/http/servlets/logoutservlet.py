@@ -21,7 +21,7 @@ import logging
 
 from sydent.http.servlets import jsonwrap, send_cors
 from sydent.db.accounts import AccountStore
-from sydent.http.auth import authIfV2, tokenFromRequest
+from sydent.http.auth import authV2, tokenFromRequest
 
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class LogoutServlet(Resource):
         """
         send_cors(request)
 
-        authIfV2(self.sydent, request, False)
+        authV2(self.sydent, request, False)
 
         token = tokenFromRequest(request)
 

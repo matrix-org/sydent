@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from twisted.web.resource import Resource
 
 from sydent.http.servlets import jsonwrap, send_cors
-from sydent.http.auth import authIfV2
+from sydent.http.auth import authV2
 
 
 class AccountServlet(Resource):
@@ -36,7 +36,7 @@ class AccountServlet(Resource):
         """
         send_cors(request)
 
-        account = authIfV2(self.sydent, request)
+        account = authV2(self.sydent, request)
 
         return {
             "user_id": account.userId,
@@ -45,4 +45,3 @@ class AccountServlet(Resource):
     def render_OPTIONS(self, request):
         send_cors(request)
         return b''
-
