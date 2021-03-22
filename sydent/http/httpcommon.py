@@ -15,8 +15,14 @@
 # limitations under the License.
 
 import logging
+from io import BytesIO
 
 import twisted.internet.ssl
+from twisted.internet import defer, protocol
+from twisted.internet.protocol import connectionDone
+from twisted.web._newclient import ResponseDone
+from twisted.web.http import PotentialDataLoss
+from twisted.web.iweb import UNKNOWN_LENGTH
 
 logger = logging.getLogger(__name__)
 
@@ -62,3 +68,98 @@ class SslComponents:
             return twisted.internet._sslverify.OpenSSLCertificateAuthorities([caCert.original])
         else:
             return twisted.internet.ssl.OpenSSLDefaultPaths()
+
+
+
+class BodyExceededMaxSize(Exception):
+    """The maximum allowed size of the HTTP body was exceeded."""
+
+
+class _DiscardBodyWithMaxSizeProtocol(protocol.Protocol):
+    """A protocol which immediately errors upon receiving data."""
+
+    def __init__(self, deferred):
+        self.deferred = deferred
+
+    def _maybe_fail(self):
+        """
+        Report a max size exceed error and disconnect the first time this is called.
+        """
+        if not self.deferred.called:
+            self.deferred.errback(BodyExceededMaxSize())
+            # Close the connection (forcefully) since all the data will get
+            # discarded anyway.
+            self.transport.abortConnection()
+
+    def dataReceived(self, data) -> None:
+        self._maybe_fail()
+
+    def connectionLost(self, reason) -> None:
+        self._maybe_fail()
+
+
+class _ReadBodyWithMaxSizeProtocol(protocol.Protocol):
+    """A protocol which reads body to a stream, erroring if the body exceeds a maximum size."""
+
+    def __init__(self, deferred, max_size):
+        self.stream = BytesIO()
+        self.deferred = deferred
+        self.length = 0
+        self.max_size = max_size
+
+    def dataReceived(self, data) -> None:
+        # If the deferred was called, bail early.
+        if self.deferred.called:
+            return
+
+        self.stream.write(data)
+        self.length += len(data)
+        # The first time the maximum size is exceeded, error and cancel the
+        # connection. dataReceived might be called again if data was received
+        # in the meantime.
+        if self.max_size is not None and self.length >= self.max_size:
+            self.deferred.errback(BodyExceededMaxSize())
+            # Close the connection (forcefully) since all the data will get
+            # discarded anyway.
+            self.transport.abortConnection()
+
+    def connectionLost(self, reason = connectionDone) -> None:
+        # If the maximum size was already exceeded, there's nothing to do.
+        if self.deferred.called:
+            return
+
+        if reason.check(ResponseDone):
+            self.deferred.callback(self.stream.getvalue())
+        elif reason.check(PotentialDataLoss):
+            # stolen from https://github.com/twisted/treq/pull/49/files
+            # http://twistedmatrix.com/trac/ticket/4840
+            self.deferred.callback(self.stream.getvalue())
+        else:
+            self.deferred.errback(reason)
+
+
+def read_body_with_max_size(response, max_size):
+    """
+    Read a HTTP response body to a file-object. Optionally enforcing a maximum file size.
+
+    If the maximum file size is reached, the returned Deferred will resolve to a
+    Failure with a BodyExceededMaxSize exception.
+
+    Args:
+        response: The HTTP response to read from.
+        max_size: The maximum file size to allow.
+
+    Returns:
+        A Deferred which resolves to the read body.
+    """
+    d = defer.Deferred()
+
+    # If the Content-Length header gives a size larger than the maximum allowed
+    # size, do not bother downloading the body.
+    if max_size is not None and response.length != UNKNOWN_LENGTH:
+        if response.length > max_size:
+            response.deliverBody(_DiscardBodyWithMaxSizeProtocol(d))
+            return d
+
+    response.deliverBody(_ReadBodyWithMaxSizeProtocol(d, max_size))
+    return d
