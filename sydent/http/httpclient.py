@@ -25,6 +25,7 @@ from twisted.web.http_headers import Headers
 from sydent.http.matrixfederationagent import MatrixFederationAgent
 
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
+from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +35,14 @@ class HTTPClient(object):
     requests.
     """
     @defer.inlineCallbacks
-    def get_json(self, uri):
+    def get_json(self, uri, max_size = None):
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
         :type uri: unicode
+
+        :param max_size: The maximum size (in bytes) to allow as a response.
+        :type max_size: int
 
         :return: A deferred containing JSON parsed into a Python object.
         :rtype: twisted.internet.defer.Deferred[dict[any, any]]
@@ -49,7 +53,7 @@ class HTTPClient(object):
             b"GET",
             uri.encode("utf8"),
         )
-        body = yield readBody(response)
+        body = yield read_body_with_max_size(response, max_size)
         try:
             # json.loads doesn't allow bytes in Python 3.5
             json_body = json.loads(body.decode("UTF-8"))
@@ -94,7 +98,11 @@ class HTTPClient(object):
         # Ensure the body object is read otherwise we'll leak HTTP connections
         # as per
         # https://twistedmatrix.com/documents/current/web/howto/client.html
-        yield readBody(response)
+        try:
+            # TODO Will this cause the server to think the request was a failure?
+            yield read_body_with_max_size(response, 0)
+        except BodyExceededMaxSize:
+            pass
 
         defer.returnValue(response)
 

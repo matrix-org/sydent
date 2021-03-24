@@ -24,7 +24,6 @@ import json
 import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
-from sydent.http.auth import authIfV2
 
 
 logger = logging.getLogger(__name__)
@@ -48,8 +47,6 @@ class LookupServlet(Resource):
         Returns: A signed association if the threepid has a corresponding mxid, otherwise the empty object.
         """
         send_cors(request)
-
-        authIfV2(self.sydent, request)
 
         args = get_args(request, ('medium', 'address'))
 

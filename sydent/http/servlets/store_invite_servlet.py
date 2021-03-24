@@ -28,20 +28,22 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
 from sydent.http.servlets import get_args, send_cors, jsonwrap
-from sydent.http.auth import authIfV2
+from sydent.http.auth import authV2
 from sydent.util.emailutils import sendEmail
 
 
 class StoreInviteServlet(Resource):
-    def __init__(self, syd):
+    def __init__(self, syd, require_auth=False):
         self.sydent = syd
         self.random = random.SystemRandom()
+        self.require_auth = require_auth
 
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
 
-        authIfV2(self.sydent, request)
+        if self.require_auth:
+            authV2(self.sydent, request)
 
         args = get_args(request, ("medium", "address", "room_id", "sender",))
         medium = args["medium"]
