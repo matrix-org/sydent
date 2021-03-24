@@ -47,9 +47,9 @@ class RegisterServlet(Resource):
 
         args = get_args(request, ('matrix_server_name', 'access_token'))
 
-        hostname = args['matrix_server_name'].lower()
+        matrix_server = args['matrix_server_name'].lower()
 
-        if not is_valid_hostname(hostname):
+        if not is_valid_hostname(matrix_server):
             request.setResponseCode(400)
             return {
                 'errcode': 'M_INVALID_PARAM',
@@ -59,15 +59,50 @@ class RegisterServlet(Resource):
         result = yield self.client.get_json(
             "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
             % (
-                hostname,
+                matrix_server,
                 urllib.parse.quote(args['access_token']),
             ),
             1024 * 5,
         )
+
         if 'sub' not in result:
             raise Exception("Invalid response from homeserver")
 
         user_id = result['sub']
+
+        if not isinstance(user_id, str):
+            request.setResponseCode(500)
+            return {
+                'errcode': 'M_UNKNOWN',
+                'error': 'The Matrix homeserver returned a malformed reply'
+            }
+
+        user_id_components = user_id.split(':', 1)
+
+        # Ensure there's a localpart and domain in the returned user ID.
+        if len(user_id_components) != 2:
+            request.setResponseCode(500)
+            return {
+                'errcode': 'M_UNKNOWN',
+                'error': 'The Matrix homeserver returned an invalid MXID'
+            }
+
+        user_id_server = user_id_components[1]
+
+        if not is_valid_hostname(user_id_server):
+            request.setResponseCode(500)
+            return {
+                'errcode': 'M_UNKNOWN',
+                'error': 'The Matrix homeserver returned an invalid MXID'
+            }
+
+        if user_id_server != matrix_server:
+            request.setResponseCode(500)
+            return {
+                'errcode': 'M_UNKNOWN',
+                'error': 'The Matrix homeserver returned a MXID belonging to another homeserver'
+            }
+
         tok = yield issueToken(self.sydent, user_id)
 
         # XXX: `token` is correct for the spec, but we released with `access_token`
