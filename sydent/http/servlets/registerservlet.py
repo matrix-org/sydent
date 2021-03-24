@@ -25,7 +25,7 @@ from six.moves import urllib
 from sydent.http.servlets import get_args, jsonwrap, deferjsonwrap, send_cors
 from sydent.http.httpclient import FederationHttpClient
 from sydent.users.tokens import issueToken
-
+from sydent.util.stringutils import is_valid_hostname
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +47,20 @@ class RegisterServlet(Resource):
 
         args = get_args(request, ('matrix_server_name', 'access_token'))
 
+        hostname = args['matrix_server_name'].lower()
+
+        if not is_valid_hostname(hostname):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'matrix_server_name must be a valid hostname'
+            }
+
         result = yield self.client.get_json(
-            "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s" % (
-                args['matrix_server_name'], urllib.parse.quote(args['access_token']),
+            "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
+            % (
+                hostname,
+                urllib.parse.quote(args['access_token']),
             ),
             1024 * 5,
         )
