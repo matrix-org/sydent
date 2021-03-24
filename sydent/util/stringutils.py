@@ -63,7 +63,7 @@ def is_valid_hostname(string: str) -> bool:
             port_num = int(port)
             valid_port = (
                 port == str(port_num)  # exclude things like '08090' or ' 8090'
-                and 1 <= port_num < 65536
+                and 1 <= port_num < 65536)
         except ValueError:
             valid_port = False
 
