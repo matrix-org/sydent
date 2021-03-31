@@ -25,6 +25,7 @@ import signedjson.key
 from signedjson.sign import SignatureVerifyException
 
 from sydent.http.httpclient import FederationHttpClient
+from sydent.util.stringutils import is_valid_hostname
 
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,13 @@ logger = logging.getLogger(__name__)
 class NoAuthenticationError(Exception):
     """
     Raised when no signature is provided that could be authenticated
+    """
+    pass
+
+
+class InvalidServerName(Exception):
+    """
+    Raised when the provided origin parameter is not a valid hostname (plus optional port).
     """
     pass
 
@@ -196,6 +204,9 @@ class Verifier(object):
 
         if not json_request["signatures"]:
             raise NoAuthenticationError("Missing X-Matrix Authorization header")
+
+        if not is_valid_hostname(json_request["origin"]):
+            raise InvalidServerName("X-Matrix header's origin parameter must be a valid hostname")
 
         yield self.verifyServerSignedJson(json_request, [origin])
 
