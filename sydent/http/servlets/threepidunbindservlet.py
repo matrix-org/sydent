@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import json
 import logging
 
-from sydent.hs_federation.verifier import NoAuthenticationError
+from sydent.hs_federation.verifier import NoAuthenticationError, InvalidServerName
 from signedjson.sign import SignatureVerifyException
 
 from sydent.http.servlets import dict_to_json_bytes
@@ -81,7 +81,7 @@ class ThreePidUnbindServlet(Resource):
             # and "client_secret" fields, they are trying to prove that they
             # were the original author of the bind. We then check that what
             # they supply matches and if it does, allow the unbind.
-            # 
+            #
             # However if these fields are not supplied, we instead check
             # whether the request originated from a homeserver, and if so the
             # same homeserver that originally created the bind. We do this by
@@ -121,7 +121,7 @@ class ThreePidUnbindServlet(Resource):
                         'error': "This validation session has not yet been completed"
                     }))
                     return
-                
+
                 if s.medium != threepid['medium'] or s.address != threepid['address']:
                     request.setResponseCode(403)
                     request.write(dict_to_json_bytes({
@@ -143,7 +143,12 @@ class ThreePidUnbindServlet(Resource):
                     request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': str(ex)}))
                     request.finish()
                     return
-                except:
+                except InvalidServerName as ex:
+                    request.setResponseCode(400)
+                    request.write(dict_to_json_bytes({'errcode': 'M_INVALID_PARAM', 'error': str(ex)}))
+                    request.finish()
+                    return
+                except Exception:
                     logger.exception("Exception whilst authenticating unbind request")
                     request.setResponseCode(500)
                     request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
