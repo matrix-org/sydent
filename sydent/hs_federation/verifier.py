@@ -78,13 +78,18 @@ class Verifier(object):
 
         client = FederationHttpClient(self.sydent)
         result = yield client.get_json("matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50)
+
         if 'verify_keys' not in result:
             raise SignatureVerifyException("No key found in response")
 
         if 'valid_until_ts' in result:
+            if not isinstance(result['valid_until_ts'], int):
+                raise SignatureVerifyException("Invalid valid_until_ts received, must be an integer")
+
             # Don't cache anything without a valid_until_ts or we wouldn't
             # know when to expire it.
-            logger.info("Got keys for %s: caching until %s", server_name, result['valid_until_ts'])
+
+            logger.info("Got keys for %s: caching until %d", server_name, result['valid_until_ts'])
             self.cache[server_name] = result
 
         defer.returnValue(result['verify_keys'])
