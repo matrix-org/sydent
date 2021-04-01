@@ -24,6 +24,7 @@ from signedjson.sign import SignatureVerifyException
 
 from sydent.http.servlets import dict_to_json_bytes
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.util import json_decoder
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     IncorrectClientSecretException,
@@ -51,7 +52,7 @@ class ThreePidUnbindServlet(Resource):
         try:
             try:
                 # json.loads doesn't allow bytes in Python 3.5
-                body = json.loads(request.content.read().decode("UTF-8"))
+                body = json_decoder.decode(request.content.read().decode("UTF-8"))
             except ValueError:
                 request.setResponseCode(400)
                 request.write(dict_to_json_bytes({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
@@ -81,7 +82,7 @@ class ThreePidUnbindServlet(Resource):
             # and "client_secret" fields, they are trying to prove that they
             # were the original author of the bind. We then check that what
             # they supply matches and if it does, allow the unbind.
-            # 
+            #
             # However if these fields are not supplied, we instead check
             # whether the request originated from a homeserver, and if so the
             # same homeserver that originally created the bind. We do this by
@@ -121,7 +122,7 @@ class ThreePidUnbindServlet(Resource):
                         'error': "This validation session has not yet been completed"
                     }))
                     return
-                
+
                 if s.medium != threepid['medium'] or s.address != threepid['address']:
                     request.setResponseCode(403)
                     request.write(dict_to_json_bytes({
