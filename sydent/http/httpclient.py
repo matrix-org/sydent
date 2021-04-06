@@ -22,8 +22,9 @@ from io import BytesIO
 from twisted.internet import defer
 from twisted.web.client import FileBodyProducer, Agent, readBody
 from twisted.web.http_headers import Headers
-from sydent.http.matrixfederationagent import MatrixFederationAgent
 
+from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
+from sydent.http.matrixfederationagent import MatrixFederationAgent
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 
@@ -116,7 +117,11 @@ class SimpleHttpClient(HTTPClient):
         # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
         # 'like a browser'
         self.agent = Agent(
-            self.sydent.reactor,
+            BlacklistingReactorWrapper(
+                reactor=self.sydent.reactor,
+                ip_whitelist=sydent.ip_whitelist,
+                ip_blacklist=sydent.ip_blacklist,
+            ),
             connectTimeout=15,
         )
 
@@ -127,6 +132,10 @@ class FederationHttpClient(HTTPClient):
     def __init__(self, sydent):
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
-            self.sydent.reactor,
-            ClientTLSOptionsFactory(sydent.cfg),
+            BlacklistingReactorWrapper(
+                reactor=self.sydent.reactor,
+                ip_whitelist=sydent.ip_whitelist,
+                ip_blacklist=sydent.ip_blacklist,
+            ),
+            ClientTLSOptionsFactory(sydent.cfg) if sydent.use_tls_for_federation else None,
         )

@@ -24,6 +24,7 @@ import copy
 import logging
 import logging.handlers
 import os
+from typing import Set
 
 import twisted.internet.reactor
 from twisted.internet import task
@@ -46,6 +47,7 @@ from sydent.hs_federation.verifier import Verifier
 
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
+from sydent.util.ip_range import generate_ip_set, DEFAULT_IP_RANGE_BLACKLIST
 
 from sydent.sign.ed25519 import SydentEd25519
 
@@ -107,6 +109,26 @@ CONFIG_DEFAULTS = {
         # Whether clients and homeservers can register an association using v1 endpoints.
         'enable_v1_associations': 'true',
         'delete_tokens_on_bind': 'true',
+
+        # Prevent outgoing requests from being sent to the following blacklisted
+        # IP address CIDR ranges. If this option is not specified or empty then
+        # it defaults to private IP address ranges.
+        #
+        # The blacklist applies to all outbound requests except replication
+        # requests.
+        #
+        # (0.0.0.0 and :: are always blacklisted, whether or not they are
+        # explicitly listed here, since they correspond to unroutable
+        # addresses.)
+        'ip.blacklist': '',
+
+        # List of IP address CIDR ranges that should be allowed for outbound
+        # requests. This is useful for specifying exceptions to wide-ranging
+        # blacklisted target IP ranges.
+        #
+        # This whitelist overrides `ip.blacklist` and defaults to an empty
+        # list.
+        'ip.whitelist': '',
     },
     'db': {
         'db.file': os.environ.get('SYDENT_DB_PATH', 'sydent.db'),
@@ -183,9 +205,10 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, cfg, reactor=twisted.internet.reactor):
+    def __init__(self, cfg, reactor=twisted.internet.reactor, use_tls_for_federation=True):
         self.reactor = reactor
         self.config_file = get_config_file_path()
+        self.use_tls_for_federation = use_tls_for_federation
 
         self.cfg = cfg
 
@@ -240,6 +263,15 @@ class Sydent:
         self.delete_tokens_on_bind = parse_cfg_bool(
             self.cfg.get("general", "delete_tokens_on_bind")
         )
+
+        ip_blacklist = set_from_comma_sep_string(self.cfg.get("general", "ip.blacklist"))
+        if not ip_blacklist:
+            ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
+
+        ip_whitelist = set_from_comma_sep_string(self.cfg.get("general", "ip.whitelist"))
+
+        self.ip_blacklist = generate_ip_set(ip_blacklist)
+        self.ip_whitelist = generate_ip_set(ip_whitelist)
 
         self.default_web_client_location = self.cfg.get(
             "email", "email.default_web_client_location"
@@ -510,6 +542,12 @@ def get_config_file_path():
 
 def parse_cfg_bool(value):
     return value.lower() == "true"
+
+
+def set_from_comma_sep_string(rawstr: str) -> Set[str]:
+    if rawstr == '':
+        return set()
+    return {x.strip() for x in rawstr.split(',')}
 
 
 def run_gc():
