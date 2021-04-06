@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import time
-
 
 def time_msec():
     """
@@ -25,3 +25,12 @@ def time_msec():
     :rtype: int
     """
     return int(time.time() * 1000)
+
+
+def _reject_invalid_json(val):
+    """Do not allow Infinity, -Infinity, or NaN values in JSON."""
+    raise ValueError("Invalid JSON value: '%s'" % val)
+
+
+# a custom JSON decoder which will reject Python extensions to JSON.
+json_decoder = json.JSONDecoder(parse_constant=_reject_invalid_json)
