@@ -29,6 +29,7 @@ from sydent.http.servlets.authenticated_bind_threepid_servlet import (
 from sydent.http.servlets.authenticated_unbind_threepid_servlet import (
     AuthenticatedUnbindThreePidServlet,
 )
+from sydent.http.httpcommon import SizeLimitingRequest
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +130,7 @@ class ClientApiHttpServer:
         v2.putChild(b'hash_details', self.sydent.servlets.hash_details)
 
         self.factory = Site(root)
+        self.factory.requestFactory = SizeLimitingRequest
         self.factory.displayTracebacks = False
 
     def setup(self):

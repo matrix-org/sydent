@@ -23,8 +23,14 @@ from twisted.internet.protocol import connectionDone
 from twisted.web._newclient import ResponseDone
 from twisted.web.http import PotentialDataLoss
 from twisted.web.iweb import UNKNOWN_LENGTH
+from twisted.web import server
+
 
 logger = logging.getLogger(__name__)
+
+# Arbitrarily limited to 512 KiB.
+MAX_REQUEST_SIZE = 512 * 1024
+
 
 class SslComponents:
     def __init__(self, sydent):
@@ -61,14 +67,13 @@ class SslComponents:
                 fp = open(caCertFilename)
                 caCert = twisted.internet.ssl.Certificate.loadPEM(fp.read())
                 fp.close()
-            except:
+            except Exception:
                 logger.warn("Failed to open CA cert file %s", caCertFilename)
                 raise
             logger.warn("Using custom CA cert file: %s", caCertFilename)
             return twisted.internet._sslverify.OpenSSLCertificateAuthorities([caCert.original])
         else:
             return twisted.internet.ssl.OpenSSLDefaultPaths()
-
 
 
 class BodyExceededMaxSize(Exception):
@@ -123,7 +128,7 @@ class _ReadBodyWithMaxSizeProtocol(protocol.Protocol):
             # discarded anyway.
             self.transport.abortConnection()
 
-    def connectionLost(self, reason = connectionDone) -> None:
+    def connectionLost(self, reason=connectionDone) -> None:
         # If the maximum size was already exceeded, there's nothing to do.
         if self.deferred.called:
             return
@@ -163,3 +168,15 @@ def read_body_with_max_size(response, max_size):
 
     response.deliverBody(_ReadBodyWithMaxSizeProtocol(d, max_size))
     return d
+
+
+class SizeLimitingRequest(server.Request):
+    def handleContentChunk(self, data):
+        if self.content.tell() + len(data) > MAX_REQUEST_SIZE:
+            logger.info(
+                "Aborting connection from %s because the request exceeds maximum size",
+                self.client.host)
+            self.transport.abortConnection()
+            return
+
+        return super().handleContentChunk(data)
