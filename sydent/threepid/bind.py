@@ -32,7 +32,7 @@ from sydent.http.httpclient import FederationHttpClient
 
 from sydent.threepid import ThreepidAssociation
 
-from sydent.util.stringutils import is_valid_hostname
+from sydent.util.stringutils import is_valid_matrix_server_name
 
 from twisted.internet import defer
 
@@ -143,9 +143,9 @@ class ThreepidBinder:
 
         matrix_server = mxid_parts[1]
 
-        if not is_valid_hostname(matrix_server):
+        if not is_valid_matrix_server_name(matrix_server):
             logger.error(
-                "MXID server part '%s' not a valid hostname. Not retrying.",
+                "MXID server part '%s' not a valid Matrix server name. Not retrying.",
                 matrix_server,
             )
             return
@@ -184,7 +184,7 @@ class ThreepidBinder:
                     "Successfully deleted invite for %s from the store",
                     assoc["address"],
                 )
-            except Exception as e:
+            except Exception:
                 logger.exception(
                     "Couldn't remove invite for %s from the store",
                     assoc["address"],

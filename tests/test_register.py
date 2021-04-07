@@ -21,6 +21,7 @@ from tests.utils import make_request, make_sydent
 
 class RegisterTestCase(unittest.TestCase):
     """Tests Sydent's register servlet"""
+
     def setUp(self):
         # Create a new sydent
         self.sydent = make_sydent()
