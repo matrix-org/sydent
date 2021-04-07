@@ -80,4 +80,3 @@ class TermsServlet(Resource):
     def render_OPTIONS(self, request):
         send_cors(request)
         return b''
-
