@@ -27,10 +27,9 @@ from unpaddedbase64 import encode_base64
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 
-from sydent.http.servlets import get_args, send_cors, jsonwrap
+from sydent.http.servlets import get_args, send_cors, jsonwrap, MatrixRestError
 from sydent.http.auth import authV2
 from sydent.util.emailutils import sendEmail
-
 
 class StoreInviteServlet(Resource):
     def __init__(self, syd, require_auth=False):
@@ -42,14 +41,18 @@ class StoreInviteServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        if self.require_auth:
-            authV2(self.sydent, request)
-
         args = get_args(request, ("medium", "address", "room_id", "sender",))
         medium = args["medium"]
         address = args["address"]
         roomId = args["room_id"]
         sender = args["sender"]
+
+        verified_sender = None
+        if self.require_auth:
+            account = authV2(self.sydent, request)
+            verified_sender = sender
+            if account.userId != sender:
+                raise MatrixRestError(403, "M_UNAUTHORIZED", "'sender' doesn't match")
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
         mxid = globalAssocStore.getMxid(medium, address)
@@ -104,9 +107,13 @@ class StoreInviteServlet(Resource):
         for k in extra_substitutions:
             substitutions.setdefault(k, '')
 
+        substitutions["bracketed_verified_sender"] = ""
+        if verified_sender:
+            substitutions["bracketed_verified_sender"] = "(%s) " % (verified_sender,)
+
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
         if substitutions["room_name"] != '':
-            substitutions["bracketed_room_name"] = "(%s)" % substitutions["room_name"]
+            substitutions["bracketed_room_name"] = "(%s) " % substitutions["room_name"]
 
         substitutions["web_client_location"] = self.sydent.default_web_client_location
         if 'org.matrix.web_client_location' in substitutions:
