@@ -4,10 +4,10 @@ To: %(to)s
 Message-ID: %(messageid)s
 Subject: Confirm your email address for Element
 MIME-Version: 1.0
-Content-Type: multipart/alternative; 
-	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+Content-Type: multipart/alternative;
+	boundary="%(multipart_boundary)s"
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+--%(multipart_boundary)s
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
@@ -51,12 +51,7 @@ decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
-Content-Type: multipart/related;
-	boundary="M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR";
-	type="text/html"
-
---M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR
+--%(multipart_boundary)s
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -171,6 +166,5 @@ pre, code {
         </table>
     </body>
 </html>
---M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--
+--%(multipart_boundary)s--

@@ -34,6 +34,7 @@ else:
 import email.utils
 
 from sydent.util import time_msec
+from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,10 @@ def sendEmail(sydent, templateFile, mailTo, substitutions):
         allSubstitutions[k] = v
         allSubstitutions[k+"_forhtml"] = escape(v)
         allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
+
+    # We add randomize the multipart boundary to stop user input from
+    # conflicting with it.
+    allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
 
     mailString = open(templateFile).read() % allSubstitutions
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
