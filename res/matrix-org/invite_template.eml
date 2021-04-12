@@ -64,7 +64,7 @@ pre, code {
     padding: 20px;
 }
 
-#low-contrast {
+.low-contrast {
     color: #666666
 }
 
