@@ -17,7 +17,7 @@ from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
-from sydent.util.stringutils import is_valid_client_secret
+from sydent.util.stringutils import is_valid_client_secret, MAX_EMAIL_ADDRESS_LENGTH
 from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.validators import (
     IncorrectClientSecretException,
@@ -56,6 +56,13 @@ class EmailRequestCodeServlet(Resource):
             return {
                 'errcode': 'M_INVALID_PARAM',
                 'error': 'Invalid client_secret provided'
+            }
+
+        if not (0 < len(email) <= MAX_EMAIL_ADDRESS_LENGTH):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid email provided'
             }
 
         ipaddress = self.sydent.ip_from_request(request)

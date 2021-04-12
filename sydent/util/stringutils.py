@@ -18,13 +18,22 @@ from typing import Optional, Tuple
 from twisted.internet.abstract import isIPAddress, isIPv6Address
 
 # https://matrix.org/docs/spec/client_server/r0.6.0#post-matrix-client-r0-register-email-requesttoken
-client_secret_regex = re.compile(r"^[0-9a-zA-Z\.\=\_\-]+$")
+CLIENT_SECRET_REGEX = re.compile(r"^[0-9a-zA-Z\.=_\-]+$")
 
 # hostname/domain name
 # https://regex101.com/r/OyN1lg/2
 hostname_regex = re.compile(
     r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$",
     flags=re.IGNORECASE)
+
+# it's unclear what the maximum length of an email address is. RFC3696 (as corrected
+# by errata) says:
+#    the upper limit on address lengths should normally be considered to be 254.
+#
+# In practice, mail servers appear to be more tolerant and allow 400 characters
+# or so. Let's allow 500, which should be plenty for everyone.
+#
+MAX_EMAIL_ADDRESS_LENGTH = 500
 
 
 def is_valid_client_secret(client_secret):
@@ -36,7 +45,10 @@ def is_valid_client_secret(client_secret):
     :return: Whether the client_secret is valid
     :rtype: bool
     """
-    return client_secret_regex.match(client_secret) is not None
+    return (
+        0 < len(client_secret) <= 255
+        and CLIENT_SECRET_REGEX.match(client_secret) is not None
+    )
 
 
 def is_valid_hostname(string: str) -> bool:
