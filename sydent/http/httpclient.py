@@ -27,6 +27,7 @@ from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
 from sydent.http.matrixfederationagent import MatrixFederationAgent
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
+from sydent.util import json_decoder
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class HTTPClient(object):
         body = yield read_body_with_max_size(response, max_size)
         try:
             # json.loads doesn't allow bytes in Python 3.5
-            json_body = json.loads(body.decode("UTF-8"))
+            json_body = json_decoder.decode(body.decode("UTF-8"))
         except Exception as e:
             logger.exception("Error parsing JSON from %s", uri)
             raise

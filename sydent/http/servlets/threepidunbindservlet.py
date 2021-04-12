@@ -24,6 +24,7 @@ from signedjson.sign import SignatureVerifyException
 
 from sydent.http.servlets import dict_to_json_bytes
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.util import json_decoder
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     IncorrectClientSecretException,
@@ -51,7 +52,7 @@ class ThreePidUnbindServlet(Resource):
         try:
             try:
                 # json.loads doesn't allow bytes in Python 3.5
-                body = json.loads(request.content.read().decode("UTF-8"))
+                body = json_decoder.decode(request.content.read().decode("UTF-8"))
             except ValueError:
                 request.setResponseCode(400)
                 request.write(dict_to_json_bytes({'errcode': 'M_BAD_JSON', 'error': 'Malformed JSON'}))
