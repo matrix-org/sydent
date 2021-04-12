@@ -30,6 +30,8 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import get_args, send_cors, jsonwrap, MatrixRestError
 from sydent.http.auth import authV2
 from sydent.util.emailutils import sendEmail
+from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
+
 
 class StoreInviteServlet(Resource):
     def __init__(self, syd, require_auth=False):
@@ -69,6 +71,13 @@ class StoreInviteServlet(Resource):
             return {
                 "errcode": "M_UNRECOGNIZED",
                 "error": "Didn't understand medium '%s'" % (medium,),
+            }
+
+        if not (0 < len(address) <= MAX_EMAIL_ADDRESS_LENGTH):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid email provided'
             }
 
         token = self._randomString(128)
