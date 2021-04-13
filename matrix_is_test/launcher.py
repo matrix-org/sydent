@@ -25,7 +25,6 @@ CFG_TEMPLATE = """
 clientapi.http.bind_address = localhost
 clientapi.http.port = {port}
 client_http_base = http://localhost:{port}
-verify_response_template = {testsubject_path}/res/verify_response_template
 federation.verifycerts = False
 
 [db]
@@ -35,16 +34,16 @@ db.file = :memory:
 server.name = test.local
 terms.path = {terms_path}
 info_path = {info_path}
+templates.path = {testsubject_path}/res
+brand.default = is-test
 
 [email]
 email.tlsmode = 0
-email.template = {testsubject_path}/res/verification_template.eml
 email.invite.subject = %(sender_display_name)s has invited you to chat
 email.smtphost = localhost
 email.from = Sydent Validation <noreply@localhost>
 email.smtpport = 9925
 email.subject = Your Validation Token
-email.invite_template = {testsubject_path}/res/invite_template.eml
 """
 
 class MatrixIsTestLauncher(object):

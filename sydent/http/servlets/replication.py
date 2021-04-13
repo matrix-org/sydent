@@ -21,6 +21,7 @@ from twisted.web import server
 from twisted.internet import defer
 from sydent.http.servlets import jsonwrap, MatrixRestError
 from sydent.threepid import threePidAssocFromDict
+from sydent.util import json_decoder
 
 from sydent.util.hash import sha256_and_url_safe_base64
 
@@ -87,7 +88,7 @@ class ReplicationPushServlet(Resource):
 
         try:
             # json.loads doesn't allow bytes in Python 3.5
-            inJson = json.loads(request.content.read().decode("UTF-8"))
+            inJson = json_decoder.decode(request.content.read().decode("UTF-8"))
         except ValueError:
             logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
             raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')

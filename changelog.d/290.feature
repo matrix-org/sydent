@@ -1,1 +1,0 @@
-Add a Dockerfile and allow environment variables `SYDENT_SERVER_NAME`, `SYDENT_PID_FILE` and `SYDENT_DB_PATH` to modify default configuration values.

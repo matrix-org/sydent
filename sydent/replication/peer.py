@@ -22,6 +22,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.threepid import threePidAssocFromDict
 from sydent.config import ConfigError
+from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
 from unpaddedbase64 import decode_base64
 
@@ -269,7 +270,7 @@ class RemotePeer(Peer):
         :param updateDeferred: The deferred to call the error callback of.
         :type updateDeferred: twisted.internet.defer.Deferred
         """
-        errObj = json.loads(body.decode("utf8"))
+        errObj = json_decoder.decode(body.decode("utf8"))
         e = RemotePeerError()
         e.errorDict = errObj
         updateDeferred.errback(e)

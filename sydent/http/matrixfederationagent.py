@@ -14,7 +14,6 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import json
 import logging
 import random
 import time
@@ -32,6 +31,7 @@ from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent
 
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
+from sydent.util import json_decoder
 from sydent.util.ttlcache import TTLCache
 
 # period to cache .well-known results for by default
@@ -320,7 +320,7 @@ class MatrixFederationAgent(object):
             if response.code != 200:
                 raise Exception("Non-200 response %s" % (response.code, ))
 
-            parsed_body = json.loads(body.decode('utf-8'))
+            parsed_body = json_decoder.decode(body.decode('utf-8'))
             logger.info("Response from .well-known: %s", parsed_body)
             if not isinstance(parsed_body, dict):
                 raise Exception("not a dict")

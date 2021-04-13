@@ -39,23 +39,22 @@ from sydent.util import time_msec
 logger = logging.getLogger(__name__)
 
 
-def sendEmail(sydent, templateName, mailTo, substitutions):
+def sendEmail(sydent, templateFile, mailTo, substitutions):
     """
     Sends an email with the given parameters.
 
     :param sydent: The Sydent instance to use when building the configuration to send the
         email with.
     :type sydent: sydent.sydent.Sydent
-    :param templateName: The name of the template to use when building the body of the
+    :param templateFile: The filename of the template to use when building the body of the
         email.
-    :type templateName: str
+    :type templateFile: str
     :param mailTo: The email address to send the email to.
     :type mailTo: unicode
     :param substitutions: The substitutions to use with the template.
     :type substitutions: dict[str, str]
     """
     mailFrom = sydent.cfg.get('email', 'email.from')
-    mailTemplateFile = sydent.cfg.get('email', templateName)
 
     myHostname = sydent.cfg.get('email', 'email.hostname')
     if myHostname == '':
@@ -74,17 +73,9 @@ def sendEmail(sydent, templateName, mailTo, substitutions):
     for k, v in substitutions.items():
         allSubstitutions[k] = v
         allSubstitutions[k+"_forhtml"] = escape(v)
-
-        if six.PY2 and isinstance(v, unicode):
-            # urllib.parse.quote doesn't support unicode in Python 2, because at that
-            # time unicode in URLs weren't a thing. So convert the value to ascii and
-            # ignore error so we don't return an error if a parameter (e.g. the room's
-            # name contains ascii).
-            v = v.encode("utf-8", errors="ignore")
-
         allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
 
-    mailString = open(mailTemplateFile, encoding="utf-8").read() % allSubstitutions
+    mailString = open(templateFile, encoding="utf-8").read() % allSubstitutions
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
     if parsedFrom == '' or parsedTo == '':
