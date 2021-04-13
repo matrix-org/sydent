@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from twisted.web.resource import Resource
 
 from sydent.http.servlets import jsonwrap, get_args
-from sydent.http.auth import authIfV2
+from sydent.http.auth import authV2
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
@@ -32,12 +32,14 @@ from sydent.validators import (
 class GetValidated3pidServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd, require_auth=False):
         self.sydent = syd
+        self.require_auth = require_auth
 
     @jsonwrap
     def render_GET(self, request):
-        authIfV2(self.sydent, request)
+        if self.require_auth:
+            authV2(self.sydent, request)
 
         args = get_args(request, ('sid', 'client_secret'))
 

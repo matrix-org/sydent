@@ -24,7 +24,7 @@ import copy
 import logging
 import logging.handlers
 import os
-import re
+from typing import Set
 
 import twisted.internet.reactor
 from twisted.internet import task
@@ -49,6 +49,7 @@ from sydent.hs_federation.verifier import Verifier
 
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
+from sydent.util.ip_range import generate_ip_set, DEFAULT_IP_RANGE_BLACKLIST
 
 from sydent.sign.ed25519 import SydentEd25519
 
@@ -83,13 +84,6 @@ from sydent.threepid.bind import ThreepidBinder
 from sydent.replication.pusher import Pusher
 
 logger = logging.getLogger(__name__)
-
-
-def set_from_comma_sep_string(rawstr):
-    if rawstr == '':
-        return set()
-    return {x.strip() for x in rawstr.split(',')}
-
 
 CONFIG_DEFAULTS = {
     'general': {
@@ -136,6 +130,26 @@ CONFIG_DEFAULTS = {
         # Whether clients and homeservers can register an association using v1 endpoints.
         'enable_v1_associations': 'true',
         'delete_tokens_on_bind': 'true',
+
+        # Prevent outgoing requests from being sent to the following blacklisted
+        # IP address CIDR ranges. If this option is not specified or empty then
+        # it defaults to private IP address ranges.
+        #
+        # The blacklist applies to all outbound requests except replication
+        # requests.
+        #
+        # (0.0.0.0 and :: are always blacklisted, whether or not they are
+        # explicitly listed here, since they correspond to unroutable
+        # addresses.)
+        'ip.blacklist': '',
+
+        # List of IP address CIDR ranges that should be allowed for outbound
+        # requests. This is useful for specifying exceptions to wide-ranging
+        # blacklisted target IP ranges.
+        #
+        # This whitelist overrides `ip.blacklist` and defaults to an empty
+        # list.
+        'ip.whitelist': '',
     },
     'db': {
         'db.file': os.environ.get('SYDENT_DB_PATH', 'sydent.db'),
@@ -245,9 +259,10 @@ CONFIG_DEFAULTS = {
 
 
 class Sydent:
-    def __init__(self, cfg, reactor=twisted.internet.reactor):
+    def __init__(self, cfg, reactor=twisted.internet.reactor, use_tls_for_federation=True):
         self.reactor = reactor
         self.config_file = get_config_file_path()
+        self.use_tls_for_federation = use_tls_for_federation
 
         self.cfg = cfg
 
@@ -328,6 +343,15 @@ class Sydent:
             self.cfg.get("general", "delete_tokens_on_bind")
         )
 
+        ip_blacklist = set_from_comma_sep_string(self.cfg.get("general", "ip.blacklist"))
+        if not ip_blacklist:
+            ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
+
+        ip_whitelist = set_from_comma_sep_string(self.cfg.get("general", "ip.whitelist"))
+
+        self.ip_blacklist = generate_ip_set(ip_blacklist)
+        self.ip_whitelist = generate_ip_set(ip_whitelist)
+
         self.username_reveal_characters = int(self.cfg.get(
             "email", "email.third_party_invite_username_reveal_characters"
         ))
@@ -400,9 +424,13 @@ class Sydent:
         self.servlets.v1 = V1Servlet(self)
         self.servlets.v2 = V2Servlet(self)
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
+        self.servlets.emailRequestCodeV2 = EmailRequestCodeServlet(self, require_auth=True)
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
+        self.servlets.emailValidateV2 = EmailValidateCodeServlet(self, require_auth=True)
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
+        self.servlets.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(self, require_auth=True)
         self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
+        self.servlets.msisdnValidateV2 = MsisdnValidateCodeServlet(self, require_auth=True)
         self.servlets.lookup = LookupServlet(self)
         self.servlets.bulk_lookup = BulkLookupServlet(self)
         self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
@@ -411,11 +439,15 @@ class Sydent:
         self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
         self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
         self.servlets.threepidBind = ThreePidBindServlet(self)
+        self.servlets.threepidBindV2 = ThreePidBindServlet(self, require_auth=True)
         self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
+        self.servlets.getValidated3pidV2 = GetValidated3pidServlet(self, require_auth=True)
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
+        self.servlets.storeInviteServletV2 = StoreInviteServlet(self, require_auth=True)
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
+        self.servlets.blindlySignStuffServletV2 = BlindlySignStuffServlet(self, require_auth=True)
         self.servlets.profileReplicationServlet = ProfileReplicationServlet(self)
         self.servlets.userDirectorySearchServlet = UserDirectorySearchServlet(self)
         self.servlets.termsServlet = TermsServlet(self)
@@ -655,6 +687,12 @@ def get_config_file_path():
 
 def parse_cfg_bool(value):
     return value.lower() == "true"
+
+
+def set_from_comma_sep_string(rawstr: str) -> Set[str]:
+    if rawstr == '':
+        return set()
+    return {x.strip() for x in rawstr.split(',')}
 
 
 def run_gc():

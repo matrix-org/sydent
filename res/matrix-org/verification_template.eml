@@ -4,10 +4,10 @@ To: %(to)s
 Message-ID: %(messageid)s
 Subject: Confirm your email address for Matrix
 MIME-Version: 1.0
-Content-Type: multipart/alternative; 
-	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+Content-Type: multipart/alternative;
+	boundary="%(multipart_boundary)s"
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+--%(multipart_boundary)s
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
@@ -35,7 +35,7 @@ Matrix defines the standard, and provides open source reference implementations 
 Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
 create new communication solutions or extend the capabilities and reach of existing ones.
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+--%(multipart_boundary)s
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -85,4 +85,4 @@ create new communication solutions or extend the capabilities and reach of exist
 </body>
 </html>
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--
+--%(multipart_boundary)s--

@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import json
 import logging
 
-from sydent.hs_federation.verifier import NoAuthenticationError
+from sydent.hs_federation.verifier import NoAuthenticationError, InvalidServerName
 from signedjson.sign import SignatureVerifyException
 
 from sydent.http.servlets import dict_to_json_bytes
@@ -144,7 +144,12 @@ class ThreePidUnbindServlet(Resource):
                     request.write(dict_to_json_bytes({'errcode': 'M_FORBIDDEN', 'error': str(ex)}))
                     request.finish()
                     return
-                except:
+                except InvalidServerName as ex:
+                    request.setResponseCode(400)
+                    request.write(dict_to_json_bytes({'errcode': 'M_INVALID_PARAM', 'error': str(ex)}))
+                    request.finish()
+                    return
+                except Exception:
                     logger.exception("Exception whilst authenticating unbind request")
                     request.setResponseCode(500)
                     request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
