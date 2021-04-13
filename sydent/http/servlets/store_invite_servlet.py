@@ -19,7 +19,6 @@ from __future__ import absolute_import
 import nacl.signing
 import random
 import string
-import time
 from email.header import Header
 
 from six import string_types
@@ -81,33 +80,48 @@ class StoreInviteServlet(Resource):
         tokenStore.storeEphemeralPublicKey(ephemeralPublicKeyBase64)
         tokenStore.storeToken(medium, address, roomId, sender, token)
 
+        # Variables to substitute in the template.
         substitutions = {}
+        # Include all arguments sent via the request.
         for k, v in args.items():
             if isinstance(v, string_types):
                 substitutions[k] = v
         substitutions["token"] = token
 
-        required = [
+        # Substitutions that the template requires, but are optional to provide
+        # to the API.
+        extra_substitutions = [
             'sender_display_name',
             'token',
             'room_name',
             'bracketed_room_name',
             'room_avatar_url',
-            'sender_display_name',
+            'sender_avatar_url',
             'guest_user_id',
             'guest_access_token',
         ]
-        for k in required:
+        for k in extra_substitutions:
             substitutions.setdefault(k, '')
 
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
         if substitutions["room_name"] != '':
             substitutions["bracketed_room_name"] = "(%s)" % substitutions["room_name"]
 
+        substitutions["web_client_location"] = self.sydent.default_web_client_location
+        if 'org.matrix.web_client_location' in substitutions:
+            substitutions["web_client_location"] = substitutions.pop("org.matrix.web_client_location")
+
         subject_header = Header(self.sydent.cfg.get('email', 'email.invite.subject', raw=True) % substitutions, 'utf8')
         substitutions["subject_header_value"] = subject_header.encode()
 
-        sendEmail(self.sydent, "email.invite_template", address, substitutions)
+        brand = self.sydent.brand_from_request(request)
+        templateFile = self.sydent.get_branded_template(
+            brand,
+            "invite_template.eml",
+            ('email', 'email.invite_template'),
+        )
+
+        sendEmail(self.sydent, templateFile, address, substitutions)
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())

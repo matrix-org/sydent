@@ -1,0 +1,1 @@
+Fix a regression in v2.2.0 where the wrong characters would be obfuscated in a 3pid invite.
