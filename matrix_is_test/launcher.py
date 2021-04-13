@@ -36,6 +36,9 @@ terms.path = {terms_path}
 templates.path = {testsubject_path}/res
 brand.default = is-test
 
+
+ip.whitelist = 127.0.0.1
+
 [email]
 email.tlsmode = 0
 email.invite.subject = %(sender_display_name)s has invited you to chat

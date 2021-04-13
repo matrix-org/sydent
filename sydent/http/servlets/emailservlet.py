@@ -17,7 +17,7 @@ from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
-from sydent.util.stringutils import is_valid_client_secret
+from sydent.util.stringutils import is_valid_client_secret, MAX_EMAIL_ADDRESS_LENGTH
 from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.validators import (
     IncorrectClientSecretException,
@@ -28,20 +28,22 @@ from sydent.validators import (
 
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
-from sydent.http.auth import authIfV2
+from sydent.http.auth import authV2
 
 
 class EmailRequestCodeServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd, require_auth=False):
         self.sydent = syd
+        self.require_auth = require_auth
 
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
 
-        authIfV2(self.sydent, request)
+        if self.require_auth:
+            authV2(self.sydent, request)
 
         args = get_args(request, ('email', 'client_secret', 'send_attempt'))
 
@@ -54,6 +56,13 @@ class EmailRequestCodeServlet(Resource):
             return {
                 'errcode': 'M_INVALID_PARAM',
                 'error': 'Invalid client_secret provided'
+            }
+
+        if not (0 < len(email) <= MAX_EMAIL_ADDRESS_LENGTH):
+            request.setResponseCode(400)
+            return {
+                'errcode': 'M_INVALID_PARAM',
+                'error': 'Invalid email provided'
             }
 
         ipaddress = self.sydent.ip_from_request(request)
@@ -83,8 +92,9 @@ class EmailRequestCodeServlet(Resource):
 class EmailValidateCodeServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd, require_auth=False):
         self.sydent = syd
+        self.require_auth = require_auth
 
     def render_GET(self, request):
         args = get_args(request, ('nextLink',), required=False)
@@ -119,7 +129,8 @@ class EmailValidateCodeServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        authIfV2(self.sydent, request)
+        if self.require_auth:
+            authV2(self.sydent, request)
 
         return self.do_validate_request(request)
 

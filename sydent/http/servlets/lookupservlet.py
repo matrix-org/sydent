@@ -20,11 +20,10 @@ from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
 
 import logging
-import json
 import signedjson.sign
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
-from sydent.http.auth import authIfV2
+from sydent.util import json_decoder
 
 
 logger = logging.getLogger(__name__)
@@ -42,14 +41,12 @@ class LookupServlet(Resource):
         Look up an individual threepid.
 
         ** DEPRECATED **
-        
+
         Params: 'medium': the medium of the threepid
                 'address': the address of the threepid
         Returns: A signed association if the threepid has a corresponding mxid, otherwise the empty object.
         """
         send_cors(request)
-
-        authIfV2(self.sydent, request)
 
         args = get_args(request, ('medium', 'address'))
 
@@ -63,7 +60,7 @@ class LookupServlet(Resource):
         if not sgassoc:
             return {}
 
-        sgassoc = json.loads(sgassoc)
+        sgassoc = json_decoder.decode(sgassoc)
         if not self.sydent.server_name in sgassoc['signatures']:
             # We have not yet worked out what the proper trust model should be.
             #

@@ -32,6 +32,8 @@ from sydent.http.httpclient import FederationHttpClient
 
 from sydent.threepid import ThreepidAssociation
 
+from sydent.util.stringutils import is_valid_matrix_server_name
+
 from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
@@ -131,6 +133,7 @@ class ThreepidBinder:
         """
         mxid = assoc["mxid"]
         mxid_parts = mxid.split(":", 1)
+
         if len(mxid_parts) != 2:
             logger.error(
                 "Can't notify on bind for unparseable mxid %s. Not retrying.",
@@ -138,8 +141,17 @@ class ThreepidBinder:
             )
             return
 
+        matrix_server = mxid_parts[1]
+
+        if not is_valid_matrix_server_name(matrix_server):
+            logger.error(
+                "MXID server part '%s' not a valid Matrix server name. Not retrying.",
+                matrix_server,
+            )
+            return
+
         post_url = "matrix://%s/_matrix/federation/v1/3pid/onbind" % (
-            mxid_parts[1],
+            matrix_server,
         )
 
         logger.info("Making bind callback to: %s", post_url)
@@ -172,7 +184,7 @@ class ThreepidBinder:
                     "Successfully deleted invite for %s from the store",
                     assoc["address"],
                 )
-            except Exception as e:
+            except Exception:
                 logger.exception(
                     "Couldn't remove invite for %s from the store",
                     assoc["address"],

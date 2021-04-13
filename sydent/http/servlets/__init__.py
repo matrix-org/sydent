@@ -22,6 +22,7 @@ import functools
 from twisted.internet import defer
 from twisted.web import server
 
+from sydent.util import json_decoder
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ def get_args(request, args, required=True):
     ):
         try:
             # json.loads doesn't allow bytes in Python 3.5
-            request_args = json.loads(request.content.read().decode("UTF-8"))
+            request_args = json_decoder.decode(request.content.read().decode("UTF-8"))
         except ValueError:
             raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
 
