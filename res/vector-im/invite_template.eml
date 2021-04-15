@@ -4,17 +4,18 @@ To: %(to)s
 Message-ID: %(messageid)s
 Subject: %(subject_header_value)s
 MIME-Version: 1.0
-Content-Type: multipart/alternative; 
-	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+Content-Type: multipart/alternative;
+	boundary="%(multipart_boundary)s"
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+--%(multipart_boundary)s
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
 Hi,
 
-%(sender_display_name)s has invited you into a room %(bracketed_room_name)s on
-Element. To join the conversation please follow the link below.
+%(sender_display_name)s %(bracketed_verified_sender)shas invited you into a room
+%(bracketed_room_name)son Element. To join the conversation please follow the
+link below.
 
 %(web_client_location)/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s
 
@@ -51,12 +52,7 @@ decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
-Content-Type: multipart/related;
-	boundary="M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR";
-	type="text/html"
-
---M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR
+--%(multipart_boundary)s
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -79,6 +75,10 @@ pre, code {
     font-size: 12pt;
     width: 100%%;
     padding: 20px;
+}
+
+.low-contrast {
+    color: #666666
 }
 
 #inner {
@@ -123,8 +123,8 @@ pre, code {
 
 <p>Hi,</p>
 
-<p>%(sender_display_name_forhtml)s has invited you into a room %(bracketed_room_name_forhtml)s on
-Element.</p>
+<p>%(sender_display_name_forhtml)s <span class="low-contrast">%(bracketed_verified_sender_forhtml)s</span> has invited you into a
+room %(bracketed_room_name_forhtml)s on Element.</p>
 
 <p>
     <a
@@ -173,6 +173,5 @@ Matrix visit https://matrix.org.</p>
         </table>
     </body>
 </html>
---M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
 
---7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--
+--%(multipart_boundary)s--

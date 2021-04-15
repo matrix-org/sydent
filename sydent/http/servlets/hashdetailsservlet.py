@@ -16,7 +16,7 @@
 from __future__ import absolute_import
 
 from twisted.web.resource import Resource
-from sydent.http.auth import authIfV2
+from sydent.http.auth import authV2
 
 import logging
 
@@ -48,7 +48,7 @@ class HashDetailsServlet(Resource):
         """
         send_cors(request)
 
-        authIfV2(self.sydent, request)
+        authV2(self.sydent, request)
 
         return {
             "algorithms": self.known_algorithms,

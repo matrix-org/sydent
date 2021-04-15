@@ -25,6 +25,7 @@ import signedjson.key
 from signedjson.sign import SignatureVerifyException
 
 from sydent.http.httpclient import FederationHttpClient
+from sydent.util.stringutils import is_valid_matrix_server_name
 
 
 logger = logging.getLogger(__name__)
@@ -33,6 +34,13 @@ logger = logging.getLogger(__name__)
 class NoAuthenticationError(Exception):
     """
     Raised when no signature is provided that could be authenticated
+    """
+    pass
+
+
+class InvalidServerName(Exception):
+    """
+    Raised when the provided origin parameter is not a valid hostname (plus optional port).
     """
     pass
 
@@ -69,14 +77,19 @@ class Verifier(object):
                 defer.returnValue(self.cache[server_name]['verify_keys'])
 
         client = FederationHttpClient(self.sydent)
-        result = yield client.get_json("matrix://%s/_matrix/key/v2/server/" % server_name)
+        result = yield client.get_json("matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50)
+
         if 'verify_keys' not in result:
             raise SignatureVerifyException("No key found in response")
 
         if 'valid_until_ts' in result:
+            if not isinstance(result['valid_until_ts'], int):
+                raise SignatureVerifyException("Invalid valid_until_ts received, must be an integer")
+
             # Don't cache anything without a valid_until_ts or we wouldn't
             # know when to expire it.
-            logger.info("Got keys for %s: caching until %s", server_name, result['valid_until_ts'])
+
+            logger.info("Got keys for %s: caching until %d", server_name, result['valid_until_ts'])
             self.cache[server_name] = result
 
         defer.returnValue(result['verify_keys'])
@@ -196,6 +209,9 @@ class Verifier(object):
 
         if not json_request["signatures"]:
             raise NoAuthenticationError("Missing X-Matrix Authorization header")
+
+        if not is_valid_matrix_server_name(json_request["origin"]):
+            raise InvalidServerName("X-Matrix header's origin parameter must be a valid Matrix server name")
 
         yield self.verifyServerSignedJson(json_request, [origin])
 

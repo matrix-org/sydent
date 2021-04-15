@@ -44,7 +44,7 @@ class AuthTestCase(unittest.TestCase):
         self.sydent.db.commit()
 
     def test_can_read_token_from_headers(self):
-        """Tests that Sydent correct extracts an auth token from request headers"""
+        """Tests that Sydent correctly extracts an auth token from request headers"""
         self.sydent.run()
 
         request, _ = make_request(
@@ -59,7 +59,7 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(token, self.test_token)
 
     def test_can_read_token_from_query_parameters(self):
-        """Tests that Sydent correct extracts an auth token from query parameters"""
+        """Tests that Sydent correctly extracts an auth token from query parameters"""
         self.sydent.run()
 
         request, _ = make_request(

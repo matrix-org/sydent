@@ -2,9 +2,19 @@ import json
 from io import BytesIO
 import logging
 import os
-
+from typing import Dict
 import attr
 from six import text_type
+from zope.interface import implementer
+from twisted.internet._resolver import SimpleResolverComplexifier
+from twisted.internet.defer import fail, succeed
+from twisted.internet.error import DNSLookupError
+from twisted.internet.interfaces import (
+    IHostnameResolver,
+    IReactorPluggableNameResolver,
+    IResolverSimple,
+)
+
 from twisted.internet import address
 import twisted.logger
 from twisted.web.http_headers import Headers
@@ -53,13 +63,13 @@ def make_sydent(test_config={}):
     # Use an in-memory SQLite database. Note that the database isn't cleaned up between
     # tests, so by default the same database will be used for each test if changed to be
     # a file on disk.
-    if 'db' not in test_config:
-        test_config['db'] = {'db.file': ':memory:'}
+    if "db" not in test_config:
+        test_config["db"] = {"db.file": ":memory:"}
     else:
-        test_config['db'].setdefault('db.file', ':memory:')
+        test_config["db"].setdefault("db.file", ":memory:")
 
-    reactor = MemoryReactorClock()
-    return Sydent(reactor=reactor, cfg=parse_config_dict(test_config))
+    reactor = ResolvingMemoryReactorClock()
+    return Sydent(reactor=reactor, cfg=parse_config_dict(test_config), use_tls_for_federation=False)
 
 
 @attr.s
@@ -149,6 +159,7 @@ class FakeChannel(object):
 
 class FakeSite:
     """A fake Twisted Web Site."""
+
     pass
 
 
@@ -191,10 +202,7 @@ def make_request(
         path = path.encode("ascii")
 
     # Decorate it to be the full path, if we're using shorthand
-    if (
-        shorthand
-        and not path.startswith(b"/_matrix")
-    ):
+    if shorthand and not path.startswith(b"/_matrix"):
         path = b"/_matrix/identity/v2/" + path
         path = path.replace(b"//", b"/")
 
@@ -253,10 +261,7 @@ def setup_logging():
     """
     root_logger = logging.getLogger()
 
-    log_format = (
-        "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
-        " - %(message)s"
-    )
+    log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
 
     handler = ToTwistedHandler()
     formatter = logging.Formatter(log_format)
@@ -268,3 +273,26 @@ def setup_logging():
 
 
 setup_logging()
+
+
+@implementer(IReactorPluggableNameResolver)
+class ResolvingMemoryReactorClock(MemoryReactorClock):
+    """
+    A MemoryReactorClock that supports name resolution.
+    """
+
+    def __init__(self):
+        lookups = self.lookups = {}  # type: Dict[str, str]
+
+        @implementer(IResolverSimple)
+        class FakeResolver:
+            def getHostByName(self, name, timeout=None):
+                if name not in lookups:
+                    return fail(DNSLookupError("OH NO: unknown %s" % (name,)))
+                return succeed(lookups[name])
+
+        self.nameResolver = SimpleResolverComplexifier(FakeResolver())
+        super().__init__()
+
+    def installNameResolver(self, resolver: IHostnameResolver) -> IHostnameResolver:
+        raise NotImplementedError()
