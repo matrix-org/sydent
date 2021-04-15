@@ -1,20 +1,55 @@
-Sydent 2.3.0 (unreleased)
+Sydent 2.3.0 (2021-04-15)
 =========================
 
-Bug fixes
----------
+**Note**: this will be the last release of Sydent to support Python 3.5 or ealier. Future releases will require at least Python 3.6.
+
+Security advisory
+-----------------
+
+This release contains fixes to the following security issues:
+
+- Denial of service attack via disk space or memory exhaustion ([CVE-2021-29430](https://cve.mitre.org/cgi-bin/cvename.cgi?name=2021-29430)).
+- SSRF due to missing validation of hostnames ([CVE-2021-29431](https://cve.mitre.org/cgi-bin/cvename.cgi?name=2021-29431)).
+- Malicious users could control the content of invitation emails ([CVE-2021-29432](https://cve.mitre.org/cgi-bin/cvename.cgi?name=2021-29432)).
+- Denial of service (via resource exhaustion) due to improper input validation ([CVE-2021-29433](https://cve.mitre.org/cgi-bin/cvename.cgi?name=2021-29433)).
+
+Although we are not aware of these vulnerabilities being exploited in the wild, Sydent server adminstrators are advised to update as soon as possible. Note that as well as changes to the package, there are also changes to the default email templates. If any templates have been updated locally, they must also be updated in line with the changes to the defaults for full protection from CVE-2021-29432.
+
+Features
+--------
+
+- Accept an optional `web_client_location` argument to the invite endpoint which allows customisation of the email template. ([\#326](https://github.com/matrix-org/sydent/issues/326))
+- Move templates to a per-brand subdirectory of `/res`. Add `templates.path` and `brand.default` config options ([\#328](https://github.com/matrix-org/sydent/issues/328))
+
+
+Bugfixes
+--------
+
+- Fix a regression in v2.2.0 where the wrong characters would be obfuscated in a 3pid invite. ([\#317](https://github.com/matrix-org/sydent/issues/317))
+- Fix a long-standing bug where invalid JSON would be accepted over the HTTP interfaces. ([\#337](https://github.com/matrix-org/sydent/issues/337))
 - During user registration on the identity server, validate that the MXID returned by the contacted homeserver is valid for that homeserver. ([cc97fff](https://github.com/matrix-org/sydent/commit/cc97fff))
 - Ensure that `/v2/` endponts are correctly authenticated. ([ce04a68](https://github.com/matrix-org/sydent/commit/ce04a68))
 - Perform additional validation on the response received when requesting server signing keys. ([07e6da7](https://github.com/matrix-org/sydent/commit/07e6da7))
-
-Security fixes
---------------
-
 - Validate the `matrix_server_name` parameter given during user registration. ([9e57334](https://github.com/matrix-org/sydent/commit/9e57334), [8936925](https://github.com/matrix-org/sydent/commit/8936925), [3d531ed](https://github.com/matrix-org/sydent/commit/3d531ed), [0f00412](https://github.com/matrix-org/sydent/commit/0f00412))
 - Limit the size of requests received from HTTP clients. ([89071a1](https://github.com/matrix-org/sydent/commit/89071a1), [0523511](https://github.com/matrix-org/sydent/commit/0523511), [f56eee3](https://github.com/matrix-org/sydent/commit/f56eee3))
 - Limit the size of responses received from HTTP servers. ([89071a1](https://github.com/matrix-org/sydent/commit/89071a1), [0523511](https://github.com/matrix-org/sydent/commit/0523511), [f56eee3](https://github.com/matrix-org/sydent/commit/f56eee3))
 - In invite emails, randomise the multipart boundary, and include MXIDs where available. ([4469d1d](https://github.com/matrix-org/sydent/commit/4469d1d), [6b405a8](https://github.com/matrix-org/sydent/commit/6b405a8), [65a6e91](https://github.com/matrix-org/sydent/commit/65a6e91))
 - Perform additional validation on the `client_secret` and `email` parameters to various APIs. ([3175fd3](https://github.com/matrix-org/sydent/commit/3175fd3))
+
+
+Updates to the Docker image
+---------------------------
+
+- Base docker image on Debian rather than Alpine Linux. ([\#335](https://github.com/matrix-org/sydent/issues/335))
+
+
+Internal Changes
+----------------
+
+- Fix test logging to allow braces in log output. ([\#318](https://github.com/matrix-org/sydent/issues/318))
+- Install prometheus_client in the Docker image. ([\#325](https://github.com/matrix-org/sydent/issues/325))
+- Bump the version of signedjson to 1.1.1. ([\#334](https://github.com/matrix-org/sydent/issues/334))
+
 
 Sydent 2.2.0 (2020-09-11)
 =========================
