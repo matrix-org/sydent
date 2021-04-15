@@ -1,7 +1,7 @@
 Sydent 2.3.0 (2021-04-15)
 =========================
 
-**Note**: this will be the last release of Sydent to support Python 3.5 or ealier. Future releases will require at least Python 3.6.
+**Note**: this will be the last release of Sydent to support Python 3.5 or earlier. Future releases will require at least Python 3.6.
 
 Security advisory
 -----------------
@@ -13,7 +13,7 @@ This release contains fixes to the following security issues:
 - Malicious users could control the content of invitation emails ([CVE-2021-29432](https://cve.mitre.org/cgi-bin/cvename.cgi?name=2021-29432)).
 - Denial of service (via resource exhaustion) due to improper input validation ([CVE-2021-29433](https://cve.mitre.org/cgi-bin/cvename.cgi?name=2021-29433)).
 
-Although we are not aware of these vulnerabilities being exploited in the wild, Sydent server adminstrators are advised to update as soon as possible. Note that as well as changes to the package, there are also changes to the default email templates. If any templates have been updated locally, they must also be updated in line with the changes to the defaults for full protection from CVE-2021-29432.
+Although we are not aware of these vulnerabilities being exploited in the wild, Sydent server administrators are advised to update as soon as possible. Note that as well as changes to the package, there are also changes to the default email templates. If any templates have been updated locally, they must also be updated in line with the changes to the defaults for full protection from CVE-2021-29432.
 
 Features
 --------
