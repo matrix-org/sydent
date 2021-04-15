@@ -19,7 +19,7 @@ Features
 --------
 
 - Accept an optional `web_client_location` argument to the invite endpoint which allows customisation of the email template. ([\#326](https://github.com/matrix-org/sydent/issues/326))
-- Move templates to a per-brand subdirectory of `/res`. Add `templates.path` and `brand.default` config options ([\#328](https://github.com/matrix-org/sydent/issues/328))
+- Move templates to a per-brand subdirectory of `/res`. Add `templates.path` and `brand.default` config options. ([\#328](https://github.com/matrix-org/sydent/issues/328))
 
 
 Bugfixes
@@ -28,7 +28,7 @@ Bugfixes
 - Fix a regression in v2.2.0 where the wrong characters would be obfuscated in a 3pid invite. ([\#317](https://github.com/matrix-org/sydent/issues/317))
 - Fix a long-standing bug where invalid JSON would be accepted over the HTTP interfaces. ([\#337](https://github.com/matrix-org/sydent/issues/337))
 - During user registration on the identity server, validate that the MXID returned by the contacted homeserver is valid for that homeserver. ([cc97fff](https://github.com/matrix-org/sydent/commit/cc97fff))
-- Ensure that `/v2/` endponts are correctly authenticated. ([ce04a68](https://github.com/matrix-org/sydent/commit/ce04a68))
+- Ensure that `/v2/` endpoints are correctly authenticated. ([ce04a68](https://github.com/matrix-org/sydent/commit/ce04a68))
 - Perform additional validation on the response received when requesting server signing keys. ([07e6da7](https://github.com/matrix-org/sydent/commit/07e6da7))
 - Validate the `matrix_server_name` parameter given during user registration. ([9e57334](https://github.com/matrix-org/sydent/commit/9e57334), [8936925](https://github.com/matrix-org/sydent/commit/8936925), [3d531ed](https://github.com/matrix-org/sydent/commit/3d531ed), [0f00412](https://github.com/matrix-org/sydent/commit/0f00412))
 - Limit the size of requests received from HTTP clients. ([89071a1](https://github.com/matrix-org/sydent/commit/89071a1), [0523511](https://github.com/matrix-org/sydent/commit/0523511), [f56eee3](https://github.com/matrix-org/sydent/commit/f56eee3))
