@@ -1,0 +1,1 @@
+Handle CORS for GetValidated3pidServlet. Endpoint /3pid/getValidated3pid returns valid CORS headers.
