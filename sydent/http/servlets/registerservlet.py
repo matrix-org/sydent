@@ -45,46 +45,46 @@ class RegisterServlet(Resource):
         """
         send_cors(request)
 
-        args = get_args(request, ('matrix_server_name', 'access_token'))
+        args = get_args(request, ("matrix_server_name", "access_token"))
 
-        matrix_server = args['matrix_server_name'].lower()
+        matrix_server = args["matrix_server_name"].lower()
 
         if not is_valid_matrix_server_name(matrix_server):
             request.setResponseCode(400)
             return {
-                'errcode': 'M_INVALID_PARAM',
-                'error': 'matrix_server_name must be a valid Matrix server name (IP address or hostname)'
+                "errcode": "M_INVALID_PARAM",
+                "error": "matrix_server_name must be a valid Matrix server name (IP address or hostname)",
             }
 
         result = yield self.client.get_json(
             "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
             % (
                 matrix_server,
-                urllib.parse.quote(args['access_token']),
+                urllib.parse.quote(args["access_token"]),
             ),
             1024 * 5,
         )
 
-        if 'sub' not in result:
+        if "sub" not in result:
             raise Exception("Invalid response from homeserver")
 
-        user_id = result['sub']
+        user_id = result["sub"]
 
         if not isinstance(user_id, str):
             request.setResponseCode(500)
             return {
-                'errcode': 'M_UNKNOWN',
-                'error': 'The Matrix homeserver returned a malformed reply'
+                "errcode": "M_UNKNOWN",
+                "error": "The Matrix homeserver returned a malformed reply",
             }
 
-        user_id_components = user_id.split(':', 1)
+        user_id_components = user_id.split(":", 1)
 
         # Ensure there's a localpart and domain in the returned user ID.
         if len(user_id_components) != 2:
             request.setResponseCode(500)
             return {
-                'errcode': 'M_UNKNOWN',
-                'error': 'The Matrix homeserver returned an invalid MXID'
+                "errcode": "M_UNKNOWN",
+                "error": "The Matrix homeserver returned an invalid MXID",
             }
 
         user_id_server = user_id_components[1]
@@ -92,15 +92,15 @@ class RegisterServlet(Resource):
         if not is_valid_matrix_server_name(user_id_server):
             request.setResponseCode(500)
             return {
-                'errcode': 'M_UNKNOWN',
-                'error': 'The Matrix homeserver returned an invalid MXID'
+                "errcode": "M_UNKNOWN",
+                "error": "The Matrix homeserver returned an invalid MXID",
             }
 
         if user_id_server != matrix_server:
             request.setResponseCode(500)
             return {
-                'errcode': 'M_UNKNOWN',
-                'error': 'The Matrix homeserver returned a MXID belonging to another homeserver'
+                "errcode": "M_UNKNOWN",
+                "error": "The Matrix homeserver returned a MXID belonging to another homeserver",
             }
 
         tok = yield issueToken(self.sydent, user_id)
@@ -108,11 +108,13 @@ class RegisterServlet(Resource):
         # XXX: `token` is correct for the spec, but we released with `access_token`
         # for a substantial amount of time. Serve both to make spec-compliant clients
         # happy.
-        defer.returnValue({
-            "access_token": tok,
-            "token": tok,
-        })
+        defer.returnValue(
+            {
+                "access_token": tok,
+                "token": tok,
+            }
+        )
 
     def render_OPTIONS(self, request):
         send_cors(request)
-        return b''
+        return b""

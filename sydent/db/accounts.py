@@ -33,8 +33,11 @@ class AccountStore(object):
         :rtype: Account or None
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("select a.user_id, a.created_ts, a.consent_version from accounts a, tokens t "
-                          "where t.user_id = a.user_id and t.token = ?", (token,))
+        res = cur.execute(
+            "select a.user_id, a.created_ts, a.consent_version from accounts a, tokens t "
+            "where t.user_id = a.user_id and t.token = ?",
+            (token,),
+        )
 
         row = res.fetchone()
         if row is None:

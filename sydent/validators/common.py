@@ -54,14 +54,14 @@ def validateSessionWithToken(sydent, sid, clientSecret, token):
         raise SessionExpiredException()
 
     # TODO once we can validate the token oob
-    #if tokenObj.validated and clientSecret == tokenObj.clientSecret:
+    # if tokenObj.validated and clientSecret == tokenObj.clientSecret:
     #    return True
 
     if s.token == token:
         logger.info("Setting session %s as validated", s.id)
         valSessionStore.setValidated(s.id, True)
 
-        return {'success': True}
+        return {"success": True}
     else:
         logger.info("Incorrect token submitted")
         raise IncorrectSessionTokenException()

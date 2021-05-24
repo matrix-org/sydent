@@ -36,14 +36,14 @@ def tokenFromRequest(request):
     """
     token = None
     # check for Authorization header first
-    authHeader = request.getHeader('Authorization')
-    if authHeader is not None and authHeader.startswith('Bearer '):
-        token = authHeader[len("Bearer "):]
+    authHeader = request.getHeader("Authorization")
+    if authHeader is not None and authHeader.startswith("Bearer "):
+        token = authHeader[len("Bearer ") :]
 
     # no? try access_token query param
     if token is None:
-        args = get_args(request, ('access_token',), required=False)
-        token = args.get('access_token')
+        args = get_args(request, ("access_token",), required=False)
+        token = args.get("access_token")
 
     # Ensure we're dealing with unicode.
     if token and isinstance(token, bytes):
@@ -81,8 +81,8 @@ def authV2(sydent, request, requireTermsAgreed=True):
     if requireTermsAgreed:
         terms = get_terms(sydent)
         if (
-            terms.getMasterVersion() is not None and
-            account.consentVersion != terms.getMasterVersion()
+            terms.getMasterVersion() is not None
+            and account.consentVersion != terms.getMasterVersion()
         ):
             raise MatrixRestError(403, "M_TERMS_NOT_SIGNED", "Terms not signed")
 

@@ -48,10 +48,10 @@ class LookupServlet(Resource):
         """
         send_cors(request)
 
-        args = get_args(request, ('medium', 'address'))
+        args = get_args(request, ("medium", "address"))
 
-        medium = args['medium']
-        address = args['address']
+        medium = args["medium"]
+        address = args["address"]
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
 
@@ -61,7 +61,7 @@ class LookupServlet(Resource):
             return {}
 
         sgassoc = json_decoder.decode(sgassoc)
-        if not self.sydent.server_name in sgassoc['signatures']:
+        if not self.sydent.server_name in sgassoc["signatures"]:
             # We have not yet worked out what the proper trust model should be.
             #
             # Maybe clients implicitly trust a server they talk to (and so we
@@ -80,12 +80,10 @@ class LookupServlet(Resource):
             # replication, so that we can undo this decision in the future if
             # we wish, without having destroyed the raw underlying data.
             sgassoc = signedjson.sign.sign_json(
-                sgassoc,
-                self.sydent.server_name,
-                self.sydent.keyring.ed25519
+                sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519
             )
         return sgassoc
 
     def render_OPTIONS(self, request):
         send_cors(request)
-        return b''
+        return b""

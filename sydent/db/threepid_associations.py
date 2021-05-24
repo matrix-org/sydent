@@ -40,10 +40,20 @@ class LocalAssociationStore:
         cur = self.sydent.db.cursor()
 
         # sqlite's support for upserts is atrocious
-        cur.execute("insert or replace into local_threepid_associations "
-                    "('medium', 'address', 'lookup_hash', 'mxid', 'ts', 'notBefore', 'notAfter')"
-                    " values (?, ?, ?, ?, ?, ?, ?)",
-                    (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after))
+        cur.execute(
+            "insert or replace into local_threepid_associations "
+            "('medium', 'address', 'lookup_hash', 'mxid', 'ts', 'notBefore', 'notAfter')"
+            " values (?, ?, ?, ?, ?, ?, ?)",
+            (
+                assoc.medium,
+                assoc.address,
+                assoc.lookup_hash,
+                assoc.mxid,
+                assoc.ts,
+                assoc.not_before,
+                assoc.not_after,
+            ),
+        )
         self.sydent.db.commit()
 
     def getAssociationsAfterId(self, afterId, limit=None):
@@ -65,9 +75,11 @@ class LocalAssociationStore:
         if afterId is None:
             afterId = -1
 
-        q = "select id, medium, address, lookup_hash, mxid, ts, notBefore, notAfter from " \
-            "local_threepid_associations " \
+        q = (
+            "select id, medium, address, lookup_hash, mxid, ts, notBefore, notAfter from "
+            "local_threepid_associations "
             "where id > ? order by id asc"
+        )
         if limit is not None:
             q += " limit ?"
             res = cur.execute(q, (afterId, limit))
@@ -79,7 +91,9 @@ class LocalAssociationStore:
 
         assocs = {}
         for row in res.fetchall():
-            assoc = ThreepidAssociation(row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+            assoc = ThreepidAssociation(
+                row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+            )
             assocs[row[0]] = assoc
             maxId = row[0]
 
@@ -133,7 +147,7 @@ class LocalAssociationStore:
         cur.execute(
             "SELECT COUNT(*) FROM local_threepid_associations "
             "WHERE medium = ? AND address = ? AND mxid = ?",
-            (threepid['medium'], threepid['address'], mxid)
+            (threepid["medium"], threepid["address"], mxid),
         )
         row = cur.fetchone()
         if row[0] > 0:
@@ -142,17 +156,22 @@ class LocalAssociationStore:
                 "REPLACE INTO local_threepid_associations "
                 "('medium', 'address', 'mxid', 'ts', 'notBefore', 'notAfter') "
                 " values (?, ?, NULL, ?, null, null)",
-                (threepid['medium'], threepid['address'], ts),
+                (threepid["medium"], threepid["address"], ts),
             )
             logger.info(
                 "Deleting local assoc for %s/%s/%s replaced %d rows",
-                threepid['medium'], threepid['address'], mxid, cur.rowcount,
+                threepid["medium"],
+                threepid["address"],
+                mxid,
+                cur.rowcount,
             )
             self.sydent.db.commit()
         else:
             logger.info(
                 "No local assoc found for %s/%s/%s",
-                threepid['medium'], threepid['address'], mxid,
+                threepid["medium"],
+                threepid["address"],
+                mxid,
             )
             # we still consider this successful in the name of idempotency:
             # the binding to be deleted is not there, so we're in the desired state.
@@ -181,10 +200,12 @@ class GlobalAssociationStore:
         # threepids we have currently (we treat the local part of email addresses as
         # case insensitive which is technically incorrect). If we someday get a
         # case-sensitive threepid, this can change.
-        res = cur.execute("select sgAssoc from global_threepid_associations where "
-                    "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
-                    "order by ts desc limit 1",
-                    (medium, address, time_msec(), time_msec()))
+        res = cur.execute(
+            "select sgAssoc from global_threepid_associations where "
+            "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
+            "order by ts desc limit 1",
+            (medium, address, time_msec(), time_msec()),
+        )
 
         row = res.fetchone()
 
@@ -208,10 +229,12 @@ class GlobalAssociationStore:
         :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("select mxid from global_threepid_associations where "
-                    "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
-                    "order by ts desc limit 1",
-                    (medium, address, time_msec(), time_msec()))
+        res = cur.execute(
+            "select mxid from global_threepid_associations where "
+            "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
+            "order by ts desc limit 1",
+            (medium, address, time_msec(), time_msec()),
+        )
 
         row = res.fetchone()
 
@@ -233,15 +256,19 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))")
-        cur.execute("CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))")
+        cur.execute(
+            "CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))"
+        )
+        cur.execute(
+            "CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))"
+        )
 
         try:
             inserted_cap = 0
             while inserted_cap < len(threepid_tuples):
                 cur.executemany(
                     "INSERT INTO tmp_getmxids (medium, address) VALUES (?, ?)",
-                    threepid_tuples[inserted_cap:inserted_cap + 500]
+                    threepid_tuples[inserted_cap : inserted_cap + 500],
                 )
                 inserted_cap += 500
 
@@ -252,7 +279,7 @@ class GlobalAssociationStore:
                 "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium AND lower(gte.address) = lower(tmp_getmxids.address) "
                 "WHERE gte.notBefore < ? AND gte.notAfter > ? "
                 "ORDER BY gte.medium, gte.address, gte.ts DESC",
-                (time_msec(), time_msec())
+                (time_msec(), time_msec()),
             )
 
             results = []
@@ -288,11 +315,23 @@ class GlobalAssociationStore:
         :type commit: bool
         """
         cur = self.sydent.db.cursor()
-        cur.execute("insert or ignore into global_threepid_associations "
-                          "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
-                          "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                          (assoc.medium, assoc.address, assoc.lookup_hash, assoc.mxid, assoc.ts, assoc.not_before, assoc.not_after,
-                          originServer, originId, rawSgAssoc))
+        cur.execute(
+            "insert or ignore into global_threepid_associations "
+            "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
+            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                assoc.medium,
+                assoc.address,
+                assoc.lookup_hash,
+                assoc.mxid,
+                assoc.ts,
+                assoc.not_before,
+                assoc.not_after,
+                originServer,
+                originId,
+                rawSgAssoc,
+            ),
+        )
         if commit:
             self.sydent.db.commit()
 
@@ -308,8 +347,11 @@ class GlobalAssociationStore:
         :rtype: int or None
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("select max(originId),count(originId) from global_threepid_associations "
-                          "where originServer = ?", (server,))
+        res = cur.execute(
+            "select max(originId),count(originId) from global_threepid_associations "
+            "where originServer = ?",
+            (server,),
+        )
         row = res.fetchone()
 
         if row[1] == 0:
@@ -334,7 +376,9 @@ class GlobalAssociationStore:
         )
         logger.info(
             "Deleted %d rows from global associations for %s/%s",
-            cur.rowcount, medium, address,
+            cur.rowcount,
+            medium,
+            address,
         )
         self.sydent.db.commit()
 
@@ -349,10 +393,14 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("CREATE TEMPORARY TABLE tmp_retrieve_mxids_for_hashes "
-                    "(lookup_hash VARCHAR)")
-        cur.execute("CREATE INDEX tmp_retrieve_mxids_for_hashes_lookup_hash ON "
-                    "tmp_retrieve_mxids_for_hashes(lookup_hash)")
+        cur.execute(
+            "CREATE TEMPORARY TABLE tmp_retrieve_mxids_for_hashes "
+            "(lookup_hash VARCHAR)"
+        )
+        cur.execute(
+            "CREATE INDEX tmp_retrieve_mxids_for_hashes_lookup_hash ON "
+            "tmp_retrieve_mxids_for_hashes(lookup_hash)"
+        )
 
         results = {}
         try:
@@ -364,7 +412,7 @@ class GlobalAssociationStore:
                 cur.executemany(
                     "INSERT INTO tmp_retrieve_mxids_for_hashes(lookup_hash) "
                     "VALUES (?)",
-                    addresses[inserted_cap:inserted_cap + 500]
+                    addresses[inserted_cap : inserted_cap + 500],
                 )
                 inserted_cap += 500
 
@@ -376,7 +424,7 @@ class GlobalAssociationStore:
                 "ON gta.lookup_hash = tmp_retrieve_mxids_for_hashes.lookup_hash "
                 "WHERE gta.notBefore < ? AND gta.notAfter > ? "
                 "ORDER BY gta.lookup_hash, gta.mxid, gta.ts",
-                (time_msec(), time_msec())
+                (time_msec(), time_msec()),
             )
 
             # Place the results from the query into a dictionary

@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class TermsStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
@@ -30,12 +31,12 @@ class TermsStore(object):
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
-            "select url from accepted_terms_urls "
-            "where user_id = ?", (user_id,),
+            "select url from accepted_terms_urls " "where user_id = ?",
+            (user_id,),
         )
 
         urls = []
-        for url, in res:
+        for (url,) in res:
             # Ensure we're dealing with unicode.
             if url and isinstance(url, bytes):
                 url = url.decode("UTF-8")

@@ -51,7 +51,8 @@ WELL_KNOWN_MAX_CACHE_PERIOD = 48 * 3600
 WELL_KNOWN_MAX_SIZE = 50 * 1024  # 50 KiB
 
 logger = logging.getLogger(__name__)
-well_known_cache = TTLCache('well-known')
+well_known_cache = TTLCache("well-known")
+
 
 @implementer(IAgent)
 class MatrixFederationAgent(object):
@@ -80,7 +81,9 @@ class MatrixFederationAgent(object):
     """
 
     def __init__(
-        self, reactor, tls_client_options_factory,
+        self,
+        reactor,
+        tls_client_options_factory,
         _well_known_tls_policy=None,
         _srv_resolver=None,
         _well_known_cache=well_known_cache,
@@ -101,7 +104,7 @@ class MatrixFederationAgent(object):
         if _well_known_tls_policy is not None:
             # the param is called 'contextFactory', but actually passing a
             # contextfactory is deprecated, and it expects an IPolicyForHTTPS.
-            agent_args['contextFactory'] = _well_known_tls_policy
+            agent_args["contextFactory"] = _well_known_tls_policy
         _well_known_agent = RedirectAgent(
             Agent(self._reactor, pool=self._pool, **agent_args),
         )
@@ -159,14 +162,16 @@ class MatrixFederationAgent(object):
         else:
             headers = headers.copy()
 
-        if not headers.hasHeader(b'host'):
-            headers.addRawHeader(b'host', res.host_header)
+        if not headers.hasHeader(b"host"):
+            headers.addRawHeader(b"host", res.host_header)
 
         class EndpointFactory(object):
             @staticmethod
             def endpointForURI(_uri):
                 ep = LoggingHostnameEndpoint(
-                    self._reactor, res.target_host, res.target_port,
+                    self._reactor,
+                    res.target_host,
+                    res.target_port,
                 )
                 if tls_options is not None:
                     ep = wrapClientTLS(tls_options, ep)
@@ -202,21 +207,25 @@ class MatrixFederationAgent(object):
             port = parsed_uri.port
             if port == -1:
                 port = 8448
-            defer.returnValue(_RoutingResult(
-                host_header=parsed_uri.netloc,
-                tls_server_name=parsed_uri.host,
-                target_host=parsed_uri.host,
-                target_port=port,
-            ))
+            defer.returnValue(
+                _RoutingResult(
+                    host_header=parsed_uri.netloc,
+                    tls_server_name=parsed_uri.host,
+                    target_host=parsed_uri.host,
+                    target_port=port,
+                )
+            )
 
         if parsed_uri.port != -1:
             # there is an explicit port
-            defer.returnValue(_RoutingResult(
-                host_header=parsed_uri.netloc,
-                tls_server_name=parsed_uri.host,
-                target_host=parsed_uri.host,
-                target_port=parsed_uri.port,
-            ))
+            defer.returnValue(
+                _RoutingResult(
+                    host_header=parsed_uri.netloc,
+                    tls_server_name=parsed_uri.host,
+                    target_host=parsed_uri.host,
+                    target_port=parsed_uri.port,
+                )
+            )
 
         if lookup_well_known:
             # try a .well-known lookup
@@ -228,8 +237,8 @@ class MatrixFederationAgent(object):
 
                 # parse the server name in the .well-known response into host/port.
                 # (This code is lifted from twisted.web.client.URI.fromBytes).
-                if b':' in well_known_server:
-                    well_known_host, well_known_port = well_known_server.rsplit(b':', 1)
+                if b":" in well_known_server:
+                    well_known_host, well_known_port = well_known_server.rsplit(b":", 1)
                     try:
                         well_known_port = int(well_known_port)
                     except ValueError:
@@ -263,21 +272,27 @@ class MatrixFederationAgent(object):
             port = 8448
             logger.debug(
                 "No SRV record for %s, using %s:%i",
-                parsed_uri.host.decode("ascii"), target_host.decode("ascii"), port,
+                parsed_uri.host.decode("ascii"),
+                target_host.decode("ascii"),
+                port,
             )
         else:
             target_host, port = pick_server_from_list(server_list)
             logger.debug(
                 "Picked %s:%i from SRV records for %s",
-                target_host.decode("ascii"), port, parsed_uri.host.decode("ascii"),
+                target_host.decode("ascii"),
+                port,
+                parsed_uri.host.decode("ascii"),
             )
 
-        defer.returnValue(_RoutingResult(
-            host_header=parsed_uri.netloc,
-            tls_server_name=parsed_uri.host,
-            target_host=target_host,
-            target_port=port,
-        ))
+        defer.returnValue(
+            _RoutingResult(
+                host_header=parsed_uri.netloc,
+                tls_server_name=parsed_uri.host,
+                target_host=target_host,
+                target_port=port,
+            )
+        )
 
     @defer.inlineCallbacks
     def _get_well_known(self, server_name):
@@ -315,16 +330,16 @@ class MatrixFederationAgent(object):
             - INVALID_WELL_KNOWN if the .well-known was invalid
         :rtype: Deferred[Tuple[bytes|None|object],int]
         """
-        uri = b"https://%s/.well-known/matrix/server" % (server_name, )
+        uri = b"https://%s/.well-known/matrix/server" % (server_name,)
         uri_str = uri.decode("ascii")
         logger.info("Fetching %s", uri_str)
         try:
             response = yield self._well_known_agent.request(b"GET", uri)
             body = yield read_body_with_max_size(response, WELL_KNOWN_MAX_SIZE)
             if response.code != 200:
-                raise Exception("Non-200 response %s" % (response.code, ))
+                raise Exception("Non-200 response %s" % (response.code,))
 
-            parsed_body = json_decoder.decode(body.decode('utf-8'))
+            parsed_body = json_decoder.decode(body.decode("utf-8"))
             logger.info("Response from .well-known: %s", parsed_body)
             if not isinstance(parsed_body, dict):
                 raise Exception("not a dict")
@@ -360,6 +375,7 @@ class MatrixFederationAgent(object):
 @implementer(IStreamClientEndpoint)
 class LoggingHostnameEndpoint(object):
     """A wrapper for HostnameEndpint which logs when it connects"""
+
     def __init__(self, reactor, host, port, *args, **kwargs):
         self.host = host
         self.port = port
@@ -374,17 +390,17 @@ class LoggingHostnameEndpoint(object):
 def _cache_period_from_headers(headers, time_now=time.time):
     cache_controls = _parse_cache_control(headers)
 
-    if b'no-store' in cache_controls:
+    if b"no-store" in cache_controls:
         return 0
 
-    if b'max-age' in cache_controls:
+    if b"max-age" in cache_controls:
         try:
-            max_age = int(cache_controls[b'max-age'])
+            max_age = int(cache_controls[b"max-age"])
             return max_age
         except ValueError:
             pass
 
-    expires = headers.getRawHeaders(b'expires')
+    expires = headers.getRawHeaders(b"expires")
     if expires is not None:
         try:
             expires_date = stringToDatetime(expires[-1])
@@ -400,9 +416,9 @@ def _cache_period_from_headers(headers, time_now=time.time):
 
 def _parse_cache_control(headers):
     cache_controls = {}
-    for hdr in headers.getRawHeaders(b'cache-control', []):
-        for directive in hdr.split(b','):
-            splits = [x.strip() for x in directive.split(b'=', 1)]
+    for hdr in headers.getRawHeaders(b"cache-control", []):
+        for directive in hdr.split(b","):
+            splits = [x.strip() for x in directive.split(b"=", 1)]
             k = splits[0].lower()
             v = splits[1] if len(splits) > 1 else None
             cache_controls[k] = v

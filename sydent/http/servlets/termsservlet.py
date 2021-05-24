@@ -64,7 +64,8 @@ class TermsServlet(Resource):
         unknown_urls = list(set(user_accepts) - terms.getUrlSet())
         if len(unknown_urls) > 0:
             raise MatrixRestError(
-                400, "M_UNKNOWN", "Unrecognised URLs: %s" % (', '.join(unknown_urls),))
+                400, "M_UNKNOWN", "Unrecognised URLs: %s" % (", ".join(unknown_urls),)
+            )
 
         termsStore = TermsStore(self.sydent)
         termsStore.addAgreedUrls(account.userId, user_accepts)
@@ -79,4 +80,4 @@ class TermsServlet(Resource):
 
     def render_OPTIONS(self, request):
         send_cors(request)
-        return b''
+        return b""

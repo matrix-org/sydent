@@ -36,8 +36,9 @@ class HTTPClient(object):
     """A base HTTP class that contains methods for making GET and POST HTTP
     requests.
     """
+
     @defer.inlineCallbacks
-    def get_json(self, uri, max_size = None):
+    def get_json(self, uri, max_size=None):
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -84,9 +85,14 @@ class HTTPClient(object):
         """
         json_bytes = json.dumps(post_json).encode("utf8")
 
-        headers = opts.get('headers', Headers({
-            b"Content-Type": [b"application/json"],
-        }))
+        headers = opts.get(
+            "headers",
+            Headers(
+                {
+                    b"Content-Type": [b"application/json"],
+                }
+            ),
+        )
 
         logger.debug("HTTP POST %s -> %s", json_bytes, uri)
 
@@ -94,7 +100,7 @@ class HTTPClient(object):
             b"POST",
             uri.encode("utf8"),
             headers,
-            bodyProducer=FileBodyProducer(BytesIO(json_bytes))
+            bodyProducer=FileBodyProducer(BytesIO(json_bytes)),
         )
 
         # Ensure the body object is read otherwise we'll leak HTTP connections
@@ -108,10 +114,12 @@ class HTTPClient(object):
 
         defer.returnValue(response)
 
+
 class SimpleHttpClient(HTTPClient):
     """A simple, no-frills HTTP client based on the class of the same name
     from Synapse.
     """
+
     def __init__(self, sydent):
         self.sydent = sydent
         # The default endpoint factory in Twisted 14.0.0 (which we require) uses the
@@ -126,10 +134,12 @@ class SimpleHttpClient(HTTPClient):
             connectTimeout=15,
         )
 
+
 class FederationHttpClient(HTTPClient):
     """HTTP client for federation requests to homeservers. Uses a
     MatrixFederationAgent.
     """
+
     def __init__(self, sydent):
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
@@ -138,5 +148,7 @@ class FederationHttpClient(HTTPClient):
                 ip_whitelist=sydent.ip_whitelist,
                 ip_blacklist=sydent.ip_blacklist,
             ),
-            ClientTLSOptionsFactory(sydent.cfg) if sydent.use_tls_for_federation else None,
+            ClientTLSOptionsFactory(sydent.cfg)
+            if sydent.use_tls_for_federation
+            else None,
         )

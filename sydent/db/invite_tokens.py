@@ -37,10 +37,12 @@ class JoinTokenStore(object):
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("INSERT INTO invite_tokens"
-                    " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts')"
-                    " VALUES (?, ?, ?, ?, ?, ?)",
-                    (medium, address, roomId, sender, token, int(time.time())))
+        cur.execute(
+            "INSERT INTO invite_tokens"
+            " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts')"
+            " VALUES (?, ?, ?, ?, ?, ?)",
+            (medium, address, roomId, sender, token, int(time.time())),
+        )
         self.sydent.db.commit()
 
     def getTokens(self, medium, address):
@@ -62,7 +64,10 @@ class JoinTokenStore(object):
         res = cur.execute(
             "SELECT medium, address, room_id, sender, token FROM invite_tokens"
             " WHERE medium = ? AND address = ? AND sent_ts IS NULL",
-            (medium, address,)
+            (
+                medium,
+                address,
+            ),
         )
         rows = res.fetchall()
 
@@ -83,13 +88,15 @@ class JoinTokenStore(object):
             if isinstance(token, bytes):
                 token = token.decode("UTF-8")
 
-            ret.append({
-                "medium": medium,
-                "address": address,
-                "room_id": roomId,
-                "sender": sender,
-                "token": token,
-            })
+            ret.append(
+                {
+                    "medium": medium,
+                    "address": address,
+                    "room_id": roomId,
+                    "sender": sender,
+                    "token": token,
+                }
+            )
 
         return ret
 
@@ -107,7 +114,11 @@ class JoinTokenStore(object):
 
         cur.execute(
             "UPDATE invite_tokens SET sent_ts = ? WHERE medium = ? AND address = ?",
-            (int(time.time()), medium, address,)
+            (
+                int(time.time()),
+                medium,
+                address,
+            ),
         )
         self.sydent.db.commit()
 
@@ -123,7 +134,7 @@ class JoinTokenStore(object):
             "INSERT INTO ephemeral_public_keys"
             " (public_key, persistence_ts)"
             " VALUES (?, ?)",
-            (publicKey, int(time.time()))
+            (publicKey, int(time.time())),
         )
         self.sydent.db.commit()
 
@@ -143,7 +154,7 @@ class JoinTokenStore(object):
             "UPDATE ephemeral_public_keys"
             " SET verify_count = verify_count + 1"
             " WHERE public_key = ?",
-            (publicKey,)
+            (publicKey,),
         )
         self.sydent.db.commit()
         return cur.rowcount > 0
@@ -160,10 +171,7 @@ class JoinTokenStore(object):
         :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute(
-            "SELECT sender FROM invite_tokens WHERE token = ?",
-            (token,)
-        )
+        res = cur.execute("SELECT sender FROM invite_tokens WHERE token = ?", (token,))
         rows = res.fetchall()
         if rows:
             return rows[0][0]
@@ -182,7 +190,10 @@ class JoinTokenStore(object):
 
         cur.execute(
             "DELETE FROM invite_tokens WHERE medium = ? AND address = ?",
-            (medium, address,)
+            (
+                medium,
+                address,
+            ),
         )
 
         self.sydent.db.commit()

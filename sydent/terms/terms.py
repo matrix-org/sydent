@@ -35,7 +35,7 @@ class Terms(object):
             are no terms of service for this server.
         :rtype: unicode or None
         """
-        version = None if self._rawTerms is None else self._rawTerms['master_version']
+        version = None if self._rawTerms is None else self._rawTerms["master_version"]
 
         # Ensure we're dealing with unicode.
         if version and isinstance(version, bytes):
@@ -51,12 +51,12 @@ class Terms(object):
         """
         policies = {}
         if self._rawTerms is not None:
-            for docName, doc in self._rawTerms['docs'].items():
+            for docName, doc in self._rawTerms["docs"].items():
                 policies[docName] = {
-                    'version': doc['version'],
+                    "version": doc["version"],
                 }
-                policies[docName].update(doc['langs'])
-        return { 'policies': policies }
+                policies[docName].update(doc["langs"])
+        return {"policies": policies}
 
     def getUrlSet(self):
         """
@@ -65,9 +65,9 @@ class Terms(object):
         """
         urls = set()
         if self._rawTerms is not None:
-            for docName, doc in self._rawTerms['docs'].items():
-                for langName, lang in doc['langs'].items():
-                    url = lang['url']
+            for docName, doc in self._rawTerms["docs"].items():
+                for langName, lang in doc["langs"].items():
+                    url = lang["url"]
 
                     # Ensure we're dealing with unicode.
                     if url and isinstance(url, bytes):
@@ -92,14 +92,15 @@ class Terms(object):
         urlset = set(urls)
 
         if self._rawTerms is not None:
-            for docName, doc in self._rawTerms['docs'].items():
-                for lang in doc['langs'].values():
-                    if lang['url'] in urlset:
+            for docName, doc in self._rawTerms["docs"].items():
+                for lang in doc["langs"].values():
+                    if lang["url"] in urlset:
                         agreed.add(docName)
                         break
 
-        required = set(self._rawTerms['docs'].keys())
+        required = set(self._rawTerms["docs"].keys())
         return agreed == required
+
 
 def get_terms(sydent):
     """Read and parse terms as specified in the config.
@@ -108,27 +109,33 @@ def get_terms(sydent):
     """
     try:
         termsYaml = None
-        termsPath = sydent.cfg.get('general', 'terms.path')
-        if termsPath == '':
+        termsPath = sydent.cfg.get("general", "terms.path")
+        if termsPath == "":
             return Terms(None)
 
         with open(termsPath) as fp:
             termsYaml = yaml.full_load(fp)
-        if 'master_version' not in termsYaml:
+        if "master_version" not in termsYaml:
             raise Exception("No master version")
-        if 'docs' not in termsYaml:
+        if "docs" not in termsYaml:
             raise Exception("No 'docs' key in terms")
-        for docName, doc in termsYaml['docs'].items():
-            if 'version' not in doc:
+        for docName, doc in termsYaml["docs"].items():
+            if "version" not in doc:
                 raise Exception("'%s' has no version" % (docName,))
-            if 'langs' not in doc:
+            if "langs" not in doc:
                 raise Exception("'%s' has no langs" % (docName,))
-            for langKey, lang in doc['langs'].items():
-                if 'name' not in lang:
-                    raise Exception("lang '%s' of doc %s has no name" % (langKey, docName))
-                if 'url' not in lang:
-                    raise Exception("lang '%s' of doc %s has no url" % (langKey, docName))
+            for langKey, lang in doc["langs"].items():
+                if "name" not in lang:
+                    raise Exception(
+                        "lang '%s' of doc %s has no name" % (langKey, docName)
+                    )
+                if "url" not in lang:
+                    raise Exception(
+                        "lang '%s' of doc %s has no url" % (langKey, docName)
+                    )
 
         return Terms(termsYaml)
     except Exception:
-        logger.exception("Couldn't read terms file '%s'", sydent.cfg.get('general', 'terms.path'))
+        logger.exception(
+            "Couldn't read terms file '%s'", sydent.cfg.get("general", "terms.path")
+        )

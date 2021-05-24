@@ -34,12 +34,16 @@ from sydent.db.sqlitedb import SqliteDatabase
 
 from sydent.http.httpcommon import SslComponents
 from sydent.http.httpserver import (
-    ClientApiHttpServer, ReplicationHttpsServer,
+    ClientApiHttpServer,
+    ReplicationHttpsServer,
     InternalApiHttpServer,
 )
 from sydent.http.httpsclient import ReplicationHttpsClient
 from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
-from sydent.http.servlets.pubkeyservlets import EphemeralPubkeyIsValidServlet, PubkeyIsValidServlet
+from sydent.http.servlets.pubkeyservlets import (
+    EphemeralPubkeyIsValidServlet,
+    PubkeyIsValidServlet,
+)
 from sydent.http.servlets.termsservlet import TermsServlet
 from sydent.validators.emailvalidator import EmailValidator
 from sydent.validators.msisdnvalidator import MsisdnValidator
@@ -51,8 +55,14 @@ from sydent.util.ip_range import generate_ip_set, DEFAULT_IP_RANGE_BLACKLIST
 
 from sydent.sign.ed25519 import SydentEd25519
 
-from sydent.http.servlets.emailservlet import EmailRequestCodeServlet, EmailValidateCodeServlet
-from sydent.http.servlets.msisdnservlet import MsisdnRequestCodeServlet, MsisdnValidateCodeServlet
+from sydent.http.servlets.emailservlet import (
+    EmailRequestCodeServlet,
+    EmailValidateCodeServlet,
+)
+from sydent.http.servlets.msisdnservlet import (
+    MsisdnRequestCodeServlet,
+    MsisdnValidateCodeServlet,
+)
 from sydent.http.servlets.lookupservlet import LookupServlet
 from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
 from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
@@ -79,37 +89,32 @@ from sydent.replication.pusher import Pusher
 logger = logging.getLogger(__name__)
 
 CONFIG_DEFAULTS = {
-    'general': {
-        'server.name': os.environ.get('SYDENT_SERVER_NAME', ''),
-        'log.path': '',
-        'log.level': 'INFO',
-        'pidfile.path': os.environ.get('SYDENT_PID_FILE', 'sydent.pid'),
-        'terms.path': '',
-        'address_lookup_limit': '10000',  # Maximum amount of addresses in a single /lookup request
-
+    "general": {
+        "server.name": os.environ.get("SYDENT_SERVER_NAME", ""),
+        "log.path": "",
+        "log.level": "INFO",
+        "pidfile.path": os.environ.get("SYDENT_PID_FILE", "sydent.pid"),
+        "terms.path": "",
+        "address_lookup_limit": "10000",  # Maximum amount of addresses in a single /lookup request
         # The root path to use for load templates. This should contain branded
         # directories. Each directory should contain the following templates:
         #
         # * invite_template.eml
         # * verification_template.eml
         # * verify_response_template.html
-        'templates.path': 'res',
+        "templates.path": "res",
         # The brand directory to use if no brand hint (or an invalid brand hint)
         # is provided by the request.
-        'brand.default': 'matrix-org',
-
+        "brand.default": "matrix-org",
         # The following can be added to your local config file to enable prometheus
         # support.
         # 'prometheus_port': '8080',  # The port to serve metrics on
         # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
-
         # The following can be added to your local config file to enable sentry support.
         # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
-
         # Whether clients and homeservers can register an association using v1 endpoints.
-        'enable_v1_associations': 'true',
-        'delete_tokens_on_bind': 'true',
-
+        "enable_v1_associations": "true",
+        "delete_tokens_on_bind": "true",
         # Prevent outgoing requests from being sent to the following blacklisted
         # IP address CIDR ranges. If this option is not specified or empty then
         # it defaults to private IP address ranges.
@@ -120,57 +125,56 @@ CONFIG_DEFAULTS = {
         # (0.0.0.0 and :: are always blacklisted, whether or not they are
         # explicitly listed here, since they correspond to unroutable
         # addresses.)
-        'ip.blacklist': '',
-
+        "ip.blacklist": "",
         # List of IP address CIDR ranges that should be allowed for outbound
         # requests. This is useful for specifying exceptions to wide-ranging
         # blacklisted target IP ranges.
         #
         # This whitelist overrides `ip.blacklist` and defaults to an empty
         # list.
-        'ip.whitelist': '',
+        "ip.whitelist": "",
     },
-    'db': {
-        'db.file': os.environ.get('SYDENT_DB_PATH', 'sydent.db'),
+    "db": {
+        "db.file": os.environ.get("SYDENT_DB_PATH", "sydent.db"),
     },
-    'http': {
-        'clientapi.http.bind_address': '::',
-        'clientapi.http.port': '8090',
-        'internalapi.http.bind_address': '::1',
-        'internalapi.http.port': '',
-        'replication.https.certfile': '',
-        'replication.https.cacert': '', # This should only be used for testing
-        'replication.https.bind_address': '::',
-        'replication.https.port': '4434',
-        'obey_x_forwarded_for': 'False',
-        'federation.verifycerts': 'True',
+    "http": {
+        "clientapi.http.bind_address": "::",
+        "clientapi.http.port": "8090",
+        "internalapi.http.bind_address": "::1",
+        "internalapi.http.port": "",
+        "replication.https.certfile": "",
+        "replication.https.cacert": "",  # This should only be used for testing
+        "replication.https.bind_address": "::",
+        "replication.https.port": "4434",
+        "obey_x_forwarded_for": "False",
+        "federation.verifycerts": "True",
         # verify_response_template is deprecated, but still used if defined Define
         # templates.path and brand.default under general instead.
         #
         # 'verify_response_template': 'res/verify_response_page_template',
-        'client_http_base': '',
+        "client_http_base": "",
     },
-    'email': {
+    "email": {
         # email.template and email.invite_template are deprecated, but still used
         # if defined. Define templates.path and brand.default under general instead.
         #
         # 'email.template': 'res/verification_template.eml',
         # 'email.invite_template': 'res/invite_template.eml',
-        'email.from': 'Sydent Validation <noreply@{hostname}>',
-        'email.subject': 'Your Validation Token',
-        'email.invite.subject': '%(sender_display_name)s has invited you to chat',
-        'email.smtphost': 'localhost',
-        'email.smtpport': '25',
-        'email.smtpusername': '',
-        'email.smtppassword': '',
-        'email.hostname': '',
-        'email.tlsmode': '0',
+        "email.from": "Sydent Validation <noreply@{hostname}>",
+        "email.subject": "Your Validation Token",
+        "email.invite.subject": "%(sender_display_name)s has invited you to chat",
+        "email.smtphost": "localhost",
+        "email.smtpport": "25",
+        "email.smtpusername": "",
+        "email.smtppassword": "",
+        "email.hostname": "",
+        "email.tlsmode": "0",
         # The web client location which will be used if it is not provided by
         # the homeserver.
         #
         # This should be the scheme and hostname only, see res/invite_template.eml
         # for the full URL that gets generated.
-        'email.default_web_client_location': 'https://app.element.io',
+        "email.default_web_client_location": "https://app.element.io",
         # When a user is invited to a room via their email address, that invite is
         # displayed in the room list using an obfuscated version of the user's email
         # address. These config options determine how much of the email address to
@@ -188,24 +192,26 @@ CONFIG_DEFAULTS = {
         #
         # The number of characters from the beginning to reveal of the email's username
         # portion (left of the '@' sign)
-        'email.third_party_invite_username_obfuscate_characters': '3',
+        "email.third_party_invite_username_obfuscate_characters": "3",
         # The number of characters from the beginning to reveal of the email's domain
         # portion (right of the '@' sign)
-        'email.third_party_invite_domain_obfuscate_characters': '3',
+        "email.third_party_invite_domain_obfuscate_characters": "3",
     },
-    'sms': {
-        'bodyTemplate': 'Your code is {token}',
-        'username': '',
-        'password': '',
+    "sms": {
+        "bodyTemplate": "Your code is {token}",
+        "username": "",
+        "password": "",
     },
-    'crypto': {
-        'ed25519.signingkey': '',
+    "crypto": {
+        "ed25519.signingkey": "",
     },
 }
 
 
 class Sydent:
-    def __init__(self, cfg, reactor=twisted.internet.reactor, use_tls_for_federation=True):
+    def __init__(
+        self, cfg, reactor=twisted.internet.reactor, use_tls_for_federation=True
+    ):
         self.reactor = reactor
         self.config_file = get_config_file_path()
         self.use_tls_for_federation = use_tls_for_federation
@@ -214,22 +220,28 @@ class Sydent:
 
         logger.info("Starting Sydent server")
 
-        self.pidfile = self.cfg.get('general', "pidfile.path");
+        self.pidfile = self.cfg.get("general", "pidfile.path")
 
         self.db = SqliteDatabase(self).db
 
-        self.server_name = self.cfg.get('general', 'server.name')
-        if self.server_name == '':
+        self.server_name = self.cfg.get("general", "server.name")
+        if self.server_name == "":
             self.server_name = os.uname()[1]
-            logger.warn(("You had not specified a server name. I have guessed that this server is called '%s' "
-                        + "and saved this in the config file. If this is incorrect, you should edit server.name in "
-                        + "the config file.") % (self.server_name,))
-            self.cfg.set('general', 'server.name', self.server_name)
+            logger.warn(
+                (
+                    "You had not specified a server name. I have guessed that this server is called '%s' "
+                    + "and saved this in the config file. If this is incorrect, you should edit server.name in "
+                    + "the config file."
+                )
+                % (self.server_name,)
+            )
+            self.cfg.set("general", "server.name", self.server_name)
             self.save_config()
 
         if self.cfg.has_option("general", "sentry_dsn"):
             # Only import and start sentry SDK if configured.
             import sentry_sdk
+
             sentry_sdk.init(
                 dsn=self.cfg.get("general", "sentry_dsn"),
             )
@@ -238,6 +250,7 @@ class Sydent:
 
         if self.cfg.has_option("general", "prometheus_port"):
             import prometheus_client
+
             prometheus_client.start_http_server(
                 port=self.cfg.getint("general", "prometheus_port"),
                 addr=self.cfg.get("general", "prometheus_addr"),
@@ -249,7 +262,9 @@ class Sydent:
             root_template_path = self.cfg.get("general", "templates.path")
             if os.path.exists(root_template_path):
                 self.valid_brands = {
-                    p for p in os.listdir(root_template_path) if os.path.isdir(os.path.join(root_template_path, p))
+                    p
+                    for p in os.listdir(root_template_path)
+                    if os.path.isdir(os.path.join(root_template_path, p))
                 }
             else:
                 # This is a legacy code-path and assumes that verify_response_template,
@@ -264,11 +279,15 @@ class Sydent:
             self.cfg.get("general", "delete_tokens_on_bind")
         )
 
-        ip_blacklist = set_from_comma_sep_string(self.cfg.get("general", "ip.blacklist"))
+        ip_blacklist = set_from_comma_sep_string(
+            self.cfg.get("general", "ip.blacklist")
+        )
         if not ip_blacklist:
             ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
 
-        ip_whitelist = set_from_comma_sep_string(self.cfg.get("general", "ip.whitelist"))
+        ip_whitelist = set_from_comma_sep_string(
+            self.cfg.get("general", "ip.whitelist")
+        )
 
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
@@ -276,12 +295,16 @@ class Sydent:
         self.default_web_client_location = self.cfg.get(
             "email", "email.default_web_client_location"
         )
-        self.username_obfuscate_characters = int(self.cfg.get(
-            "email", "email.third_party_invite_username_obfuscate_characters"
-        ))
-        self.domain_obfuscate_characters = int(self.cfg.get(
-            "email", "email.third_party_invite_domain_obfuscate_characters"
-        ))
+        self.username_obfuscate_characters = int(
+            self.cfg.get(
+                "email", "email.third_party_invite_username_obfuscate_characters"
+            )
+        )
+        self.domain_obfuscate_characters = int(
+            self.cfg.get(
+                "email", "email.third_party_invite_domain_obfuscate_characters"
+            )
+        )
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
@@ -293,8 +316,9 @@ class Sydent:
             lookup_pepper = generateAlphanumericTokenOfLength(5)
 
             # Store it in the database and rehash 3PIDs
-            hashing_metadata_store.store_lookup_pepper(sha256_and_url_safe_base64,
-                                                       lookup_pepper)
+            hashing_metadata_store.store_lookup_pepper(
+                sha256_and_url_safe_base64, lookup_pepper
+            )
 
         self.validators = Validators()
         self.validators.email = EmailValidator(self)
@@ -302,7 +326,7 @@ class Sydent:
 
         self.keyring = Keyring()
         self.keyring.ed25519 = SydentEd25519(self).signing_key
-        self.keyring.ed25519.alg = 'ed25519'
+        self.keyring.ed25519.alg = "ed25519"
 
         self.sig_verifier = Verifier(self)
 
@@ -310,13 +334,21 @@ class Sydent:
         self.servlets.v1 = V1Servlet(self)
         self.servlets.v2 = V2Servlet(self)
         self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
-        self.servlets.emailRequestCodeV2 = EmailRequestCodeServlet(self, require_auth=True)
+        self.servlets.emailRequestCodeV2 = EmailRequestCodeServlet(
+            self, require_auth=True
+        )
         self.servlets.emailValidate = EmailValidateCodeServlet(self)
-        self.servlets.emailValidateV2 = EmailValidateCodeServlet(self, require_auth=True)
+        self.servlets.emailValidateV2 = EmailValidateCodeServlet(
+            self, require_auth=True
+        )
         self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
-        self.servlets.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(self, require_auth=True)
+        self.servlets.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(
+            self, require_auth=True
+        )
         self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
-        self.servlets.msisdnValidateV2 = MsisdnValidateCodeServlet(self, require_auth=True)
+        self.servlets.msisdnValidateV2 = MsisdnValidateCodeServlet(
+            self, require_auth=True
+        )
         self.servlets.lookup = LookupServlet(self)
         self.servlets.bulk_lookup = BulkLookupServlet(self)
         self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
@@ -329,11 +361,15 @@ class Sydent:
         self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
         self.servlets.replicationPush = ReplicationPushServlet(self)
         self.servlets.getValidated3pid = GetValidated3pidServlet(self)
-        self.servlets.getValidated3pidV2 = GetValidated3pidServlet(self, require_auth=True)
+        self.servlets.getValidated3pidV2 = GetValidated3pidServlet(
+            self, require_auth=True
+        )
         self.servlets.storeInviteServlet = StoreInviteServlet(self)
         self.servlets.storeInviteServletV2 = StoreInviteServlet(self, require_auth=True)
         self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
-        self.servlets.blindlySignStuffServletV2 = BlindlySignStuffServlet(self, require_auth=True)
+        self.servlets.blindlySignStuffServletV2 = BlindlySignStuffServlet(
+            self, require_auth=True
+        )
         self.servlets.termsServlet = TermsServlet(self)
         self.servlets.accountServlet = AccountServlet(self)
         self.servlets.registerServlet = RegisterServlet(self)
@@ -363,7 +399,7 @@ class Sydent:
         cb.start(1.0)
 
     def save_config(self):
-        fp = open(self.config_file, 'w')
+        fp = open(self.config_file, "w")
         self.cfg.write(fp)
         fp.close()
 
@@ -372,24 +408,25 @@ class Sydent:
         self.replicationHttpsServer.setup()
         self.pusher.setup()
 
-        internalport = self.cfg.get('http', 'internalapi.http.port')
+        internalport = self.cfg.get("http", "internalapi.http.port")
         if internalport:
             try:
-                interface = self.cfg.get('http', 'internalapi.http.bind_address')
+                interface = self.cfg.get("http", "internalapi.http.bind_address")
             except configparser.NoOptionError:
-                interface = '::1'
+                interface = "::1"
             self.internalApiHttpServer = InternalApiHttpServer(self)
             self.internalApiHttpServer.setup(interface, int(internalport))
 
         if self.pidfile:
-            with open(self.pidfile, 'w') as pidfile:
+            with open(self.pidfile, "w") as pidfile:
                 pidfile.write(str(os.getpid()) + "\n")
 
         self.reactor.run()
 
     def ip_from_request(self, request):
-        if (self.cfg.get('http', 'obey_x_forwarded_for') and
-                request.requestHeaders.hasHeader("X-Forwarded-For")):
+        if self.cfg.get(
+            "http", "obey_x_forwarded_for"
+        ) and request.requestHeaders.hasHeader("X-Forwarded-For"):
             return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
         return request.getClientIP()
 
@@ -507,16 +544,13 @@ def parse_config_file(config_file):
 
 
 def setup_logging(cfg):
-    log_format = (
-        "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s"
-        " - %(message)s"
-    )
+    log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
     formatter = logging.Formatter(log_format)
 
-    logPath = cfg.get('general', "log.path")
-    if logPath != '':
+    logPath = cfg.get("general", "log.path")
+    if logPath != "":
         handler = logging.handlers.TimedRotatingFileHandler(
-            logPath, when='midnight', backupCount=365
+            logPath, when="midnight", backupCount=365
         )
         handler.setFormatter(formatter)
 
@@ -524,12 +558,13 @@ def setup_logging(cfg):
             logger.info("Closing log file due to SIGHUP")
             handler.doRollover()
             logger.info("Opened new log file due to SIGHUP")
+
     else:
         handler = logging.StreamHandler()
 
     handler.setFormatter(formatter)
-    rootLogger = logging.getLogger('')
-    rootLogger.setLevel(cfg.get('general', 'log.level'))
+    rootLogger = logging.getLogger("")
+    rootLogger.setLevel(cfg.get("general", "log.level"))
     rootLogger.addHandler(handler)
 
     observer = log.PythonLoggingObserver()
@@ -537,7 +572,7 @@ def setup_logging(cfg):
 
 
 def get_config_file_path():
-    return os.environ.get('SYDENT_CONF', "sydent.conf")
+    return os.environ.get("SYDENT_CONF", "sydent.conf")
 
 
 def parse_cfg_bool(value):
@@ -545,9 +580,9 @@ def parse_cfg_bool(value):
 
 
 def set_from_comma_sep_string(rawstr: str) -> Set[str]:
-    if rawstr == '':
+    if rawstr == "":
         return set()
-    return {x.strip() for x in rawstr.split(',')}
+    return {x.strip() for x in rawstr.split(",")}
 
 
 def run_gc():
@@ -558,7 +593,7 @@ def run_gc():
             gc.collect(i)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cfg = parse_config_file(get_config_file_path())
     setup_logging(cfg)
     syd = Sydent(cfg)

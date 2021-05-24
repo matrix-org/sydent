@@ -32,6 +32,7 @@ class MatrixRestError(Exception):
     Handled by the jsonwrap wrapper. Any servlets that don't use this
     wrapper should catch this exception themselves.
     """
+
     def __init__(self, httpStatus, errcode, error):
         super(Exception, self).__init__(error)
         self.httpStatus = httpStatus
@@ -63,15 +64,16 @@ def get_args(request, args, required=True):
         are of type unicode.
     :rtype: dict[unicode, any]
     """
-    v1_path = request.path.startswith(b'/_matrix/identity/api/v1')
+    v1_path = request.path.startswith(b"/_matrix/identity/api/v1")
 
     request_args = None
     # for v1 paths, only look for json args if content type is json
-    if (
-        request.method in (b'POST', b'PUT') and (
-            not v1_path or (
-                request.requestHeaders.hasHeader('Content-Type') and
-                request.requestHeaders.getRawHeaders('Content-Type')[0].startswith('application/json')
+    if request.method in (b"POST", b"PUT") and (
+        not v1_path
+        or (
+            request.requestHeaders.hasHeader("Content-Type")
+            and request.requestHeaders.getRawHeaders("Content-Type")[0].startswith(
+                "application/json"
             )
         )
     ):
@@ -79,12 +81,12 @@ def get_args(request, args, required=True):
             # json.loads doesn't allow bytes in Python 3.5
             request_args = json_decoder.decode(request.content.read().decode("UTF-8"))
         except ValueError:
-            raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
+            raise MatrixRestError(400, "M_BAD_JSON", "Malformed JSON")
 
     # If we didn't get anything from that, and it's a v1 api path, try the request args
     # (element-web's usage of the ed25519 sign servlet currently involves
     # sending the params in the query string with a json body of 'null')
-    if request_args is None and (v1_path or request.method == b'GET'):
+    if request_args is None and (v1_path or request.method == b"GET"):
         request_args_bytes = copy.copy(request.args)
         # Twisted supplies everything as an array because it's valid to
         # supply the same params multiple times with www-form-urlencoded
@@ -102,7 +104,7 @@ def get_args(request, args, required=True):
                     safe_k = k.decode("UTF-8", errors="backslashreplace")
                     raise MatrixRestError(
                         400,
-                        'M_INVALID_PARAM',
+                        "M_INVALID_PARAM",
                         "Parameter %s and its value must be valid UTF-8" % safe_k,
                     )
 
@@ -118,8 +120,8 @@ def get_args(request, args, required=True):
 
         if len(missing) > 0:
             request.setResponseCode(400)
-            msg = "Missing parameters: "+(",".join(missing))
-            raise MatrixRestError(400, 'M_MISSING_PARAMS', msg)
+            msg = "Missing parameters: " + (",".join(missing))
+            raise MatrixRestError(400, "M_MISSING_PARAMS", msg)
 
     return request_args
 
@@ -151,10 +153,13 @@ def jsonwrap(f):
             logger.exception("Exception processing request")
             request.setHeader("Content-Type", "application/json")
             request.setResponseCode(500)
-            return dict_to_json_bytes({
-                "errcode": "M_UNKNOWN",
-                "error": "Internal Server Error",
-            })
+            return dict_to_json_bytes(
+                {
+                    "errcode": "M_UNKNOWN",
+                    "error": "Internal Server Error",
+                }
+            )
+
     return inner
 
 
@@ -186,11 +191,21 @@ def deferjsonwrap(f):
         request.setHeader("Content-Type", "application/json")
         if failure.check(MatrixRestError) is not None:
             request.setResponseCode(failure.value.httpStatus)
-            request.write(dict_to_json_bytes({'errcode': failure.value.errcode, 'error': failure.value.error}))
+            request.write(
+                dict_to_json_bytes(
+                    {"errcode": failure.value.errcode, "error": failure.value.error}
+                )
+            )
         else:
-            logger.error("Request processing failed: %r, %s", failure, failure.getTraceback())
+            logger.error(
+                "Request processing failed: %r, %s", failure, failure.getTraceback()
+            )
             request.setResponseCode(500)
-            request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': 'Internal Server Error'}))
+            request.write(
+                dict_to_json_bytes(
+                    {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
+                )
+            )
         request.finish()
 
     def inner(*args, **kwargs):
@@ -211,13 +226,13 @@ def deferjsonwrap(f):
         d.addCallback(reqDone, request)
         d.addErrback(reqErr, request)
         return server.NOT_DONE_YET
+
     return inner
 
 
 def send_cors(request):
     request.setHeader("Access-Control-Allow-Origin", "*")
-    request.setHeader("Access-Control-Allow-Methods",
-                      "GET, POST, PUT, DELETE, OPTIONS")
+    request.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
     request.setHeader("Access-Control-Allow-Headers", "*")
 
 

@@ -35,6 +35,7 @@ class NoAuthenticationError(Exception):
     """
     Raised when no signature is provided that could be authenticated
     """
+
     pass
 
 
@@ -42,6 +43,7 @@ class InvalidServerName(Exception):
     """
     Raised when the provided origin parameter is not a valid hostname (plus optional port).
     """
+
     pass
 
 
@@ -51,6 +53,7 @@ class Verifier(object):
     homeserver's address, contacting it, requesting its keys and
     verifying that the signature on the json blob matches.
     """
+
     def __init__(self, sydent):
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
@@ -73,26 +76,34 @@ class Verifier(object):
         if server_name in self.cache:
             cached = self.cache[server_name]
             now = int(time.time() * 1000)
-            if cached['valid_until_ts'] > now:
-                defer.returnValue(self.cache[server_name]['verify_keys'])
+            if cached["valid_until_ts"] > now:
+                defer.returnValue(self.cache[server_name]["verify_keys"])
 
         client = FederationHttpClient(self.sydent)
-        result = yield client.get_json("matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50)
+        result = yield client.get_json(
+            "matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50
+        )
 
-        if 'verify_keys' not in result:
+        if "verify_keys" not in result:
             raise SignatureVerifyException("No key found in response")
 
-        if 'valid_until_ts' in result:
-            if not isinstance(result['valid_until_ts'], int):
-                raise SignatureVerifyException("Invalid valid_until_ts received, must be an integer")
+        if "valid_until_ts" in result:
+            if not isinstance(result["valid_until_ts"], int):
+                raise SignatureVerifyException(
+                    "Invalid valid_until_ts received, must be an integer"
+                )
 
             # Don't cache anything without a valid_until_ts or we wouldn't
             # know when to expire it.
 
-            logger.info("Got keys for %s: caching until %d", server_name, result['valid_until_ts'])
+            logger.info(
+                "Got keys for %s: caching until %d",
+                server_name,
+                result["valid_until_ts"],
+            )
             self.cache[server_name] = result
 
-        defer.returnValue(result['verify_keys'])
+        defer.returnValue(result["verify_keys"])
 
     @defer.inlineCallbacks
     def verifyServerSignedJson(self, signed_json, acceptable_server_names=None):
@@ -114,9 +125,9 @@ class Verifier(object):
 
         :raise SignatureVerifyException: The json cannot be verified.
         """
-        if 'signatures' not in signed_json:
+        if "signatures" not in signed_json:
             raise SignatureVerifyException("Signature missing")
-        for server_name, sigs in signed_json['signatures'].items():
+        for server_name, sigs in signed_json["signatures"].items():
             if acceptable_server_names is not None:
                 if server_name not in acceptable_server_names:
                     continue
@@ -124,22 +135,30 @@ class Verifier(object):
             server_keys = yield self._getKeysForServer(server_name)
             for key_name, sig in sigs.items():
                 if key_name in server_keys:
-                    if 'key' not in server_keys[key_name]:
+                    if "key" not in server_keys[key_name]:
                         logger.warn("Ignoring key %s with no 'key'")
                         continue
-                    key_bytes = decode_base64(server_keys[key_name]['key'])
-                    verify_key = signedjson.key.decode_verify_key_bytes(key_name, key_bytes)
+                    key_bytes = decode_base64(server_keys[key_name]["key"])
+                    verify_key = signedjson.key.decode_verify_key_bytes(
+                        key_name, key_bytes
+                    )
                     logger.info("verifying sig from key %r", key_name)
-                    signedjson.sign.verify_signed_json(signed_json, server_name, verify_key)
-                    logger.info("Verified signature with key %s from %s", key_name, server_name)
+                    signedjson.sign.verify_signed_json(
+                        signed_json, server_name, verify_key
+                    )
+                    logger.info(
+                        "Verified signature with key %s from %s", key_name, server_name
+                    )
                     defer.returnValue((server_name, key_name))
             logger.warn(
                 "No matching key found for signature block %r in server keys %r",
-                signed_json['signatures'], server_keys,
+                signed_json["signatures"],
+                server_keys,
             )
         logger.warn(
             "Unable to verify any signatures from block %r. Acceptable server names: %r",
-            signed_json['signatures'], acceptable_server_names,
+            signed_json["signatures"],
+            acceptable_server_names,
         )
         raise SignatureVerifyException("No matching signature found")
 
@@ -184,7 +203,7 @@ class Verifier(object):
                 param_dict = dict(kv.split(u"=") for kv in params)
 
                 def strip_quotes(value):
-                    if value.startswith(u"\""):
+                    if value.startswith(u'"'):
                         return value[1:-1]
                     else:
                         return value
@@ -211,7 +230,9 @@ class Verifier(object):
             raise NoAuthenticationError("Missing X-Matrix Authorization header")
 
         if not is_valid_matrix_server_name(json_request["origin"]):
-            raise InvalidServerName("X-Matrix header's origin parameter must be a valid Matrix server name")
+            raise InvalidServerName(
+                "X-Matrix header's origin parameter must be a valid Matrix server name"
+            )
 
         yield self.verifyServerSignedJson(json_request, [origin])
 

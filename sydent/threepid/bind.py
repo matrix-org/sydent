@@ -72,13 +72,19 @@ class ThreepidBinder:
 
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
-        str_to_hash = u' '.join(
+        str_to_hash = u" ".join(
             [address, medium, self.hashing_store.get_lookup_pepper()],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
         assoc = ThreepidAssociation(
-            medium, address, lookup_hash, mxid, createdAt, createdAt, expires,
+            medium,
+            address,
+            lookup_hash,
+            mxid,
+            createdAt,
+            createdAt,
+            expires,
         )
 
         localAssocStore.addOrUpdateAssociation(assoc)
@@ -94,7 +100,9 @@ class ThreepidBinder:
                 "mxid": mxid,
                 "token": token["token"],
             }
-            token["signed"] = signedjson.sign.sign_json(token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519)
+            token["signed"] = signedjson.sign.sign_json(
+                token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519
+            )
             invites.append(token)
         if invites:
             assoc.extra_fields["invites"] = invites
@@ -150,9 +158,7 @@ class ThreepidBinder:
             )
             return
 
-        post_url = "matrix://%s/_matrix/federation/v1/3pid/onbind" % (
-            matrix_server,
-        )
+        post_url = "matrix://%s/_matrix/federation/v1/3pid/onbind" % (matrix_server,)
 
         logger.info("Making bind callback to: %s", post_url)
 

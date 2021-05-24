@@ -33,7 +33,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         # Mock post_json_get_nothing so the /onBind call doesn't fail.
         def post_json_get_nothing(uri, post_json, opts):
-            return Response((b'HTTP', 1, 1), 200, b'OK', None, None)
+            return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
         FederationHttpClient.post_json_get_nothing = Mock(
             side_effect=post_json_get_nothing,
@@ -42,7 +42,10 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         # Manually insert an invite token, we'll check later that it's been deleted.
         join_token_store = JoinTokenStore(self.sydent)
         join_token_store.storeToken(
-            medium, address, "!someroom:example.com", "@jane:example.com",
+            medium,
+            address,
+            "!someroom:example.com",
+            "@jane:example.com",
             "sometoken",
         )
 
@@ -52,7 +55,9 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         # Bind the 3PID
         self.sydent.threepidBinder.addBinding(
-            medium, address, "@john:example.com",
+            medium,
+            address,
+            "@john:example.com",
         )
 
         # Give Sydent some time to call /onBind and delete the token.
@@ -66,7 +71,10 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         res = cur.execute(
             "SELECT medium, address, room_id, sender, token FROM invite_tokens"
             " WHERE medium = ? AND address = ?",
-            (medium, address,)
+            (
+                medium,
+                address,
+            ),
         )
         rows = res.fetchall()
 
@@ -86,22 +94,19 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
         # Even short addresses are redacted
         short_email_address = "1@1.com"
-        redacted_address = store_invite_servlet.redact_email_address(short_email_address)
+        redacted_address = store_invite_servlet.redact_email_address(
+            short_email_address
+        )
 
         self.assertEqual(redacted_address, "...@1...")
 
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
-    """Test that invite tokens are not deleted when that is disabled.
-    """
+    """Test that invite tokens are not deleted when that is disabled."""
 
     def setUp(self):
         # Create a new sydent
-        config = {
-            "general": {
-                "delete_tokens_on_bind": "false"
-            }
-        }
+        config = {"general": {"delete_tokens_on_bind": "false"}}
         self.sydent = make_sydent(test_config=config)
 
     def test_no_delete_on_bind(self):
@@ -113,7 +118,7 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
 
         # Mock post_json_get_nothing so the /onBind call doesn't fail.
         def post_json_get_nothing(uri, post_json, opts):
-            return Response((b'HTTP', 1, 1), 200, b'OK', None, None)
+            return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
         FederationHttpClient.post_json_get_nothing = Mock(
             side_effect=post_json_get_nothing,
@@ -122,7 +127,10 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
         # Manually insert an invite token, we'll check later that it's been deleted.
         join_token_store = JoinTokenStore(self.sydent)
         join_token_store.storeToken(
-            medium, address, "!someroom:example.com", "@jane:example.com",
+            medium,
+            address,
+            "!someroom:example.com",
+            "@jane:example.com",
             "sometoken",
         )
 
@@ -132,7 +140,9 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
 
         # Bind the 3PID
         self.sydent.threepidBinder.addBinding(
-            medium, address, "@john:example.com",
+            medium,
+            address,
+            "@john:example.com",
         )
 
         # Give Sydent some time to call /onBind and delete the token.
@@ -146,7 +156,10 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
         res = cur.execute(
             "SELECT medium, address, room_id, sender, token FROM invite_tokens"
             " WHERE medium = ? AND address = ?",
-            (medium, address,)
+            (
+                medium,
+                address,
+            ),
         )
         rows = res.fetchall()
 

@@ -33,7 +33,8 @@ class Ed25519Servlet(Resource):
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
-        return {'public_key': pubKeyBase64}
+        return {"public_key": pubKeyBase64}
+
 
 class PubkeyIsValidServlet(Resource):
     isLeaf = True
@@ -48,7 +49,7 @@ class PubkeyIsValidServlet(Resource):
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
-        return {'valid': args["public_key"] == pubKeyBase64}
+        return {"valid": args["public_key"] == pubKeyBase64}
 
 
 class EphemeralPubkeyIsValidServlet(Resource):
@@ -63,5 +64,5 @@ class EphemeralPubkeyIsValidServlet(Resource):
         publicKey = args["public_key"]
 
         return {
-            'valid': self.joinTokenStore.validateEphemeralPublicKey(publicKey),
+            "valid": self.joinTokenStore.validateEphemeralPublicKey(publicKey),
         }

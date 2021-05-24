@@ -54,26 +54,28 @@ def sendEmail(sydent, templateFile, mailTo, substitutions):
     :param substitutions: The substitutions to use with the template.
     :type substitutions: dict[str, str]
     """
-    mailFrom = sydent.cfg.get('email', 'email.from')
+    mailFrom = sydent.cfg.get("email", "email.from")
 
-    myHostname = sydent.cfg.get('email', 'email.hostname')
-    if myHostname == '':
+    myHostname = sydent.cfg.get("email", "email.hostname")
+    if myHostname == "":
         myHostname = socket.getfqdn()
     midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
     messageid = "<%d%s@%s>" % (time_msec(), midRandom, myHostname)
 
-    substitutions.update({
-        'messageid': messageid,
-        'date': email.utils.formatdate(localtime=False),
-        'to': mailTo,
-        'from': mailFrom,
-    })
+    substitutions.update(
+        {
+            "messageid": messageid,
+            "date": email.utils.formatdate(localtime=False),
+            "to": mailTo,
+            "from": mailFrom,
+        }
+    )
 
     allSubstitutions = {}
     for k, v in substitutions.items():
         allSubstitutions[k] = v
-        allSubstitutions[k+"_forhtml"] = escape(v)
-        allSubstitutions[k+"_forurl"] = urllib.parse.quote(v)
+        allSubstitutions[k + "_forhtml"] = escape(v)
+        allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
 
     # We add randomize the multipart boundary to stop user input from
     # conflicting with it.
@@ -82,7 +84,7 @@ def sendEmail(sydent, templateFile, mailTo, substitutions):
     mailString = open(templateFile).read() % allSubstitutions
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
-    if parsedFrom == '' or parsedTo == '':
+    if parsedFrom == "" or parsedTo == "":
         logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
         raise EmailAddressException()
 
@@ -90,28 +92,34 @@ def sendEmail(sydent, templateFile, mailTo, substitutions):
         logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
         raise EmailAddressException()
 
-    mailServer = sydent.cfg.get('email', 'email.smtphost')
-    mailPort = sydent.cfg.get('email', 'email.smtpport')
-    mailUsername = sydent.cfg.get('email', 'email.smtpusername')
-    mailPassword = sydent.cfg.get('email', 'email.smtppassword')
-    mailTLSMode = sydent.cfg.get('email', 'email.tlsmode')
-    logger.info("Sending mail to %s with mail server: %s" % (mailTo, mailServer,))
+    mailServer = sydent.cfg.get("email", "email.smtphost")
+    mailPort = sydent.cfg.get("email", "email.smtpport")
+    mailUsername = sydent.cfg.get("email", "email.smtpusername")
+    mailPassword = sydent.cfg.get("email", "email.smtppassword")
+    mailTLSMode = sydent.cfg.get("email", "email.tlsmode")
+    logger.info(
+        "Sending mail to %s with mail server: %s"
+        % (
+            mailTo,
+            mailServer,
+        )
+    )
     try:
-        if mailTLSMode == 'SSL' or mailTLSMode == 'TLS':
+        if mailTLSMode == "SSL" or mailTLSMode == "TLS":
             smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)
-        elif mailTLSMode == 'STARTTLS':
+        elif mailTLSMode == "STARTTLS":
             smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
             smtp.starttls()
         else:
             smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
-        if mailUsername != '':
+        if mailUsername != "":
             smtp.login(mailUsername, mailPassword)
 
         # We're using the parsing above to do basic validation, but instead of
         # failing it may munge the address it returns. So we should *not* use
         # that parsed address, as it may not match any validation done
         # elsewhere.
-        smtp.sendmail(mailFrom, mailTo, mailString.encode('utf-8'))
+        smtp.sendmail(mailFrom, mailTo, mailString.encode("utf-8"))
         smtp.quit()
     except Exception as origException:
         twisted.python.log.err()

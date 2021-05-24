@@ -44,20 +44,19 @@ class BulkLookupServlet(Resource):
         """
         send_cors(request)
 
-        args = get_args(request, ('threepids',))
+        args = get_args(request, ("threepids",))
 
-        threepids = args['threepids']
+        threepids = args["threepids"]
         if not isinstance(threepids, list):
-            raise MatrixRestError(400, 'M_INVALID_PARAM', 'threepids must be a list')
+            raise MatrixRestError(400, "M_INVALID_PARAM", "threepids must be a list")
 
         logger.info("Bulk lookup of %d threepids", len(threepids))
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
         results = globalAssocStore.getMxids(threepids)
 
-        return {'threepids': results}
-
+        return {"threepids": results}
 
     def render_OPTIONS(self, request):
         send_cors(request)
-        return b''
+        return b""

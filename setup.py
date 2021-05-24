@@ -19,11 +19,13 @@ import re
 import os
 from setuptools import setup, find_packages
 
+
 def read_version():
-    fn = os.path.join(os.path.dirname(__file__), 'sydent', '__init__.py')
+    fn = os.path.join(os.path.dirname(__file__), "sydent", "__init__.py")
     with open(fn) as fp:
         f = fp.read()
     return re.search(r"^__version__ = '(.*)'", f).group(1)
+
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -31,6 +33,7 @@ def read_version():
 # string in below ...
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 setup(
     name="matrix-sydent",
@@ -41,10 +44,8 @@ setup(
         "signedjson==1.1.1",
         "unpaddedbase64==1.1.0",
         "Twisted>=16.0.0",
-
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
-
         "phonenumbers",
         "pyopenssl",
         "attrs>=19.1.0",

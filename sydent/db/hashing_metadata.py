@@ -24,7 +24,7 @@ class HashingMetadataStore:
 
     def get_lookup_pepper(self):
         """Return the value of the current lookup pepper from the db
-        
+
         :return: A pepper if it exists in the database, or None if one does
                  not exist
         :rtype: unicode or None
@@ -57,15 +57,19 @@ class HashingMetadataStore:
 
         # Create or update lookup_pepper
         sql = (
-            'INSERT OR REPLACE INTO hashing_metadata (id, lookup_pepper) '
-            'VALUES (0, ?)'
+            "INSERT OR REPLACE INTO hashing_metadata (id, lookup_pepper) "
+            "VALUES (0, ?)"
         )
         cur.execute(sql, (pepper,))
 
         # Hand the cursor to each rehashing function
         # Each function will queue some rehashing db transactions
-        self._rehash_threepids(cur, hashing_function, pepper, "local_threepid_associations")
-        self._rehash_threepids(cur, hashing_function, pepper, "global_threepid_associations")
+        self._rehash_threepids(
+            cur, hashing_function, pepper, "local_threepid_associations"
+        )
+        self._rehash_threepids(
+            cur, hashing_function, pepper, "global_threepid_associations"
+        )
 
         # Commit the queued db transactions so that adding a new pepper and hashing is atomic
         self.sydent.db.commit()
@@ -102,9 +106,10 @@ class HashingMetadataStore:
         batch_size = 500
         count = 0
         while count < row_count:
-            sql = (
-                "SELECT medium, address FROM %s ORDER BY id LIMIT %s OFFSET %s" %
-                (table, batch_size, count)
+            sql = "SELECT medium, address FROM %s ORDER BY id LIMIT %s OFFSET %s" % (
+                table,
+                batch_size,
+                count,
             )
             res = cur.execute(sql)
             rows = res.fetchall()
@@ -125,8 +130,7 @@ class HashingMetadataStore:
                 # Save the result to the DB
                 sql = (
                     "UPDATE %s SET lookup_hash = ? "
-                    "WHERE medium = ? AND address = ?"
-                    % table
+                    "WHERE medium = ? AND address = ?" % table
                 )
                 # Lines up the query to be executed on commit
                 cur.execute(sql, (result, medium, address))

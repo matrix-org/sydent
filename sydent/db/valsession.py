@@ -17,8 +17,13 @@ from __future__ import absolute_import
 
 import sydent.util.tokenutils
 
-from sydent.validators import ValidationSession, IncorrectClientSecretException, InvalidSessionIdException, \
-    SessionExpiredException, SessionNotValidatedException
+from sydent.validators import (
+    ValidationSession,
+    IncorrectClientSecretException,
+    InvalidSessionIdException,
+    SessionExpiredException,
+    SessionNotValidatedException,
+)
 from sydent.util import time_msec
 
 from random import SystemRandom
@@ -47,25 +52,35 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
-                    "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
-                    "where s.medium = ? and s.address = ? and s.clientSecret = ? and t.validationSession = s.id",
-                    (medium, address, clientSecret))
+        cur.execute(
+            "select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
+            "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
+            "where s.medium = ? and s.address = ? and s.clientSecret = ? and t.validationSession = s.id",
+            (medium, address, clientSecret),
+        )
         row = cur.fetchone()
 
         if row:
-            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+            s = ValidationSession(
+                row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+            )
             return s
 
-        sid = self.addValSession(medium, address, clientSecret, time_msec(), commit=False)
+        sid = self.addValSession(
+            medium, address, clientSecret, time_msec(), commit=False
+        )
 
         tokenString = sydent.util.tokenutils.generateTokenForMedium(medium)
 
-        cur.execute("insert into threepid_token_auths (validationSession, token, sendAttemptNumber) values (?, ?, ?)",
-                    (sid, tokenString, -1))
+        cur.execute(
+            "insert into threepid_token_auths (validationSession, token, sendAttemptNumber) values (?, ?, ?)",
+            (sid, tokenString, -1),
+        )
         self.sydent.db.commit()
 
-        s = ValidationSession(sid, medium, address, clientSecret, False, time_msec(), tokenString, -1)
+        s = ValidationSession(
+            sid, medium, address, clientSecret, False, time_msec(), tokenString, -1
+        )
         return s
 
     def addValSession(self, medium, address, clientSecret, mtime, commit=True):
@@ -94,8 +109,11 @@ class ThreePidValSessionStore:
         # should be safe enough given we reap old sessions.
         sid = self.random.randint(0, 2 ** 31)
 
-        cur.execute("insert into threepid_validation_sessions ('id', 'medium', 'address', 'clientSecret', 'mtime')" +
-            " values (?, ?, ?, ?, ?)", (sid, medium, address, clientSecret, mtime))
+        cur.execute(
+            "insert into threepid_validation_sessions ('id', 'medium', 'address', 'clientSecret', 'mtime')"
+            + " values (?, ?, ?, ?, ?)",
+            (sid, medium, address, clientSecret, mtime),
+        )
         if commit:
             self.sydent.db.commit()
         return sid
@@ -111,7 +129,10 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("update threepid_token_auths set sendAttemptNumber = ? where id = ?", (attemptNo, sid))
+        cur.execute(
+            "update threepid_token_auths set sendAttemptNumber = ? where id = ?",
+            (attemptNo, sid),
+        )
         self.sydent.db.commit()
 
     def setValidated(self, sid, validated):
@@ -125,7 +146,10 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("update threepid_validation_sessions set validated = ? where id = ?", (validated, sid))
+        cur.execute(
+            "update threepid_validation_sessions set validated = ? where id = ?",
+            (validated, sid),
+        )
         self.sydent.db.commit()
 
     def setMtime(self, sid, mtime):
@@ -139,7 +163,10 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("update threepid_validation_sessions set mtime = ? where id = ?", (mtime, sid))
+        cur.execute(
+            "update threepid_validation_sessions set mtime = ? where id = ?",
+            (mtime, sid),
+        )
         self.sydent.db.commit()
 
     def getSessionById(self, sid):
@@ -155,14 +182,19 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("select id, medium, address, clientSecret, validated, mtime from "+
-            "threepid_validation_sessions where id = ?", (sid,))
+        cur.execute(
+            "select id, medium, address, clientSecret, validated, mtime from "
+            + "threepid_validation_sessions where id = ?",
+            (sid,),
+        )
         row = cur.fetchone()
 
         if not row:
             return None
 
-        return ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], None, None)
+        return ValidationSession(
+            row[0], row[1], row[2], row[3], row[4], row[5], None, None
+        )
 
     def getTokenSessionById(self, sid):
         """
@@ -176,13 +208,18 @@ class ThreePidValSessionStore:
         """
         cur = self.sydent.db.cursor()
 
-        cur.execute("select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
-                    "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
-                    "where s.id = ? and t.validationSession = s.id", (sid,))
+        cur.execute(
+            "select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
+            "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
+            "where s.id = ? and t.validationSession = s.id",
+            (sid,),
+        )
         row = cur.fetchone()
 
         if row:
-            s = ValidationSession(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+            s = ValidationSession(
+                row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+            )
             return s
 
         return None
@@ -225,12 +262,13 @@ class ThreePidValSessionStore:
         return s
 
     def deleteOldSessions(self):
-        """Delete old threepid validation sessions that are long expired.
-        """
+        """Delete old threepid validation sessions that are long expired."""
 
         cur = self.sydent.db.cursor()
 
-        delete_before_ts = time_msec() - 5 * ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS
+        delete_before_ts = (
+            time_msec() - 5 * ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS
+        )
 
         sql = """
             DELETE FROM threepid_validation_sessions

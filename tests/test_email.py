@@ -29,7 +29,9 @@ class TestRequestCode(unittest.TestCase):
         # Create a new sydent
         config = {
             "general": {
-                "templates.path": os.path.join(os.path.dirname(os.path.dirname(__file__)), "res"),
+                "templates.path": os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), "res"
+                ),
             },
         }
         self.sydent = make_sydent(test_config=config)
@@ -49,12 +51,14 @@ class TestRequestCode(unittest.TestCase):
         self.sydent.run()
 
         request, channel = make_request(
-            self.sydent.reactor, "POST", "/_matrix/identity/v1/validate/email/requestToken",
+            self.sydent.reactor,
+            "POST",
+            "/_matrix/identity/v1/validate/email/requestToken",
             {
                 "email": "test@test",
                 "client_secret": "oursecret",
                 "send_attempt": 0,
-            }
+            },
         )
         smtp = self._render_request(request)
         self.assertEqual(channel.code, 200)
@@ -67,12 +71,14 @@ class TestRequestCode(unittest.TestCase):
         self.sydent.run()
 
         request, channel = make_request(
-            self.sydent.reactor, "POST", "/_matrix/identity/v1/validate/email/requestToken?brand=vector-im",
+            self.sydent.reactor,
+            "POST",
+            "/_matrix/identity/v1/validate/email/requestToken?brand=vector-im",
             {
                 "email": "test@test",
                 "client_secret": "oursecret",
                 "send_attempt": 0,
-            }
+            },
         )
         smtp = self._render_request(request)
         self.assertEqual(channel.code, 200)

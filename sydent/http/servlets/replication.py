@@ -48,42 +48,59 @@ class ReplicationPushServlet(Resource):
         peer = peerStore.getPeerByName(peerCertCn)
 
         if not peer:
-            logger.warn("Got connection from %s but no peer found by that name", peerCertCn)
-            raise MatrixRestError(403, 'M_UNKNOWN_PEER', 'This peer is not known to this server')
+            logger.warn(
+                "Got connection from %s but no peer found by that name", peerCertCn
+            )
+            raise MatrixRestError(
+                403, "M_UNKNOWN_PEER", "This peer is not known to this server"
+            )
 
         logger.info("Push connection made from peer %s", peer.servername)
 
-        if not request.requestHeaders.hasHeader('Content-Type') or \
-                request.requestHeaders.getRawHeaders('Content-Type')[0] != 'application/json':
-            logger.warn("Peer %s made push connection with non-JSON content (type: %s)",
-                        peer.servername, request.requestHeaders.getRawHeaders('Content-Type')[0])
-            raise MatrixRestError(400, 'M_NOT_JSON', 'This endpoint expects JSON')
+        if (
+            not request.requestHeaders.hasHeader("Content-Type")
+            or request.requestHeaders.getRawHeaders("Content-Type")[0]
+            != "application/json"
+        ):
+            logger.warn(
+                "Peer %s made push connection with non-JSON content (type: %s)",
+                peer.servername,
+                request.requestHeaders.getRawHeaders("Content-Type")[0],
+            )
+            raise MatrixRestError(400, "M_NOT_JSON", "This endpoint expects JSON")
 
         try:
             # json.loads doesn't allow bytes in Python 3.5
             inJson = json_decoder.decode(request.content.read().decode("UTF-8"))
         except ValueError:
-            logger.warn("Peer %s made push connection with malformed JSON", peer.servername)
-            raise MatrixRestError(400, 'M_BAD_JSON', 'Malformed JSON')
+            logger.warn(
+                "Peer %s made push connection with malformed JSON", peer.servername
+            )
+            raise MatrixRestError(400, "M_BAD_JSON", "Malformed JSON")
 
-        if 'sgAssocs' not in inJson:
-            logger.warn("Peer %s made push connection with no 'sgAssocs' key in JSON", peer.servername)
-            raise MatrixRestError(400, 'M_BAD_JSON', 'No "sgAssocs" key in JSON')
+        if "sgAssocs" not in inJson:
+            logger.warn(
+                "Peer %s made push connection with no 'sgAssocs' key in JSON",
+                peer.servername,
+            )
+            raise MatrixRestError(400, "M_BAD_JSON", 'No "sgAssocs" key in JSON')
 
         failedIds = []
 
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
         # Ensure items are pulled out of the dictionary in order of origin_id.
-        sg_assocs = inJson.get('sgAssocs', {})
-        sg_assocs = sorted(
-            sg_assocs.items(), key=lambda k: int(k[0])
-        )
+        sg_assocs = inJson.get("sgAssocs", {})
+        sg_assocs = sorted(sg_assocs.items(), key=lambda k: int(k[0]))
 
         for originId, sgAssoc in sg_assocs:
             try:
                 peer.verifySignedAssociation(sgAssoc)
-                logger.debug("Signed association from %s with origin ID %s verified", peer.servername, originId)
+                logger.debug(
+                    "Signed association from %s with origin ID %s verified",
+                    peer.servername,
+                    originId,
+                )
 
                 # Don't bother adding if one has already failed: we add all of them or none so
                 # we're only going to roll back the transaction anyway (but we continue to try
@@ -96,31 +113,52 @@ class ReplicationPushServlet(Resource):
 
                 if assocObj.mxid is not None:
                     # Calculate the lookup hash with our own pepper for this association
-                    str_to_hash = u' '.join(
-                        [assocObj.address, assocObj.medium,
-                         self.hashing_store.get_lookup_pepper()],
+                    str_to_hash = u" ".join(
+                        [
+                            assocObj.address,
+                            assocObj.medium,
+                            self.hashing_store.get_lookup_pepper(),
+                        ],
                     )
                     assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
                     # Add this association
                     globalAssocsStore.addAssociation(
-                        assocObj, json.dumps(sgAssoc), peer.servername, originId, commit=False
+                        assocObj,
+                        json.dumps(sgAssoc),
+                        peer.servername,
+                        originId,
+                        commit=False,
                     )
                 else:
-                    logger.info("Incoming deletion: removing associations for %s / %s", assocObj.medium, assocObj.address)
-                    globalAssocsStore.removeAssociation(assocObj.medium, assocObj.address)
-                logger.info("Stored association origin ID %s from %s", originId, peer.servername)
+                    logger.info(
+                        "Incoming deletion: removing associations for %s / %s",
+                        assocObj.medium,
+                        assocObj.address,
+                    )
+                    globalAssocsStore.removeAssociation(
+                        assocObj.medium, assocObj.address
+                    )
+                logger.info(
+                    "Stored association origin ID %s from %s", originId, peer.servername
+                )
             except:
                 failedIds.append(originId)
-                logger.warn("Failed to verify signed association from %s with origin ID %s",
-                            peer.servername, originId)
+                logger.warn(
+                    "Failed to verify signed association from %s with origin ID %s",
+                    peer.servername,
+                    originId,
+                )
                 twisted.python.log.err()
 
         if len(failedIds) > 0:
             self.sydent.db.rollback()
             request.setResponseCode(400)
-            return {'errcode': 'M_VERIFICATION_FAILED', 'error': 'Verification failed for one or more associations',
-                    'failed_ids':failedIds}
+            return {
+                "errcode": "M_VERIFICATION_FAILED",
+                "error": "Verification failed for one or more associations",
+                "failed_ids": failedIds,
+            }
         else:
             self.sydent.db.commit()
-            return {'success': True}
+            return {"success": True}

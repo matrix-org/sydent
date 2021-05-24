@@ -43,7 +43,15 @@ class StoreInviteServlet(Resource):
     def render_POST(self, request):
         send_cors(request)
 
-        args = get_args(request, ("medium", "address", "room_id", "sender",))
+        args = get_args(
+            request,
+            (
+                "medium",
+                "address",
+                "room_id",
+                "sender",
+            ),
+        )
         medium = args["medium"]
         address = args["address"]
         roomId = args["room_id"]
@@ -75,10 +83,7 @@ class StoreInviteServlet(Resource):
 
         if not (0 < len(address) <= MAX_EMAIL_ADDRESS_LENGTH):
             request.setResponseCode(400)
-            return {
-                'errcode': 'M_INVALID_PARAM',
-                'error': 'Invalid email provided'
-            }
+            return {"errcode": "M_INVALID_PARAM", "error": "Invalid email provided"}
 
         token = self._randomString(128)
 
@@ -104,38 +109,44 @@ class StoreInviteServlet(Resource):
         # Substitutions that the template requires, but are optional to provide
         # to the API.
         extra_substitutions = [
-            'sender_display_name',
-            'token',
-            'room_name',
-            'bracketed_room_name',
-            'room_avatar_url',
-            'sender_avatar_url',
-            'guest_user_id',
-            'guest_access_token',
+            "sender_display_name",
+            "token",
+            "room_name",
+            "bracketed_room_name",
+            "room_avatar_url",
+            "sender_avatar_url",
+            "guest_user_id",
+            "guest_access_token",
         ]
         for k in extra_substitutions:
-            substitutions.setdefault(k, '')
+            substitutions.setdefault(k, "")
 
         substitutions["bracketed_verified_sender"] = ""
         if verified_sender:
             substitutions["bracketed_verified_sender"] = "(%s) " % (verified_sender,)
 
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
-        if substitutions["room_name"] != '':
+        if substitutions["room_name"] != "":
             substitutions["bracketed_room_name"] = "(%s) " % substitutions["room_name"]
 
         substitutions["web_client_location"] = self.sydent.default_web_client_location
-        if 'org.matrix.web_client_location' in substitutions:
-            substitutions["web_client_location"] = substitutions.pop("org.matrix.web_client_location")
+        if "org.matrix.web_client_location" in substitutions:
+            substitutions["web_client_location"] = substitutions.pop(
+                "org.matrix.web_client_location"
+            )
 
-        subject_header = Header(self.sydent.cfg.get('email', 'email.invite.subject', raw=True) % substitutions, 'utf8')
+        subject_header = Header(
+            self.sydent.cfg.get("email", "email.invite.subject", raw=True)
+            % substitutions,
+            "utf8",
+        )
         substitutions["subject_header_value"] = subject_header.encode()
 
         brand = self.sydent.brand_from_request(request)
         templateFile = self.sydent.get_branded_template(
             brand,
             "invite_template.eml",
-            ('email', 'email.invite_template'),
+            ("email", "email.invite_template"),
         )
 
         sendEmail(self.sydent, templateFile, address, substitutions)
@@ -143,17 +154,23 @@ class StoreInviteServlet(Resource):
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
-        baseUrl = "%s/_matrix/identity/api/v1" % (self.sydent.cfg.get('http', 'client_http_base'),)
+        baseUrl = "%s/_matrix/identity/api/v1" % (
+            self.sydent.cfg.get("http", "client_http_base"),
+        )
 
         keysToReturn = []
-        keysToReturn.append({
-            "public_key": pubKeyBase64,
-            "key_validity_url": baseUrl + "/pubkey/isvalid",
-        })
-        keysToReturn.append({
-            "public_key": ephemeralPublicKeyBase64,
-            "key_validity_url": baseUrl + "/pubkey/ephemeral/isvalid",
-        })
+        keysToReturn.append(
+            {
+                "public_key": pubKeyBase64,
+                "key_validity_url": baseUrl + "/pubkey/isvalid",
+            }
+        )
+        keysToReturn.append(
+            {
+                "public_key": ephemeralPublicKeyBase64,
+                "key_validity_url": baseUrl + "/pubkey/ephemeral/isvalid",
+            }
+        )
 
         resp = {
             "token": token,
@@ -179,7 +196,9 @@ class StoreInviteServlet(Resource):
         username, domain = address.split(u"@", 1)
 
         # Obfuscate strings
-        redacted_username = self._redact(username, self.sydent.username_obfuscate_characters)
+        redacted_username = self._redact(
+            username, self.sydent.username_obfuscate_characters
+        )
         redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
 
         return redacted_username + u"@" + redacted_domain
@@ -220,4 +239,4 @@ class StoreInviteServlet(Resource):
         :return: The generated string.
         :rtype: unicode
         """
-        return u''.join(self.random.choice(string.ascii_letters) for _ in range(length))
+        return u"".join(self.random.choice(string.ascii_letters) for _ in range(length))
