@@ -36,10 +36,8 @@ class RegisterTestCase(unittest.TestCase):
             self.sydent.reactor,
             "POST",
             "/_matrix/identity/v2/account/register",
-            content={
-                "matrix_server_name": bad_hostname,
-                "access_token": "foo"
-            })
+            content={"matrix_server_name": bad_hostname, "access_token": "foo"},
+        )
 
         request.render(self.sydent.servlets.registerServlet)
 

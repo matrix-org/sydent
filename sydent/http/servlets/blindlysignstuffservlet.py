@@ -45,9 +45,9 @@ class BlindlySignStuffServlet(Resource):
 
         args = get_args(request, ("private_key", "token", "mxid"))
 
-        private_key_base64 = args['private_key']
-        token = args['token']
-        mxid = args['mxid']
+        private_key_base64 = args["private_key"]
+        token = args["token"]
+        mxid = args["mxid"]
 
         sender = self.tokenStore.getSenderForToken(token)
         if sender is None:
@@ -60,15 +60,9 @@ class BlindlySignStuffServlet(Resource):
         }
         try:
             private_key = signedjson.key.decode_signing_key_base64(
-                "ed25519",
-                "0",
-                private_key_base64
+                "ed25519", "0", private_key_base64
             )
-            signed = signedjson.sign.sign_json(
-                to_sign,
-                self.server_name,
-                private_key
-            )
+            signed = signedjson.sign.sign_json(to_sign, self.server_name, private_key)
         except:
             logger.exception("signing failed")
             raise MatrixRestError(500, "M_UNKNOWN", "Internal Server Error")
@@ -77,4 +71,4 @@ class BlindlySignStuffServlet(Resource):
 
     def render_OPTIONS(self, request):
         send_cors(request)
-        return b''
+        return b""

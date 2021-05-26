@@ -28,11 +28,11 @@ class ReplicationTestCase(unittest.TestCase):
         cur = self.sydent.db.cursor()
         cur.execute(
             "INSERT INTO peers (name, port, lastSentVersion, active) VALUES (?, ?, ?, ?)",
-            ("fake.server", 1234, 0, 1)
+            ("fake.server", 1234, 0, 1),
         )
         cur.execute(
             "INSERT INTO peer_pubkeys (peername, alg, key) VALUES (?, ?, ?)",
-            ("fake.server", "ed25519", peer_public_key_base64)
+            ("fake.server", "ed25519", peer_public_key_base64),
         )
 
         self.sydent.db.commit()
@@ -64,12 +64,10 @@ class ReplicationTestCase(unittest.TestCase):
         # can extract a common name and figure out which peer sent it from its common
         # name. The common name of the certificate we use for tests is fake.server.
         config = {
-            "general": {
-                "server.name": "fake.server"
-            },
+            "general": {"server.name": "fake.server"},
             "crypto": {
                 "ed25519.signingkey": "ed25519 0 b29eXMMAYCFvFEtq9mLI42aivMtcg4Hl0wK89a+Vb6c"
-            }
+            },
         }
 
         fake_sender_sydent = make_sydent(config)
@@ -107,8 +105,7 @@ class ReplicationTestCase(unittest.TestCase):
             self.assertDictEqual(signed_assoc, res_assocs[assoc_id])
 
     def test_outgoing_replication(self):
-        """Make a fake peer and associations and make sure Sydent tries to push to it.
-        """
+        """Make a fake peer and associations and make sure Sydent tries to push to it."""
         cur = self.sydent.db.cursor()
 
         # Insert the fake associations into the database.
@@ -127,7 +124,7 @@ class ReplicationTestCase(unittest.TestCase):
                     assoc.not_after,
                 )
                 for assoc in self.assocs
-            ]
+            ],
         )
 
         self.sydent.db.commit()
@@ -159,23 +156,23 @@ class ReplicationTestCase(unittest.TestCase):
             :rtype: twisted.internet.defer.Deferred[Response]
             """
             # Check the method and the URI.
-            assert method == b'POST'
-            assert uri == b'https://fake.server:1234/_matrix/identity/replicate/v1/push'
+            assert method == b"POST"
+            assert uri == b"https://fake.server:1234/_matrix/identity/replicate/v1/push"
 
             # postJson calls the agent with a BytesIO within a FileBodyProducer, so we
             # need to unpack the payload correctly.
             payload = json.loads(body._inputFile.read().decode("utf8"))
-            for assoc_id, assoc in payload['sgAssocs'].items():
+            for assoc_id, assoc in payload["sgAssocs"].items():
                 sent_assocs[assoc_id] = assoc
 
             # Return with a fake response wrapped in a Deferred.
             d = defer.Deferred()
-            d.callback(Response((b'HTTP', 1, 1), 200, b'OK', None, None))
+            d.callback(Response((b"HTTP", 1, 1), 200, b"OK", None, None))
             return d
 
         # Mock the replication client's agent so it runs the custom code instead of
         # actually sending the requests.
-        agent = Mock(spec=['request'])
+        agent = Mock(spec=["request"])
         agent.request.side_effect = request
         self.sydent.replicationHttpsClient.agent = agent
 
@@ -192,4 +189,4 @@ class ReplicationTestCase(unittest.TestCase):
             # looking up in signed_assocs. Also, the ID of the first association Sydent
             # will push will be 1, so we need to subtract 1 when figuring out which index
             # to lookup.
-            self.assertDictEqual(assoc, signed_assocs[int(assoc_id)-1])
+            self.assertDictEqual(assoc, signed_assocs[int(assoc_id) - 1])

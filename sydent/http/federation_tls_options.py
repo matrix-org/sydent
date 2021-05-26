@@ -21,6 +21,7 @@ from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
 from twisted.internet.abstract import isIPAddress, isIPv6Address
 from twisted.internet._sslverify import ClientTLSOptions
 
+
 def _tolerateErrors(wrapped):
     """
     Wrap up an info_callback for pyOpenSSL so that if something goes wrong
@@ -39,6 +40,7 @@ def _tolerateErrors(wrapped):
 
     return infoCallback
 
+
 def _idnaBytes(text):
     """
     Convert some text typed by a human into some ASCII bytes. This is a
@@ -52,6 +54,7 @@ def _idnaBytes(text):
     else:
         return idna.encode(text)
 
+
 @implementer(IOpenSSLClientConnectionCreator)
 class ClientTLSOptions(object):
     """
@@ -64,7 +67,7 @@ class ClientTLSOptions(object):
         self._ctx = ctx
 
         if isIPAddress(hostname) or isIPv6Address(hostname):
-            self._hostnameBytes = hostname.encode('ascii')
+            self._hostnameBytes = hostname.encode("ascii")
             self._sendSNI = False
         else:
             self._hostnameBytes = _idnaBytes(hostname)

@@ -31,7 +31,7 @@ def generateTokenForMedium(medium):
     :return: The generated token.
     :rtype: unicode
     """
-    if medium == 'email':
+    if medium == "email":
         return generateAlphanumericTokenOfLength(32)
     else:
         return generateNumericTokenOfLength(6)
@@ -60,4 +60,9 @@ def generateAlphanumericTokenOfLength(length):
     :return: The generated token.
     :rtype: unicode
     """
-    return u"".join([r.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase) for _ in range(length)])
+    return u"".join(
+        [
+            r.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
+            for _ in range(length)
+        ]
+    )

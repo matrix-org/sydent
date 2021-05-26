@@ -33,8 +33,11 @@ class PeerStore:
         :rtype: RemotePeer
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
-                          "where p.name = ? and pk.peername = p.name and p.active = 1", (name,))
+        res = cur.execute(
+            "select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+            "where p.name = ? and pk.peername = p.name and p.active = 1",
+            (name,),
+        )
 
         serverName = None
         port = None
@@ -62,8 +65,10 @@ class PeerStore:
         :rtype: list[RemotePeer]
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute("select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
-                          "where pk.peername = p.name and p.active = 1")
+        res = cur.execute(
+            "select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+            "where pk.peername = p.name and p.active = 1"
+        )
 
         peers = []
 
@@ -89,7 +94,9 @@ class PeerStore:
 
         return peers
 
-    def setLastSentVersionAndPokeSucceeded(self, peerName, lastSentVersion, lastPokeSucceeded):
+    def setLastSentVersionAndPokeSucceeded(
+        self, peerName, lastSentVersion, lastPokeSucceeded
+    ):
         """
         Sets the ID of the last association sent to a given peer and the time of the
         last successful request sent to that peer.
@@ -103,6 +110,9 @@ class PeerStore:
         :type lastPokeSucceeded: int
         """
         cur = self.sydent.db.cursor()
-        cur.execute("update peers set lastSentVersion = ?, lastPokeSucceededAt = ? "
-                          "where name = ?", (lastSentVersion, lastPokeSucceeded, peerName))
+        cur.execute(
+            "update peers set lastSentVersion = ?, lastPokeSucceededAt = ? "
+            "where name = ?",
+            (lastSentVersion, lastPokeSucceeded, peerName),
+        )
         self.sydent.db.commit()

@@ -94,7 +94,10 @@ class Pusher:
 
         try:
             # Push associations
-            assocs, latest_assoc_id = self.local_assoc_store.getSignedAssociationsAfterId(
+            (
+                assocs,
+                latest_assoc_id,
+            ) = self.local_assoc_store.getSignedAssociationsAfterId(
                 p.lastSentVersion, ASSOCIATIONS_PUSH_LIMIT
             )
 
@@ -103,8 +106,7 @@ class Pusher:
                 return
 
             logger.info(
-                "Pushing %d updates to %s:%d",
-                len(assocs), p.servername, p.port
+                "Pushing %d updates to %s:%d", len(assocs), p.servername, p.port
             )
             result = yield p.pushUpdates(assocs)
 
@@ -114,7 +116,10 @@ class Pusher:
 
             logger.info(
                 "Pushed updates to %s:%d with result %d %s",
-                p.servername, p.port, result.code, result.phrase
+                p.servername,
+                p.port,
+                result.code,
+                result.phrase,
             )
         except Exception:
             logger.exception("Error pushing updates to %s:%d", p.servername, p.port)

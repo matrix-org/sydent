@@ -26,13 +26,13 @@ def threePidAssocFromDict(d):
     :rtype: ThreepidAssociation
     """
     assoc = ThreepidAssociation(
-        d['medium'],
-        d['address'],
-        None, # empty lookup_hash digest by default
-        d['mxid'],
-        d['ts'],
-        d['not_before'],
-        d['not_after'],
+        d["medium"],
+        d["address"],
+        None,  # empty lookup_hash digest by default
+        d["mxid"],
+        d["ts"],
+        d["not_before"],
+        d["not_after"],
     )
     return assoc
 

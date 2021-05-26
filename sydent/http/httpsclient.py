@@ -35,14 +35,15 @@ class ReplicationHttpsClient:
     (ie. presents our replication SSL certificate and validates peer SSL certificates as we would in the
     replication HTTPS server)
     """
+
     def __init__(self, sydent):
         self.sydent = sydent
         self.agent = None
 
         if self.sydent.sslComponents.myPrivateCertificate:
             # We will already have logged a warn if this is absent, so don't do it again
-            #cert = self.sydent.sslComponents.myPrivateCertificate
-            #self.certOptions = twisted.internet.ssl.CertificateOptions(privateKey=cert.privateKey.original,
+            # cert = self.sydent.sslComponents.myPrivateCertificate
+            # self.certOptions = twisted.internet.ssl.CertificateOptions(privateKey=cert.privateKey.original,
             #                                                      certificate=cert.original,
             #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
             self.agent = Agent(self.sydent.reactor, SydentPolicyForHTTPS(self.sydent))
@@ -64,11 +65,14 @@ class ReplicationHttpsClient:
             logger.error("HTTPS post attempted but HTTPS is not configured")
             return
 
-        headers = Headers({'Content-Type': ['application/json'], 'User-Agent': ['Sydent']})
+        headers = Headers(
+            {"Content-Type": ["application/json"], "User-Agent": ["Sydent"]}
+        )
 
         json_bytes = json.dumps(jsonObject).encode("utf8")
-        reqDeferred = self.agent.request(b'POST', uri.encode('utf8'), headers,
-                                         FileBodyProducer(BytesIO(json_bytes)))
+        reqDeferred = self.agent.request(
+            b"POST", uri.encode("utf8"), headers, FileBodyProducer(BytesIO(json_bytes))
+        )
 
         return reqDeferred
 
@@ -79,6 +83,8 @@ class SydentPolicyForHTTPS(object):
         self.sydent = sydent
 
     def creatorForNetloc(self, hostname, port):
-        return optionsForClientTLS(hostname.decode("ascii"),
-                                   trustRoot=self.sydent.sslComponents.trustRoot,
-                                   clientCertificate=self.sydent.sslComponents.myPrivateCertificate)
+        return optionsForClientTLS(
+            hostname.decode("ascii"),
+            trustRoot=self.sydent.sslComponents.trustRoot,
+            clientCertificate=self.sydent.sslComponents.myPrivateCertificate,
+        )

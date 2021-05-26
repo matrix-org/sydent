@@ -24,7 +24,8 @@ CLIENT_SECRET_REGEX = re.compile(r"^[0-9a-zA-Z\.=_\-]+$")
 # https://regex101.com/r/OyN1lg/2
 hostname_regex = re.compile(
     r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$",
-    flags=re.IGNORECASE)
+    flags=re.IGNORECASE,
+)
 
 # it's unclear what the maximum length of an email address is. RFC3696 (as corrected
 # by errata) says:
@@ -126,6 +127,8 @@ def is_valid_matrix_server_name(string: str) -> bool:
         return False
 
     valid_ipv4_addr = isIPAddress(host)
-    valid_ipv6_literal = host[0] == "[" and host[-1] == "]" and isIPv6Address(host[1:-1])
+    valid_ipv6_literal = (
+        host[0] == "[" and host[-1] == "]" and isIPv6Address(host[1:-1])
+    )
 
     return valid_ipv4_addr or valid_ipv6_literal or is_valid_hostname(host)

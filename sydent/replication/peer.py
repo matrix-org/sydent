@@ -60,6 +60,7 @@ class LocalPeer(Peer):
     """
     The local peer (ourselves: essentially copying from the local associations table to the global one)
     """
+
     def __init__(self, sydent):
         super(LocalPeer, self).__init__(sydent.server_name, {})
         self.sydent = sydent
@@ -88,17 +89,27 @@ class LocalPeer(Peer):
 
                 if assocObj.mxid is not None:
                     # Assign a lookup_hash to this association
-                    str_to_hash = u' '.join(
-                        [assocObj.address, assocObj.medium, self.hashing_store.get_lookup_pepper()],
+                    str_to_hash = u" ".join(
+                        [
+                            assocObj.address,
+                            assocObj.medium,
+                            self.hashing_store.get_lookup_pepper(),
+                        ],
                     )
                     assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
                     # We can probably skip verification for the local peer (although it could
                     # be good as a sanity check)
-                    globalAssocStore.addAssociation(assocObj, json.dumps(sgAssocs[localId]),
-                                                    self.sydent.server_name, localId)
+                    globalAssocStore.addAssociation(
+                        assocObj,
+                        json.dumps(sgAssocs[localId]),
+                        self.sydent.server_name,
+                        localId,
+                    )
                 else:
-                    globalAssocStore.removeAssociation(assocObj.medium, assocObj.address)
+                    globalAssocStore.removeAssociation(
+                        assocObj.medium, assocObj.address
+                    )
 
         d = defer.succeed(True)
         return d
@@ -126,14 +137,15 @@ class RemotePeer(Peer):
         # look up or build the replication URL
         try:
             replication_url = sydent.cfg.get(
-                "peer.%s" % server_name, "base_replication_url",
+                "peer.%s" % server_name,
+                "base_replication_url",
             )
         except (configparser.NoSectionError, configparser.NoOptionError):
             if not port:
                 port = 1001
             replication_url = "https://%s:%i" % (server_name, port)
 
-        if replication_url[-1:] != '/':
+        if replication_url[-1:] != "/":
             replication_url += "/"
 
         replication_url += "_matrix/identity/replicate/v1/push"
@@ -150,7 +162,10 @@ class RemotePeer(Peer):
             # Decode hex into bytes
             pubkey_decoded = binascii.unhexlify(pubkey)
 
-            logger.warn("Peer public key of %s is hex encoded. Please update to base64 encoding", server_name)
+            logger.warn(
+                "Peer public key of %s is hex encoded. Please update to base64 encoding",
+                server_name,
+            )
         except ValueError:
             # Check for base64 encoding
             try:
@@ -160,7 +175,9 @@ class RemotePeer(Peer):
                     "Unable to decode public key for peer %s: %s" % (server_name, e),
                 )
 
-        self.verify_key = signedjson.key.decode_verify_key_bytes(SIGNING_KEY_ALGORITHM + ":", pubkey_decoded)
+        self.verify_key = signedjson.key.decode_verify_key_bytes(
+            SIGNING_KEY_ALGORITHM + ":", pubkey_decoded
+        )
 
         # Attach metadata
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
@@ -173,13 +190,17 @@ class RemotePeer(Peer):
         :param assoc: A signed association.
         :type assoc: dict[any, any]
         """
-        if not 'signatures' in assoc:
+        if not "signatures" in assoc:
             raise NoSignaturesException()
 
         key_ids = signedjson.sign.signature_ids(assoc, self.servername)
-        if not key_ids or len(key_ids) == 0 or not key_ids[0].startswith(SIGNING_KEY_ALGORITHM + ":"):
+        if (
+            not key_ids
+            or len(key_ids) == 0
+            or not key_ids[0].startswith(SIGNING_KEY_ALGORITHM + ":")
+        ):
             e = NoMatchingSignatureException()
-            e.foundSigs = assoc['signatures'].keys()
+            e.foundSigs = assoc["signatures"].keys()
             e.requiredServername = self.servername
             raise e
 
@@ -196,7 +217,7 @@ class RemotePeer(Peer):
         :return: A deferred which results in the response to the push request.
         :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
-        body = {'sgAssocs': sgAssocs}
+        body = {"sgAssocs": sgAssocs}
 
         reqDeferred = self.sydent.replicationHttpsClient.postJson(
             self.replication_url, body
@@ -267,7 +288,10 @@ class NoSignaturesException(Exception):
 
 class NoMatchingSignatureException(Exception):
     def __str__(self):
-        return "Found signatures: %s, required server name: %s" % (self.foundSigs, self.requiredServername)
+        return "Found signatures: %s, required server name: %s" % (
+            self.foundSigs,
+            self.requiredServername,
+        )
 
 
 class RemotePeerError(Exception):

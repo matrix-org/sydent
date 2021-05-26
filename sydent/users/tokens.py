@@ -22,6 +22,7 @@ from sydent.db.accounts import AccountStore
 
 logger = logging.getLogger(__name__)
 
+
 def issueToken(sydent, user_id):
     """
     Creates an account for the given Matrix user ID, then generates, saves and returns

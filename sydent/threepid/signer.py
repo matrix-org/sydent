@@ -32,13 +32,15 @@ class Signer:
         :rtype: dict[str, any]
         """
         sgassoc = {
-            'medium': assoc.medium,
-            'address': assoc.address,
-            'mxid': assoc.mxid,
-            'ts': assoc.ts,
-            'not_before': assoc.not_before,
-            'not_after': assoc.not_after
+            "medium": assoc.medium,
+            "address": assoc.address,
+            "mxid": assoc.mxid,
+            "ts": assoc.ts,
+            "not_before": assoc.not_before,
+            "not_after": assoc.not_after,
         }
         sgassoc.update(assoc.extra_fields)
-        sgassoc = signedjson.sign.sign_json(sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519)
+        sgassoc = signedjson.sign.sign_json(
+            sgassoc, self.sydent.server_name, self.sydent.keyring.ed25519
+        )
         return sgassoc

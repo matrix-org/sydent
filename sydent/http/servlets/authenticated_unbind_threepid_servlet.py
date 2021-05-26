@@ -24,6 +24,7 @@ class AuthenticatedUnbindThreePidServlet(Resource):
 
     It is assumed that authentication happens out of band
     """
+
     def __init__(self, sydent):
         Resource.__init__(self)
         self.sydent = sydent
@@ -31,14 +32,15 @@ class AuthenticatedUnbindThreePidServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        args = get_args(request, ('medium', 'address', 'mxid'))
+        args = get_args(request, ("medium", "address", "mxid"))
 
-        threepid = {'medium': args['medium'], 'address': args['address']}
-        
+        threepid = {"medium": args["medium"], "address": args["address"]}
+
         return self.sydent.threepidBinder.removeBinding(
-            threepid, args['mxid'],
+            threepid,
+            args["mxid"],
         )
 
     def render_OPTIONS(self, request):
         send_cors(request)
-        return b''
+        return b""

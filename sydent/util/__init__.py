@@ -17,6 +17,7 @@
 import json
 import time
 
+
 def time_msec():
     """
     Get the current time in milliseconds.

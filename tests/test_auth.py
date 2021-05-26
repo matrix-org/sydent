@@ -33,12 +33,11 @@ class AuthTestCase(unittest.TestCase):
         cur.execute(
             "INSERT INTO accounts (user_id, created_ts, consent_version)"
             "VALUES (?, ?, ?)",
-            ("@bob:localhost", 101010101, "asd")
+            ("@bob:localhost", 101010101, "asd"),
         )
         cur.execute(
-            "INSERT INTO tokens (user_id, token)"
-            "VALUES (?, ?)",
-            ("@bob:localhost", self.test_token)
+            "INSERT INTO tokens (user_id, token)" "VALUES (?, ?)",
+            ("@bob:localhost", self.test_token),
         )
 
         self.sydent.db.commit()
@@ -63,8 +62,9 @@ class AuthTestCase(unittest.TestCase):
         self.sydent.run()
 
         request, _ = make_request(
-            self.sydent.reactor, "GET",
-            "/_matrix/identity/v2/hash_details?access_token=" + self.test_token
+            self.sydent.reactor,
+            "GET",
+            "/_matrix/identity/v2/hash_details?access_token=" + self.test_token,
         )
 
         token = tokenFromRequest(request)

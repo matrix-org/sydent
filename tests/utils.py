@@ -69,7 +69,11 @@ def make_sydent(test_config={}):
         test_config["db"].setdefault("db.file", ":memory:")
 
     reactor = ResolvingMemoryReactorClock()
-    return Sydent(reactor=reactor, cfg=parse_config_dict(test_config), use_tls_for_federation=False)
+    return Sydent(
+        reactor=reactor,
+        cfg=parse_config_dict(test_config),
+        use_tls_for_federation=False,
+    )
 
 
 @attr.s

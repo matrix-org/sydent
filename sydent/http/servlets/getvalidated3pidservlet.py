@@ -41,22 +41,24 @@ class GetValidated3pidServlet(Resource):
         if self.require_auth:
             authV2(self.sydent, request)
 
-        args = get_args(request, ('sid', 'client_secret'))
+        args = get_args(request, ("sid", "client_secret"))
 
-        sid = args['sid']
-        clientSecret = args['client_secret']
+        sid = args["sid"]
+        clientSecret = args["client_secret"]
 
         if not is_valid_client_secret(clientSecret):
             request.setResponseCode(400)
             return {
-                'errcode': 'M_INVALID_PARAM',
-                'error': 'Invalid client_secret provided'
+                "errcode": "M_INVALID_PARAM",
+                "error": "Invalid client_secret provided",
             }
 
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
-        noMatchError = {'errcode': 'M_NO_VALID_SESSION',
-                        'error': "No valid session was found matching that sid and client secret"}
+        noMatchError = {
+            "errcode": "M_NO_VALID_SESSION",
+            "error": "No valid session was found matching that sid and client secret",
+        }
 
         try:
             s = valSessionStore.getValidatedSession(sid, clientSecret)
@@ -65,11 +67,15 @@ class GetValidated3pidServlet(Resource):
             return noMatchError
         except SessionExpiredException:
             request.setResponseCode(400)
-            return {'errcode': 'M_SESSION_EXPIRED',
-                    'error': "This validation session has expired: call requestToken again"}
+            return {
+                "errcode": "M_SESSION_EXPIRED",
+                "error": "This validation session has expired: call requestToken again",
+            }
         except SessionNotValidatedException:
             request.setResponseCode(400)
-            return {'errcode': 'M_SESSION_NOT_VALIDATED',
-                    'error': "This validation session has not yet been completed"}
+            return {
+                "errcode": "M_SESSION_NOT_VALIDATED",
+                "error": "This validation session has not yet been completed",
+            }
 
-        return {'medium': s.medium, 'address': s.address, 'validated_at': s.mtime}
+        return {"medium": s.medium, "address": s.address, "validated_at": s.mtime}
