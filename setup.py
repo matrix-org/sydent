@@ -24,7 +24,7 @@ def read_version():
     fn = os.path.join(os.path.dirname(__file__), "sydent", "__init__.py")
     with open(fn) as fp:
         f = fp.read()
-    return re.search(r'^__version__ = "(.*), f).group(1)"')
+    return re.search(r'^__version__ = "(.*)"', f).group(1)
 
 
 # Utility function to read the README file.
