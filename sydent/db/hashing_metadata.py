@@ -71,15 +71,16 @@ class HashingMetadataStore:
             cur, hashing_function, pepper, "global_threepid_associations"
         )
 
-        # Commit the queued db transactions so that adding a new pepper and hashing is atomic
+        # Commit the queued db transactions so that adding a new pepper and hashing
+        # is atomic
         self.sydent.db.commit()
 
     def _rehash_threepids(self, cur, hashing_function, pepper, table):
         """Rehash 3PIDs of a given table using a given hashing_function and pepper
 
-        A database cursor `cur` must be passed to this function. After this function completes,
-        the calling function should make sure to call self`self.sydent.db.commit()` to commit
-        the made changes to the database.
+        A database cursor `cur` must be passed to this function. After this function
+        completes, the calling function should make sure to call
+        self`self.sydent.db.commit()` to commit the made changes to the database.
 
         :param cur: Database cursor
         :type cur:
@@ -87,7 +88,8 @@ class HashingMetadataStore:
         :param hashing_function: A function with single input and output strings
         :type hashing_function func(str) -> str
 
-        :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing
+        :param pepper: A pepper to append to the end of the 3PID (after a space)
+             before hashing
         :type pepper: str
 
         :param table: The database table to perform the rehashing on
@@ -121,7 +123,8 @@ class HashingMetadataStore:
 
                 # Combine the medium, address and pepper together in the
                 # following form: "address medium pepper"
-                # According to MSC2134: https://github.com/matrix-org/matrix-doc/pull/2134
+                # According to MSC2134:
+                # https://github.com/matrix-org/matrix-doc/pull/2134
                 combo = "%s %s %s" % (address, medium, pepper)
 
                 # Hash the resulting string

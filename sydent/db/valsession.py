@@ -54,8 +54,10 @@ class ThreePidValSessionStore:
 
         cur.execute(
             "select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
-            "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
-            "where s.medium = ? and s.address = ? and s.clientSecret = ? and t.validationSession = s.id",
+            "t.token, t.sendAttemptNumber "
+            "from threepid_validation_sessions s,threepid_token_auths t "
+            "where s.medium = ? and s.address = ? and s.clientSecret = ? "
+            "and t.validationSession = s.id",
             (medium, address, clientSecret),
         )
         row = cur.fetchone()
@@ -73,7 +75,8 @@ class ThreePidValSessionStore:
         tokenString = sydent.util.tokenutils.generateTokenForMedium(medium)
 
         cur.execute(
-            "insert into threepid_token_auths (validationSession, token, sendAttemptNumber) values (?, ?, ?)",
+            "insert into threepid_token_auths "
+            "(validationSession, token, sendAttemptNumber) values (?, ?, ?)",
             (sid, tokenString, -1),
         )
         self.sydent.db.commit()
@@ -110,7 +113,8 @@ class ThreePidValSessionStore:
         sid = self.random.randint(0, 2 ** 31)
 
         cur.execute(
-            "insert into threepid_validation_sessions ('id', 'medium', 'address', 'clientSecret', 'mtime')"
+            "insert into threepid_validation_sessions "
+            "('id', 'medium', 'address', 'clientSecret', 'mtime')"
             + " values (?, ?, ?, ?, ?)",
             (sid, medium, address, clientSecret, mtime),
         )
@@ -210,7 +214,8 @@ class ThreePidValSessionStore:
 
         cur.execute(
             "select s.id, s.medium, s.address, s.clientSecret, s.validated, s.mtime, "
-            "t.token, t.sendAttemptNumber from threepid_validation_sessions s,threepid_token_auths t "
+            "t.token, t.sendAttemptNumber "
+            "from threepid_validation_sessions s,threepid_token_auths t "
             "where s.id = ? and t.validationSession = s.id",
             (sid,),
         )

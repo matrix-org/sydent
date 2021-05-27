@@ -55,7 +55,7 @@ class TermsStore(object):
         :type urls: list[unicode]
         """
         cur = self.sydent.db.cursor()
-        res = cur.executemany(
+        cur.executemany(
             "insert or ignore into accepted_terms_urls (user_id, url) values (?, ?)",
             ((user_id, u) for u in urls),
         )

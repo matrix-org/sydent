@@ -54,7 +54,7 @@ class SqliteDatabase:
             try:
                 logger.info("Importing %s", scriptPath)
                 c.executescript(fp.read())
-            except:
+            except:  # noqa: E722
                 logger.error("Error importing %s", scriptPath)
                 raise
             fp.close()
@@ -68,18 +68,21 @@ class SqliteDatabase:
         if curVer < 1:
             cur = self.db.cursor()
 
-            # add auto_increment to the primary key of local_threepid_associations to ensure ids are never re-used,
-            # allow the mxid column to be null to represent the deletion of a binding
-            # and remove not null constraints on ts, notBefore and notAfter (again for when a binding has been deleted
+            # add auto_increment to the primary key of local_threepid_associations to
+            # ensure ids are never re-used, allow the mxid column to be null to
+            # represent the deletion of a binding and remove not null constraints on
+            # ts, notBefore and notAfter (again for when a binding has been deleted
             # and these wouldn't be very meaningful)
             logger.info("Migrating schema from v0 to v1")
             cur.execute("DROP INDEX IF EXISTS medium_address")
             cur.execute("DROP INDEX IF EXISTS local_threepid_medium_address")
             cur.execute(
-                "ALTER TABLE local_threepid_associations RENAME TO old_local_threepid_associations"
+                "ALTER TABLE local_threepid_associations "
+                "RENAME TO old_local_threepid_associations"
             )
             cur.execute(
-                "CREATE TABLE local_threepid_associations (id integer primary key autoincrement, "
+                "CREATE TABLE local_threepid_associations ( "
+                "id integer primary key autoincrement, "
                 "medium varchar(16) not null, "
                 "address varchar(256) not null, "
                 "mxid varchar(256), "
@@ -88,23 +91,28 @@ class SqliteDatabase:
                 "notAfter bigint)"
             )
             cur.execute(
-                "INSERT INTO local_threepid_associations (medium, address, mxid, ts, notBefore, notAfter) "
-                "SELECT medium, address, mxid, ts, notBefore, notAfter FROM old_local_threepid_associations"
+                "INSERT INTO local_threepid_associations ( "
+                "medium, address, mxid, ts, notBefore, notAfter) "
+                "SELECT medium, address, mxid, ts, notBefore, notAfter "
+                "FROM old_local_threepid_associations"
             )
             cur.execute(
-                "CREATE UNIQUE INDEX local_threepid_medium_address on local_threepid_associations(medium, address)"
+                "CREATE UNIQUE INDEX local_threepid_medium_address "
+                "on local_threepid_associations(medium, address)"
             )
             cur.execute("DROP TABLE old_local_threepid_associations")
 
-            # same autoincrement for global_threepid_associations (fields stay non-nullable because we don't need
-            # entries in this table for deletions, we can just delete the rows)
+            # same autoincrement for global_threepid_associations (fields stay
+            # non-nullable because we don't need entries in this table for deletions,
+            # we can just delete the rows)
             cur.execute("DROP INDEX IF EXISTS global_threepid_medium_address")
             cur.execute("DROP INDEX IF EXISTS global_threepid_medium_lower_address")
             cur.execute("DROP INDEX IF EXISTS global_threepid_originServer_originId")
             cur.execute("DROP INDEX IF EXISTS medium_lower_address")
             cur.execute("DROP INDEX IF EXISTS threepid_originServer_originId")
             cur.execute(
-                "ALTER TABLE global_threepid_associations RENAME TO old_global_threepid_associations"
+                "ALTER TABLE global_threepid_associations "
+                "RENAME TO old_global_threepid_associations"
             )
             cur.execute(
                 "CREATE TABLE IF NOT EXISTS global_threepid_associations "
@@ -121,12 +129,15 @@ class SqliteDatabase:
             )
             cur.execute(
                 "INSERT INTO global_threepid_associations "
-                "(medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) "
-                "SELECT medium, address, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc "
+                "(medium, address, mxid, ts, notBefore, notAfter, "
+                "originServer, originId, sgAssoc) "
+                "SELECT medium, address, mxid, ts, notBefore, notAfter, "
+                "originServer, originId, sgAssoc "
                 "FROM old_global_threepid_associations"
             )
             cur.execute(
-                "CREATE INDEX global_threepid_medium_address on global_threepid_associations (medium, address)"
+                "CREATE INDEX global_threepid_medium_address on "
+                "global_threepid_associations (medium, address)"
             )
             cur.execute(
                 "CREATE INDEX global_threepid_medium_lower_address on "
@@ -145,7 +156,8 @@ class SqliteDatabase:
             logger.info("Migrating schema from v1 to v2")
             cur = self.db.cursor()
             cur.execute(
-                "CREATE INDEX threepid_validation_sessions_mtime ON threepid_validation_sessions(mtime)"
+                "CREATE INDEX threepid_validation_sessions_mtime ON "
+                "threepid_validation_sessions(mtime)"
             )
             self.db.commit()
             logger.info("v1 -> v2 schema migration complete")
@@ -184,16 +196,20 @@ class SqliteDatabase:
         if curVer < 4:
             cur = self.db.cursor()
             cur.execute(
-                "CREATE TABLE accounts(user_id TEXT NOT NULL PRIMARY KEY, created_ts BIGINT NOT NULL, consent_version TEXT)"
+                "CREATE TABLE accounts(user_id TEXT NOT NULL PRIMARY KEY, "
+                "created_ts BIGINT NOT NULL, consent_version TEXT)"
             )
             cur.execute(
-                "CREATE TABLE tokens(token TEXT NOT NULL PRIMARY KEY, user_id TEXT NOT NULL)"
+                "CREATE TABLE tokens(token TEXT NOT NULL PRIMARY KEY, "
+                "user_id TEXT NOT NULL)"
             )
             cur.execute(
-                "CREATE TABLE accepted_terms_urls(user_id TEXT NOT NULL, url TEXT NOT NULL)"
+                "CREATE TABLE accepted_terms_urls(user_id TEXT NOT NULL, "
+                "url TEXT NOT NULL)"
             )
             cur.execute(
-                "CREATE UNIQUE INDEX accepted_terms_urls_idx ON accepted_terms_urls (user_id, url)"
+                "CREATE UNIQUE INDEX accepted_terms_urls_idx ON "
+                "accepted_terms_urls (user_id, url)"
             )
             self.db.commit()
             logger.info("v3 -> v4 schema migration complete")
@@ -204,7 +220,8 @@ class SqliteDatabase:
             cur = self.db.cursor()
             cur.execute("DROP INDEX IF EXISTS lookup_hash_medium")
             cur.execute(
-                "CREATE INDEX global_threepid_lookup_hash ON global_threepid_associations(lookup_hash)"
+                "CREATE INDEX global_threepid_lookup_hash ON "
+                "global_threepid_associations(lookup_hash)"
             )
             self.db.commit()
             logger.info("v4 -> v5 schema migration complete")
@@ -212,7 +229,7 @@ class SqliteDatabase:
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
-        res = cur.execute("PRAGMA user_version")
+        cur.execute("PRAGMA user_version")
         row = cur.fetchone()
         return row[0]
 
@@ -220,4 +237,4 @@ class SqliteDatabase:
         cur = self.db.cursor()
         # NB. pragma doesn't support variable substitution so we
         # do it in python (as a decimal so we don't risk SQL injection)
-        res = cur.execute("PRAGMA user_version = %d" % (ver,))
+        cur.execute("PRAGMA user_version = %d" % (ver,))

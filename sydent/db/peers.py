@@ -34,7 +34,8 @@ class PeerStore:
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
-            "select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+            "select p.name, p.port, p.lastSentVersion, pk.alg, pk.key "
+            "from peers p, peer_pubkeys pk "
             "where p.name = ? and pk.peername = p.name and p.active = 1",
             (name,),
         )
@@ -66,7 +67,8 @@ class PeerStore:
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
-            "select p.name, p.port, p.lastSentVersion, pk.alg, pk.key from peers p, peer_pubkeys pk "
+            "select p.name, p.port, p.lastSentVersion, pk.alg, pk.key "
+            "from peers p, peer_pubkeys pk "
             "where pk.peername = p.name and p.active = 1"
         )
 

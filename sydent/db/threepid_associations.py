@@ -42,7 +42,8 @@ class LocalAssociationStore:
         # sqlite's support for upserts is atrocious
         cur.execute(
             "insert or replace into local_threepid_associations "
-            "('medium', 'address', 'lookup_hash', 'mxid', 'ts', 'notBefore', 'notAfter')"
+            "('medium', 'address', 'lookup_hash', 'mxid', 'ts', "
+            "'notBefore', 'notAfter')"
             " values (?, ?, ?, ?, ?, ?, ?)",
             (
                 assoc.medium,
@@ -76,8 +77,8 @@ class LocalAssociationStore:
             afterId = -1
 
         q = (
-            "select id, medium, address, lookup_hash, mxid, ts, notBefore, notAfter from "
-            "local_threepid_associations "
+            "select id, medium, address, lookup_hash, mxid, ts, "
+            "notBefore, notAfter from local_threepid_associations "
             "where id > ? order by id asc"
         )
         if limit is not None:
@@ -201,9 +202,9 @@ class GlobalAssociationStore:
         # case insensitive which is technically incorrect). If we someday get a
         # case-sensitive threepid, this can change.
         res = cur.execute(
-            "select sgAssoc from global_threepid_associations where "
-            "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
-            "order by ts desc limit 1",
+            "select sgAssoc from global_threepid_associations "
+            "where medium = ? and lower(address) = lower(?) "
+            "and notBefore < ? and notAfter > ? order by ts desc limit 1",
             (medium, address, time_msec(), time_msec()),
         )
 
@@ -230,9 +231,9 @@ class GlobalAssociationStore:
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
-            "select mxid from global_threepid_associations where "
-            "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
-            "order by ts desc limit 1",
+            "select mxid from global_threepid_associations "
+            "where medium = ? and lower(address) = lower(?) and notBefore < ? "
+            "and notAfter > ? order by ts desc limit 1",
             (medium, address, time_msec(), time_msec()),
         )
 
@@ -257,10 +258,12 @@ class GlobalAssociationStore:
         cur = self.sydent.db.cursor()
 
         cur.execute(
-            "CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), address VARCHAR(256))"
+            "CREATE TEMPORARY TABLE tmp_getmxids (medium VARCHAR(16), "
+            "address VARCHAR(256))"
         )
         cur.execute(
-            "CREATE INDEX tmp_getmxids_medium_lower_address ON tmp_getmxids (medium, lower(address))"
+            "CREATE INDEX tmp_getmxids_medium_lower_address "
+            "ON tmp_getmxids (medium, lower(address))"
         )
 
         try:
@@ -273,10 +276,13 @@ class GlobalAssociationStore:
                 inserted_cap += 500
 
             res = cur.execute(
-                # 'notBefore' is the time the association starts being valid, 'notAfter' the the time at which
-                # it ceases to be valid, so the ts must be greater than 'notBefore' and less than 'notAfter'.
-                "SELECT gte.medium, gte.address, gte.ts, gte.mxid FROM global_threepid_associations gte "
-                "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium AND lower(gte.address) = lower(tmp_getmxids.address) "
+                # 'notBefore' is the time the association starts being valid, 'notAfter'
+                # the the time at which it ceases to be valid, so the ts must be greater
+                # than 'notBefore' and less than 'notAfter'.
+                "SELECT gte.medium, gte.address, gte.ts, gte.mxid "
+                "FROM global_threepid_associations gte "
+                "JOIN tmp_getmxids ON gte.medium = tmp_getmxids.medium "
+                "AND lower(gte.address) = lower(tmp_getmxids.address) "
                 "WHERE gte.notBefore < ? AND gte.notAfter > ? "
                 "ORDER BY gte.medium, gte.address, gte.ts DESC",
                 (time_msec(), time_msec()),
@@ -317,7 +323,8 @@ class GlobalAssociationStore:
         cur = self.sydent.db.cursor()
         cur.execute(
             "insert or ignore into global_threepid_associations "
-            "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, originServer, originId, sgAssoc) values "
+            "(medium, address, lookup_hash, mxid, ts, notBefore, notAfter, "
+            "originServer, originId, sgAssoc) values "
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 assoc.medium,
@@ -417,9 +424,11 @@ class GlobalAssociationStore:
                 inserted_cap += 500
 
             res = cur.execute(
-                # 'notBefore' is the time the association starts being valid, 'notAfter' the the time at which
-                # it ceases to be valid, so the ts must be greater than 'notBefore' and less than 'notAfter'.
-                "SELECT gta.lookup_hash, gta.mxid FROM global_threepid_associations gta "
+                # 'notBefore' is the time the association starts being valid, 'notAfter'
+                # the the time at which it ceases to be valid, so the ts must be greater
+                # than 'notBefore' and less than 'notAfter'.
+                "SELECT gta.lookup_hash, gta.mxid "
+                "FROM global_threepid_associations gta "
                 "JOIN tmp_retrieve_mxids_for_hashes "
                 "ON gta.lookup_hash = tmp_retrieve_mxids_for_hashes.lookup_hash "
                 "WHERE gta.notBefore < ? AND gta.notAfter > ? "
@@ -428,8 +437,8 @@ class GlobalAssociationStore:
             )
 
             # Place the results from the query into a dictionary
-            # Results are sorted from oldest to newest, so if there are multiple mxid's for
-            # the same lookup hash, only the newest mapping will be returned
+            # Results are sorted from oldest to newest, so if there are multiple mxid's
+            # for the same lookup hash, only the newest mapping will be returned
             for lookup_hash, mxid in res.fetchall():
                 results[lookup_hash] = mxid
 

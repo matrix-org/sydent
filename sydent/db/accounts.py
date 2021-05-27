@@ -34,8 +34,8 @@ class AccountStore(object):
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
-            "select a.user_id, a.created_ts, a.consent_version from accounts a, tokens t "
-            "where t.user_id = a.user_id and t.token = ?",
+            "select a.user_id, a.created_ts, a.consent_version from accounts a, "
+            "tokens t where t.user_id = a.user_id and t.token = ?",
             (token,),
         )
 
@@ -58,7 +58,7 @@ class AccountStore(object):
         :type consent_version: str or None
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute(
+        cur.execute(
             "insert or ignore into accounts (user_id, created_ts, consent_version) "
             "values (?, ?, ?)",
             (user_id, creation_ts, consent_version),
@@ -76,7 +76,7 @@ class AccountStore(object):
         :type consent_version: unicode or None
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute(
+        cur.execute(
             "update accounts set consent_version = ? where user_id = ?",
             (consent_version, user_id),
         )
@@ -92,7 +92,7 @@ class AccountStore(object):
         :type token: unicode
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute(
+        cur.execute(
             "insert into tokens (user_id, token) values (?, ?)",
             (user_id, token),
         )
@@ -106,7 +106,7 @@ class AccountStore(object):
         :type token: unicode
         """
         cur = self.sydent.db.cursor()
-        res = cur.execute(
+        cur.execute(
             "delete from tokens where token = ?",
             (token,),
         )
