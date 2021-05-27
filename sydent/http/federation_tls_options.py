@@ -34,8 +34,8 @@ def _tolerateErrors(wrapped):
         try:
             return wrapped(connection, where, ret)
         except:  # noqa: E722, taken from the twisted implementation
-            f = Failure()
-            logger.exception("Error during info_callback")
+            f = Failure()  # noqa: F821
+            logger.exception("Error during info_callback")  # noqa: F821
             connection.get_app_data().failVerification(f)
 
     return infoCallback

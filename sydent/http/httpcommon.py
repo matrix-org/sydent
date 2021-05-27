@@ -54,7 +54,8 @@ class SslComponents:
             fp = open(privKeyAndCertFilename)
         except IOError:
             logger.warn(
-                "Unable to read private key / cert file from %s: not starting the replication HTTPS server "
+                "Unable to read private key / cert file from %s: "
+                "not starting the replication HTTPS server "
                 "or doing replication pushes.",
                 privKeyAndCertFilename,
             )
@@ -65,8 +66,9 @@ class SslComponents:
         return twisted.internet.ssl.PrivateCertificate.loadPEM(authData)
 
     def makeTrustRoot(self):
-        # If this option is specified, use a specific root CA cert. This is useful for testing when it's not
-        # practical to get the client cert signed by a real root CA but should never be used on a production server.
+        # If this option is specified, use a specific root CA cert. This is useful for
+        # testing when it's not practical to get the client cert signed by a real root
+        # CA but should never be used on a production server.
         caCertFilename = self.sydent.cfg.get("http", "replication.https.cacert")
         if len(caCertFilename) > 0:
             try:
@@ -112,7 +114,8 @@ class _DiscardBodyWithMaxSizeProtocol(protocol.Protocol):
 
 
 class _ReadBodyWithMaxSizeProtocol(protocol.Protocol):
-    """A protocol which reads body to a stream, erroring if the body exceeds a maximum size."""
+    """A protocol which reads body to a stream, erroring if the body exceeds a maximum
+    size."""
 
     def __init__(self, deferred, max_size):
         self.stream = BytesIO()
@@ -153,7 +156,8 @@ class _ReadBodyWithMaxSizeProtocol(protocol.Protocol):
 
 def read_body_with_max_size(response, max_size):
     """
-    Read a HTTP response body to a file-object. Optionally enforcing a maximum file size.
+    Read a HTTP response body to a file-object. Optionally enforcing a maximum file
+    size.
 
     If the maximum file size is reached, the returned Deferred will resolve to a
     Failure with a BodyExceededMaxSize exception.

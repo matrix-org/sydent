@@ -41,7 +41,8 @@ class NoAuthenticationError(Exception):
 
 class InvalidServerName(Exception):
     """
-    Raised when the provided origin parameter is not a valid hostname (plus optional port).
+    Raised when the provided origin parameter is not a valid hostname (plus optional
+    port).
     """
 
     pass
@@ -156,7 +157,8 @@ class Verifier(object):
                 server_keys,
             )
         logger.warn(
-            "Unable to verify any signatures from block %r. Acceptable server names: %r",
+            "Unable to verify any signatures from block %r. "
+            "Acceptable server names: %r",
             signed_json["signatures"],
             acceptable_server_names,
         )

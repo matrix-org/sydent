@@ -63,7 +63,7 @@ class BlindlySignStuffServlet(Resource):
                 "ed25519", "0", private_key_base64
             )
             signed = signedjson.sign.sign_json(to_sign, self.server_name, private_key)
-        except:
+        except:  # noqa: E722
             logger.exception("signing failed")
             raise MatrixRestError(500, "M_UNKNOWN", "Internal Server Error")
 

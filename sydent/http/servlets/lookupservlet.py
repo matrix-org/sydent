@@ -44,7 +44,8 @@ class LookupServlet(Resource):
 
         Params: 'medium': the medium of the threepid
                 'address': the address of the threepid
-        Returns: A signed association if the threepid has a corresponding mxid, otherwise the empty object.
+        Returns: A signed association if the threepid has a corresponding mxid,
+        otherwise the empty object.
         """
         send_cors(request)
 
@@ -61,7 +62,7 @@ class LookupServlet(Resource):
             return {}
 
         sgassoc = json_decoder.decode(sgassoc)
-        if not self.sydent.server_name in sgassoc["signatures"]:
+        if self.sydent.server_name not in sgassoc["signatures"]:
             # We have not yet worked out what the proper trust model should be.
             #
             # Maybe clients implicitly trust a server they talk to (and so we

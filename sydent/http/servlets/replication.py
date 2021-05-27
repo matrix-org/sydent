@@ -102,10 +102,10 @@ class ReplicationPushServlet(Resource):
                     originId,
                 )
 
-                # Don't bother adding if one has already failed: we add all of them or none so
-                # we're only going to roll back the transaction anyway (but we continue to try
-                # & verify the rest so we can give a complete list of the ones that don't
-                # verify)
+                # Don't bother adding if one has already failed: we add all of them or
+                # none so we're only going to roll back the transaction anyway (but we
+                # continue to try & verify the rest so we can give a complete list of
+                # the ones that don't verify)
                 if len(failedIds) > 0:
                     continue
 
@@ -142,7 +142,7 @@ class ReplicationPushServlet(Resource):
                 logger.info(
                     "Stored association origin ID %s from %s", originId, peer.servername
                 )
-            except:
+            except:  # noqa: E722
                 failedIds.append(originId)
                 logger.warn(
                     "Failed to verify signed association from %s with origin ID %s",

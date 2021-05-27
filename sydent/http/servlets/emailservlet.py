@@ -106,17 +106,23 @@ class EmailValidateCodeServlet(Resource):
         resp = None
         try:
             resp = self.do_validate_request(request)
-        except:
+        except:  # noqa: E722
             pass
         if resp and "success" in resp and resp["success"]:
-            msg = "Verification successful! Please return to your Matrix client to continue."
+            msg = (
+                "Verification successful! "
+                "Please return to your Matrix client to continue."
+            )
             if "nextLink" in args:
                 next_link = args["nextLink"]
                 if not next_link.startswith("file:///"):
                     request.setResponseCode(302)
                     request.setHeader("Location", next_link)
         else:
-            msg = "Verification failed: you may need to request another verification email"
+            msg = (
+                "Verification failed: "
+                "you may need to request another verification email"
+            )
 
         brand = self.sydent.brand_from_request(request)
         templateFile = self.sydent.get_branded_template(
@@ -172,7 +178,8 @@ class EmailValidateCodeServlet(Resource):
             return {
                 "success": False,
                 "errcode": "M_INVALID_PARAM",
-                "error": "Client secret does not match the one given when requesting the token",
+                "error": "Client secret does not match the one given "
+                "when requesting the token",
             }
         except SessionExpiredException:
             return {

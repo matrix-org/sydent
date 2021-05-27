@@ -132,14 +132,20 @@ class MsisdnValidateCodeServlet(Resource):
         else:
             resp = self.do_validate_request(args)
             if "success" in resp and resp["success"]:
-                msg = "Verification successful! Please return to your Matrix client to continue."
+                msg = (
+                    "Verification successful! "
+                    "Please return to your Matrix client to continue."
+                )
                 if "next_link" in args:
                     next_link = args["next_link"]
                     request.setResponseCode(302)
                     request.setHeader("Location", next_link)
             else:
                 request.setResponseCode(400)
-                msg = "Verification failed: you may need to request another verification text"
+                msg = (
+                    "Verification failed: "
+                    "you may need to request another verification text."
+                )
 
         brand = self.sydent.brand_from_request(request)
         templateFile = self.sydent.get_branded_template(
@@ -196,7 +202,8 @@ class MsisdnValidateCodeServlet(Resource):
             return {
                 "success": False,
                 "errcode": "M_INVALID_PARAM",
-                "error": "Client secret does not match the one given when requesting the token",
+                "error": "Client secret does not match the one given "
+                "when requesting the token",
             }
         except SessionExpiredException:
             request.setResponseCode(400)

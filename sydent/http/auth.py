@@ -59,13 +59,13 @@ def authV2(sydent, request, requireTermsAgreed=True):
     :type sydent: sydent.sydent.Sydent
     :param request: The request to look for an access token in.
     :type request: twisted.web.server.Request
-    :param requireTermsAgreed: Whether to deny authentication if the user hasn't accepted
-        the terms of service.
+    :param requireTermsAgreed: Whether to deny authentication if the user hasn't
+        accepted the terms of service.
 
     :returns Account|None: The account object if there is correct auth, or None for v1
         APIs.
-    :raises MatrixRestError: If the request is v2 but could not be authed or the user has
-        not accepted terms.
+    :raises MatrixRestError: If the request is v2 but could not be authed or the user
+        has not accepted terms.
     """
     token = tokenFromRequest(request)
 

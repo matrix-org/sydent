@@ -130,7 +130,8 @@ class ThreePidUnbindServlet(Resource):
                         dict_to_json_bytes(
                             {
                                 "errcode": "M_NO_VALID_SESSION",
-                                "error": "No valid session was found matching that sid and client secret",
+                                "error": "No valid session was found matching that "
+                                "sid and client secret",
                             }
                         )
                     )
@@ -142,7 +143,8 @@ class ThreePidUnbindServlet(Resource):
                         dict_to_json_bytes(
                             {
                                 "errcode": "M_SESSION_NOT_VALIDATED",
-                                "error": "This validation session has not yet been completed",
+                                "error": "This validation session has not yet "
+                                "been completed",
                             }
                         )
                     )
@@ -154,7 +156,8 @@ class ThreePidUnbindServlet(Resource):
                         dict_to_json_bytes(
                             {
                                 "errcode": "M_FORBIDDEN",
-                                "error": "Provided session information does not match medium/address combo",
+                                "error": "Provided session information does not match "
+                                "medium/address combo",
                             }
                         )
                     )

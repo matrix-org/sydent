@@ -84,8 +84,9 @@ def pick_server_from_list(server_list):
 
 class SrvResolver(object):
     """Interface to the dns client to do SRV lookups, with result caching.
-    The default resolver in twisted.names doesn't do any caching (it has a CacheResolver,
-    but the cache never gets populated), so we add our own caching layer here.
+    The default resolver in twisted.names doesn't do any caching (it has a
+    CacheResolver, but the cache never gets populated), so we add our own
+    caching layer here.
 
     :param dns_client: Twisted resolver impl
     :type dns_client: twisted.internet.interfaces.IResolver

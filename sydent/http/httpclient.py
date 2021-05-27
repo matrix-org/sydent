@@ -123,8 +123,8 @@ class SimpleHttpClient(HTTPClient):
     def __init__(self, sydent):
         self.sydent = sydent
         # The default endpoint factory in Twisted 14.0.0 (which we require) uses the
-        # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
-        # 'like a browser'
+        # BrowserLikePolicyForHTTPS context factory which will do regular cert
+        # validation 'like a browser'
         self.agent = Agent(
             BlacklistingReactorWrapper(
                 reactor=self.sydent.reactor,

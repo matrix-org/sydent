@@ -31,9 +31,9 @@ logger = logging.getLogger(__name__)
 
 class ReplicationHttpsClient:
     """
-    An HTTPS client specifically for talking replication to other Matrix Identity Servers
-    (ie. presents our replication SSL certificate and validates peer SSL certificates as we would in the
-    replication HTTPS server)
+    An HTTPS client specifically for talking replication to other Matrix Identity
+    Servers (ie. presents our replication SSL certificate and validates peer SSL
+    certificates as we would in the replication HTTPS server)
     """
 
     def __init__(self, sydent):
@@ -43,9 +43,12 @@ class ReplicationHttpsClient:
         if self.sydent.sslComponents.myPrivateCertificate:
             # We will already have logged a warn if this is absent, so don't do it again
             # cert = self.sydent.sslComponents.myPrivateCertificate
-            # self.certOptions = twisted.internet.ssl.CertificateOptions(privateKey=cert.privateKey.original,
-            #                                                      certificate=cert.original,
-            #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
+            # self.certOptions = (
+            #                     twisted.internet.ssl.CertificateOptions(
+            #                     privateKey=cert.privateKey.original,
+            #                     certificate=cert.original,
+            #                     trustRoot=self.sydent.sslComponents.trustRoot)
+            #                     )
             self.agent = Agent(self.sydent.reactor, SydentPolicyForHTTPS(self.sydent))
 
     def postJson(self, uri, jsonObject):

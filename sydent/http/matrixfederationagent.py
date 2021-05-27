@@ -450,8 +450,8 @@ class _RoutingResult(object):
 
     target_host = attr.ib()
     """
-    The hostname (or IP literal) we should route the TCP connection to (the target of the
-    SRV record, or the hostname from the URL/.well-known)
+    The hostname (or IP literal) we should route the TCP connection to (the target of
+    the SRV record, or the hostname from the URL/.well-known)
     :type: bytes
     """
 

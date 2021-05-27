@@ -53,7 +53,8 @@ class RegisterServlet(Resource):
             request.setResponseCode(400)
             return {
                 "errcode": "M_INVALID_PARAM",
-                "error": "matrix_server_name must be a valid Matrix server name (IP address or hostname)",
+                "error": "matrix_server_name must be a valid Matrix server name "
+                "(IP address or hostname)",
             }
 
         result = yield self.client.get_json(
@@ -100,7 +101,8 @@ class RegisterServlet(Resource):
             request.setResponseCode(500)
             return {
                 "errcode": "M_UNKNOWN",
-                "error": "The Matrix homeserver returned a MXID belonging to another homeserver",
+                "error": "The Matrix homeserver returned a MXID belonging to "
+                "another homeserver",
             }
 
         tok = yield issueToken(self.sydent, user_id)
