@@ -95,7 +95,8 @@ CONFIG_DEFAULTS = {
         "log.level": "INFO",
         "pidfile.path": os.environ.get("SYDENT_PID_FILE", "sydent.pid"),
         "terms.path": "",
-        "address_lookup_limit": "10000",  # Maximum amount of addresses in a single /lookup request
+        "address_lookup_limit": "10000",  # Maximum amount of addresses
+                                          # in a single /lookup request
         # The root path to use for load templates. This should contain branded
         # directories. Each directory should contain the following templates:
         #
@@ -109,10 +110,13 @@ CONFIG_DEFAULTS = {
         # The following can be added to your local config file to enable prometheus
         # support.
         # 'prometheus_port': '8080',  # The port to serve metrics on
-        # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
+        # 'prometheus_addr': '',  # The address to bind to. Empty string means bind
+        # to all.
         # The following can be added to your local config file to enable sentry support.
-        # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
-        # Whether clients and homeservers can register an association using v1 endpoints.
+        # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance
+        # project.
+        # Whether clients and homeservers can register an association using v1
+        # endpoints.
         "enable_v1_associations": "true",
         "delete_tokens_on_bind": "true",
         # Prevent outgoing requests from being sent to the following blacklisted
@@ -180,11 +184,13 @@ CONFIG_DEFAULTS = {
         # address. These config options determine how much of the email address to
         # obfuscate. Note that the '@' sign is always included.
         #
-        # If the string is longer than a configured limit below, it is truncated to that limit
-        # with '...' added. Otherwise:
+        # If the string is longer than a configured limit below, it is truncated to
+        # that limit with '...' added. Otherwise:
         #
-        # * If the string is longer than 5 characters, it is truncated to 3 characters + '...'
-        # * If the string is longer than 1 character, it is truncated to 1 character + '...'
+        # * If the string is longer than 5 characters, it is truncated to 3
+        #   characters + '...'
+        # * If the string is longer than 1 character, it is truncated to 1
+        #   character + '...'
         # * If the string is 1 character long, it is converted to '...'
         #
         # This ensures that a full email address is never shown, even if it is extremely
@@ -229,9 +235,10 @@ class Sydent:
             self.server_name = os.uname()[1]
             logger.warn(
                 (
-                    "You had not specified a server name. I have guessed that this server is called '%s' "
-                    + "and saved this in the config file. If this is incorrect, you should edit server.name in "
-                    + "the config file."
+                    "You had not specified a server name. I have guessed that this "
+                    "server is called '%s' and saved this in the config file. "
+                    "If this is incorrect, you should edit server.name in the config "
+                    "file."
                 )
                 % (self.server_name,)
             )
@@ -385,7 +392,8 @@ class Sydent:
 
         self.pusher = Pusher(self)
 
-        # A dedicated validation session store just to clean up old sessions every N minutes
+        # A dedicated validation session store just to clean up
+        # old sessions every N minutes
         self.cleanupValSession = ThreePidValSessionStore(self)
         cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
         cb.clock = self.reactor
@@ -432,7 +440,8 @@ class Sydent:
 
     def brand_from_request(self, request):
         """
-        If the brand GET parameter is passed, returns that as a string, otherwise returns None.
+        If the brand GET parameter is passed, returns that as a string,
+        otherwise returns None.
 
         :param request: The incoming request.
         :type request: twisted.web.http.Request
@@ -474,7 +483,8 @@ class Sydent:
             if brand not in self.valid_brands:
                 brand = None
 
-        # If the brand hint is not valid, or not provided, fallback to the default brand.
+        # If the brand hint is not valid, or not provided, fallback to the default
+        # brand.
         if not brand:
             brand = self.cfg.get("general", "brand.default")
 
