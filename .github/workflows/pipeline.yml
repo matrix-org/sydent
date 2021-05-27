@@ -11,6 +11,17 @@ jobs:
       - run: python -m pip install -e .
       - run: trial tests
 
+  run-matrix-is-tests-python3-6:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - run: python -m pip install -e .
+      - run: pip install git+https://github.com/matrix-org/matrix-is-tester.git
+      - run: trial matrix_is_tester
+
   run-unit-tests-python3-9:
     runs-on: ubuntu-latest
     steps: 
@@ -21,13 +32,13 @@ jobs:
       - run: python -m pip install -e .
       - run: trial tests
 
-  run-matrix-is-tests-python3-6:
+  run-matrix-is-tests-python3-9:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.6'
+          python-version: '3.9'
       - run: python -m pip install -e .
       - run: pip install git+https://github.com/matrix-org/matrix-is-tester.git
       - run: trial matrix_is_tester
