@@ -47,11 +47,11 @@ class Pusher:
 
     def doLocalPush(self):
         """
-        Synchronously push local associations to this server (ie. copy them to globals table)
-        The local server is essentially treated the same as any other peer except we don't do
-        the network round-trip and this function can be used so the association goes into the
-        global table before the http call returns (so clients know it will be available on at
-        least the same ID server they used)
+        Synchronously push local associations to this server (ie. copy them to globals
+        table) The local server is essentially treated the same as any other peer except
+        we don't do the network round-trip and this function can be used so the
+        association goes into the global table before the http call returns (so
+        clients know it will be available on at least the same ID server they used)
         """
         localPeer = LocalPeer(self.sydent)
 
@@ -64,8 +64,9 @@ class Pusher:
     def scheduledPush(self):
         """Push pending updates to all known remote peers. To be called regularly.
 
-        :returns a deferred.DeferredList of defers, one per peer we're pushing to that will
-        resolve when pushing to that peer has completed, successfully or otherwise
+        :returns a deferred.DeferredList of defers, one per peer we're pushing to
+            that will resolve when pushing to that peer has completed, successfully
+            or otherwise
         :rtype deferred.DeferredList
         """
         peers = self.peerStore.getAllPeers()
@@ -124,5 +125,6 @@ class Pusher:
         except Exception:
             logger.exception("Error pushing updates to %s:%d", p.servername, p.port)
         finally:
-            # Whether pushing completed or an error occurred, signal that pushing has finished
+            # Whether pushing completed or an error occurred, signal that pushing
+            # has finished
             p.is_being_pushed_to = False

@@ -49,8 +49,9 @@ class Peer(object):
 
     def pushUpdates(self, sgAssocs):
         """
-        :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
-                        sgAssoc is the json object of the signed association
+        :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is
+                         the id on the creating server and sgAssoc is the json
+                         object of the signed association
         :return a deferred
         """
         pass
@@ -58,7 +59,8 @@ class Peer(object):
 
 class LocalPeer(Peer):
     """
-    The local peer (ourselves: essentially copying from the local associations table to the global one)
+    The local peer (ourselves: essentially copying from the local associations
+    table to the global one)
     """
 
     def __init__(self, sydent):
@@ -98,8 +100,8 @@ class LocalPeer(Peer):
                     )
                     assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
-                    # We can probably skip verification for the local peer (although it could
-                    # be good as a sanity check)
+                    # We can probably skip verification for the local peer
+                    # (although it could be good as a sanity check)
                     globalAssocStore.addAssociation(
                         assocObj,
                         json.dumps(sgAssocs[localId]),
@@ -163,7 +165,8 @@ class RemotePeer(Peer):
             pubkey_decoded = binascii.unhexlify(pubkey)
 
             logger.warn(
-                "Peer public key of %s is hex encoded. Please update to base64 encoding",
+                "Peer public key of %s is hex encoded. "
+                "Please update to base64 encoding",
                 server_name,
             )
         except ValueError:
@@ -190,7 +193,7 @@ class RemotePeer(Peer):
         :param assoc: A signed association.
         :type assoc: dict[any, any]
         """
-        if not "signatures" in assoc:
+        if "signatures" not in assoc:
             raise NoSignaturesException()
 
         key_ids = signedjson.sign.signature_ids(assoc, self.servername)
