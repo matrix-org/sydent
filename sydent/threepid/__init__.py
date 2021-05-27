@@ -46,7 +46,8 @@ class ThreepidAssociation:
         :param mxid: The matrix ID the 3pid is associated with
         :param ts: The creation timestamp of this association, ms
         :param not_before: The timestamp, in ms, at which this association becomes valid
-        :param not_after: The timestamp, in ms, at which this association ceases to be valid
+        :param not_after: The timestamp, in ms, at which this association ceases to be
+         valid
         """
         self.medium = medium
         self.address = address
