@@ -80,3 +80,7 @@ class GetValidated3pidServlet(Resource):
             }
 
         return {"medium": s.medium, "address": s.address, "validated_at": s.mtime}
+
+    def render_OPTIONS(self, request):
+        send_cors(request)
+        return b""
