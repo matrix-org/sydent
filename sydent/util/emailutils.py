@@ -31,8 +31,8 @@ if six.PY2:
 else:
     from html import escape
 
-from sydent.util import time_msec
-from sydent.util.tokenutils import generateAlphanumericTokenOfLength
+from sydent.util import time_msec  # noqa: E402
+from sydent.util.tokenutils import generateAlphanumericTokenOfLength  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
