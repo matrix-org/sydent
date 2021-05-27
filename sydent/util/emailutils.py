@@ -31,8 +31,6 @@ if six.PY2:
 else:
     from html import escape
 
-import email.utils
-
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 
@@ -43,11 +41,11 @@ def sendEmail(sydent, templateFile, mailTo, substitutions):
     """
     Sends an email with the given parameters.
 
-    :param sydent: The Sydent instance to use when building the configuration to send the
-        email with.
+    :param sydent: The Sydent instance to use when building the configuration
+        to send the email with.
     :type sydent: sydent.sydent.Sydent
-    :param templateFile: The filename of the template to use when building the body of the
-        email.
+    :param templateFile: The filename of the template to use when building the
+        body of the email.
     :type templateFile: str
     :param mailTo: The email address to send the email to.
     :type mailTo: unicode
