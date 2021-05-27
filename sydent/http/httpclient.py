@@ -60,7 +60,7 @@ class HTTPClient(object):
         try:
             # json.loads doesn't allow bytes in Python 3.5
             json_body = json_decoder.decode(body.decode("UTF-8"))
-        except Exception as e:
+        except Exception as e:  # noqa: F841
             logger.exception("Error parsing JSON from %s", uri)
             raise
         defer.returnValue(json_body)

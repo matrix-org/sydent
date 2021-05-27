@@ -41,8 +41,8 @@ class EmailValidator:
         brand=None,
     ):
         """
-        Creates or retrieves a validation session and sends an email to the corresponding
-        email address with a token to use to verify the association.
+        Creates or retrieves a validation session and sends an email to the
+        corresponding email address with a token to use to verify the association.
 
         :param emailAddress: The email address to send the email to.
         :type emailAddress: unicode
@@ -77,7 +77,8 @@ class EmailValidator:
 
         if int(valSession.sendAttemptNumber) >= int(sendAttempt):
             logger.info(
-                "Not mailing code because current send attempt (%d) is not less than given send attempt (%s)",
+                "Not mailing code because current send attempt "
+                "(%d) is not less than given send attempt (%s)",
                 int(sendAttempt),
                 int(valSession.sendAttemptNumber),
             )
@@ -118,11 +119,14 @@ class EmailValidator:
         :rtype: unicode
         """
         base = self.sydent.cfg.get("http", "client_http_base")
-        link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
-            base,
-            urllib.parse.quote(valSession.token),
-            urllib.parse.quote(clientSecret),
-            valSession.id,
+        link = (
+            "%s/_matrix/identity/api/v1/validate/email/submitToken?"
+            "token=%s&client_secret=%s&sid=%d" % (
+                base,
+                urllib.parse.quote(valSession.token),
+                urllib.parse.quote(clientSecret),
+                valSession.id,
+            )
         )
         if nextLink:
             # manipulate the nextLink to add the sid, because

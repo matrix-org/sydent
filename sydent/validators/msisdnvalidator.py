@@ -49,11 +49,13 @@ class MsisdnValidator:
                     parts = origString.split(":")
                     if len(parts) != 2:
                         raise Exception(
-                            "Originators must be in form: long:<number>, short:<number> or alpha:<text>, separated by commas"
+                            "Originators must be in form: long:<number>, "
+                            "short:<number> or alpha:<text>, separated by commas"
                         )
                     if parts[0] not in ["long", "short", "alpha"]:
                         raise Exception(
-                            "Invalid originator type: valid types are long, short and alpha"
+                            "Invalid originator type: "
+                            "valid types are long, short and alpha"
                         )
                     self.originators[country].append(
                         {
@@ -76,7 +78,8 @@ class MsisdnValidator:
     def requestToken(self, phoneNumber, clientSecret, sendAttempt, brand=None):
         """
         Creates or retrieves a validation session and sends an text message to the
-        corresponding phone number address with a token to use to verify the association.
+        corresponding phone number address with a token to use to verify the
+        association.
 
         :param phoneNumber: The phone number to send the email to.
         :type phoneNumber: phonenumbers.PhoneNumber
@@ -109,7 +112,8 @@ class MsisdnValidator:
 
         if int(valSession.sendAttemptNumber) >= int(sendAttempt):
             logger.info(
-                "Not texting code because current send attempt (%d) is not less than given send attempt (%s)",
+                "Not texting code because current send attempt "
+                "(%d) is not less than given send attempt (%s)",
                 int(sendAttempt),
                 int(valSession.sendAttemptNumber),
             )
