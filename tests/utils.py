@@ -57,8 +57,8 @@ def make_sydent(test_config={}):
     """Create a new sydent
 
     Args:
-        test_config (dict): any configuration variables for overriding the default sydent
-            config
+        test_config (dict): any configuration variables for overriding the default
+            sydent config
     """
     # Use an in-memory SQLite database. Note that the database isn't cleaned up between
     # tests, so by default the same database will be used for each test if changed to be

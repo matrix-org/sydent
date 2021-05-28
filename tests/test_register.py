@@ -27,7 +27,8 @@ class RegisterTestCase(unittest.TestCase):
         self.sydent = make_sydent()
 
     def test_sydent_rejects_invalid_hostname(self):
-        """Tests that the /register endpoint rejects an invalid hostname passed as matrix_server_name"""
+        """Tests that the /register endpoint rejects an invalid hostname passed as
+           matrix_server_name"""
         self.sydent.run()
 
         bad_hostname = "example.com#"

@@ -16,7 +16,7 @@ class ReplicationTestCase(unittest.TestCase):
         # Create a new sydent
         config = {
             "crypto": {
-                "ed25519.signingkey": "ed25519 0 FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
+                "ed25519.signingkey": "ed25519 0 FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"  # noqa: E501
             }
         }
         self.sydent = make_sydent(test_config=config)
@@ -27,7 +27,8 @@ class ReplicationTestCase(unittest.TestCase):
         # Inject our fake peer into the database.
         cur = self.sydent.db.cursor()
         cur.execute(
-            "INSERT INTO peers (name, port, lastSentVersion, active) VALUES (?, ?, ?, ?)",
+            "INSERT INTO peers (name, port, lastSentVersion, active) VALUES "
+            "(?, ?, ?, ?)",
             ("fake.server", 1234, 0, 1),
         )
         cur.execute(
@@ -60,13 +61,13 @@ class ReplicationTestCase(unittest.TestCase):
 
         # Configure the Sydent to impersonate. We need to use "fake.server" as the
         # server's name because that's the name the recipient Sydent has for it. On top
-        # of that, the replication servlet expects a TLS certificate in the request so it
-        # can extract a common name and figure out which peer sent it from its common
+        # of that, the replication servlet expects a TLS certificate in the request so
+        # it can extract a common name and figure out which peer sent it from its common
         # name. The common name of the certificate we use for tests is fake.server.
         config = {
             "general": {"server.name": "fake.server"},
             "crypto": {
-                "ed25519.signingkey": "ed25519 0 b29eXMMAYCFvFEtq9mLI42aivMtcg4Hl0wK89a+Vb6c"
+                "ed25519.signingkey": "ed25519 0 b29eXMMAYCFvFEtq9mLI42aivMtcg4Hl0wK89a+Vb6c"  # noqa: E501
             },
         }
 
@@ -105,7 +106,8 @@ class ReplicationTestCase(unittest.TestCase):
             self.assertDictEqual(signed_assoc, res_assocs[assoc_id])
 
     def test_outgoing_replication(self):
-        """Make a fake peer and associations and make sure Sydent tries to push to it."""
+        """Make a fake peer and associations and make sure Sydent tries to push to
+           it."""
         cur = self.sydent.db.cursor()
 
         # Insert the fake associations into the database.
@@ -185,8 +187,8 @@ class ReplicationTestCase(unittest.TestCase):
         self.assertEqual(len(self.assocs), len(sent_assocs))
         for assoc_id, assoc in sent_assocs.items():
             # Replication payloads use a specific format that causes the JSON encoder to
-            # convert the numeric indexes to string, so we need to convert them back when
-            # looking up in signed_assocs. Also, the ID of the first association Sydent
-            # will push will be 1, so we need to subtract 1 when figuring out which index
-            # to lookup.
+            # convert the numeric indexes to string, so we need to convert them back
+            # when looking up in signed_assocs. Also, the ID of the first association
+            # Sydent will push will be 1, so we need to subtract 1 when figuring out
+            # which index to lookup.
             self.assertDictEqual(assoc, signed_assocs[int(assoc_id) - 1])
