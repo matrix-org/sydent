@@ -54,8 +54,8 @@ setup(
         "six>=1.10",
         "pyyaml>=3.11",
         "mock>=3.0.5",
-        "flake8==3.9.0",
-        "black==20.8b1",
+        "flake8==3.9.2",
+        "black==21.5b1",
     ],
     # make sure we package the sql files
     include_package_data=True,

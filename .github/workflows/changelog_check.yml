@@ -8,9 +8,9 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.sha}}
+          ref: ${{ github.head_ref }}
       - uses: actions/setup-python@v2
         with:
           python-version: "3.7"
       - run: python -m pip install towncrier
-      - run: python -m towncrier.check --compare-with="origin/main"
+      - run: python -m towncrier.check --compare-with=${{ github.base_ref }}
