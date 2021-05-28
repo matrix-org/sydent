@@ -34,8 +34,8 @@ jobs:
     needs: [check-code-style]
     runs-on: ubuntu-latest
     strategy:
-    matrix:
-      python-version: ['3.6', '3.x']
+      matrix:
+        python-version: ['3.6', '3.x']
 
     steps:
       - uses: actions/checkout@v2
