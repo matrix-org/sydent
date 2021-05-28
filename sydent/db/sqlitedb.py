@@ -54,7 +54,7 @@ class SqliteDatabase:
             try:
                 logger.info("Importing %s", scriptPath)
                 c.executescript(fp.read())
-            except:
+            except Exception:
                 logger.error("Error importing %s", scriptPath)
                 raise
             fp.close()
@@ -212,7 +212,7 @@ class SqliteDatabase:
 
     def _getSchemaVersion(self):
         cur = self.db.cursor()
-        res = cur.execute("PRAGMA user_version")
+        cur.execute("PRAGMA user_version")
         row = cur.fetchone()
         return row[0]
 
@@ -220,4 +220,4 @@ class SqliteDatabase:
         cur = self.db.cursor()
         # NB. pragma doesn't support variable substitution so we
         # do it in python (as a decimal so we don't risk SQL injection)
-        res = cur.execute("PRAGMA user_version = %d" % (ver,))
+        cur.execute("PRAGMA user_version = %d" % (ver,))

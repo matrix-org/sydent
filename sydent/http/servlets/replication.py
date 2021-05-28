@@ -142,7 +142,7 @@ class ReplicationPushServlet(Resource):
                 logger.info(
                     "Stored association origin ID %s from %s", originId, peer.servername
                 )
-            except:
+            except Exception:
                 failedIds.append(originId)
                 logger.warn(
                     "Failed to verify signed association from %s with origin ID %s",

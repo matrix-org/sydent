@@ -14,7 +14,6 @@
 
 
 from mock import patch
-from netaddr import IPSet
 from twisted.internet import defer
 from twisted.internet.error import DNSLookupError
 from twisted.test.proto_helpers import StringTransport

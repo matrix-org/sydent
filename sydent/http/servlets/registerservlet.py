@@ -19,10 +19,9 @@ from twisted.web.resource import Resource
 from twisted.internet import defer
 
 import logging
-import json
 from six.moves import urllib
 
-from sydent.http.servlets import get_args, jsonwrap, deferjsonwrap, send_cors
+from sydent.http.servlets import get_args, deferjsonwrap, send_cors
 from sydent.http.httpclient import FederationHttpClient
 from sydent.users.tokens import issueToken
 from sydent.util.stringutils import is_valid_matrix_server_name
