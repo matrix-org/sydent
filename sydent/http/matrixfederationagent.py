@@ -30,7 +30,7 @@ from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent
 
-from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
+from sydent.http.httpcommon import read_body_with_max_size
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
 from sydent.util import json_decoder
 from sydent.util.ttlcache import TTLCache

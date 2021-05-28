@@ -56,7 +56,7 @@ def _idnaBytes(text):
 
 
 @implementer(IOpenSSLClientConnectionCreator)
-class ClientTLSOptions(object):
+class ClientTLSOptions(object):  # noqa: F811
     """
     Client creator for TLS without certificate identity verification. This is a
     copy of twisted.internet._sslverify.ClientTLSOptions with the identity

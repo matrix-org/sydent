@@ -20,7 +20,7 @@ import logging
 from io import BytesIO
 
 from twisted.internet import defer
-from twisted.web.client import FileBodyProducer, Agent, readBody
+from twisted.web.client import FileBodyProducer, Agent
 from twisted.web.http_headers import Headers
 
 from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper

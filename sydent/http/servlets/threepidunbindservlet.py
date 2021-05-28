@@ -16,7 +16,6 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import json
 import logging
 
 from sydent.hs_federation.verifier import NoAuthenticationError, InvalidServerName

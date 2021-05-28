@@ -22,7 +22,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 import logging
 import signedjson.sign
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.util import json_decoder
 
 
