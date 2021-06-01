@@ -14,12 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List
+
 
 class TermsStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def getAgreedUrls(self, user_id):
+    def getAgreedUrls(self, user_id: str) -> List[str]:
         """
         Retrieves the URLs of the terms the given user has agreed to.
 
@@ -45,7 +47,7 @@ class TermsStore(object):
 
         return urls
 
-    def addAgreedUrls(self, user_id, urls):
+    def addAgreedUrls(self, user_id: str, urls: List[str]) -> None:
         """
         Saves that the given user has accepted the terms at the given URLs.
 

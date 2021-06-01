@@ -17,12 +17,14 @@ from __future__ import absolute_import
 
 from sydent.users.accounts import Account
 
+from typing import Union
+
 
 class AccountStore(object):
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def getAccountByToken(self, token):
+    def getAccountByToken(self, token: str) -> Union[Account, None]:
         """
         Select the account matching the given token, if any.
 
@@ -45,7 +47,9 @@ class AccountStore(object):
 
         return Account(*row)
 
-    def storeAccount(self, user_id, creation_ts, consent_version):
+    def storeAccount(
+        self, user_id: str, creation_ts: int, consent_version: Union[bytes, None]
+    ) -> None:
         """
         Stores an account for the given user ID.
 
@@ -65,7 +69,9 @@ class AccountStore(object):
         )
         self.sydent.db.commit()
 
-    def setConsentVersion(self, user_id, consent_version):
+    def setConsentVersion(
+        self, user_id: bytes, consent_version: Union[str, None]
+    ) -> None:
         """
         Saves that the given user has agreed to all of the terms in the document of the
         given version.
@@ -82,7 +88,7 @@ class AccountStore(object):
         )
         self.sydent.db.commit()
 
-    def addToken(self, user_id, token):
+    def addToken(self, user_id: str, token: str) -> None:
         """
         Stores the authentication token for a given user.
 
@@ -98,7 +104,7 @@ class AccountStore(object):
         )
         self.sydent.db.commit()
 
-    def delToken(self, token):
+    def delToken(self, token: str) -> int:
         """
         Deletes an authentication token from the database.
 

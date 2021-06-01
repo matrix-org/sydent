@@ -17,12 +17,14 @@ from __future__ import absolute_import
 
 from sydent.replication.peer import RemotePeer
 
+from typing import Union, List, Dict
+
 
 class PeerStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def getPeerByName(self, name):
+    def getPeerByName(self, name: str) -> Union[RemotePeer, None]:
         """
         Retrieves a remote peer using it's server name.
 
@@ -57,7 +59,7 @@ class PeerStore:
 
         return p
 
-    def getAllPeers(self):
+    def getAllPeers(self) -> List[RemotePeer]:
         """
         Retrieve all of the remote peers from the database.
 
@@ -75,7 +77,7 @@ class PeerStore:
         peername = None
         port = None
         lastSentVer = None
-        pubkeys = {}
+        pubkeys: Dict[str, str] = {}
 
         for row in res.fetchall():
             if row[0] != peername:
@@ -95,8 +97,8 @@ class PeerStore:
         return peers
 
     def setLastSentVersionAndPokeSucceeded(
-        self, peerName, lastSentVersion, lastPokeSucceeded
-    ):
+        self, peerName: str, lastSentVersion: int, lastPokeSucceeded: int
+    ) -> None:
         """
         Sets the ID of the last association sent to a given peer and the time of the
         last successful request sent to that peer.

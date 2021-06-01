@@ -17,12 +17,14 @@
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
 
+from typing import Union, Callable
+
 
 class HashingMetadataStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def get_lookup_pepper(self):
+    def get_lookup_pepper(self) -> Union[str, None]:
         """Return the value of the current lookup pepper from the db
 
         :return: A pepper if it exists in the database, or None if one does
@@ -44,7 +46,9 @@ class HashingMetadataStore:
 
         return pepper
 
-    def store_lookup_pepper(self, hashing_function, pepper):
+    def store_lookup_pepper(
+        self, hashing_function: Callable[[str], str], pepper: str
+    ) -> None:
         """Stores a new lookup pepper in the hashing_metadata db table and rehashes all 3PIDs
 
         :param hashing_function: A function with single input and output strings
@@ -74,7 +78,13 @@ class HashingMetadataStore:
         # Commit the queued db transactions so that adding a new pepper and hashing is atomic
         self.sydent.db.commit()
 
-    def _rehash_threepids(self, cur, hashing_function, pepper, table):
+    def _rehash_threepids(
+        self,
+        cur: object,
+        hashing_function: Callable[[str], str],
+        pepper: str,
+        table: str,
+    ) -> None:
         """Rehash 3PIDs of a given table using a given hashing_function and pepper
 
         A database cursor `cur` must be passed to this function. After this function completes,
