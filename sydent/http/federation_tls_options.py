@@ -19,7 +19,6 @@ from zope.interface import implementer
 from twisted.internet import ssl
 from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
 from twisted.internet.abstract import isIPAddress, isIPv6Address
-from twisted.internet._sslverify import ClientTLSOptions
 
 
 def _tolerateErrors(wrapped):

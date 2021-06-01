@@ -190,7 +190,7 @@ class RemotePeer(Peer):
         :param assoc: A signed association.
         :type assoc: dict[any, any]
         """
-        if not "signatures" in assoc:
+        if "signatures" not in assoc:
             raise NoSignaturesException()
 
         key_ids = signedjson.sign.signature_ids(assoc, self.servername)
