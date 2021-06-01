@@ -15,9 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 import os
-from setuptools import setup, find_packages
+import re
+
+from setuptools import find_packages, setup
 
 
 def read_version():

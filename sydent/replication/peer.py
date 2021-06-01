@@ -16,25 +16,23 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from six.moves import configparser
-
-from sydent.db.threepid_associations import GlobalAssociationStore
-from sydent.db.hashing_metadata import HashingMetadataStore
-from sydent.threepid import threePidAssocFromDict
-from sydent.config import ConfigError
-from sydent.util import json_decoder
-from sydent.util.hash import sha256_and_url_safe_base64
-from unpaddedbase64 import decode_base64
-
-import signedjson.sign
-import signedjson.key
-
-import logging
-import json
 import binascii
+import json
+import logging
 
+import signedjson.key
+import signedjson.sign
+from six.moves import configparser
 from twisted.internet import defer
 from twisted.web.client import readBody
+from unpaddedbase64 import decode_base64
+
+from sydent.config import ConfigError
+from sydent.db.hashing_metadata import HashingMetadataStore
+from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.threepid import threePidAssocFromDict
+from sydent.util import json_decoder
+from sydent.util.hash import sha256_and_url_safe_base64
 
 logger = logging.getLogger(__name__)
 

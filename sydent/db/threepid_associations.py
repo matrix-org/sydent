@@ -15,13 +15,11 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from sydent.util import time_msec
+import logging
 
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
-
-import logging
-
+from sydent.util import time_msec
 
 logger = logging.getLogger(__name__)
 

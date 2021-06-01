@@ -16,13 +16,13 @@
 from __future__ import absolute_import
 
 import logging
+
 from six.moves import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.util import time_msec
 from sydent.util.emailutils import sendEmail
 from sydent.validators import common
-
-from sydent.util import time_msec
 
 logger = logging.getLogger(__name__)
 

@@ -15,8 +15,8 @@
 # limitations under the License.
 
 import logging
-import yaml
 
+import yaml
 
 logger = logging.getLogger(__name__)
 

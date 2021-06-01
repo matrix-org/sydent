@@ -17,9 +17,9 @@ from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
-from sydent.http.servlets import jsonwrap, get_args
-from sydent.http.auth import authV2
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.http.auth import authV2
+from sydent.http.servlets import get_args, jsonwrap
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     IncorrectClientSecretException,

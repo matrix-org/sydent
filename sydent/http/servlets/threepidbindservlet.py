@@ -19,13 +19,13 @@ from __future__ import absolute_import
 from twisted.web.resource import Resource
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 from sydent.http.auth import authV2
+from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
-    SessionExpiredException,
     IncorrectClientSecretException,
     InvalidSessionIdException,
+    SessionExpiredException,
     SessionNotValidatedException,
 )
 

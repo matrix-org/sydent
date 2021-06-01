@@ -15,20 +15,19 @@
 # limitations under the License.
 from __future__ import absolute_import
 
+import json
+import logging
+
 import twisted.python.log
 from twisted.web.resource import Resource
-from sydent.http.servlets import jsonwrap, MatrixRestError
-from sydent.threepid import threePidAssocFromDict
-from sydent.util import json_decoder
-
-from sydent.util.hash import sha256_and_url_safe_base64
 
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
-
-import logging
-import json
+from sydent.http.servlets import MatrixRestError, jsonwrap
+from sydent.threepid import threePidAssocFromDict
+from sydent.util import json_decoder
+from sydent.util.hash import sha256_and_url_safe_base64
 
 logger = logging.getLogger(__name__)
 

@@ -18,9 +18,8 @@ from __future__ import absolute_import
 import logging
 
 from sydent.db.accounts import AccountStore
-from sydent.terms.terms import get_terms
 from sydent.http.servlets import MatrixRestError, get_args
-
+from sydent.terms.terms import get_terms
 
 logger = logging.getLogger(__name__)
 

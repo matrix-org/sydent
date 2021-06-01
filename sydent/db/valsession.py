@@ -15,18 +15,17 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import sydent.util.tokenutils
+from random import SystemRandom
 
+import sydent.util.tokenutils
+from sydent.util import time_msec
 from sydent.validators import (
-    ValidationSession,
     IncorrectClientSecretException,
     InvalidSessionIdException,
     SessionExpiredException,
     SessionNotValidatedException,
+    ValidationSession,
 )
-from sydent.util import time_msec
-
-from random import SystemRandom
 
 
 class ThreePidValSessionStore:
