@@ -1,11 +1,14 @@
 import json
-from io import BytesIO
 import logging
 import os
+from io import BytesIO
 from typing import Dict
+
 import attr
+import twisted.logger
+from OpenSSL import crypto
 from six import text_type
-from zope.interface import implementer
+from twisted.internet import address
 from twisted.internet._resolver import SimpleResolverComplexifier
 from twisted.internet.defer import fail, succeed
 from twisted.internet.error import DNSLookupError
@@ -14,17 +17,13 @@ from twisted.internet.interfaces import (
     IReactorPluggableNameResolver,
     IResolverSimple,
 )
-
-from twisted.internet import address
-import twisted.logger
+from twisted.test.proto_helpers import MemoryReactorClock
+from twisted.web.http import unquote
 from twisted.web.http_headers import Headers
 from twisted.web.server import Request, Site
-from twisted.web.http import unquote
-from twisted.test.proto_helpers import MemoryReactorClock
-from OpenSSL import crypto
+from zope.interface import implementer
 
 from sydent.sydent import Sydent, parse_config_dict
-
 
 # Expires on Jan 11 2030 at 17:53:40 GMT
 FAKE_SERVER_CERT_PEM = """

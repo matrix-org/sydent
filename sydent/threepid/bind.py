@@ -19,22 +19,19 @@ from __future__ import absolute_import
 import collections
 import logging
 import math
+
 import signedjson.sign
+from twisted.internet import defer
+
+from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.invite_tokens import JoinTokenStore
-
 from sydent.db.threepid_associations import LocalAssociationStore
-
+from sydent.http.httpclient import FederationHttpClient
+from sydent.threepid import ThreepidAssociation
+from sydent.threepid.signer import Signer
 from sydent.util import time_msec
 from sydent.util.hash import sha256_and_url_safe_base64
-from sydent.db.hashing_metadata import HashingMetadataStore
-from sydent.threepid.signer import Signer
-from sydent.http.httpclient import FederationHttpClient
-
-from sydent.threepid import ThreepidAssociation
-
 from sydent.util.stringutils import is_valid_matrix_server_name
-
-from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
 

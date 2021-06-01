@@ -17,21 +17,20 @@
 from __future__ import absolute_import
 
 import logging
-from twisted.web.resource import Resource
-import phonenumbers
 
+import phonenumbers
+from twisted.web.resource import Resource
+
+from sydent.http.auth import authV2
+from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     DestinationRejectedException,
     IncorrectClientSecretException,
-    InvalidSessionIdException,
     IncorrectSessionTokenException,
+    InvalidSessionIdException,
     SessionExpiredException,
 )
-
-from sydent.http.servlets import get_args, jsonwrap, send_cors
-from sydent.http.auth import authV2
-from sydent.util.stringutils import is_valid_client_secret
-
 
 logger = logging.getLogger(__name__)
 

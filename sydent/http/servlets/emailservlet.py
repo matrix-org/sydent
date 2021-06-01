@@ -17,18 +17,16 @@ from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
-from sydent.util.stringutils import is_valid_client_secret, MAX_EMAIL_ADDRESS_LENGTH
+from sydent.http.auth import authV2
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.util.emailutils import EmailAddressException, EmailSendException
+from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH, is_valid_client_secret
 from sydent.validators import (
     IncorrectClientSecretException,
-    InvalidSessionIdException,
     IncorrectSessionTokenException,
+    InvalidSessionIdException,
     SessionExpiredException,
 )
-
-
-from sydent.http.servlets import get_args, jsonwrap, send_cors
-from sydent.http.auth import authV2
 
 
 class EmailRequestCodeServlet(Resource):

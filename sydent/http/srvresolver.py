@@ -19,7 +19,6 @@ import random
 import time
 
 import attr
-
 from twisted.internet import defer
 from twisted.internet.error import ConnectError
 from twisted.names import client, dns

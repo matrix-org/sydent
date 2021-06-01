@@ -15,16 +15,15 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import logging
 import json
+import logging
 from io import BytesIO
-
-from zope.interface import implementer
 
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
-from twisted.web.iweb import IPolicyForHTTPS
 from twisted.web.http_headers import Headers
+from twisted.web.iweb import IPolicyForHTTPS
+from zope.interface import implementer
 
 logger = logging.getLogger(__name__)
 

@@ -15,20 +15,19 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import nacl.signing
 import random
 import string
 from email.header import Header
 
+import nacl.signing
 from six import string_types
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
-
-from sydent.http.servlets import get_args, send_cors, jsonwrap, MatrixRestError
 from sydent.http.auth import authV2
+from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.util.emailutils import sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
 

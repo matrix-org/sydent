@@ -18,15 +18,14 @@ from __future__ import absolute_import
 import logging
 import time
 
+import signedjson.key
+import signedjson.sign
+from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from unpaddedbase64 import decode_base64
-import signedjson.sign
-import signedjson.key
-from signedjson.sign import SignatureVerifyException
 
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name
-
 
 logger = logging.getLogger(__name__)
 

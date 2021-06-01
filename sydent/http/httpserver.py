@@ -17,19 +17,19 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from twisted.web.server import Site
-from twisted.web.resource import Resource
-
 import logging
-import twisted.internet.ssl
 
+import twisted.internet.ssl
+from twisted.web.resource import Resource
+from twisted.web.server import Site
+
+from sydent.http.httpcommon import SizeLimitingRequest
 from sydent.http.servlets.authenticated_bind_threepid_servlet import (
     AuthenticatedBindThreePidServlet,
 )
 from sydent.http.servlets.authenticated_unbind_threepid_servlet import (
     AuthenticatedUnbindThreePidServlet,
 )
-from sydent.http.httpcommon import SizeLimitingRequest
 
 logger = logging.getLogger(__name__)
 

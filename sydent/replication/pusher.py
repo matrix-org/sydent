@@ -18,14 +18,14 @@ from __future__ import absolute_import
 
 import logging
 
-from twisted.internet import defer
 import twisted.internet.reactor
 import twisted.internet.task
+from twisted.internet import defer
 
-from sydent.util import time_msec
-from sydent.replication.peer import LocalPeer
-from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.db.peers import PeerStore
+from sydent.db.threepid_associations import LocalAssociationStore
+from sydent.replication.peer import LocalPeer
+from sydent.util import time_msec
 
 logger = logging.getLogger(__name__)
 

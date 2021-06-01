@@ -20,11 +20,10 @@ from io import BytesIO
 import twisted.internet.ssl
 from twisted.internet import defer, protocol
 from twisted.internet.protocol import connectionDone
+from twisted.web import server
 from twisted.web._newclient import ResponseDone
 from twisted.web.http import PotentialDataLoss
 from twisted.web.iweb import UNKNOWN_LENGTH
-from twisted.web import server
-
 
 logger = logging.getLogger(__name__)
 

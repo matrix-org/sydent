@@ -15,8 +15,8 @@
 # limitations under the License.
 
 import os
-import tempfile
 import shutil
+import tempfile
 import time
 from subprocess import Popen
 

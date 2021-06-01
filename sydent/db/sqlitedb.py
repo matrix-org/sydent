@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sqlite3
 import logging
 import os
+import sqlite3
 
 logger = logging.getLogger(__name__)
 

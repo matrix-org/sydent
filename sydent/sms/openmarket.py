@@ -19,8 +19,9 @@ import logging
 from base64 import b64encode
 
 from twisted.internet import defer
-from sydent.http.httpclient import SimpleHttpClient
 from twisted.web.http_headers import Headers
+
+from sydent.http.httpclient import SimpleHttpClient
 
 logger = logging.getLogger(__name__)
 

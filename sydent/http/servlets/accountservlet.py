@@ -17,8 +17,8 @@ from __future__ import absolute_import
 
 from twisted.web.resource import Resource
 
-from sydent.http.servlets import jsonwrap, send_cors
 from sydent.http.auth import authV2
+from sydent.http.servlets import jsonwrap, send_cors
 
 
 class AccountServlet(Resource):

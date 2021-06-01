@@ -17,8 +17,8 @@ from __future__ import absolute_import
 import logging
 import time
 
-from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 from sydent.db.accounts import AccountStore
+from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 
 logger = logging.getLogger(__name__)
 

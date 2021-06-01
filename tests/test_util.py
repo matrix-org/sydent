@@ -1,4 +1,5 @@
 from twisted.trial import unittest
+
 from sydent.util.stringutils import is_valid_matrix_server_name
 
 
