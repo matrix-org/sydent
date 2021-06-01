@@ -69,7 +69,7 @@ class MsisdnRequestCodeServlet(Resource):
         try:
             phone_number_object = phonenumbers.parse(raw_phone_number, country)
         except Exception as e:
-            logger.warn("Invalid phone number given: %r", e)
+            logger.warning("Invalid phone number given: %r", e)
             request.setResponseCode(400)
             return {
                 "errcode": "M_INVALID_PHONE_NUMBER",

@@ -136,7 +136,7 @@ class Verifier(object):
             for key_name, sig in sigs.items():
                 if key_name in server_keys:
                     if "key" not in server_keys[key_name]:
-                        logger.warn("Ignoring key %s with no 'key'")
+                        logger.warning("Ignoring key %s with no 'key'")
                         continue
                     key_bytes = decode_base64(server_keys[key_name]["key"])
                     verify_key = signedjson.key.decode_verify_key_bytes(
@@ -150,12 +150,12 @@ class Verifier(object):
                         "Verified signature with key %s from %s", key_name, server_name
                     )
                     defer.returnValue((server_name, key_name))
-            logger.warn(
+            logger.warning(
                 "No matching key found for signature block %r in server keys %r",
                 signed_json["signatures"],
                 server_keys,
             )
-        logger.warn(
+        logger.warning(
             "Unable to verify any signatures from block %r. Acceptable server names: %r",
             signed_json["signatures"],
             acceptable_server_names,
