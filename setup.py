@@ -56,6 +56,7 @@ setup(
         "mock>=3.0.5",
         "flake8==3.9.2",
         "black==21.5b1",
+        "isort==5.8.0",
     ],
     # make sure we package the sql files
     include_package_data=True,
