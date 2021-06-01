@@ -162,7 +162,7 @@ class RemotePeer(Peer):
             # Decode hex into bytes
             pubkey_decoded = binascii.unhexlify(pubkey)
 
-            logger.warn(
+            logger.warning(
                 "Peer public key of %s is hex encoded. Please update to base64 encoding",
                 server_name,
             )

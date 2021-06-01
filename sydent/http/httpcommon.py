@@ -44,7 +44,7 @@ class SslComponents:
             "http", "replication.https.certfile"
         )
         if privKeyAndCertFilename == "":
-            logger.warn(
+            logger.warning(
                 "No HTTPS private key / cert found: not starting replication server "
                 "or doing replication pushes"
             )
@@ -53,7 +53,7 @@ class SslComponents:
         try:
             fp = open(privKeyAndCertFilename)
         except IOError:
-            logger.warn(
+            logger.warning(
                 "Unable to read private key / cert file from %s: not starting the replication HTTPS server "
                 "or doing replication pushes.",
                 privKeyAndCertFilename,
@@ -74,9 +74,9 @@ class SslComponents:
                 caCert = twisted.internet.ssl.Certificate.loadPEM(fp.read())
                 fp.close()
             except Exception:
-                logger.warn("Failed to open CA cert file %s", caCertFilename)
+                logger.warning("Failed to open CA cert file %s", caCertFilename)
                 raise
-            logger.warn("Using custom CA cert file: %s", caCertFilename)
+            logger.warning("Using custom CA cert file: %s", caCertFilename)
             return twisted.internet._sslverify.OpenSSLCertificateAuthorities(
                 [caCert.original]
             )

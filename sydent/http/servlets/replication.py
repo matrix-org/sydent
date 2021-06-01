@@ -48,7 +48,7 @@ class ReplicationPushServlet(Resource):
         peer = peerStore.getPeerByName(peerCertCn)
 
         if not peer:
-            logger.warn(
+            logger.warning(
                 "Got connection from %s but no peer found by that name", peerCertCn
             )
             raise MatrixRestError(
@@ -62,7 +62,7 @@ class ReplicationPushServlet(Resource):
             or request.requestHeaders.getRawHeaders("Content-Type")[0]
             != "application/json"
         ):
-            logger.warn(
+            logger.warning(
                 "Peer %s made push connection with non-JSON content (type: %s)",
                 peer.servername,
                 request.requestHeaders.getRawHeaders("Content-Type")[0],
@@ -73,13 +73,13 @@ class ReplicationPushServlet(Resource):
             # json.loads doesn't allow bytes in Python 3.5
             inJson = json_decoder.decode(request.content.read().decode("UTF-8"))
         except ValueError:
-            logger.warn(
+            logger.warning(
                 "Peer %s made push connection with malformed JSON", peer.servername
             )
             raise MatrixRestError(400, "M_BAD_JSON", "Malformed JSON")
 
         if "sgAssocs" not in inJson:
-            logger.warn(
+            logger.warning(
                 "Peer %s made push connection with no 'sgAssocs' key in JSON",
                 peer.servername,
             )
@@ -144,7 +144,7 @@ class ReplicationPushServlet(Resource):
                 )
             except Exception:
                 failedIds.append(originId)
-                logger.warn(
+                logger.warning(
                     "Failed to verify signed association from %s with origin ID %s",
                     peer.servername,
                     originId,
