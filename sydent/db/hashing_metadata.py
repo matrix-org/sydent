@@ -17,7 +17,10 @@
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
 
-from typing import Union, Callable
+from typing import Union, Callable, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import sqlite3
 
 
 class HashingMetadataStore:
@@ -80,7 +83,7 @@ class HashingMetadataStore:
 
     def _rehash_threepids(
         self,
-        cur: object,
+        cur: "sqlite3.Cursor",
         hashing_function: Callable[[str], str],
         pepper: str,
         table: str,
