@@ -44,7 +44,7 @@ setup(
     install_requires=[
         "signedjson==1.1.1",
         "unpaddedbase64==1.1.0",
-        "Twisted>=16.0.0",
+        "Twisted>=18.4.0",
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
         "phonenumbers",
