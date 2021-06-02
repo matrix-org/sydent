@@ -9,6 +9,6 @@ _trial_temp
 .python-version
 
 # Runtime files
-sydent.conf
-sydent.db
+/sydent.conf
+/sydent.db
 /matrix_is_test/sydent.stderr
