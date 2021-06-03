@@ -20,8 +20,9 @@ import logging
 from sydent.db.accounts import AccountStore
 from sydent.http.servlets import MatrixRestError, get_args
 from sydent.terms.terms import get_terms
+from sydent.sydent import Sydent
 
-from typing import Union, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sydent.db.accounts import Account
@@ -60,10 +61,10 @@ def tokenFromRequest(request: twisted.web.server.Request) -> Optional[str]:
 
 
 def authV2(
-    sydent: sydent.sydent.Sydent,
+    sydent: 'Sydent',
     request: twisted.web.server.Request,
     requireTermsAgreed: bool = True,
-) -> Union[Account, None]:
+) -> Optional[Account]:
     """For v2 APIs check that the request has a valid access token associated with it
 
     :param sydent: The Sydent instance to use.

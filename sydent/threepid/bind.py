@@ -19,6 +19,8 @@ from __future__ import absolute_import
 import collections
 import logging
 import math
+import signedjson.sign # type: ignore
+from sydent.db.invite_tokens import JoinTokenStore
 
 import signedjson.sign
 from twisted.internet import defer
@@ -33,6 +35,13 @@ from sydent.util import time_msec
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.stringutils import is_valid_matrix_server_name
 
+from twisted.internet import defer
+
+from typing import TYPE_CHECKING, Dict, Any, Generator, Union, Optional
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
@@ -40,11 +49,11 @@ class ThreepidBinder:
     # the lifetime of a 3pid association
     THREEPID_ASSOCIATION_LIFETIME_MS = 100 * 365 * 24 * 60 * 60 * 1000
 
-    def __init__(self, sydent: sydent.Sydent) -> None:
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 
-    def addBinding(self, medium, address, mxid):
+    def addBinding(self, medium: str, address: str, mxid: str) -> Dict[str, Any]:
         """
         Binds the given 3pid to the given mxid.
 
@@ -112,7 +121,7 @@ class ThreepidBinder:
 
         return sgassoc
 
-    def removeBinding(self, threepid, mxid):
+    def removeBinding(self, threepid: Dict, mxid: str) -> None:
         """
         Removes the binding between a given 3PID and a given MXID.
 
@@ -126,7 +135,7 @@ class ThreepidBinder:
         self.sydent.pusher.doLocalPush()
 
     @defer.inlineCallbacks
-    def _notify(self, assoc, attempt):
+    def _notify(self, assoc: Dict[str, Any], attempt: int) -> Generator:
         """
         Sends data about a new association (and, if necessary, the associated invites)
         to the associated MXID's homeserver.
@@ -193,7 +202,7 @@ class ThreepidBinder:
                     assoc["address"],
                 )
 
-    def _notifyErrback(self, assoc, attempt, error):
+    def _notifyErrback(self, assoc: Dict[str, Any], attempt: int, error: Union[Exception, str]) -> None:
         """
         Handles errors when trying to send an association down to a homeserver by
         logging the error and scheduling a new attempt.

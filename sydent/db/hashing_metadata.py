@@ -17,7 +17,7 @@
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
 
-from typing import Union, Callable, TYPE_CHECKING
+from typing import Union, Callable, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     import sqlite3
@@ -27,7 +27,7 @@ class HashingMetadataStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
-    def get_lookup_pepper(self) -> Union[str, None]:
+    def get_lookup_pepper(self) -> Optional[str]:
         """Return the value of the current lookup pepper from the db
 
         :return: A pepper if it exists in the database, or None if one does
