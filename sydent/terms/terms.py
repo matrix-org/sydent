@@ -17,19 +17,20 @@
 import logging
 
 import yaml
+from typing import Union, Set, List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class Terms(object):
-    def __init__(self, yamlObj):
+    def __init__(self, yamlObj) -> None:
         """
         :param yamlObj: The parsed YAML.
         :type yamlObj: dict[str, any] or None
         """
         self._rawTerms = yamlObj
 
-    def getMasterVersion(self):
+    def getMasterVersion(self) -> Union[str, None]:
         """
         :return: The global (master) version of the terms, or None if there
             are no terms of service for this server.
@@ -43,7 +44,7 @@ class Terms(object):
 
         return version
 
-    def getForClient(self):
+    def getForClient(self) -> Dict:
         """
         :return: A dict which value for the "policies" key is a dict which contains the
             "docs" part of the terms' YAML. That nested dict is empty if no terms.
@@ -58,7 +59,7 @@ class Terms(object):
                 policies[docName].update(doc["langs"])
         return {"policies": policies}
 
-    def getUrlSet(self):
+    def getUrlSet(self) -> Set[str]:
         """
         :return: All the URLs for the terms in a set. Empty set if no terms.
         :rtype: set[unicode]
@@ -76,7 +77,7 @@ class Terms(object):
                     urls.add(url)
         return urls
 
-    def urlListIsSufficient(self, urls):
+    def urlListIsSufficient(self, urls: List[str]) -> bool:
         """
         Checks whether the provided list of URLs (which represents the list of terms
         accepted by the user) is enough to allow the creation of the user's account.
@@ -102,7 +103,7 @@ class Terms(object):
         return agreed == required
 
 
-def get_terms(sydent):
+def get_terms(sydent) -> Optional[Terms]:
     """Read and parse terms as specified in the config.
 
     :returns Terms
@@ -139,3 +140,4 @@ def get_terms(sydent):
         logger.exception(
             "Couldn't read terms file '%s'", sydent.cfg.get("general", "terms.path")
         )
+        return None # added per this: https://github.com/python/mypy/issues/3974

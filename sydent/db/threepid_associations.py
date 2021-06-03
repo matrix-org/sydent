@@ -403,7 +403,7 @@ class GlobalAssociationStore:
         )
         self.sydent.db.commit()
 
-    def retrieveMxidsForHashes(self, addresses: List[str]) -> Dict[str, str]:
+    def retrieveMxidsForHashes(self, addresses: List[Any]) -> Dict[str, str]:
         """Returns a mapping from hash: mxid from a list of given lookup_hash values
 
         :param addresses: An array of lookup_hash values to check against the db

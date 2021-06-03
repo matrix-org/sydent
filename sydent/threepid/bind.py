@@ -40,7 +40,7 @@ class ThreepidBinder:
     # the lifetime of a 3pid association
     THREEPID_ASSOCIATION_LIFETIME_MS = 100 * 365 * 24 * 60 * 60 * 1000
 
-    def __init__(self, sydent):
+    def __init__(self, sydent: sydent.Sydent) -> None:
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 

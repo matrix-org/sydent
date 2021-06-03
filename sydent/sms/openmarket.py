@@ -23,6 +23,8 @@ from twisted.web.http_headers import Headers
 
 from sydent.http.httpclient import SimpleHttpClient
 
+from typing import Union, Dict, Generator, Any
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,7 +63,7 @@ class OpenMarketSMS:
         self.http_cli = SimpleHttpClient(sydent)
 
     @defer.inlineCallbacks
-    def sendTextSMS(self, body, dest, source=None):
+    def sendTextSMS(self, body: Dict, dest: str, source: Union[None, Dict[str, str]]=None) -> Generator:
         """
         Sends a text message with the given body to the given MSISDN.
 
@@ -91,7 +93,7 @@ class OpenMarketSMS:
         password = self.sydent.cfg.get("sms", "password").encode("UTF-8")
 
         b64creds = b64encode(b"%s:%s" % (username, password))
-        headers = Headers(
+        headers: Any = Headers(
             {
                 b"Authorization": [b"Basic " + b64creds],
                 b"Content-Type": [b"application/json"],

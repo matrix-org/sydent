@@ -21,10 +21,18 @@ from sydent.db.accounts import AccountStore
 from sydent.http.servlets import MatrixRestError, get_args
 from sydent.terms.terms import get_terms
 
+from typing import Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sydent.db.accounts import Account
+    import twisted
+    from sydent.sydent import Sydent
+
+
 logger = logging.getLogger(__name__)
 
 
-def tokenFromRequest(request):
+def tokenFromRequest(request: twisted.web.server.Request) -> Optional[str]:
     """Extract token from header of query parameter.
 
     :param request: The request to look for an access token in.
@@ -51,7 +59,11 @@ def tokenFromRequest(request):
     return token
 
 
-def authV2(sydent, request, requireTermsAgreed=True):
+def authV2(
+    sydent: sydent.sydent.Sydent,
+    request: twisted.web.server.Request,
+    requireTermsAgreed: bool = True,
+) -> Union[Account, None]:
     """For v2 APIs check that the request has a valid access token associated with it
 
     :param sydent: The Sydent instance to use.

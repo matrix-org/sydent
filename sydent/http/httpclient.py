@@ -29,6 +29,11 @@ from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 from sydent.http.matrixfederationagent import MatrixFederationAgent
 from sydent.util import json_decoder
 
+from typing import Union, Dict, Any, TYPE_CHECKING, Generator
+
+if TYPE_CHECKING:
+    import twisted
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,9 +41,13 @@ class HTTPClient(object):
     """A base HTTP class that contains methods for making GET and POST HTTP
     requests.
     """
+    agent: Any # TODO: find actual type of twisted.web.iweb.IAgent
+
 
     @defer.inlineCallbacks
-    def get_json(self, uri, max_size=None):
+    def get_json(
+        self, uri: str, max_size: Union[int, None] = None
+    ) -> Generator[Dict[Any, Any], Any, Any]:
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -66,7 +75,9 @@ class HTTPClient(object):
         defer.returnValue(json_body)
 
     @defer.inlineCallbacks
-    def post_json_get_nothing(self, uri, post_json, opts):
+    def post_json_get_nothing(
+        self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
+    ) -> Generator[Any, Any, Any]:
         """Make a POST request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a POST request to.

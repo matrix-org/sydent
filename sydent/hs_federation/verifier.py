@@ -18,14 +18,24 @@ from __future__ import absolute_import
 import logging
 import time
 
+
 import signedjson.key
 import signedjson.sign
+from twisted.internet import defer
+from unpaddedbase64 import decode_base64 # type: ignore
+import signedjson.sign #type: ignore
+import signedjson.key #type: ignore
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from unpaddedbase64 import decode_base64
 
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name
+
+from typing import Dict, Union, TYPE_CHECKING, Any, List, Tuple, Generator
+
+if TYPE_CHECKING:
+    import twisted
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +72,9 @@ class Verifier(object):
         }
 
     @defer.inlineCallbacks
-    def _getKeysForServer(self, server_name):
+    def _getKeysForServer(
+        self, server_name: str
+    ) -> Generator:
         """Get the signing key data from a homeserver.
 
         :param server_name: The name of the server to request the keys from.
@@ -105,7 +117,11 @@ class Verifier(object):
         defer.returnValue(result["verify_keys"])
 
     @defer.inlineCallbacks
-    def verifyServerSignedJson(self, signed_json, acceptable_server_names=None):
+    def verifyServerSignedJson(
+        self,
+        signed_json: Dict[str, Any],
+        acceptable_server_names: Union[List[str], None] = None,
+    ) -> Generator:
         """Given a signed json object, try to verify any one
         of the signatures on it
 
@@ -162,7 +178,9 @@ class Verifier(object):
         raise SignatureVerifyException("No matching signature found")
 
     @defer.inlineCallbacks
-    def authenticate_request(self, request, content):
+    def authenticate_request(
+        self, request: twisted.web.server.Request, content: Union[bytes, None]
+    ) -> Generator:
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
 
@@ -186,7 +204,7 @@ class Verifier(object):
 
         origin = None
 
-        def parse_auth_header(header_str):
+        def parse_auth_header(header_str: str) -> Tuple[str, str, str]:
             """
             Extracts a server name, signing key and payload signature from an
             authentication header.
@@ -199,7 +217,7 @@ class Verifier(object):
             """
             try:
                 params = header_str.split(u" ")[1].split(u",")
-                param_dict = dict(kv.split(u"=") for kv in params)
+                param_dict: Dict[str, str] = dict(kv.split(u"=") for kv in params)
 
                 def strip_quotes(value):
                     if value.startswith(u'"'):

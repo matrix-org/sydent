@@ -33,6 +33,20 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
+from unpaddedbase64 import decode_base64 # type: ignore
+
+import signedjson.sign # type: ignore
+import signedjson.key # type: ignore
+
+import logging
+import json
+import binascii
+
+from twisted.internet import defer
+from twisted.web.client import readBody
+
+from collections.abc import Sequence
+from typing import Generator
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +59,7 @@ class Peer(object):
         self.pubkeys = pubkeys
         self.is_being_pushed_to = False
 
-    def pushUpdates(self, sgAssocs):
+    def pushUpdates(self, sgAssocs: Sequence[tuple]) -> Generator:
         """
         :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
                         sgAssoc is the json object of the signed association
@@ -69,7 +83,7 @@ class LocalPeer(Peer):
         if self.lastId is None:
             self.lastId = -1
 
-    def pushUpdates(self, sgAssocs):
+    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> Generator:
         """
         Saves the given associations in the global associations store. Only stores an
         association if its ID is greater than the last seen ID.
@@ -181,7 +195,7 @@ class RemotePeer(Peer):
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
         self.verify_key.version = 0
 
-    def verifySignedAssociation(self, assoc):
+    def verifySignedAssociation(self, assoc: Dict[Any, Any]) -> None:
         """Verifies a signature on a signed association. Raises an exception if the
         signature is incorrect or couldn't be verified.
 
@@ -205,7 +219,7 @@ class RemotePeer(Peer):
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
-    def pushUpdates(self, sgAssocs):
+    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> Generator:
         """
         Pushes the given associations to the peer.
 
@@ -233,7 +247,7 @@ class RemotePeer(Peer):
 
         return updateDeferred
 
-    def _pushSuccess(self, result, updateDeferred):
+    def _pushSuccess(self, result: twisted.web.iweb.IResponse, updateDeferred: twisted.internet.defer.Deferred) -> None:
         """
         Processes a successful push request. If the request resulted in a status code
         that's not a success, consider it a failure
@@ -251,7 +265,7 @@ class RemotePeer(Peer):
             d.addCallback(self._failedPushBodyRead, updateDeferred=updateDeferred)
             d.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
-    def _failedPushBodyRead(self, body, updateDeferred):
+    def _failedPushBodyRead(self, body: bytes, updateDeferred: twisted.internet.defer.Deferred) -> None:
         """
         Processes a response body from a failed push request, then calls the error
         callback of the provided deferred.
@@ -266,7 +280,7 @@ class RemotePeer(Peer):
         e.errorDict = errObj
         updateDeferred.errback(e)
 
-    def _pushFailed(self, failure, updateDeferred):
+    def _pushFailed(self, failure: twisted.python.failure.Failure, updateDeferred: twisted.internet.defer.Deferred) -> None:
         """
         Processes a failed push request, by calling the error callback of the given
         deferred with it.
