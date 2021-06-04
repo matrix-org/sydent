@@ -26,7 +26,7 @@ from typing import Set
 
 import twisted.internet.reactor
 from six.moves import configparser
-from twisted.internet import task
+from twisted.internet import address, task
 from twisted.python import log
 
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -420,7 +420,11 @@ class Sydent:
             "http", "obey_x_forwarded_for"
         ) and request.requestHeaders.hasHeader("X-Forwarded-For"):
             return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
-        return request.getClientIP()
+        client = request.getClientAddress()
+        if isinstance(client, (address.IPv4Address, address.IPv6Address)):
+            return client.host
+        else:
+            return None
 
     def brand_from_request(self, request):
         """
