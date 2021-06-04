@@ -21,9 +21,13 @@ from base64 import b64encode
 from twisted.internet import defer
 from twisted.web.http_headers import Headers
 
+
 from sydent.http.httpclient import SimpleHttpClient
 
-from typing import Union, Dict, Generator, Any
+from typing import Dict, Any, TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +46,7 @@ TONS = {
 }
 
 
-def tonFromType(t):
+def tonFromType(t: str) -> int:
     """
     Get the type of number from the originator's type.
 
@@ -58,12 +62,14 @@ def tonFromType(t):
 
 
 class OpenMarketSMS:
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
         self.http_cli = SimpleHttpClient(sydent)
 
     @defer.inlineCallbacks
-    def sendTextSMS(self, body: Dict, dest: str, source: Union[None, Dict[str, str]]=None) -> Generator:
+    def sendTextSMS(
+        self, body: Dict, dest: str, source: Optional[Dict[str, str]] = None
+    ) -> None:
         """
         Sends a text message with the given body to the given MSISDN.
 

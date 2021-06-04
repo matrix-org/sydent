@@ -15,11 +15,14 @@
 # limitations under the License.
 import time
 
-from typing import Union, List, Dict
+from typing import Optional, List, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 
 class JoinTokenStore(object):
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
 
     def storeToken(
@@ -163,7 +166,7 @@ class JoinTokenStore(object):
         self.sydent.db.commit()
         return cur.rowcount > 0
 
-    def getSenderForToken(self, token: str) -> Union[str, None]:
+    def getSenderForToken(self, token: str) -> Optional[str]:
         """
         Retrieves the MXID of the user that sent the invite the provided token is for.
 

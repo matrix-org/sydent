@@ -19,11 +19,16 @@ import logging
 import os
 import sqlite3
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
 class SqliteDatabase:
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.sydent = syd
 
         dbFilePath = self.sydent.cfg.get("db", "db.file")

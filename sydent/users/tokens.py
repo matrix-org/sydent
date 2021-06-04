@@ -20,10 +20,16 @@ import time
 from sydent.db.accounts import AccountStore
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
+
 logger = logging.getLogger(__name__)
 
 
-def issueToken(sydent, user_id):
+def issueToken(sydent: "Sydent", user_id: str) -> str:
     """
     Creates an account for the given Matrix user ID, then generates, saves and returns
     an access token for that account.

@@ -34,10 +34,17 @@ else:
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 
+from typing import TYPE_CHECKING, Dict, Any
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
-def sendEmail(sydent, templateFile, mailTo, substitutions):
+def sendEmail(
+    sydent: "Sydent", templateFile: str, mailTo: str, substitutions: Dict[str, str]
+) -> None:
     """
     Sends an email with the given parameters.
 
@@ -131,4 +138,5 @@ class EmailAddressException(Exception):
 
 
 class EmailSendException(Exception):
+    cause: Any  # type hint added to prevent ""EmailSendException" has no attribute "cause"" error in Mypy
     pass

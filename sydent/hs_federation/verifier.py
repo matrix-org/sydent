@@ -22,9 +22,10 @@ import time
 import signedjson.key
 import signedjson.sign
 from twisted.internet import defer
-from unpaddedbase64 import decode_base64 # type: ignore
-import signedjson.sign #type: ignore
-import signedjson.key #type: ignore
+from twisted.web.server import Request
+from unpaddedbase64 import decode_base64  # type: ignore
+import signedjson.sign  # type: ignore
+import signedjson.key  # type: ignore
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from unpaddedbase64 import decode_base64
@@ -32,10 +33,10 @@ from unpaddedbase64 import decode_base64
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name
 
-from typing import Dict, Union, TYPE_CHECKING, Any, List, Tuple, Generator
+from typing import Dict, Optional, TYPE_CHECKING, Any, List, Tuple, Generator
 
 if TYPE_CHECKING:
-    import twisted
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -63,18 +64,16 @@ class Verifier(object):
     verifying that the signature on the json blob matches.
     """
 
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
         # in the result.
-        self.cache = {
+        self.cache: Dict = {
             # server_name: <result from keys query>,
         }
 
     @defer.inlineCallbacks
-    def _getKeysForServer(
-        self, server_name: str
-    ) -> Generator:
+    def _getKeysForServer(self, server_name: str) -> Generator:
         """Get the signing key data from a homeserver.
 
         :param server_name: The name of the server to request the keys from.
@@ -120,7 +119,7 @@ class Verifier(object):
     def verifyServerSignedJson(
         self,
         signed_json: Dict[str, Any],
-        acceptable_server_names: Union[List[str], None] = None,
+        acceptable_server_names: Optional[List[str]] = None,
     ) -> Generator:
         """Given a signed json object, try to verify any one
         of the signatures on it
@@ -179,7 +178,7 @@ class Verifier(object):
 
     @defer.inlineCallbacks
     def authenticate_request(
-        self, request: twisted.web.server.Request, content: Union[bytes, None]
+        self, request: 'Request', content: Optional[bytes]
     ) -> Generator:
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
@@ -217,7 +216,7 @@ class Verifier(object):
             """
             try:
                 params = header_str.split(u" ")[1].split(u",")
-                param_dict: Dict[str, str] = dict(kv.split(u"=") for kv in params)
+                param_dict = dict(kv.split(u"=") for kv in params)
 
                 def strip_quotes(value):
                     if value.startswith(u'"'):

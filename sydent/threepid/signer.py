@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import signedjson.sign # type: ignore
+import signedjson.sign  # type: ignore
 
 from typing import TYPE_CHECKING, Dict, Any
 
@@ -22,11 +22,12 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
     from sydent.threepid import ThreepidAssociation
 
+
 class Signer:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
-    def signedThreePidAssociation(self, assoc: 'ThreepidAssociation') -> Dict[str, Any]:
+    def signedThreePidAssociation(self, assoc: "ThreepidAssociation") -> Dict[str, Any]:
         """
         Signs a 3PID association.
 

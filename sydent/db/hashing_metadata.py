@@ -16,15 +16,16 @@
 
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
+from sqlite3 import Cursor
 
 from typing import Union, Callable, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    import sqlite3
+    from sydent.sydent import Sydent
 
 
 class HashingMetadataStore:
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
 
     def get_lookup_pepper(self) -> Optional[str]:
@@ -83,7 +84,7 @@ class HashingMetadataStore:
 
     def _rehash_threepids(
         self,
-        cur: "sqlite3.Cursor",
+        cur: "Cursor",
         hashing_function: Callable[[str], str],
         pepper: str,
         table: str,

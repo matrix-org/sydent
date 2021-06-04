@@ -22,6 +22,7 @@ from io import BytesIO
 from twisted.internet import defer
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
+from twisted.web.iweb import IAgent
 
 from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
@@ -29,10 +30,10 @@ from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 from sydent.http.matrixfederationagent import MatrixFederationAgent
 from sydent.util import json_decoder
 
-from typing import Union, Dict, Any, TYPE_CHECKING, Generator
+from typing import Optional, Dict, Any, TYPE_CHECKING, Generator
 
 if TYPE_CHECKING:
-    import twisted
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +42,13 @@ class HTTPClient(object):
     """A base HTTP class that contains methods for making GET and POST HTTP
     requests.
     """
-    agent: Any # TODO: find actual type of twisted.web.iweb.IAgent
 
+    agent: Any  # TODO: find type that will work with both Agent() and MatrixFederationAgent()
 
     @defer.inlineCallbacks
     def get_json(
-        self, uri: str, max_size: Union[int, None] = None
-    ) -> Generator[Dict[Any, Any], Any, Any]:
+        self, uri: str, max_size: Optional[int] = None
+    ) -> Generator:
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -77,7 +78,7 @@ class HTTPClient(object):
     @defer.inlineCallbacks
     def post_json_get_nothing(
         self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
-    ) -> Generator[Any, Any, Any]:
+    ) -> Generator:
         """Make a POST request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a POST request to.
@@ -131,7 +132,7 @@ class SimpleHttpClient(HTTPClient):
     from Synapse.
     """
 
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
         # The default endpoint factory in Twisted 14.0.0 (which we require) uses the
         # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
@@ -151,7 +152,7 @@ class FederationHttpClient(HTTPClient):
     MatrixFederationAgent.
     """
 
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
             BlacklistingReactorWrapper(

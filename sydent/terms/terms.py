@@ -17,20 +17,20 @@
 import logging
 
 import yaml
-from typing import Union, Set, List, Dict, Optional
+from typing import Any, Set, List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class Terms(object):
-    def __init__(self, yamlObj) -> None:
+    def __init__(self, yamlObj: Optional[Dict[str, Any]]) -> None:
         """
         :param yamlObj: The parsed YAML.
         :type yamlObj: dict[str, any] or None
         """
         self._rawTerms = yamlObj
 
-    def getMasterVersion(self) -> Union[str, None]:
+    def getMasterVersion(self) -> Optional[str]:
         """
         :return: The global (master) version of the terms, or None if there
             are no terms of service for this server.
@@ -44,7 +44,7 @@ class Terms(object):
 
         return version
 
-    def getForClient(self) -> Dict:
+    def getForClient(self) -> Dict[str, dict]:
         """
         :return: A dict which value for the "policies" key is a dict which contains the
             "docs" part of the terms' YAML. That nested dict is empty if no terms.
@@ -140,4 +140,4 @@ def get_terms(sydent) -> Optional[Terms]:
         logger.exception(
             "Couldn't read terms file '%s'", sydent.cfg.get("general", "terms.path")
         )
-        return None # added per this: https://github.com/python/mypy/issues/3974
+        return None  # added per this: https://github.com/python/mypy/issues/3974

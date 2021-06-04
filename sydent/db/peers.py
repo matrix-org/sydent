@@ -17,14 +17,17 @@ from __future__ import absolute_import
 
 from sydent.replication.peer import RemotePeer
 
-from typing import Union, List, Dict
+from typing import Optional, List, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 
 class PeerStore:
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
 
-    def getPeerByName(self, name: str) -> Union[RemotePeer, None]:
+    def getPeerByName(self, name: str) -> Optional[RemotePeer]:
         """
         Retrieves a remote peer using it's server name.
 

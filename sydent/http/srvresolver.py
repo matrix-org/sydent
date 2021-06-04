@@ -20,9 +20,13 @@ import time
 
 import attr
 from twisted.internet import defer
+from twisted.internet.defer import Deferred
 from twisted.internet.error import ConnectError
+from twisted.internet.interfaces import IResolver
 from twisted.names import client, dns
 from twisted.names.error import DNSNameError, DomainError
+
+from typing import Callable, Dict, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +53,7 @@ class Server(object):
     expires = attr.ib(default=0)
 
 
-def pick_server_from_list(server_list):
+def pick_server_from_list(server_list: list[Server]) -> Tuple[bytes, int]:
     """Randomly choose a server from the server list.
 
     :param server_list: List of candidate servers.
@@ -96,13 +100,13 @@ class SrvResolver(object):
     :type get_time: callable
     """
 
-    def __init__(self, dns_client=client, cache=SERVER_CACHE, get_time=time.time):
+    def __init__(self, dns_client: 'IResolver'=client, cache: Dict=SERVER_CACHE, get_time: Callable=time.time) -> None:
         self._dns_client = dns_client
         self._cache = cache
         self._get_time = get_time
 
     @defer.inlineCallbacks
-    def resolve_service(self, service_name):
+    def resolve_service(self, service_name: bytes) -> 'Deferred':
         """Look up a SRV record
 
         :param service_name: The record to look up.

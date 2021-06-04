@@ -27,11 +27,14 @@ from sydent.validators import (
     ValidationSession,
 )
 
-from typing import Union
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 
 class ThreePidValSessionStore:
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.sydent = syd
         self.random = SystemRandom()
 
@@ -179,7 +182,7 @@ class ThreePidValSessionStore:
         )
         self.sydent.db.commit()
 
-    def getSessionById(self, sid: str) -> Union[ValidationSession, None]:
+    def getSessionById(self, sid: str) -> Optional[ValidationSession]:
         """
         Retrieves the session matching the given sid.
 
@@ -206,7 +209,7 @@ class ThreePidValSessionStore:
             row[0], row[1], row[2], row[3], row[4], row[5], None, None
         )
 
-    def getTokenSessionById(self, sid: str) -> Union[ValidationSession, None]:
+    def getTokenSessionById(self, sid: str) -> Optional[ValidationSession]:
         """
         Retrieves a validation session using the session's ID.
 

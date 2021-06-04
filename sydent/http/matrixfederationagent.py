@@ -19,20 +19,25 @@ import random
 import time
 
 import attr
-from netaddr import IPAddress
+from netaddr import IPAddress # type: ignore
+from zope.interface import implementer
+
 from twisted.internet import defer
+from twisted.internet.defer import Deferred
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent
-from zope.interface import implementer
+from twisted.web.iweb import IAgent, IBodyProducer
+
 
 from sydent.http.httpcommon import read_body_with_max_size
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
 from sydent.util import json_decoder
 from sydent.util.ttlcache import TTLCache
+
+from typing import Generator, Optional
 
 # period to cache .well-known results for by default
 WELL_KNOWN_DEFAULT_CACHE_PERIOD = 24 * 3600
@@ -84,9 +89,9 @@ class MatrixFederationAgent(object):
         reactor,
         tls_client_options_factory,
         _well_known_tls_policy=None,
-        _srv_resolver=None,
-        _well_known_cache=well_known_cache,
-    ):
+        _srv_resolver: Optional['SrvResolver']=None,
+        _well_known_cache: Optional['TTLCache']=well_known_cache,
+    ) -> None:
         self._reactor = reactor
 
         self._tls_client_options_factory = tls_client_options_factory
@@ -116,7 +121,12 @@ class MatrixFederationAgent(object):
         self._well_known_cache = _well_known_cache
 
     @defer.inlineCallbacks
-    def request(self, method, uri, headers=None, bodyProducer=None):
+    def request(
+        self,
+        method: bytes,
+        uri: bytes,
+        headers: Optional['Headers']=None,
+        bodyProducer: Optional['IBodyProducer']=None) -> 'Deferred':
         """
         :param method: HTTP method (GET/POST/etc).
         :type method: bytes
@@ -181,7 +191,7 @@ class MatrixFederationAgent(object):
         defer.returnValue(res)
 
     @defer.inlineCallbacks
-    def _route_matrix_uri(self, parsed_uri, lookup_well_known=True):
+    def _route_matrix_uri(self, parsed_uri: 'URI', lookup_well_known: bool=True) -> 'Deferred':
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
@@ -294,7 +304,7 @@ class MatrixFederationAgent(object):
         )
 
     @defer.inlineCallbacks
-    def _get_well_known(self, server_name):
+    def _get_well_known(self, server_name: bytes) -> 'Deferred':
         """Attempt to fetch and parse a .well-known file for the given server
 
         :param server_name: Name of the server, from the requested url.
@@ -317,7 +327,7 @@ class MatrixFederationAgent(object):
         defer.returnValue(result)
 
     @defer.inlineCallbacks
-    def _do_get_well_known(self, server_name):
+    def _do_get_well_known(self, server_name: bytes) -> 'Deferred':
         """Actually fetch and parse a .well-known, without checking the cache
 
         :param server_name: Name of the server, from the requested url

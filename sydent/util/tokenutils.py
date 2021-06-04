@@ -20,7 +20,7 @@ import string
 r = random.SystemRandom()
 
 
-def generateTokenForMedium(medium):
+def generateTokenForMedium(medium: str) -> str:
     """
     Generates a token of a different format depending on the medium, a 32 characters
     alphanumeric one if the medium is email, a 6 characters numeric one otherwise.
@@ -37,7 +37,7 @@ def generateTokenForMedium(medium):
         return generateNumericTokenOfLength(6)
 
 
-def generateNumericTokenOfLength(length):
+def generateNumericTokenOfLength(length: int) -> str:
     """
     Generates a token of the given length with the character set [0-9].
 
@@ -50,7 +50,7 @@ def generateNumericTokenOfLength(length):
     return u"".join([r.choice(string.digits) for _ in range(length)])
 
 
-def generateAlphanumericTokenOfLength(length):
+def generateAlphanumericTokenOfLength(length: int) -> str:
     """
     Generates a token of the given length with the character set [a-zA-Z0-9].
 

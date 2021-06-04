@@ -19,21 +19,19 @@ import logging
 
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
-<<<<<<< HEAD
-from sydent.util import time_msec
-=======
 
 import logging
 
-from typing import Tuple, Union, List, Dict, Any, Sequence
+from typing import Tuple, Optional, List, Dict, Any, Sequence, TYPE_CHECKING
 
->>>>>>> reset author
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
 
 class LocalAssociationStore:
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
 
     def addOrUpdateAssociation(self, assoc: ThreepidAssociation) -> None:
@@ -63,8 +61,8 @@ class LocalAssociationStore:
         self.sydent.db.commit()
 
     def getAssociationsAfterId(
-        self, afterId: int, limit: Union[int, None] = None
-    ) -> Tuple[Dict[int, ThreepidAssociation], Union[int, None]]:
+        self, afterId: int, limit: Optional[int] = None
+    ) -> Tuple[Dict[int, ThreepidAssociation], Optional[int]]:
         """
         Retrieves every association after the given ID.
 
@@ -108,8 +106,8 @@ class LocalAssociationStore:
         return assocs, maxId
 
     def getSignedAssociationsAfterId(
-        self, afterId: int, limit: Union[int, None] = None
-    ) -> Tuple[Dict[int, Dict[str, Any]], Union[int, None]]:
+        self, afterId: int, limit: Optional[int] = None
+    ) -> Tuple[Dict[int, Dict[str, Any]], Optional[int]]:
         """Get associations after a given ID, and sign them before returning
 
         :param afterId: The ID to return results after (not inclusive)
@@ -188,12 +186,12 @@ class LocalAssociationStore:
 
 
 class GlobalAssociationStore:
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
 
     def signedAssociationStringForThreepid(
         self, medium: str, address: str
-    ) -> Union[str, None]:
+    ) -> Optional[str]:
         """
         Retrieve the JSON for the signed association matching the provided 3PID,
         if one exists.
@@ -228,7 +226,7 @@ class GlobalAssociationStore:
 
         return sgAssocStr
 
-    def getMxid(self, medium: str, address: str) -> Union[str, None]:
+    def getMxid(self, medium: str, address: str) -> Optional[str]:
         """
         Retrieves the MXID associated with a 3PID.
 
@@ -356,7 +354,7 @@ class GlobalAssociationStore:
         if commit:
             self.sydent.db.commit()
 
-    def lastIdFromServer(self, server: str) -> Union[int, None]:
+    def lastIdFromServer(self, server: str) -> Optional[int]:
         """
         Retrieves the ID of the last association received from the given peer.
 
