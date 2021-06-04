@@ -20,7 +20,6 @@ import logging
 from sydent.db.accounts import AccountStore
 from sydent.http.servlets import MatrixRestError, get_args
 from sydent.terms.terms import get_terms
-from sydent.sydent import Sydent
 
 from twisted.web.server import Request
 
