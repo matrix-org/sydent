@@ -26,7 +26,7 @@ from twisted.internet.interfaces import IResolver
 from twisted.names import client, dns
 from twisted.names.error import DNSNameError, DomainError
 
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, Tuple, List
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class Server(object):
     expires = attr.ib(default=0)
 
 
-def pick_server_from_list(server_list: list[Server]) -> Tuple[bytes, int]:
+def pick_server_from_list(server_list: List[Server]) -> Tuple[bytes, int]:
     """Randomly choose a server from the server list.
 
     :param server_list: List of candidate servers.
