@@ -41,6 +41,7 @@ setup(
     version=read_version(),
     packages=find_packages(),
     description="Reference Matrix Identity Verification and Lookup Server",
+    python_requires=">=3.7",
     install_requires=[
         "signedjson==1.1.1",
         "unpaddedbase64==1.1.0",
