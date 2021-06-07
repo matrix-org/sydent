@@ -14,7 +14,7 @@
 import time
 
 
-class JoinTokenStore(object):
+class JoinTokenStore:
     def __init__(self, sydent):
         self.sydent = sydent
 

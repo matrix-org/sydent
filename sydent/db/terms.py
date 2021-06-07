@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class TermsStore(object):
+class TermsStore:
     def __init__(self, sydent):
         self.sydent = sydent
 
