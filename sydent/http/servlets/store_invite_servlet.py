@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import random
 import string
@@ -99,7 +98,7 @@ class StoreInviteServlet(Resource):
         substitutions = {}
         # Include all arguments sent via the request.
         for k, v in args.items():
-            if isinstance(v, string_types):
+            if isinstance(v, str):
                 substitutions[k] = v
         substitutions["token"] = token
 
@@ -190,7 +189,7 @@ class StoreInviteServlet(Resource):
         :rtype: unicode
         """
         # Extract strings from the address
-        username, domain = address.split(u"@", 1)
+        username, domain = address.split("@", 1)
 
         # Obfuscate strings
         redacted_username = self._redact(
@@ -198,7 +197,7 @@ class StoreInviteServlet(Resource):
         )
         redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
 
-        return redacted_username + u"@" + redacted_domain
+        return redacted_username + "@" + redacted_domain
 
     def _redact(self, s, characters_to_reveal):
         """
@@ -218,13 +217,13 @@ class StoreInviteServlet(Resource):
         # If the string is shorter than the defined threshold, redact based on length
         if len(s) <= characters_to_reveal:
             if len(s) > 5:
-                return s[:3] + u"..."
+                return s[:3] + "..."
             if len(s) > 1:
-                return s[0] + u"..."
-            return u"..."
+                return s[0] + "..."
+            return "..."
 
         # Otherwise truncate it and add an ellipses
-        return s[:characters_to_reveal] + u"..."
+        return s[:characters_to_reveal] + "..."
 
     def _randomString(self, length):
         """
@@ -236,4 +235,4 @@ class StoreInviteServlet(Resource):
         :return: The generated string.
         :rtype: unicode
         """
-        return u"".join(self.random.choice(string.ascii_letters) for _ in range(length))
+        return "".join(self.random.choice(string.ascii_letters) for _ in range(length))
