@@ -11,7 +11,7 @@
 #  limitations under the License.
 
 
-from mock import patch
+from unittest.mock import patch
 from twisted.internet import defer
 from twisted.internet.error import DNSLookupError
 from twisted.test.proto_helpers import StringTransport
@@ -130,7 +130,7 @@ class BlacklistingAgentTest(TestCase):
         self.assertRegex(transport.value(), b"Host: example.com")
 
         # Send it the HTTP response
-        res_json = '{ "sub": "@test:example.com" }'.encode("ascii")
+        res_json = b'{ "sub": "@test:example.com" }'
         protocol.dataReceived(
             b"HTTP/1.1 200 OK\r\n"
             b"Server: Fake\r\n"
@@ -180,7 +180,7 @@ class BlacklistingAgentTest(TestCase):
         self.assertRegex(transport.value(), b"Host: example.com")
 
         # Send it the HTTP response
-        res_json = '{ "sub": "@test:example.com" }'.encode("ascii")
+        res_json = b'{ "sub": "@test:example.com" }'
         protocol.dataReceived(
             b"HTTP/1.1 200 OK\r\n"
             b"Server: Fake\r\n"

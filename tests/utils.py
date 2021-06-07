@@ -76,7 +76,7 @@ def make_sydent(test_config={}):
 
 
 @attr.s
-class FakeChannel(object):
+class FakeChannel:
     """
     A fake Twisted Web Channel (the part that interfaces with the
     wire). Mostly copied from Synapse's tests framework.
@@ -214,7 +214,7 @@ def make_request(
 
     if isinstance(content, dict):
         content = json.dumps(content)
-    if isinstance(content, text_type):
+    if isinstance(content, str):
         content = content.encode("utf8")
 
     site = FakeSite()
