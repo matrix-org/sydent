@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014,2017 OpenMarket Ltd
 # Copyright 2019 The Matrix.org Foundation C.I.C.
 #

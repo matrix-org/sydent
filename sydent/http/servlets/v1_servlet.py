@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018 Travis Ralston
 # Copyright 2018 New Vector Ltd
 #
