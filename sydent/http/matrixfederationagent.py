@@ -126,7 +126,7 @@ class MatrixFederationAgent(object):
         method: bytes,
         uri: bytes,
         headers: Optional['Headers']=None,
-        bodyProducer: Optional['IBodyProducer']=None) -> 'Deferred':
+        bodyProducer: Optional['IBodyProducer']=None) -> Generator:
         """
         :param method: HTTP method (GET/POST/etc).
         :type method: bytes
@@ -304,7 +304,7 @@ class MatrixFederationAgent(object):
         )
 
     @defer.inlineCallbacks
-    def _get_well_known(self, server_name: bytes) -> 'Deferred':
+    def _get_well_known(self, server_name: bytes) -> Generator:
         """Attempt to fetch and parse a .well-known file for the given server
 
         :param server_name: Name of the server, from the requested url.
@@ -327,7 +327,7 @@ class MatrixFederationAgent(object):
         defer.returnValue(result)
 
     @defer.inlineCallbacks
-    def _do_get_well_known(self, server_name: bytes) -> 'Deferred':
+    def _do_get_well_known(self, server_name: bytes) -> Generator:
         """Actually fetch and parse a .well-known, without checking the cache
 
         :param server_name: Name of the server, from the requested url

@@ -61,7 +61,7 @@ class LocalAssociationStore:
         self.sydent.db.commit()
 
     def getAssociationsAfterId(
-        self, afterId: int, limit: Optional[int] = None
+        self, afterId: Optional[int], limit: Optional[int] = None
     ) -> Tuple[Dict[int, ThreepidAssociation], Optional[int]]:
         """
         Retrieves every association after the given ID.
@@ -106,7 +106,7 @@ class LocalAssociationStore:
         return assocs, maxId
 
     def getSignedAssociationsAfterId(
-        self, afterId: int, limit: Optional[int] = None
+        self, afterId: Optional[int], limit: Optional[int] = None
     ) -> Tuple[Dict[int, Dict[str, Any]], Optional[int]]:
         """Get associations after a given ID, and sign them before returning
 
@@ -254,7 +254,7 @@ class GlobalAssociationStore:
         return row[0]
 
     def getMxids(
-        self, threepid_tuples: List[Tuple[str, str, str]]
+        self, threepid_tuples: List[Tuple[str, str]]
     ) -> List[Tuple[str, str, str]]:
         """Given a list of threepid_tuples, return the same list but with
         mxids appended to each tuple for which a match was found in the
@@ -295,7 +295,7 @@ class GlobalAssociationStore:
             )
 
             results = []
-            current = (Any, Any)
+            current = None
             for row in res.fetchall():
                 # only use the most recent entry for each
                 # threepid (they're sorted by ts)
@@ -401,7 +401,7 @@ class GlobalAssociationStore:
         )
         self.sydent.db.commit()
 
-    def retrieveMxidsForHashes(self, addresses: List[Any]) -> Dict[str, str]:
+    def retrieveMxidsForHashes(self, addresses: List[str]) -> Dict[str, str]:
         """Returns a mapping from hash: mxid from a list of given lookup_hash values
 
         :param addresses: An array of lookup_hash values to check against the db

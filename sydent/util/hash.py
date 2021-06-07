@@ -19,7 +19,7 @@ import hashlib
 import unpaddedbase64  # type: ignore
 
 
-def sha256_and_url_safe_base64(input_text: str) -> bytes:
+def sha256_and_url_safe_base64(input_text: str) -> str:
     """SHA256 hash an input string, encode the digest as url-safe base64, and
     return
 

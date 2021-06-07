@@ -50,7 +50,7 @@ class AccountStore(object):
         return Account(*row)
 
     def storeAccount(
-        self, user_id: str, creation_ts: int, consent_version: Optional[bytes]
+        self, user_id: str, creation_ts: int, consent_version: Optional[str]
     ) -> None:
         """
         Stores an account for the given user ID.
@@ -72,7 +72,7 @@ class AccountStore(object):
         self.sydent.db.commit()
 
     def setConsentVersion(
-        self, user_id: bytes, consent_version: Optional[str]
+        self, user_id: str, consent_version: Optional[str]
     ) -> None:
         """
         Saves that the given user has agreed to all of the terms in the document of the

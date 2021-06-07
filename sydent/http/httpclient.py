@@ -43,7 +43,7 @@ class HTTPClient(object):
     requests.
     """
 
-    agent: Any  # TODO: find type that will work with both Agent() and MatrixFederationAgent()
+    agent: IAgent  # TODO: find type that will work with both Agent() and MatrixFederationAgent()
 
     @defer.inlineCallbacks
     def get_json(

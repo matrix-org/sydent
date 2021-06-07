@@ -140,4 +140,4 @@ def get_terms(sydent) -> Optional[Terms]:
         logger.exception(
             "Couldn't read terms file '%s'", sydent.cfg.get("general", "terms.path")
         )
-        return None  # added per this: https://github.com/python/mypy/issues/3974
+        return None

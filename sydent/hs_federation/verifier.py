@@ -68,7 +68,7 @@ class Verifier(object):
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
         # in the result.
-        self.cache: Dict = {
+        self.cache: Dict[str, Any] = {
             # server_name: <result from keys query>,
         }
 

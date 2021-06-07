@@ -84,7 +84,7 @@ class HashingMetadataStore:
 
     def _rehash_threepids(
         self,
-        cur: "Cursor",
+        cur: Cursor,
         hashing_function: Callable[[str], str],
         pepper: str,
         table: str,

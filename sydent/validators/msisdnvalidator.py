@@ -39,7 +39,7 @@ class MsisdnValidator:
         self.omSms = OpenMarketSMS(sydent)
 
         # cache originators & sms rules from config file
-        self.originators: Dict = {}
+        self.originators = {}
         self.smsRules = {}
         for opt in self.sydent.cfg.options("sms"):
             if opt.startswith("originators."):

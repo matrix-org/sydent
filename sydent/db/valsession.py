@@ -131,7 +131,7 @@ class ThreePidValSessionStore:
             self.sydent.db.commit()
         return sid
 
-    def setSendAttemptNumber(self, sid: str, attemptNo: int) -> None:
+    def setSendAttemptNumber(self, sid: int, attemptNo: int) -> None:
         """
         Updates the send attempt number for the session with the given ID.
 
@@ -148,7 +148,7 @@ class ThreePidValSessionStore:
         )
         self.sydent.db.commit()
 
-    def setValidated(self, sid: str, validated: bool) -> None:
+    def setValidated(self, sid: int, validated: bool) -> None:
         """
         Updates a session to set the validated flag to the given value.
 
@@ -165,7 +165,7 @@ class ThreePidValSessionStore:
         )
         self.sydent.db.commit()
 
-    def setMtime(self, sid: str, mtime: int) -> None:
+    def setMtime(self, sid: int, mtime: int) -> None:
         """
         Set the time of the last send attempt for the session with the given ID
 
@@ -182,7 +182,7 @@ class ThreePidValSessionStore:
         )
         self.sydent.db.commit()
 
-    def getSessionById(self, sid: str) -> Optional[ValidationSession]:
+    def getSessionById(self, sid: int) -> Optional[ValidationSession]:
         """
         Retrieves the session matching the given sid.
 
@@ -209,7 +209,7 @@ class ThreePidValSessionStore:
             row[0], row[1], row[2], row[3], row[4], row[5], None, None
         )
 
-    def getTokenSessionById(self, sid: str) -> Optional[ValidationSession]:
+    def getTokenSessionById(self, sid: int) -> Optional[ValidationSession]:
         """
         Retrieves a validation session using the session's ID.
 
@@ -237,7 +237,7 @@ class ThreePidValSessionStore:
 
         return None
 
-    def getValidatedSession(self, sid: str, clientSecret: str) -> ValidationSession:
+    def getValidatedSession(self, sid: int, clientSecret: str) -> ValidationSession:
         """
         Retrieve a validated and still-valid session whose client secret matches the
         one passed in.

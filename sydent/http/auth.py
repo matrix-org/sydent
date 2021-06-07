@@ -63,7 +63,7 @@ def authV2(
     sydent: "Sydent",
     request: 'Request',
     requireTermsAgreed: bool = True,
-) -> Optional['Account']:
+) -> 'Account':
     """For v2 APIs check that the request has a valid access token associated with it
 
     :param sydent: The Sydent instance to use.
