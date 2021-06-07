@@ -53,7 +53,7 @@ def _idnaBytes(text):
 
 
 @implementer(IOpenSSLClientConnectionCreator)
-class ClientTLSOptions(object):
+class ClientTLSOptions:
     """
     Client creator for TLS without certificate identity verification. This is a
     copy of twisted.internet._sslverify.ClientTLSOptions with the identity
@@ -85,7 +85,7 @@ class ClientTLSOptions(object):
             connection.set_tlsext_host_name(self._hostnameBytes)
 
 
-class ClientTLSOptionsFactory(object):
+class ClientTLSOptionsFactory:
     """Factory for Twisted ClientTLSOptions that are used to make connections
     to remote servers for federation."""
 

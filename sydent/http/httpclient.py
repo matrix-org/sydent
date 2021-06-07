@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import json
 import logging
@@ -30,7 +29,7 @@ from sydent.util import json_decoder
 logger = logging.getLogger(__name__)
 
 
-class HTTPClient(object):
+class HTTPClient:
     """A base HTTP class that contains methods for making GET and POST HTTP
     requests.
     """

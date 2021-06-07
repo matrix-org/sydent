@@ -49,7 +49,7 @@ class SslComponents:
 
         try:
             fp = open(privKeyAndCertFilename)
-        except IOError:
+        except OSError:
             logger.warning(
                 "Unable to read private key / cert file from %s: not starting the replication HTTPS server "
                 "or doing replication pushes.",
