@@ -17,15 +17,13 @@
 from __future__ import absolute_import
 
 import logging
+
 import phonenumbers
 
 from sydent.db.valsession import ThreePidValSessionStore
-from sydent.validators import common
 from sydent.sms.openmarket import OpenMarketSMS
-
-from sydent.validators import DestinationRejectedException
-
 from sydent.util import time_msec
+from sydent.validators import DestinationRejectedException, common
 
 logger = logging.getLogger(__name__)
 

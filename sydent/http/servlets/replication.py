@@ -15,20 +15,19 @@
 # limitations under the License.
 from __future__ import absolute_import
 
+import json
+import logging
+
 import twisted.python.log
 from twisted.web.resource import Resource
-from sydent.http.servlets import jsonwrap, MatrixRestError
-from sydent.threepid import threePidAssocFromDict
-from sydent.util import json_decoder
-
-from sydent.util.hash import sha256_and_url_safe_base64
 
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
-
-import logging
-import json
+from sydent.http.servlets import MatrixRestError, jsonwrap
+from sydent.threepid import threePidAssocFromDict
+from sydent.util import json_decoder
+from sydent.util.hash import sha256_and_url_safe_base64
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,7 @@ class ReplicationPushServlet(Resource):
         peer = peerStore.getPeerByName(peerCertCn)
 
         if not peer:
-            logger.warn(
+            logger.warning(
                 "Got connection from %s but no peer found by that name", peerCertCn
             )
             raise MatrixRestError(
@@ -62,7 +61,7 @@ class ReplicationPushServlet(Resource):
             or request.requestHeaders.getRawHeaders("Content-Type")[0]
             != "application/json"
         ):
-            logger.warn(
+            logger.warning(
                 "Peer %s made push connection with non-JSON content (type: %s)",
                 peer.servername,
                 request.requestHeaders.getRawHeaders("Content-Type")[0],
@@ -73,13 +72,13 @@ class ReplicationPushServlet(Resource):
             # json.loads doesn't allow bytes in Python 3.5
             inJson = json_decoder.decode(request.content.read().decode("UTF-8"))
         except ValueError:
-            logger.warn(
+            logger.warning(
                 "Peer %s made push connection with malformed JSON", peer.servername
             )
             raise MatrixRestError(400, "M_BAD_JSON", "Malformed JSON")
 
         if "sgAssocs" not in inJson:
-            logger.warn(
+            logger.warning(
                 "Peer %s made push connection with no 'sgAssocs' key in JSON",
                 peer.servername,
             )
@@ -142,9 +141,9 @@ class ReplicationPushServlet(Resource):
                 logger.info(
                     "Stored association origin ID %s from %s", originId, peer.servername
                 )
-            except:
+            except Exception:
                 failedIds.append(originId)
-                logger.warn(
+                logger.warning(
                     "Failed to verify signed association from %s with origin ID %s",
                     peer.servername,
                     originId,

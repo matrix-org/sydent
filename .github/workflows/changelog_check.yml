@@ -1,0 +1,16 @@
+name: Changelog
+on: [pull_request]
+
+jobs:
+  check-newsfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+      - run: python -m pip install towncrier
+      - run: python -m towncrier.check --compare-with="origin/${{ github.base_ref }}"

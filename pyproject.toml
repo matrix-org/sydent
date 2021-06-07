@@ -33,3 +33,6 @@
         directory = "misc"
         name = "Internal Changes"
         showcontent = true
+
+[tool.isort]
+profile = "black"

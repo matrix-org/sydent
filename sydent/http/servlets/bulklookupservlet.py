@@ -15,13 +15,12 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from twisted.web.resource import Resource
-from sydent.db.threepid_associations import GlobalAssociationStore
-
 import logging
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from twisted.web.resource import Resource
 
+from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 
 logger = logging.getLogger(__name__)
 

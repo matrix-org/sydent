@@ -15,9 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 import os
-from setuptools import setup, find_packages
+import re
+
+from setuptools import find_packages, setup
 
 
 def read_version():
@@ -43,7 +44,7 @@ setup(
     install_requires=[
         "signedjson==1.1.1",
         "unpaddedbase64==1.1.0",
-        "Twisted>=16.0.0",
+        "Twisted>=18.4.0",
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
         "phonenumbers",
@@ -54,6 +55,9 @@ setup(
         "six>=1.10",
         "pyyaml>=3.11",
         "mock>=3.0.5",
+        "flake8==3.9.2",
+        "black==21.5b1",
+        "isort==5.8.0",
     ],
     # make sure we package the sql files
     include_package_data=True,

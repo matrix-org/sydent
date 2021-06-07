@@ -15,15 +15,14 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from twisted.web.resource import Resource
-from twisted.internet import defer
-
 import logging
-import json
-from six.moves import urllib
 
-from sydent.http.servlets import get_args, jsonwrap, deferjsonwrap, send_cors
+from six.moves import urllib
+from twisted.internet import defer
+from twisted.web.resource import Resource
+
 from sydent.http.httpclient import FederationHttpClient
+from sydent.http.servlets import deferjsonwrap, get_args, send_cors
 from sydent.users.tokens import issueToken
 from sydent.util.stringutils import is_valid_matrix_server_name
 

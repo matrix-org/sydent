@@ -15,11 +15,10 @@
 # limitations under the License.
 
 from OpenSSL import SSL
-from zope.interface import implementer
 from twisted.internet import ssl
-from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
 from twisted.internet.abstract import isIPAddress, isIPv6Address
-from twisted.internet._sslverify import ClientTLSOptions
+from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
+from zope.interface import implementer
 
 
 def _tolerateErrors(wrapped):

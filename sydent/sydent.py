@@ -17,74 +17,66 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import gc
-
-from six.moves import configparser
 import copy
+import gc
 import logging
 import logging.handlers
 import os
 from typing import Set
 
 import twisted.internet.reactor
-from twisted.internet import task
+from six.moves import configparser
+from twisted.internet import address, task
 from twisted.python import log
 
+from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.sqlitedb import SqliteDatabase
-
+from sydent.db.valsession import ThreePidValSessionStore
+from sydent.hs_federation.verifier import Verifier
 from sydent.http.httpcommon import SslComponents
+from sydent.http.httpsclient import ReplicationHttpsClient
 from sydent.http.httpserver import (
     ClientApiHttpServer,
-    ReplicationHttpsServer,
     InternalApiHttpServer,
+    ReplicationHttpsServer,
 )
-from sydent.http.httpsclient import ReplicationHttpsClient
+from sydent.http.servlets.accountservlet import AccountServlet
 from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
-from sydent.http.servlets.pubkeyservlets import (
-    EphemeralPubkeyIsValidServlet,
-    PubkeyIsValidServlet,
-)
-from sydent.http.servlets.termsservlet import TermsServlet
-from sydent.validators.emailvalidator import EmailValidator
-from sydent.validators.msisdnvalidator import MsisdnValidator
-from sydent.hs_federation.verifier import Verifier
-
-from sydent.util.hash import sha256_and_url_safe_base64
-from sydent.util.tokenutils import generateAlphanumericTokenOfLength
-from sydent.util.ip_range import generate_ip_set, DEFAULT_IP_RANGE_BLACKLIST
-
-from sydent.sign.ed25519 import SydentEd25519
-
+from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
 from sydent.http.servlets.emailservlet import (
     EmailRequestCodeServlet,
     EmailValidateCodeServlet,
 )
+from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
+from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
+from sydent.http.servlets.logoutservlet import LogoutServlet
+from sydent.http.servlets.lookupservlet import LookupServlet
+from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
 from sydent.http.servlets.msisdnservlet import (
     MsisdnRequestCodeServlet,
     MsisdnValidateCodeServlet,
 )
-from sydent.http.servlets.lookupservlet import LookupServlet
-from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
-from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
-from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
-from sydent.http.servlets.pubkeyservlets import Ed25519Servlet
+from sydent.http.servlets.pubkeyservlets import (
+    Ed25519Servlet,
+    EphemeralPubkeyIsValidServlet,
+    PubkeyIsValidServlet,
+)
+from sydent.http.servlets.registerservlet import RegisterServlet
+from sydent.http.servlets.replication import ReplicationPushServlet
+from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
+from sydent.http.servlets.termsservlet import TermsServlet
 from sydent.http.servlets.threepidbindservlet import ThreePidBindServlet
 from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
-from sydent.http.servlets.replication import ReplicationPushServlet
-from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
-from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
 from sydent.http.servlets.v1_servlet import V1Servlet
-from sydent.http.servlets.accountservlet import AccountServlet
-from sydent.http.servlets.registerservlet import RegisterServlet
-from sydent.http.servlets.logoutservlet import LogoutServlet
 from sydent.http.servlets.v2_servlet import V2Servlet
-
-from sydent.db.valsession import ThreePidValSessionStore
-from sydent.db.hashing_metadata import HashingMetadataStore
-
-from sydent.threepid.bind import ThreepidBinder
-
 from sydent.replication.pusher import Pusher
+from sydent.sign.ed25519 import SydentEd25519
+from sydent.threepid.bind import ThreepidBinder
+from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
+from sydent.util.tokenutils import generateAlphanumericTokenOfLength
+from sydent.validators.emailvalidator import EmailValidator
+from sydent.validators.msisdnvalidator import MsisdnValidator
 
 logger = logging.getLogger(__name__)
 
@@ -227,7 +219,7 @@ class Sydent:
         self.server_name = self.cfg.get("general", "server.name")
         if self.server_name == "":
             self.server_name = os.uname()[1]
-            logger.warn(
+            logger.warning(
                 (
                     "You had not specified a server name. I have guessed that this server is called '%s' "
                     + "and saved this in the config file. If this is incorrect, you should edit server.name in "
@@ -428,7 +420,11 @@ class Sydent:
             "http", "obey_x_forwarded_for"
         ) and request.requestHeaders.hasHeader("X-Forwarded-For"):
             return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
-        return request.getClientIP()
+        client = request.getClientAddress()
+        if isinstance(client, (address.IPv4Address, address.IPv6Address)):
+            return client.host
+        else:
+            return None
 
     def brand_from_request(self, request):
         """

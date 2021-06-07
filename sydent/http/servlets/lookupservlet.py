@@ -16,15 +16,14 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from twisted.web.resource import Resource
-from sydent.db.threepid_associations import GlobalAssociationStore
-
 import logging
+
 import signedjson.sign
+from twisted.web.resource import Resource
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
+from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.util import json_decoder
-
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ class LookupServlet(Resource):
             return {}
 
         sgassoc = json_decoder.decode(sgassoc)
-        if not self.sydent.server_name in sgassoc["signatures"]:
+        if self.sydent.server_name not in sgassoc["signatures"]:
             # We have not yet worked out what the proper trust model should be.
             #
             # Maybe clients implicitly trust a server they talk to (and so we

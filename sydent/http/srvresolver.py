@@ -19,7 +19,6 @@ import random
 import time
 
 import attr
-
 from twisted.internet import defer
 from twisted.internet.error import ConnectError
 from twisted.names import client, dns
@@ -134,7 +133,7 @@ class SrvResolver(object):
             # Try something in the cache, else rereaise
             cache_entry = self._cache.get(service_name, None)
             if cache_entry:
-                logger.warn(
+                logger.warning(
                     "Failed to resolve %r, falling back to cache. %r", service_name, e
                 )
                 defer.returnValue(list(cache_entry))

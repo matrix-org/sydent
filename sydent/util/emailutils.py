@@ -15,23 +15,21 @@
 # limitations under the License.
 from __future__ import absolute_import
 
+import email.utils
 import logging
-import socket
 import random
 import smtplib
-import email.utils
+import socket
 import string
-import twisted.python.log
+
 import six
-from six.moves import urllib
-from six.moves import range
+import twisted.python.log
+from six.moves import range, urllib
 
 if six.PY2:
     from cgi import escape
 else:
     from html import escape
-
-import email.utils
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength

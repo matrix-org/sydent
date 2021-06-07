@@ -15,14 +15,15 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from twisted.web.resource import Resource
-
 import logging
+
 import signedjson.key
 import signedjson.sign
+from twisted.web.resource import Resource
+
 from sydent.db.invite_tokens import JoinTokenStore
-from sydent.http.servlets import get_args, jsonwrap, send_cors, MatrixRestError
 from sydent.http.auth import authV2
+from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class BlindlySignStuffServlet(Resource):
                 "ed25519", "0", private_key_base64
             )
             signed = signedjson.sign.sign_json(to_sign, self.server_name, private_key)
-        except:
+        except Exception:
             logger.exception("signing failed")
             raise MatrixRestError(500, "M_UNKNOWN", "Internal Server Error")
 

@@ -4,11 +4,10 @@ import logging
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util import time_msec
-
 from sydent.validators import (
     IncorrectClientSecretException,
-    InvalidSessionIdException,
     IncorrectSessionTokenException,
+    InvalidSessionIdException,
     SessionExpiredException,
     ValidationSession,
 )

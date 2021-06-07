@@ -15,14 +15,13 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from twisted.web.resource import Resource
-
 import logging
 
-from sydent.http.servlets import jsonwrap, send_cors
+from twisted.web.resource import Resource
+
 from sydent.db.accounts import AccountStore
 from sydent.http.auth import authV2, tokenFromRequest
-
+from sydent.http.servlets import jsonwrap, send_cors
 
 logger = logging.getLogger(__name__)
 

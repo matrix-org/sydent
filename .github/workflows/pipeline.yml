@@ -1,0 +1,48 @@
+name: Linting and tests
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+jobs:
+  check-code-style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - run: python -m pip install -e .
+      - run: black --check --diff sydent/ tests/ matrix_is_test/ setup.py
+      - run: flake8 sydent/ tests/ matrix_is_test/ setup.py
+      - run: isort --check-only --diff sydent/ tests/ matrix_is_test/ setup.py
+
+  run-unit-tests:
+    needs: [check-code-style]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.6', '3.x']
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+         python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e .
+      - run: trial tests
+
+  run-matrix-is-tests:
+    needs: [check-code-style]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.6', '3.x']
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e .
+      - run: pip install git+https://github.com/matrix-org/matrix-is-tester.git
+      - run: trial matrix_is_tester

@@ -16,14 +16,16 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import json
 import logging
 
-from sydent.hs_federation.verifier import NoAuthenticationError, InvalidServerName
 from signedjson.sign import SignatureVerifyException
+from twisted.internet import defer
+from twisted.web import server
+from twisted.web.resource import Resource
 
-from sydent.http.servlets import dict_to_json_bytes
 from sydent.db.valsession import ThreePidValSessionStore
+from sydent.hs_federation.verifier import InvalidServerName, NoAuthenticationError
+from sydent.http.servlets import dict_to_json_bytes
 from sydent.util import json_decoder
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
@@ -31,10 +33,6 @@ from sydent.validators import (
     InvalidSessionIdException,
     SessionNotValidatedException,
 )
-
-from twisted.web.resource import Resource
-from twisted.web import server
-from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
 
