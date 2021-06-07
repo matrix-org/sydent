@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import collections
 import logging
@@ -67,7 +66,7 @@ class ThreepidBinder:
 
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
-        str_to_hash = u" ".join(
+        str_to_hash = " ".join(
             [address, medium, self.hashing_store.get_lookup_pepper()],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)

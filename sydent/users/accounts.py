@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class Account(object):
+class Account:
     def __init__(self, user_id, creation_ts, consent_version):
         """
         :param user_id: The Matrix user ID for the account.

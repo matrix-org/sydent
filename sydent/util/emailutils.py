@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import email.utils
 import logging
@@ -22,12 +21,9 @@ import string
 
 import six
 import twisted.python.log
-from six.moves import range, urllib
+from six.moves import urllib
 
-if six.PY2:
-    from cgi import escape
-else:
-    from html import escape
+from html import escape
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import logging
 
@@ -161,7 +160,7 @@ class MsisdnValidator:
         msisdn = phonenumbers.format_number(
             destPhoneNumber, phonenumbers.PhoneNumberFormat.E164
         )[1:]
-        return origs[sum([int(i) for i in msisdn]) % len(origs)]
+        return origs[sum(int(i) for i in msisdn) % len(origs)]
 
     def validateSessionWithToken(self, sid, clientSecret, token):
         """

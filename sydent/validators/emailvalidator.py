@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import logging
 
@@ -62,7 +61,7 @@ class EmailValidator:
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
         valSession = valSessionStore.getOrCreateTokenSession(
-            medium=u"email", address=emailAddress, clientSecret=clientSecret
+            medium="email", address=emailAddress, clientSecret=clientSecret
         )
 
         valSessionStore.setMtime(valSession.id, time_msec())
@@ -81,7 +80,7 @@ class EmailValidator:
             )
             return valSession.id
 
-        ipstring = ipaddress if ipaddress else u"an unknown location"
+        ipstring = ipaddress if ipaddress else "an unknown location"
 
         substitutions = {
             "ipaddress": ipstring,
