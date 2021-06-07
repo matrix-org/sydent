@@ -19,7 +19,7 @@ import logging
 
 import signedjson.key
 import signedjson.sign
-from six.moves import configparser
+import configparser
 from twisted.internet import defer
 from twisted.web.client import readBody
 from unpaddedbase64 import decode_base64

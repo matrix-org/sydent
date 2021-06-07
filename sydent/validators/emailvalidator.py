@@ -14,7 +14,7 @@
 
 import logging
 
-from six.moves import urllib
+import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util import time_msec

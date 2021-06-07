@@ -19,9 +19,8 @@ import smtplib
 import socket
 import string
 
-import six
 import twisted.python.log
-from six.moves import urllib
+import urllib
 
 from html import escape
 

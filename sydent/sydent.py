@@ -22,7 +22,7 @@ import os
 from typing import Set
 
 import twisted.internet.reactor
-from six.moves import configparser
+import configparser
 from twisted.internet import address, task
 from twisted.python import log
 

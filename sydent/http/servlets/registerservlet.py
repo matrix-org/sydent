@@ -14,7 +14,8 @@
 
 import logging
 
-from six.moves import urllib
+import urllib
+
 from twisted.internet import defer
 from twisted.web.resource import Resource
 

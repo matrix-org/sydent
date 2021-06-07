@@ -17,7 +17,6 @@ import string
 from email.header import Header
 
 import nacl.signing
-from six import string_types
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
