@@ -47,7 +47,7 @@ email.subject = Your Validation Token
 """
 
 
-class MatrixIsTestLauncher(object):
+class MatrixIsTestLauncher:
     def __init__(self, with_terms):
         self.with_terms = with_terms
 
