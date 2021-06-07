@@ -19,7 +19,7 @@ import yaml
 logger = logging.getLogger(__name__)
 
 
-class Terms(object):
+class Terms:
     def __init__(self, yamlObj):
         """
         :param yamlObj: The parsed YAML.
