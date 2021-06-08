@@ -18,7 +18,7 @@ import time
 from typing import Any, Dict, Tuple
 
 import attr
-from sortedcontainers import SortedList  # type: ignore
+from sortedcontainers import SortedList
 
 logger = logging.getLogger(__name__)
 

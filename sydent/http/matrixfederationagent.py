@@ -20,7 +20,7 @@ import time
 from typing import Generator, Optional
 
 import attr
-from netaddr import IPAddress  # type: ignore
+from netaddr import IPAddress
 from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS

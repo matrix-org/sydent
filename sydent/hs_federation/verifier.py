@@ -19,12 +19,12 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
-import signedjson.key  # type: ignore
-import signedjson.sign  # type: ignore
+import signedjson.key
+import signedjson.sign
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from twisted.web.server import Request
-from unpaddedbase64 import decode_base64  # type: ignore
+from unpaddedbase64 import decode_base64
 
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name

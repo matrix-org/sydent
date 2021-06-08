@@ -16,7 +16,7 @@
 
 from typing import TYPE_CHECKING, Any, Dict
 
-import signedjson.sign  # type: ignore
+import signedjson.sign
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
