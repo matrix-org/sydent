@@ -128,9 +128,7 @@ def sendEmail(
         smtp.quit()
     except Exception as origException:
         twisted.python.log.err()
-        ese = EmailSendException()
-        ese.cause = origException
-        raise ese
+        raise EmailSendException() from origException
 
 
 class EmailAddressException(Exception):
@@ -138,5 +136,4 @@ class EmailAddressException(Exception):
 
 
 class EmailSendException(Exception):
-    cause: Any  # type hint added to prevent ""EmailSendException" has no attribute "cause"" error in Mypy
     pass
