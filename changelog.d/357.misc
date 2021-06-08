@@ -1,0 +1,1 @@
+Add a mypy.ini and add missing modules to ignore, add mypy-zope plugin, remove inline type-ignore comments, and update sydent/utils/emailutils.py. 
