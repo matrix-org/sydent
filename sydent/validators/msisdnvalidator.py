@@ -17,7 +17,7 @@
 from __future__ import absolute_import
 
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, List
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import phonenumbers  # type: ignore
 
