@@ -73,8 +73,7 @@ def authV2(
     :param requireTermsAgreed: Whether to deny authentication if the user hasn't accepted
         the terms of service.
 
-    :returns Account|None: The account object if there is correct auth, or None for v1
-        APIs.
+    :returns Account: The account object if there is correct auth
     :raises MatrixRestError: If the request is v2 but could not be authed or the user has
         not accepted terms.
     """

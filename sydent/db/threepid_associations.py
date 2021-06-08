@@ -424,14 +424,14 @@ class GlobalAssociationStore:
         results = {}
         try:
             # Convert list of addresses to list of tuples of addresses
-            addresses = [(x,) for x in addresses]
+            tuplized_addresses = [(x,) for x in addresses]
 
             inserted_cap = 0
-            while inserted_cap < len(addresses):
+            while inserted_cap < len(tuplized_addresses):
                 cur.executemany(
                     "INSERT INTO tmp_retrieve_mxids_for_hashes(lookup_hash) "
                     "VALUES (?)",
-                    addresses[inserted_cap : inserted_cap + 500],
+                    tuplized_addresses[inserted_cap : inserted_cap + 500],
                 )
                 inserted_cap += 500
 

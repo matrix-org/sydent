@@ -99,7 +99,7 @@ class OpenMarketSMS:
         password = self.sydent.cfg.get("sms", "password").encode("UTF-8")
 
         b64creds = b64encode(b"%s:%s" % (username, password))
-        headers: Any = Headers(
+        req_headers = Headers(
             {
                 b"Authorization": [b"Basic " + b64creds],
                 b"Content-Type": [b"application/json"],
@@ -107,7 +107,7 @@ class OpenMarketSMS:
         )
 
         resp = yield self.http_cli.post_json_get_nothing(
-            API_BASE_URL, body, {"headers": headers}
+            API_BASE_URL, body, {"headers": req_headers}
         )
         headers = dict(resp.headers.getAllRawHeaders())
 
