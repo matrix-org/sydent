@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import collections
 import logging
 import math
-from typing import TYPE_CHECKING, Any, Dict, Generator, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 import signedjson.sign  # type: ignore
 from twisted.internet import defer

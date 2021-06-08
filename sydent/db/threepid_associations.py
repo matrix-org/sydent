@@ -16,8 +16,9 @@
 from __future__ import absolute_import
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
+from sydent.util import time_msec
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
 
