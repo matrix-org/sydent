@@ -16,11 +16,10 @@ from __future__ import absolute_import
 
 import logging
 import time
+from typing import TYPE_CHECKING
 
 from sydent.db.accounts import AccountStore
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

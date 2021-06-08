@@ -17,17 +17,16 @@
 from __future__ import absolute_import
 
 import logging
+from typing import TYPE_CHECKING, Generator
 
 import twisted.internet.reactor
 import twisted.internet.task
 from twisted.internet import defer
 
-from sydent.util import time_msec
-from sydent.replication.peer import LocalPeer, RemotePeer
-from sydent.db.threepid_associations import LocalAssociationStore
 from sydent.db.peers import PeerStore
-
-from typing import TYPE_CHECKING, Generator
+from sydent.db.threepid_associations import LocalAssociationStore
+from sydent.replication.peer import LocalPeer, RemotePeer
+from sydent.util import time_msec
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -39,7 +38,7 @@ ASSOCIATIONS_PUSH_LIMIT = 100
 
 
 class Pusher:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.pushing = False
         self.peerStore = PeerStore(self.sydent)
@@ -79,7 +78,7 @@ class Pusher:
         return defer.DeferredList([self._push_to_peer(p) for p in peers])
 
     @defer.inlineCallbacks
-    def _push_to_peer(self, p: 'RemotePeer') -> Generator:
+    def _push_to_peer(self, p: "RemotePeer") -> Generator:
         """
         For a given peer, retrieves the list of associations that were created since
         the last successful push to this peer (limited to ASSOCIATIONS_PUSH_LIMIT) and

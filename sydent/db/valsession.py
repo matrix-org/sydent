@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 
 from random import SystemRandom
+from typing import TYPE_CHECKING, Optional
 
 import sydent.util.tokenutils
 from sydent.util import time_msec
@@ -27,14 +28,12 @@ from sydent.validators import (
     ValidationSession,
 )
 
-from typing import TYPE_CHECKING, Optional
-
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
 class ThreePidValSessionStore:
-    def __init__(self, syd: 'Sydent') -> None:
+    def __init__(self, syd: "Sydent") -> None:
         self.sydent = syd
         self.random = SystemRandom()
 

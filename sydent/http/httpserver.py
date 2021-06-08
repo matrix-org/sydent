@@ -18,6 +18,7 @@
 from __future__ import absolute_import
 
 import logging
+from typing import TYPE_CHECKING
 
 import twisted.internet.ssl
 from twisted.web.resource import Resource
@@ -31,8 +32,6 @@ from sydent.http.servlets.authenticated_unbind_threepid_servlet import (
     AuthenticatedUnbindThreePidServlet,
 )
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
@@ -40,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 class ClientApiHttpServer:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
         root = Resource()
@@ -154,7 +153,7 @@ class ClientApiHttpServer:
 
 
 class InternalApiHttpServer(object):
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def setup(self, interface, port):
@@ -182,7 +181,7 @@ class InternalApiHttpServer(object):
 
 
 class ReplicationHttpsServer:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
         root = Resource()

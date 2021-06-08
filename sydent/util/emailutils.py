@@ -31,10 +31,10 @@ if six.PY2:
 else:
     from html import escape
 
+from typing import TYPE_CHECKING, Any, Dict
+
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
-
-from typing import TYPE_CHECKING, Dict, Any
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

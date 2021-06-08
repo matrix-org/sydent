@@ -17,11 +17,10 @@ from __future__ import absolute_import
 import logging
 import random
 import time
+from typing import Generator, Optional
 
 import attr
-from netaddr import IPAddress # type: ignore
-from zope.interface import implementer
-
+from netaddr import IPAddress  # type: ignore
 from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
@@ -30,14 +29,12 @@ from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent, IBodyProducer
-
+from zope.interface import implementer
 
 from sydent.http.httpcommon import read_body_with_max_size
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
 from sydent.util import json_decoder
 from sydent.util.ttlcache import TTLCache
-
-from typing import Generator, Optional
 
 # period to cache .well-known results for by default
 WELL_KNOWN_DEFAULT_CACHE_PERIOD = 24 * 3600
@@ -89,8 +86,8 @@ class MatrixFederationAgent(object):
         reactor,
         tls_client_options_factory,
         _well_known_tls_policy=None,
-        _srv_resolver: Optional['SrvResolver']=None,
-        _well_known_cache: Optional['TTLCache']=well_known_cache,
+        _srv_resolver: Optional["SrvResolver"] = None,
+        _well_known_cache: Optional["TTLCache"] = well_known_cache,
     ) -> None:
         self._reactor = reactor
 
@@ -125,8 +122,9 @@ class MatrixFederationAgent(object):
         self,
         method: bytes,
         uri: bytes,
-        headers: Optional['Headers']=None,
-        bodyProducer: Optional['IBodyProducer']=None) -> Generator:
+        headers: Optional["Headers"] = None,
+        bodyProducer: Optional["IBodyProducer"] = None,
+    ) -> Generator:
         """
         :param method: HTTP method (GET/POST/etc).
         :type method: bytes
@@ -191,7 +189,9 @@ class MatrixFederationAgent(object):
         defer.returnValue(res)
 
     @defer.inlineCallbacks
-    def _route_matrix_uri(self, parsed_uri: 'URI', lookup_well_known: bool=True) -> 'Deferred':
+    def _route_matrix_uri(
+        self, parsed_uri: "URI", lookup_well_known: bool = True
+    ) -> "Deferred":
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with

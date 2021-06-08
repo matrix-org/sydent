@@ -17,14 +17,12 @@ from __future__ import absolute_import
 
 import logging
 from base64 import b64encode
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from twisted.internet import defer
 from twisted.web.http_headers import Headers
 
-
 from sydent.http.httpclient import SimpleHttpClient
-
-from typing import Dict, Any, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -62,7 +60,7 @@ def tonFromType(t: str) -> int:
 
 
 class OpenMarketSMS:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.http_cli = SimpleHttpClient(sydent)
 

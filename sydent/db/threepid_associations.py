@@ -16,13 +16,10 @@
 from __future__ import absolute_import
 
 import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
 
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
-
-import logging
-
-from typing import Tuple, Optional, List, Dict, Any, Sequence, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -31,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocalAssociationStore:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def addOrUpdateAssociation(self, assoc: ThreepidAssociation) -> None:
@@ -186,7 +183,7 @@ class LocalAssociationStore:
 
 
 class GlobalAssociationStore:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def signedAssociationStringForThreepid(

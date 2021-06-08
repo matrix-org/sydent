@@ -17,15 +17,14 @@
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
 from sqlite3 import Cursor
-
-from typing import Union, Callable, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Callable, Optional, Union
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
 class HashingMetadataStore:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def get_lookup_pepper(self) -> Optional[str]:

@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+from typing import TYPE_CHECKING, Dict
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util import time_msec
@@ -11,8 +12,6 @@ from sydent.validators import (
     SessionExpiredException,
     ValidationSession,
 )
-
-from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

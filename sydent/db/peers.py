@@ -15,16 +15,16 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from sydent.replication.peer import RemotePeer
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-from typing import Optional, List, Dict, TYPE_CHECKING
+from sydent.replication.peer import RemotePeer
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
 class PeerStore:
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def getPeerByName(self, name: str) -> Optional[RemotePeer]:

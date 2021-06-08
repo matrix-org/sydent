@@ -18,6 +18,7 @@ from __future__ import absolute_import
 import json
 import logging
 from io import BytesIO
+from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
 from twisted.internet import defer
 from twisted.web.client import Agent, FileBodyProducer
@@ -29,8 +30,6 @@ from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 from sydent.http.matrixfederationagent import MatrixFederationAgent
 from sydent.util import json_decoder
-
-from typing import Optional, Dict, Any, TYPE_CHECKING, Generator
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -46,9 +45,7 @@ class HTTPClient(object):
     agent: IAgent
 
     @defer.inlineCallbacks
-    def get_json(
-        self, uri: str, max_size: Optional[int] = None
-    ) -> Generator:
+    def get_json(self, uri: str, max_size: Optional[int] = None) -> Generator:
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -132,7 +129,7 @@ class SimpleHttpClient(HTTPClient):
     from Synapse.
     """
 
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         # The default endpoint factory in Twisted 14.0.0 (which we require) uses the
         # BrowserLikePolicyForHTTPS context factory which will do regular cert validation
@@ -152,7 +149,7 @@ class FederationHttpClient(HTTPClient):
     MatrixFederationAgent.
     """
 
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
             BlacklistingReactorWrapper(

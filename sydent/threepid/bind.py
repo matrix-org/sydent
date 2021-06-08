@@ -19,10 +19,9 @@ from __future__ import absolute_import
 import collections
 import logging
 import math
-import signedjson.sign  # type: ignore
-from sydent.db.invite_tokens import JoinTokenStore
+from typing import TYPE_CHECKING, Any, Dict, Generator, Optional, Union
 
-import signedjson.sign
+import signedjson.sign  # type: ignore
 from twisted.internet import defer
 
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -34,10 +33,6 @@ from sydent.threepid.signer import Signer
 from sydent.util import time_msec
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.stringutils import is_valid_matrix_server_name
-
-from twisted.internet import defer
-
-from typing import TYPE_CHECKING, Dict, Any, Generator, Union, Optional
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

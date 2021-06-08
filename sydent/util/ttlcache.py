@@ -15,11 +15,10 @@
 
 import logging
 import time
+from typing import Any, Dict, Tuple
 
 import attr
 from sortedcontainers import SortedList  # type: ignore
-
-from typing import Any, Dict, Tuple
 
 logger = logging.getLogger(__name__)
 

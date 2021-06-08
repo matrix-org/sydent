@@ -17,6 +17,7 @@
 from __future__ import absolute_import
 
 import logging
+from typing import TYPE_CHECKING, Dict, Optional
 
 import phonenumbers  # type: ignore
 
@@ -24,8 +25,6 @@ from sydent.db.valsession import ThreePidValSessionStore
 from sydent.sms.openmarket import OpenMarketSMS
 from sydent.util import time_msec
 from sydent.validators import DestinationRejectedException, common
-
-from typing import TYPE_CHECKING, Optional, Dict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

@@ -15,9 +15,9 @@
 # limitations under the License.
 
 import logging
+from typing import Any, Dict, List, Optional, Set
 
 import yaml
-from typing import Any, Set, List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 

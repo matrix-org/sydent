@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 
 import logging
+from typing import TYPE_CHECKING, Dict, Optional
 
 from six.moves import urllib
 
@@ -23,10 +24,6 @@ from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util import time_msec
 from sydent.util.emailutils import sendEmail
 from sydent.validators import common
-
-from sydent.util import time_msec
-
-from typing import TYPE_CHECKING, Optional, Dict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

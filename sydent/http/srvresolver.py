@@ -17,6 +17,7 @@
 import logging
 import random
 import time
+from typing import Callable, Dict, Generator, List, SupportsInt, Tuple
 
 import attr
 from twisted.internet import defer
@@ -25,8 +26,6 @@ from twisted.internet.error import ConnectError
 from twisted.internet.interfaces import IResolver
 from twisted.names import client, dns
 from twisted.names.error import DNSNameError, DomainError
-
-from typing import Callable, Dict, Tuple, List, SupportsInt, Generator
 
 logger = logging.getLogger(__name__)
 
@@ -100,13 +99,18 @@ class SrvResolver(object):
     :type get_time: callable
     """
 
-    def __init__(self, dns_client: 'IResolver'=client, cache: Dict[bytes, List[Server]]=SERVER_CACHE, get_time: Callable[[], SupportsInt]=time.time) -> None:
+    def __init__(
+        self,
+        dns_client: "IResolver" = client,
+        cache: Dict[bytes, List[Server]] = SERVER_CACHE,
+        get_time: Callable[[], SupportsInt] = time.time,
+    ) -> None:
         self._dns_client = dns_client
         self._cache = cache
         self._get_time = get_time
 
     @defer.inlineCallbacks
-    def resolve_service(self, service_name: bytes) -> 'Generator':
+    def resolve_service(self, service_name: bytes) -> "Generator":
         """Look up a SRV record
 
         :param service_name: The record to look up.

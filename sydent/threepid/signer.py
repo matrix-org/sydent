@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import signedjson.sign  # type: ignore
+from typing import TYPE_CHECKING, Any, Dict
 
-from typing import TYPE_CHECKING, Dict, Any
+import signedjson.sign  # type: ignore
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

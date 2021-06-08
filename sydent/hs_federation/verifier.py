@@ -17,23 +17,17 @@ from __future__ import absolute_import
 
 import logging
 import time
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
-
-import signedjson.key
-import signedjson.sign
+import signedjson.key  # type: ignore
+import signedjson.sign  # type: ignore
+from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from twisted.web.server import Request
 from unpaddedbase64 import decode_base64  # type: ignore
-import signedjson.sign  # type: ignore
-import signedjson.key  # type: ignore
-from signedjson.sign import SignatureVerifyException
-from twisted.internet import defer
-from unpaddedbase64 import decode_base64
 
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name
-
-from typing import Dict, Optional, TYPE_CHECKING, Any, List, Tuple, Generator
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -64,7 +58,7 @@ class Verifier(object):
     verifying that the signature on the json blob matches.
     """
 
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
         # in the result.
@@ -178,7 +172,7 @@ class Verifier(object):
 
     @defer.inlineCallbacks
     def authenticate_request(
-        self, request: 'Request', content: Optional[bytes]
+        self, request: "Request", content: Optional[bytes]
     ) -> Generator:
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse

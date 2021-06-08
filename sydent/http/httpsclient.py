@@ -18,15 +18,14 @@ from __future__ import absolute_import
 import json
 import logging
 from io import BytesIO
+from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
-from twisted.internet.ssl import optionsForClientTLS
 from twisted.internet.defer import Deferred
+from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IPolicyForHTTPS, IResponse
 from zope.interface import implementer
-
-from typing import TYPE_CHECKING, Dict, Any, Generator, Optional
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -41,7 +40,7 @@ class ReplicationHttpsClient:
     replication HTTPS server)
     """
 
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.agent = None
 
@@ -84,7 +83,7 @@ class ReplicationHttpsClient:
 
 @implementer(IPolicyForHTTPS)
 class SydentPolicyForHTTPS(object):
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def creatorForNetloc(self, hostname, port):

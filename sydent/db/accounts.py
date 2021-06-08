@@ -15,15 +15,16 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-from sydent.users.accounts import Account
+from typing import TYPE_CHECKING, Optional
 
-from typing import Optional, TYPE_CHECKING
+from sydent.users.accounts import Account
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
+
 class AccountStore(object):
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def getAccountByToken(self, token: str) -> Optional[Account]:
@@ -71,9 +72,7 @@ class AccountStore(object):
         )
         self.sydent.db.commit()
 
-    def setConsentVersion(
-        self, user_id: str, consent_version: Optional[str]
-    ) -> None:
+    def setConsentVersion(self, user_id: str, consent_version: Optional[str]) -> None:
         """
         Saves that the given user has agreed to all of the terms in the document of the
         given version.
