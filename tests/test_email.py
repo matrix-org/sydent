@@ -11,8 +11,8 @@
 #  limitations under the License.
 
 import os.path
-
 from unittest.mock import patch
+
 from twisted.trial import unittest
 
 from tests.utils import make_request, make_sydent

@@ -14,12 +14,12 @@
 # limitations under the License.
 
 import binascii
+import configparser
 import json
 import logging
 
 import signedjson.key
 import signedjson.sign
-import configparser
 from twisted.internet import defer
 from twisted.web.client import readBody
 from unpaddedbase64 import decode_base64

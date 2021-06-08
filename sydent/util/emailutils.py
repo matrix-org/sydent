@@ -18,11 +18,10 @@ import random
 import smtplib
 import socket
 import string
+import urllib
+from html import escape
 
 import twisted.python.log
-import urllib
-
-from html import escape
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength

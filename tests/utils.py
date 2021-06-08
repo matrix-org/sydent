@@ -7,7 +7,6 @@ from typing import Dict
 import attr
 import twisted.logger
 from OpenSSL import crypto
-from six import text_type
 from twisted.internet import address
 from twisted.internet._resolver import SimpleResolverComplexifier
 from twisted.internet.defer import fail, succeed

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-
 import urllib
 
 from sydent.db.valsession import ThreePidValSessionStore

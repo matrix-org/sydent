@@ -12,6 +12,7 @@
 
 
 from unittest.mock import patch
+
 from twisted.internet import defer
 from twisted.internet.error import DNSLookupError
 from twisted.test.proto_helpers import StringTransport
