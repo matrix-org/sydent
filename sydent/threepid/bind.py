@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import collections
 import logging
 import math
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, Union, Generator
 
 import signedjson.sign  # type: ignore
 from twisted.internet import defer
@@ -73,8 +73,10 @@ class ThreepidBinder:
 
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
+        pepper_result = self.hashing_store.get_lookup_pepper()
+        if pepper_result: pepper = pepper_result
         str_to_hash = u" ".join(
-            [address, medium, self.hashing_store.get_lookup_pepper()],
+            [address, medium, pepper],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
@@ -95,6 +97,7 @@ class ThreepidBinder:
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(medium, address)
         invites = []
+        token: Any
         for token in pendingJoinTokens:
             token["mxid"] = mxid
             token["signed"] = {
@@ -130,7 +133,7 @@ class ThreepidBinder:
         self.sydent.pusher.doLocalPush()
 
     @defer.inlineCallbacks
-    def _notify(self, assoc: Dict[str, Any], attempt: int) -> None:
+    def _notify(self, assoc: Dict[str, Any], attempt: int) -> Generator:
         """
         Sends data about a new association (and, if necessary, the associated invites)
         to the associated MXID's homeserver.
