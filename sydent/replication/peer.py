@@ -21,8 +21,8 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict
 
-import signedjson.key
-import signedjson.sign
+import signedjson.key  # type: ignore
+import signedjson.sign  # type: ignore
 from six.moves import configparser
 from twisted.internet import defer
 from twisted.internet.defer import Deferred

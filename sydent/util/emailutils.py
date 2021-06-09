@@ -31,7 +31,7 @@ if six.PY2:
 else:
     from html import escape
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
@@ -136,4 +136,5 @@ class EmailAddressException(Exception):
 
 
 class EmailSendException(Exception):
+    cause: Any  # type hint added to prevent ""EmailSendException" has no attribute "cause"" error in Mypy
     pass

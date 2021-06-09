@@ -17,9 +17,9 @@
 from __future__ import absolute_import
 
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-import phonenumbers
+import phonenumbers  # type: ignore
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.sms.openmarket import OpenMarketSMS
@@ -38,7 +38,7 @@ class MsisdnValidator:
         self.omSms = OpenMarketSMS(sydent)
 
         # cache originators & sms rules from config file
-        self.originators = {}
+        self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
         for opt in self.sydent.cfg.options("sms"):
             if opt.startswith("originators."):

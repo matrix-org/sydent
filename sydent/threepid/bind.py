@@ -21,7 +21,7 @@ import logging
 import math
 from typing import TYPE_CHECKING, Any, Dict, Union
 
-import signedjson.sign
+import signedjson.sign  # type: ignore
 from twisted.internet import defer
 
 from sydent.db.hashing_metadata import HashingMetadataStore

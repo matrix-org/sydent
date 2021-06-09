@@ -24,6 +24,9 @@ from sydent.threepid.signer import Signer
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 

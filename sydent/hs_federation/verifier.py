@@ -19,8 +19,8 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
-import signedjson.key
-import signedjson.sign
+import signedjson.key  # type: ignore
+import signedjson.sign  # type: ignore
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from twisted.web.server import Request
