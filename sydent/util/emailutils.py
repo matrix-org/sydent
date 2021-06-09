@@ -111,7 +111,7 @@ def sendEmail(
     )
     try:
         if mailTLSMode == "SSL" or mailTLSMode == "TLS":
-            smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)
+            smtp: Any = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)
         elif mailTLSMode == "STARTTLS":
             smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
             smtp.starttls()

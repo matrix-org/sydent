@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def validateSessionWithToken(
-    sydent: "Sydent", sid: str, clientSecret: str, token: str
+    sydent: "Sydent", sid: int, clientSecret: str, token: str
 ) -> Dict[str, bool]:
     """
     Attempt to validate a session, identified by the sid, using

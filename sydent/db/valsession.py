@@ -135,7 +135,7 @@ class ThreePidValSessionStore:
         Updates the send attempt number for the session with the given ID.
 
         :param sid: The ID of the session to update
-        :type sid: unicode
+        :type sid: int
         :param attemptNo: The send attempt number to update the session with.
         :type attemptNo: int
         """
@@ -152,7 +152,7 @@ class ThreePidValSessionStore:
         Updates a session to set the validated flag to the given value.
 
         :param sid: The ID of the session to update.
-        :type sid: unicode
+        :type sid: int
         :param validated: The value to set the validated flag.
         :type validated: bool
         """
@@ -169,7 +169,7 @@ class ThreePidValSessionStore:
         Set the time of the last send attempt for the session with the given ID
 
         :param sid: The ID of the session to update.
-        :type sid: unicode
+        :type sid: int
         :param mtime: The time of the last send attempt for that session.
         :type mtime: int
         """
@@ -186,7 +186,7 @@ class ThreePidValSessionStore:
         Retrieves the session matching the given sid.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: unicode
+        :type sid: int
 
         :return: The retrieved session, or None if no session could be found with that
             sid.
@@ -213,7 +213,7 @@ class ThreePidValSessionStore:
         Retrieves a validation session using the session's ID.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: unicode
+        :type sid: int
 
         :return: The validation session, or None if no session was found with that ID.
         :rtype: ValidationSession or None
@@ -242,7 +242,7 @@ class ThreePidValSessionStore:
         one passed in.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: unicode
+        :type sid: int
         :param clientSecret: A client secret to check against the one retrieved from
             the database.
         :type clientSecret: unicode
