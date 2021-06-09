@@ -73,10 +73,8 @@ class ThreepidBinder:
 
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
-        pepper_result = self.hashing_store.get_lookup_pepper()
-        if pepper_result: pepper = pepper_result
         str_to_hash = u" ".join(
-            [address, medium, pepper],
+            [address, medium, self.hashing_store.get_lookup_pepper()],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 

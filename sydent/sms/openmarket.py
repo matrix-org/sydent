@@ -17,7 +17,7 @@ from __future__ import absolute_import
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Generator
 
 from twisted.internet import defer
 from twisted.web.http_headers import Headers
@@ -67,7 +67,7 @@ class OpenMarketSMS:
     @defer.inlineCallbacks
     def sendTextSMS(
         self, body: Dict, dest: str, source: Optional[Dict[str, str]] = None
-    ) -> None:
+    ) -> Generator:
         """
         Sends a text message with the given body to the given MSISDN.
 

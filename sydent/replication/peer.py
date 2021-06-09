@@ -88,6 +88,7 @@ class LocalPeer(Peer):
         """
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
+            assert self.lastId is not None
             if localId > self.lastId:
                 assocObj = threePidAssocFromDict(sgAssocs[localId])
 
