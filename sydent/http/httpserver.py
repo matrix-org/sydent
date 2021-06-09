@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING
 
 import twisted.internet.ssl
 from twisted.web.resource import Resource
@@ -28,11 +29,14 @@ from sydent.http.servlets.authenticated_unbind_threepid_servlet import (
     AuthenticatedUnbindThreePidServlet,
 )
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
 class ClientApiHttpServer:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
         root = Resource()
@@ -146,7 +150,7 @@ class ClientApiHttpServer:
 
 
 class InternalApiHttpServer:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def setup(self, interface, port):
@@ -174,7 +178,7 @@ class InternalApiHttpServer:
 
 
 class ReplicationHttpsServer:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
         root = Resource()

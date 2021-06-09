@@ -14,11 +14,15 @@
 
 import logging
 from base64 import b64encode
+from typing import TYPE_CHECKING, Dict, Optional
 
 from twisted.internet import defer
 from twisted.web.http_headers import Headers
 
 from sydent.http.httpclient import SimpleHttpClient
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +41,7 @@ TONS = {
 }
 
 
-def tonFromType(t):
+def tonFromType(t: str) -> int:
     """
     Get the type of number from the originator's type.
 
@@ -53,12 +57,14 @@ def tonFromType(t):
 
 
 class OpenMarketSMS:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.http_cli = SimpleHttpClient(sydent)
 
     @defer.inlineCallbacks
-    def sendTextSMS(self, body, dest, source=None):
+    def sendTextSMS(
+        self, body: Dict, dest: str, source: Optional[Dict[str, str]] = None
+    ) -> None:
         """
         Sends a text message with the given body to the given MSISDN.
 
@@ -88,7 +94,7 @@ class OpenMarketSMS:
         password = self.sydent.cfg.get("sms", "password").encode("UTF-8")
 
         b64creds = b64encode(b"%s:%s" % (username, password))
-        headers = Headers(
+        req_headers = Headers(
             {
                 b"Authorization": [b"Basic " + b64creds],
                 b"Content-Type": [b"application/json"],
@@ -96,7 +102,7 @@ class OpenMarketSMS:
         )
 
         resp = yield self.http_cli.post_json_get_nothing(
-            API_BASE_URL, body, {"headers": headers}
+            API_BASE_URL, body, {"headers": req_headers}
         )
         headers = dict(resp.headers.getAllRawHeaders())
 

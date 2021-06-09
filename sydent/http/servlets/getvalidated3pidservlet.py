@@ -16,7 +16,7 @@ from twisted.web.resource import Resource
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.auth import authV2
-from sydent.http.servlets import get_args, jsonwrap
+from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     IncorrectClientSecretException,
@@ -35,6 +35,7 @@ class GetValidated3pidServlet(Resource):
 
     @jsonwrap
     def render_GET(self, request):
+        send_cors(request)
         if self.require_auth:
             authV2(self.sydent, request)
 
@@ -76,3 +77,7 @@ class GetValidated3pidServlet(Resource):
             }
 
         return {"medium": s.medium, "address": s.address, "validated_at": s.mtime}
+
+    def render_OPTIONS(self, request):
+        send_cors(request)
+        return b""

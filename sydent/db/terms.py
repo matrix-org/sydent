@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 
 class TermsStore:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent:) -> None:
         self.sydent = sydent
 
-    def getAgreedUrls(self, user_id):
+    def getAgreedUrls(self, user_id: str) -> List[str]:
         """
         Retrieves the URLs of the terms the given user has agreed to.
 
@@ -43,7 +48,7 @@ class TermsStore:
 
         return urls
 
-    def addAgreedUrls(self, user_id, urls):
+    def addAgreedUrls(self, user_id: str, urls: List[str]) -> None:
         """
         Saves that the given user has accepted the terms at the given URLs.
 

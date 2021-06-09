@@ -14,24 +14,28 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-import phonenumbers
+import phonenumbers  # type: ignore
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.sms.openmarket import OpenMarketSMS
 from sydent.util import time_msec
 from sydent.validators import DestinationRejectedException, common
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
 class MsisdnValidator:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.omSms = OpenMarketSMS(sydent)
 
         # cache originators & sms rules from config file
-        self.originators = {}
+        self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
         for opt in self.sydent.cfg.options("sms"):
             if opt.startswith("originators."):
@@ -68,7 +72,13 @@ class MsisdnValidator:
 
                 self.smsRules[country] = action
 
-    def requestToken(self, phoneNumber, clientSecret, sendAttempt, brand=None):
+    def requestToken(
+        self,
+        phoneNumber: phonenumbers.PhoneNumber,
+        clientSecret: str,
+        sendAttempt: int,
+        brand: Optional[str] = None,
+    ) -> int:
         """
         Creates or retrieves a validation session and sends an text message to the
         corresponding phone number address with a token to use to verify the association.
@@ -129,7 +139,9 @@ class MsisdnValidator:
 
         return valSession.id
 
-    def getOriginator(self, destPhoneNumber):
+    def getOriginator(
+        self, destPhoneNumber: phonenumbers.PhoneNumber
+    ) -> Dict[str, str]:
         """
         Gets an originator for a given phone number.
 
@@ -162,7 +174,9 @@ class MsisdnValidator:
         )[1:]
         return origs[sum(int(i) for i in msisdn) % len(origs)]
 
-    def validateSessionWithToken(self, sid, clientSecret, token):
+    def validateSessionWithToken(
+        self, sid: str, clientSecret: str, token: str
+    ) -> Dict[str, bool]:
         """
         Validates the session with the given ID.
 

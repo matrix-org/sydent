@@ -36,7 +36,7 @@ hostname_regex = re.compile(
 MAX_EMAIL_ADDRESS_LENGTH = 500
 
 
-def is_valid_client_secret(client_secret):
+def is_valid_client_secret(client_secret: str) -> bool:
     """Validate that a given string matches the client_secret regex defined by the spec
 
     :param client_secret: The client_secret to validate

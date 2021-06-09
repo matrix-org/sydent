@@ -17,12 +17,15 @@ import binascii
 import configparser
 import json
 import logging
+from typing import TYPE_CHECKING, Any, Dict
 
 import signedjson.key
 import signedjson.sign
 from twisted.internet import defer
+from twisted.internet.defer import Deferred
 from twisted.web.client import readBody
-from unpaddedbase64 import decode_base64
+from twisted.web.iweb import IResponse
+from unpaddedbase64 import decode_base64  # type: ignore
 
 from sydent.config import ConfigError
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -30,6 +33,9 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +48,7 @@ class Peer:
         self.pubkeys = pubkeys
         self.is_being_pushed_to = False
 
-    def pushUpdates(self, sgAssocs):
+    def pushUpdates(self, sgAssocs) -> "Deferred":
         """
         :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
                         sgAssoc is the json object of the signed association
@@ -56,7 +62,7 @@ class LocalPeer(Peer):
     The local peer (ourselves: essentially copying from the local associations table to the global one)
     """
 
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         super().__init__(sydent.server_name, {})
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
@@ -66,7 +72,7 @@ class LocalPeer(Peer):
         if self.lastId is None:
             self.lastId = -1
 
-    def pushUpdates(self, sgAssocs):
+    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred":
         """
         Saves the given associations in the global associations store. Only stores an
         association if its ID is greater than the last seen ID.
@@ -111,7 +117,14 @@ class LocalPeer(Peer):
 
 
 class RemotePeer(Peer):
-    def __init__(self, sydent, server_name, port, pubkeys, lastSentVersion):
+    def __init__(
+        self,
+        sydent: "Sydent",
+        server_name: str,
+        port: int,
+        pubkeys: Dict[str, str],
+        lastSentVersion: int,
+    ) -> None:
         """
         :param sydent: The current Sydent instance.
         :type sydent: sydent.sydent.Sydent
@@ -178,7 +191,7 @@ class RemotePeer(Peer):
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
         self.verify_key.version = 0
 
-    def verifySignedAssociation(self, assoc):
+    def verifySignedAssociation(self, assoc: Dict[Any, Any]) -> None:
         """Verifies a signature on a signed association. Raises an exception if the
         signature is incorrect or couldn't be verified.
 
@@ -202,7 +215,7 @@ class RemotePeer(Peer):
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
-    def pushUpdates(self, sgAssocs):
+    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred":
         """
         Pushes the given associations to the peer.
 
@@ -230,7 +243,11 @@ class RemotePeer(Peer):
 
         return updateDeferred
 
-    def _pushSuccess(self, result, updateDeferred):
+    def _pushSuccess(
+        self,
+        result: "IResponse",
+        updateDeferred: "Deferred",
+    ) -> None:
         """
         Processes a successful push request. If the request resulted in a status code
         that's not a success, consider it a failure
@@ -248,7 +265,7 @@ class RemotePeer(Peer):
             d.addCallback(self._failedPushBodyRead, updateDeferred=updateDeferred)
             d.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
-    def _failedPushBodyRead(self, body, updateDeferred):
+    def _failedPushBodyRead(self, body: bytes, updateDeferred: "Deferred") -> None:
         """
         Processes a response body from a failed push request, then calls the error
         callback of the provided deferred.
@@ -263,7 +280,11 @@ class RemotePeer(Peer):
         e.errorDict = errObj
         updateDeferred.errback(e)
 
-    def _pushFailed(self, failure, updateDeferred):
+    def _pushFailed(
+        self,
+        failure,
+        updateDeferred: "Deferred",
+    ) -> None:
         """
         Processes a failed push request, by calling the error callback of the given
         deferred with it.

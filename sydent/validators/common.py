@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING, Dict
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util import time_msec
@@ -10,10 +11,15 @@ from sydent.validators import (
     ValidationSession,
 )
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
-def validateSessionWithToken(sydent, sid, clientSecret, token):
+def validateSessionWithToken(
+    sydent: "Sydent", sid: str, clientSecret: str, token: str
+) -> Dict[str, bool]:
     """
     Attempt to validate a session, identified by the sid, using
     the token from out-of-band. The client secret is given to

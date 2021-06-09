@@ -13,15 +13,22 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING, Optional
+
+from twisted.web.server import Request
 
 from sydent.db.accounts import AccountStore
 from sydent.http.servlets import MatrixRestError, get_args
 from sydent.terms.terms import get_terms
 
+if TYPE_CHECKING:
+    from sydent.db.accounts import Account
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
-def tokenFromRequest(request):
+def tokenFromRequest(request: "Request") -> Optional[str]:
     """Extract token from header of query parameter.
 
     :param request: The request to look for an access token in.
@@ -48,7 +55,11 @@ def tokenFromRequest(request):
     return token
 
 
-def authV2(sydent, request, requireTermsAgreed=True):
+def authV2(
+    sydent: "Sydent",
+    request: "Request",
+    requireTermsAgreed: bool = True,
+) -> "Account":
     """For v2 APIs check that the request has a valid access token associated with it
 
     :param sydent: The Sydent instance to use.
@@ -58,8 +69,7 @@ def authV2(sydent, request, requireTermsAgreed=True):
     :param requireTermsAgreed: Whether to deny authentication if the user hasn't accepted
         the terms of service.
 
-    :returns Account|None: The account object if there is correct auth, or None for v1
-        APIs.
+    :returns Account: The account object if there is correct auth
     :raises MatrixRestError: If the request is v2 but could not be authed or the user has
         not accepted terms.
     """

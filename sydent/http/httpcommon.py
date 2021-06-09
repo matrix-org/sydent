@@ -14,6 +14,7 @@
 
 import logging
 from io import BytesIO
+from typing import TYPE_CHECKING
 
 import twisted.internet.ssl
 from twisted.internet import defer, protocol
@@ -23,6 +24,10 @@ from twisted.web._newclient import ResponseDone
 from twisted.web.http import PotentialDataLoss
 from twisted.web.iweb import UNKNOWN_LENGTH
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
+
 logger = logging.getLogger(__name__)
 
 # Arbitrarily limited to 512 KiB.
@@ -30,7 +35,7 @@ MAX_REQUEST_SIZE = 512 * 1024
 
 
 class SslComponents:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
         self.myPrivateCertificate = self.makeMyCertificate()

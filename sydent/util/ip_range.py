@@ -13,7 +13,7 @@
 import itertools
 from typing import Iterable, Optional
 
-from netaddr import AddrFormatError, IPNetwork, IPSet
+from netaddr import AddrFormatError, IPNetwork, IPSet  # type: ignore
 
 # IP ranges that are considered private / unroutable / don't make sense.
 DEFAULT_IP_RANGE_BLACKLIST = [

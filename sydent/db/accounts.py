@@ -12,14 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING, Optional
+
 from sydent.users.accounts import Account
 
-
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+    
+    
 class AccountStore:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
-    def getAccountByToken(self, token):
+    def getAccountByToken(self, token: str) -> Optional[Account]:
         """
         Select the account matching the given token, if any.
 
@@ -42,7 +47,9 @@ class AccountStore:
 
         return Account(*row)
 
-    def storeAccount(self, user_id, creation_ts, consent_version):
+    def storeAccount(
+        self, user_id: str, creation_ts: int, consent_version: Optional[str]
+    ) -> None:
         """
         Stores an account for the given user ID.
 
@@ -62,7 +69,7 @@ class AccountStore:
         )
         self.sydent.db.commit()
 
-    def setConsentVersion(self, user_id, consent_version):
+    def setConsentVersion(self, user_id: str, consent_version: Optional[str]) -> None:
         """
         Saves that the given user has agreed to all of the terms in the document of the
         given version.
@@ -79,7 +86,7 @@ class AccountStore:
         )
         self.sydent.db.commit()
 
-    def addToken(self, user_id, token):
+    def addToken(self, user_id: str, token: str) -> None:
         """
         Stores the authentication token for a given user.
 
@@ -95,7 +102,7 @@ class AccountStore:
         )
         self.sydent.db.commit()
 
-    def delToken(self, token):
+    def delToken(self, token: str) -> int:
         """
         Deletes an authentication token from the database.
 

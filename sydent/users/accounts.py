@@ -14,7 +14,7 @@
 
 
 class Account:
-    def __init__(self, user_id, creation_ts, consent_version):
+    def __init__(self, user_id: str, creation_ts: int, consent_version: str) -> None:
         """
         :param user_id: The Matrix user ID for the account.
         :type user_id: str

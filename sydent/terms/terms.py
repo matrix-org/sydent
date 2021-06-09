@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+from typing import Any, Dict, List, Optional, Set
 
 import yaml
 
@@ -20,14 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 class Terms:
-    def __init__(self, yamlObj):
+    def __init__(self, yamlObj: Optional[Dict[str, Any]]) -> None:
         """
         :param yamlObj: The parsed YAML.
         :type yamlObj: dict[str, any] or None
         """
         self._rawTerms = yamlObj
 
-    def getMasterVersion(self):
+    def getMasterVersion(self) -> Optional[str]:
         """
         :return: The global (master) version of the terms, or None if there
             are no terms of service for this server.
@@ -41,7 +42,7 @@ class Terms:
 
         return version
 
-    def getForClient(self):
+    def getForClient(self) -> Dict[str, dict]:
         """
         :return: A dict which value for the "policies" key is a dict which contains the
             "docs" part of the terms' YAML. That nested dict is empty if no terms.
@@ -56,7 +57,7 @@ class Terms:
                 policies[docName].update(doc["langs"])
         return {"policies": policies}
 
-    def getUrlSet(self):
+    def getUrlSet(self) -> Set[str]:
         """
         :return: All the URLs for the terms in a set. Empty set if no terms.
         :rtype: set[unicode]
@@ -74,7 +75,7 @@ class Terms:
                     urls.add(url)
         return urls
 
-    def urlListIsSufficient(self, urls):
+    def urlListIsSufficient(self, urls: List[str]) -> bool:
         """
         Checks whether the provided list of URLs (which represents the list of terms
         accepted by the user) is enough to allow the creation of the user's account.
@@ -100,7 +101,7 @@ class Terms:
         return agreed == required
 
 
-def get_terms(sydent):
+def get_terms(sydent) -> Optional[Terms]:
     """Read and parse terms as specified in the config.
 
     :returns Terms
@@ -137,3 +138,4 @@ def get_terms(sydent):
         logger.exception(
             "Couldn't read terms file '%s'", sydent.cfg.get("general", "terms.path")
         )
+        return None
