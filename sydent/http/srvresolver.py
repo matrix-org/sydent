@@ -21,7 +21,6 @@ from typing import Callable, Dict, Generator, List, SupportsInt, Tuple
 
 import attr
 from twisted.internet import defer
-from twisted.internet.defer import Deferred
 from twisted.internet.error import ConnectError
 from twisted.internet.interfaces import IResolver
 from twisted.names import client, dns

@@ -19,7 +19,7 @@ from __future__ import absolute_import
 import binascii
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Generator
+from typing import TYPE_CHECKING, Any, Dict
 
 import signedjson.key
 import signedjson.sign

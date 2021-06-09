@@ -15,7 +15,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Tuple
+from typing import Any, Tuple
 
 import attr
 from sortedcontainers import SortedList

@@ -17,7 +17,7 @@ from __future__ import absolute_import
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from twisted.internet import defer
 from twisted.web.http_headers import Headers
