@@ -18,12 +18,17 @@ from __future__ import absolute_import
 import json
 import logging
 from io import BytesIO
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
+from twisted.internet.defer import Deferred
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IPolicyForHTTPS
 from zope.interface import implementer
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +40,7 @@ class ReplicationHttpsClient:
     replication HTTPS server)
     """
 
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.agent = None
 
@@ -47,7 +52,7 @@ class ReplicationHttpsClient:
             #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
             self.agent = Agent(self.sydent.reactor, SydentPolicyForHTTPS(self.sydent))
 
-    def postJson(self, uri, jsonObject):
+    def postJson(self, uri: str, jsonObject: Dict[Any, Any]) -> Optional[Deferred]:
         """
         Sends an POST request over HTTPS.
 
@@ -62,7 +67,7 @@ class ReplicationHttpsClient:
         logger.debug("POSTing request to %s", uri)
         if not self.agent:
             logger.error("HTTPS post attempted but HTTPS is not configured")
-            return
+            return None
 
         headers = Headers(
             {"Content-Type": ["application/json"], "User-Agent": ["Sydent"]}
@@ -78,7 +83,7 @@ class ReplicationHttpsClient:
 
 @implementer(IPolicyForHTTPS)
 class SydentPolicyForHTTPS(object):
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def creatorForNetloc(self, hostname, port):

@@ -14,13 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import time
+from typing import TYPE_CHECKING, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 
 class JoinTokenStore(object):
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
-    def storeToken(self, medium, address, roomId, sender, token):
+    def storeToken(
+        self, medium: str, address: str, roomId: str, sender: str, token: str
+    ) -> None:
         """
         Store a new invite token and its metadata.
 
@@ -45,7 +51,7 @@ class JoinTokenStore(object):
         )
         self.sydent.db.commit()
 
-    def getTokens(self, medium, address):
+    def getTokens(self, medium: str, address: str) -> List[Dict[str, str]]:
         """
         Retrieves the pending invites tokens for this 3PID that haven't been delivered
         yet.
@@ -100,7 +106,7 @@ class JoinTokenStore(object):
 
         return ret
 
-    def markTokensAsSent(self, medium, address):
+    def markTokensAsSent(self, medium: str, address: str) -> None:
         """
         Updates the invite tokens associated with a given 3PID to mark them as
         delivered to a homeserver so they're not delivered again in the future.
@@ -122,7 +128,7 @@ class JoinTokenStore(object):
         )
         self.sydent.db.commit()
 
-    def storeEphemeralPublicKey(self, publicKey):
+    def storeEphemeralPublicKey(self, publicKey: str) -> None:
         """
         Saves the provided ephemeral public key.
 
@@ -138,7 +144,7 @@ class JoinTokenStore(object):
         )
         self.sydent.db.commit()
 
-    def validateEphemeralPublicKey(self, publicKey):
+    def validateEphemeralPublicKey(self, publicKey: str) -> bool:
         """
         Checks if an ephemeral public key is valid, and, if it is, updates its
         verification count.
@@ -159,7 +165,7 @@ class JoinTokenStore(object):
         self.sydent.db.commit()
         return cur.rowcount > 0
 
-    def getSenderForToken(self, token):
+    def getSenderForToken(self, token: str) -> Optional[str]:
         """
         Retrieves the MXID of the user that sent the invite the provided token is for.
 
@@ -177,7 +183,7 @@ class JoinTokenStore(object):
             return rows[0][0]
         return None
 
-    def deleteTokens(self, medium, address):
+    def deleteTokens(self, medium: str, address: str) -> None:
         """
         Deletes every token for a given 3PID.
 

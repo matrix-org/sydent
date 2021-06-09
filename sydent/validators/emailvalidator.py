@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 
 import logging
+from typing import TYPE_CHECKING, Dict, Optional
 
 from six.moves import urllib
 
@@ -24,22 +25,26 @@ from sydent.util import time_msec
 from sydent.util.emailutils import sendEmail
 from sydent.validators import common
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+    from sydent.validators import ValidationSession
+
 logger = logging.getLogger(__name__)
 
 
 class EmailValidator:
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def requestToken(
         self,
-        emailAddress,
-        clientSecret,
-        sendAttempt,
-        nextLink,
-        ipaddress=None,
-        brand=None,
-    ):
+        emailAddress: str,
+        clientSecret: str,
+        sendAttempt: int,
+        nextLink: str,
+        ipaddress: Optional[str] = None,
+        brand: Optional[str] = None,
+    ) -> int:
         """
         Creates or retrieves a validation session and sends an email to the corresponding
         email address with a token to use to verify the association.
@@ -102,7 +107,9 @@ class EmailValidator:
 
         return valSession.id
 
-    def makeValidateLink(self, valSession, clientSecret, nextLink):
+    def makeValidateLink(
+        self, valSession: "ValidationSession", clientSecret: str, nextLink: str
+    ) -> str:
         """
         Creates a validation link that can be sent via email to the user.
 
@@ -137,7 +144,9 @@ class EmailValidator:
             link += "&nextLink=%s" % (urllib.parse.quote(nextLink))
         return link
 
-    def validateSessionWithToken(self, sid, clientSecret, token):
+    def validateSessionWithToken(
+        self, sid: str, clientSecret: str, token: str
+    ) -> Dict[str, bool]:
         """
         Validates the session with the given ID.
 

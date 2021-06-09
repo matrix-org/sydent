@@ -15,9 +15,10 @@
 
 import logging
 import time
+from typing import Any, Tuple
 
 import attr
-from sortedcontainers import SortedList
+from sortedcontainers import SortedList  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class TTLCache(object):
 
         self._timer = timer
 
-    def set(self, key, value, ttl):
+    def set(self, key, value, ttl: float) -> None:
         """Add/update an entry in the cache
 
         :param key: Key for this entry.
@@ -74,7 +75,7 @@ class TTLCache(object):
             return default
         return e.value
 
-    def get_with_expiry(self, key):
+    def get_with_expiry(self, key) -> Tuple[Any, float]:
         """Get a value, and its expiry time, from the cache
 
         :param key: key to look up
