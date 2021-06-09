@@ -20,10 +20,9 @@ import socket
 import string
 import urllib
 from html import escape
+from typing import TYPE_CHECKING, Any, Dict
 
 import twisted.python.log
-
-from typing import TYPE_CHECKING, Any, Dict
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength

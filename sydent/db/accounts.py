@@ -18,8 +18,8 @@ from sydent.users.accounts import Account
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
-    
-    
+
+
 class AccountStore:
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
