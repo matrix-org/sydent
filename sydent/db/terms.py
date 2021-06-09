@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class TermsStore:
-    def __init__(self, sydent: "Sydent:) -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
     def getAgreedUrls(self, user_id: str) -> List[str]:
