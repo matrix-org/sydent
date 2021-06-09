@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import logging
 import time
@@ -51,7 +48,7 @@ class InvalidServerName(Exception):
     pass
 
 
-class Verifier(object):
+class Verifier:
     """
     Verifies signed json blobs from Matrix Homeservers by finding the
     homeserver's address, contacting it, requesting its keys and
@@ -209,11 +206,11 @@ class Verifier(object):
             :rtype: tuple[unicode]
             """
             try:
-                params = header_str.split(u" ")[1].split(u",")
-                param_dict = dict(kv.split(u"=") for kv in params)
+                params = header_str.split(" ")[1].split(",")
+                param_dict = dict(kv.split("=") for kv in params)
 
                 def strip_quotes(value):
-                    if value.startswith(u'"'):
+                    if value.startswith('"'):
                         return value[1:-1]
                     else:
                         return value
@@ -225,13 +222,13 @@ class Verifier(object):
             except Exception:
                 raise SignatureVerifyException("Malformed Authorization header")
 
-        auth_headers = request.requestHeaders.getRawHeaders(u"Authorization")
+        auth_headers = request.requestHeaders.getRawHeaders("Authorization")
 
         if not auth_headers:
             raise NoAuthenticationError("Missing Authorization headers")
 
         for auth in auth_headers:
-            if auth.startswith(u"X-Matrix"):
+            if auth.startswith("X-Matrix"):
                 (origin, key, sig) = parse_auth_header(auth)
                 json_request["origin"] = origin
                 json_request["signatures"].setdefault(origin, {})[key] = sig

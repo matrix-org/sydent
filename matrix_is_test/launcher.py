@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +47,7 @@ email.subject = Your Validation Token
 """
 
 
-class MatrixIsTestLauncher(object):
+class MatrixIsTestLauncher:
     def __init__(self, with_terms):
         self.with_terms = with_terms
 

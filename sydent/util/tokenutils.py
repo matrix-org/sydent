@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014 OpenMarket Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +45,7 @@ def generateNumericTokenOfLength(length: int) -> str:
     :return: The generated token.
     :rtype: unicode
     """
-    return u"".join([r.choice(string.digits) for _ in range(length)])
+    return "".join([r.choice(string.digits) for _ in range(length)])
 
 
 def generateAlphanumericTokenOfLength(length: int) -> str:
@@ -60,7 +58,7 @@ def generateAlphanumericTokenOfLength(length: int) -> str:
     :return: The generated token.
     :rtype: unicode
     """
-    return u"".join(
+    return "".join(
         [
             r.choice(string.digits + string.ascii_lowercase + string.ascii_uppercase)
             for _ in range(length)
