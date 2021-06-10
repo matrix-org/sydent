@@ -36,3 +36,21 @@
 
 [tool.isort]
 profile = "black"
+
+[tool.mypy]
+show_error_codes = true
+namespace_packages = true
+
+[[tool.mypy.overrides]]
+module = [
+    "idna",
+    "nacl.*",
+    "netaddr",
+    "OpenSSL",
+    "prometheus_client",
+    "phonenumbers",
+    "signedjson.*",
+    "sortedcontainers",
+    "unpaddedbase64"
+]
+ignore_missing_imports = true

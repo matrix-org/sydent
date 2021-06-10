@@ -58,6 +58,8 @@ setup(
         "flake8==3.9.2",
         "black==21.5b1",
         "isort==5.8.0",
+        "mypy>=0.900",
+        "mypy-zope @ git+ssh://git@github.com/Shoobx/mypy-zope/archive/391ce347b6c01dbc89e0194b62e47deadf53fbc6.tar.gz",
     ],
     # make sure we package the sql files
     include_package_data=True,
