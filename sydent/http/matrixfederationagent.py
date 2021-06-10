@@ -15,12 +15,11 @@
 import logging
 import random
 import time
-from typing import Generator, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator, Optional
 
 import attr
 from netaddr import IPAddress  # type: ignore
 from twisted.internet import defer
-from twisted.internet.defer import Deferred
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
