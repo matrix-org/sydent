@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014-2016 OpenMarket Ltd
 # Copyright 2019 New Vector Ltd
 #
@@ -32,7 +31,7 @@ SERVER_CACHE = {}
 
 
 @attr.s
-class Server(object):
+class Server:
     """
     Our record of an individual server which can be tried to reach a destination.
     Attributes:
@@ -83,7 +82,7 @@ def pick_server_from_list(server_list: List[Server]) -> Tuple[bytes, int]:
     )
 
 
-class SrvResolver(object):
+class SrvResolver:
     """Interface to the dns client to do SRV lookups, with result caching.
     The default resolver in twisted.names doesn't do any caching (it has a CacheResolver,
     but the cache never gets populated), so we add our own caching layer here.

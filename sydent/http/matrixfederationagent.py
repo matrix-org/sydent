@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import logging
 import random
@@ -56,7 +54,7 @@ well_known_cache = TTLCache("well-known")
 
 
 @implementer(IAgent)
-class MatrixFederationAgent(object):
+class MatrixFederationAgent:
     """An Agent-like thing which provides a `request` method which will look up a matrix
     server and send an HTTP request to it.
     Doesn't implement any retries. (Those are done in MatrixFederationHttpClient.)
@@ -172,7 +170,7 @@ class MatrixFederationAgent(object):
         if not headers.hasHeader(b"host"):
             headers.addRawHeader(b"host", res.host_header)
 
-        class EndpointFactory(object):
+        class EndpointFactory:
             @staticmethod
             def endpointForURI(_uri):
                 ep = LoggingHostnameEndpoint(
@@ -382,7 +380,7 @@ class MatrixFederationAgent(object):
 
 
 @implementer(IStreamClientEndpoint)
-class LoggingHostnameEndpoint(object):
+class LoggingHostnameEndpoint:
     """A wrapper for HostnameEndpint which logs when it connects"""
 
     def __init__(self, reactor, host, port, *args, **kwargs):
@@ -435,7 +433,7 @@ def _parse_cache_control(headers):
 
 
 @attr.s
-class _RoutingResult(object):
+class _RoutingResult:
     """The result returned by `_route_matrix_uri`.
     Contains the parameters needed to direct a federation connection to a particular
     server.

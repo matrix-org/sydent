@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +18,7 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class TermsStore(object):
+class TermsStore:
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 

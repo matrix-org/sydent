@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014 OpenMarket Ltd.
 # Copyright 2018 New Vector Ltd.
 #
@@ -41,6 +39,7 @@ setup(
     version=read_version(),
     packages=find_packages(),
     description="Reference Matrix Identity Verification and Lookup Server",
+    python_requires=">=3.6",
     install_requires=[
         "signedjson==1.1.1",
         "unpaddedbase64==1.1.0",
@@ -52,7 +51,6 @@ setup(
         "attrs>=19.1.0",
         "netaddr>=0.7.0",
         "sortedcontainers>=2.1.0",
-        "six>=1.10",
         "pyyaml>=3.11",
         "mock>=3.0.5",
         "flake8==3.9.2",

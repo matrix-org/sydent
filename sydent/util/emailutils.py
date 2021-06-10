@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2015 OpenMarket Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import email.utils
 import logging
@@ -21,17 +18,11 @@ import random
 import smtplib
 import socket
 import string
-
-import six
-import twisted.python.log
-from six.moves import range, urllib
-
-if six.PY2:
-    from cgi import escape
-else:
-    from html import escape
-
+import urllib
+from html import escape
 from typing import TYPE_CHECKING, Any, Dict
+
+import twisted.python.log
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength

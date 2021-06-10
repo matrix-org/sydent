@@ -37,6 +37,9 @@
 [tool.isort]
 profile = "black"
 
+[tool.black]
+target-version = ['py36']
+
 [tool.mypy]
 show_error_codes = true
 namespace_packages = true
@@ -54,3 +57,4 @@ module = [
     "unpaddedbase64"
 ]
 ignore_missing_imports = true
+

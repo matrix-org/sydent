@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015 OpenMarket Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +18,7 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class JoinTokenStore(object):
+class JoinTokenStore:
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 

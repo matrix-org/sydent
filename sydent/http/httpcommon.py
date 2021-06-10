@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014 OpenMarket Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,7 +54,7 @@ class SslComponents:
 
         try:
             fp = open(privKeyAndCertFilename)
-        except IOError:
+        except OSError:
             logger.warning(
                 "Unable to read private key / cert file from %s: not starting the replication HTTPS server "
                 "or doing replication pushes.",
