@@ -19,17 +19,23 @@ from twisted.web.resource import Resource
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 
+from typing import TYPE_CHECKING, Dict, List, Tuple
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+    from twisted.web.server import Request
+
 logger = logging.getLogger(__name__)
 
 
 class BulkLookupServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.sydent = syd
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: 'Request') -> Dict[str, List[Tuple[str, str, str]]]:
         """
         Bulk-lookup for threepids.
         Params: 'threepids': list of threepids, each of which is a list of medium, address
@@ -53,6 +59,6 @@ class BulkLookupServlet(Resource):
 
         return {"threepids": results}
 
-    def render_OPTIONS(self, request):
+    def render_OPTIONS(self, request: 'Request') -> bytes:
         send_cors(request)
         return b""

@@ -17,16 +17,21 @@ from twisted.web.resource import Resource
 from sydent.http.auth import authV2
 from sydent.http.servlets import jsonwrap, send_cors
 
+from typing import TYPE_CHECKING, Dict
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+    from twisted.web.server import Request
 
 class AccountServlet(Resource):
     isLeaf = False
 
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent')-> None:
         Resource.__init__(self)
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request):
+    def render_GET(self, request: 'Request')-> Dict[str, str]:
         """
         Return information about the user's account
         (essentially just a 'who am i')
@@ -39,6 +44,7 @@ class AccountServlet(Resource):
             "user_id": account.userId,
         }
 
-    def render_OPTIONS(self, request):
+
+    def render_OPTIONS(self, request: 'Request') -> bytes:
         send_cors(request)
         return b""

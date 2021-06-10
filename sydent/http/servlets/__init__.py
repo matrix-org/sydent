@@ -22,6 +22,12 @@ from twisted.web import server
 
 from sydent.util import json_decoder
 
+from typing import TYPE_CHECKING, Any, Dict, Tuple
+
+if TYPE_CHECKING:
+    from twisted.web.server import Request
+    from twisted.python.failure import Failure
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +44,7 @@ class MatrixRestError(Exception):
         self.error = error
 
 
-def get_args(request, args, required=True):
+def get_args(request: 'Request', args: Tuple, required: bool=True) -> Dict[str, Any]:
     """
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
@@ -62,6 +68,7 @@ def get_args(request, args, required=True):
         are of type unicode.
     :rtype: dict[unicode, any]
     """
+    assert request.path is not None
     v1_path = request.path.startswith(b"/_matrix/identity/api/v1")
 
     request_args = None
@@ -126,7 +133,7 @@ def get_args(request, args, required=True):
 
 def jsonwrap(f):
     @functools.wraps(f)
-    def inner(self, request, *args, **kwargs):
+    def inner(self, request: 'Request', *args, **kwargs) -> bytes:
         """
         Runs a web handler function with the given request and parameters, then
         converts its result into JSON and returns it. If an error happens, also sets
@@ -162,7 +169,7 @@ def jsonwrap(f):
 
 
 def deferjsonwrap(f):
-    def reqDone(resp, request):
+    def reqDone(resp: Dict[str, Any], request: 'Request') -> None:
         """
         Converts the given response content into JSON and encodes it to bytes, then
         writes it as the response to the given request with the right headers.
@@ -176,7 +183,7 @@ def deferjsonwrap(f):
         request.write(dict_to_json_bytes(resp))
         request.finish()
 
-    def reqErr(failure, request):
+    def reqErr(failure: 'Failure', request: 'Request') -> None:
         """
         Logs the given failure. If the failure is a MatrixRestError, writes a response
         using the info it contains, otherwise responds with 500 Internal Server Error.
@@ -206,7 +213,7 @@ def deferjsonwrap(f):
             )
         request.finish()
 
-    def inner(*args, **kwargs):
+    def inner(*args, **kwargs) -> int:
         """
         Runs an asynchronous web handler function with the given arguments and add
         reqDone and reqErr as the resulting Deferred's callbacks.
@@ -228,13 +235,13 @@ def deferjsonwrap(f):
     return inner
 
 
-def send_cors(request):
+def send_cors(request: 'Request') -> None:
     request.setHeader("Access-Control-Allow-Origin", "*")
     request.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
     request.setHeader("Access-Control-Allow-Headers", "*")
 
 
-def dict_to_json_bytes(content):
+def dict_to_json_bytes(content: Dict[Any, Any]) -> bytes:
     """
     Converts a dict into JSON and encodes it to bytes.
 

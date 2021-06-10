@@ -16,6 +16,12 @@ from twisted.web.resource import Resource
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+    from twisted.web.server import Request
+
 
 class AuthenticatedUnbindThreePidServlet(Resource):
     """A servlet which allows a caller to unbind any 3pid they want from an mxid
@@ -23,12 +29,12 @@ class AuthenticatedUnbindThreePidServlet(Resource):
     It is assumed that authentication happens out of band
     """
 
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         Resource.__init__(self)
         self.sydent = sydent
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: 'Request') -> None:
         send_cors(request)
         args = get_args(request, ("medium", "address", "mxid"))
 
@@ -39,6 +45,6 @@ class AuthenticatedUnbindThreePidServlet(Resource):
             args["mxid"],
         )
 
-    def render_OPTIONS(self, request):
+    def render_OPTIONS(self, request: 'Request') -> bytes:
         send_cors(request)
         return b""

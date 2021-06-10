@@ -25,16 +25,21 @@ from sydent.validators import (
     SessionExpiredException,
 )
 
+from typing import TYPE_CHECKING, Union, Dict
+
+if TYPE_CHECKING:
+    from twisted.web.server import Request
+    from sydent.sydent import Sydent
 
 class EmailRequestCodeServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd, require_auth=False):
+    def __init__(self, syd: 'Sydent', require_auth: bool=False) -> None:
         self.sydent = syd
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: 'Request') -> Dict:
         send_cors(request)
 
         if self.require_auth:
@@ -83,7 +88,7 @@ class EmailRequestCodeServlet(Resource):
 
         return resp
 
-    def render_OPTIONS(self, request):
+    def render_OPTIONS(self, request: 'Request') -> bytes:
         send_cors(request)
         return b""
 
@@ -91,11 +96,11 @@ class EmailRequestCodeServlet(Resource):
 class EmailValidateCodeServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd, require_auth=False):
+    def __init__(self, syd: 'Sydent', require_auth: bool=False) -> None:
         self.sydent = syd
         self.require_auth = require_auth
 
-    def render_GET(self, request):
+    def render_GET(self, request: 'Request') -> bytes:
         args = get_args(request, ("nextLink",), required=False)
 
         resp = None
@@ -122,10 +127,11 @@ class EmailValidateCodeServlet(Resource):
 
         request.setHeader("Content-Type", "text/html")
         res = open(templateFile).read() % {"message": msg}
+
         return res.encode("UTF-8")
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: 'Request') -> Dict[str, Union[bool, str]]:
         send_cors(request)
 
         if self.require_auth:
@@ -133,7 +139,7 @@ class EmailValidateCodeServlet(Resource):
 
         return self.do_validate_request(request)
 
-    def do_validate_request(self, request):
+    def do_validate_request(self, request: 'Request') -> Dict[str, Union[bool, str]]:
         """
         Extracts information about a validation session from the request and
         attempts to validate that session.
@@ -188,6 +194,6 @@ class EmailValidateCodeServlet(Resource):
                 "error": "No session could be found with this sid",
             }
 
-    def render_OPTIONS(self, request):
+    def render_OPTIONS(self, request: 'Request') -> bytes:
         send_cors(request)
         return b""
