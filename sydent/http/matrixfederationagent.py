@@ -15,7 +15,7 @@
 import logging
 import random
 import time
-from typing import Generator, Optional
+from typing import Generator, Optional, TYPE_CHECKING
 
 import attr
 from netaddr import IPAddress  # type: ignore
@@ -33,6 +33,9 @@ from sydent.http.httpcommon import read_body_with_max_size
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
 from sydent.util import json_decoder
 from sydent.util.ttlcache import TTLCache
+
+if TYPE_CHECKING:
+    from twisted.web.iweb import IBodyProducer
 
 # period to cache .well-known results for by default
 WELL_KNOWN_DEFAULT_CACHE_PERIOD = 24 * 3600
@@ -167,6 +170,7 @@ class MatrixFederationAgent:
         else:
             headers = headers.copy()
 
+        assert headers is not None
         if not headers.hasHeader(b"host"):
             headers.addRawHeader(b"host", res.host_header)
 
@@ -189,7 +193,7 @@ class MatrixFederationAgent:
     @defer.inlineCallbacks
     def _route_matrix_uri(
         self, parsed_uri: "URI", lookup_well_known: bool = True
-    ) -> "Deferred":
+    ) -> Generator:
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
@@ -320,6 +324,7 @@ class MatrixFederationAgent:
             result, cache_period = yield self._do_get_well_known(server_name)
 
             if cache_period > 0:
+                assert self._well_known_cache is not None
                 self._well_known_cache.set(server_name, result, cache_period)
 
         defer.returnValue(result)
@@ -357,7 +362,7 @@ class MatrixFederationAgent:
 
             # add some randomness to the TTL to avoid a stampeding herd every hour
             # after startup
-            cache_period = WELL_KNOWN_INVALID_CACHE_PERIOD
+            cache_period: float = WELL_KNOWN_INVALID_CACHE_PERIOD
             cache_period += random.uniform(0, WELL_KNOWN_DEFAULT_CACHE_PERIOD_JITTER)
             defer.returnValue((None, cache_period))
             return

@@ -17,7 +17,7 @@ import binascii
 import configparser
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 import signedjson.key
 import signedjson.sign
@@ -259,7 +259,7 @@ class RemotePeer(Peer):
             the status code.
         :type updateDeferred: twisted.internet.defer.Deferred
         """
-        if result.code >= 200 and result.code < 300:
+        if cast(int, result.code) >= 200 and cast(int, result.code) < 300:
             updateDeferred.callback(result)
         else:
             d = readBody(result)
