@@ -1,5 +1,4 @@
 #  Copyright 2021 The Matrix.org Foundation C.I.C.
-#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -13,8 +12,8 @@
 #  limitations under the License.
 
 import os.path
+from unittest.mock import patch
 
-from mock import patch
 from twisted.trial import unittest
 
 from tests.utils import make_request, make_sydent

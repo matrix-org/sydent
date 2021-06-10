@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 SENTINEL = object()
 
 
-class TTLCache(object):
+class TTLCache:
     """A key/value cache implementation where each entry has its own TTL"""
 
     def __init__(self, cache_name, timer=time.time):
@@ -141,7 +140,7 @@ class TTLCache(object):
 
 
 @attr.s(frozen=True, slots=True)
-class _CacheEntry(object):
+class _CacheEntry:
     """TTLCache entry"""
 
     # expiry_time is the first attribute, so that entries are sorted by expiry.

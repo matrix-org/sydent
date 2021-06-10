@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014 OpenMarket Ltd
 # Copyright 2019 New Vector Ltd
 #
@@ -14,16 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
 
 import binascii
+import configparser
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict
 
-import signedjson.key  # type: ignore
-import signedjson.sign  # type: ignore
-from six.moves import configparser
+import signedjson.key
+import signedjson.sign
 from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.web.client import readBody
@@ -45,7 +42,7 @@ logger = logging.getLogger(__name__)
 SIGNING_KEY_ALGORITHM = "ed25519"
 
 
-class Peer(object):
+class Peer:
     def __init__(self, servername, pubkeys):
         self.servername = servername
         self.pubkeys = pubkeys
@@ -66,7 +63,7 @@ class LocalPeer(Peer):
     """
 
     def __init__(self, sydent: "Sydent") -> None:
-        super(LocalPeer, self).__init__(sydent.server_name, {})
+        super().__init__(sydent.server_name, {})
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 
@@ -94,7 +91,7 @@ class LocalPeer(Peer):
 
                 if assocObj.mxid is not None:
                     # Assign a lookup_hash to this association
-                    str_to_hash = u" ".join(
+                    str_to_hash = " ".join(
                         [
                             assocObj.address,
                             assocObj.medium,
@@ -141,7 +138,7 @@ class RemotePeer(Peer):
         :param lastSentVersion: The ID of the last association sent to the peer.
         :type lastSentVersion: int
         """
-        super(RemotePeer, self).__init__(server_name, pubkeys)
+        super().__init__(server_name, pubkeys)
         self.sydent = sydent
         self.port = port
         self.lastSentVersion = lastSentVersion

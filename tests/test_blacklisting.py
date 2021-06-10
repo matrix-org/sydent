@@ -1,5 +1,4 @@
 #  Copyright 2021 The Matrix.org Foundation C.I.C.
-#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -13,7 +12,8 @@
 #  limitations under the License.
 
 
-from mock import patch
+from unittest.mock import patch
+
 from twisted.internet import defer
 from twisted.internet.error import DNSLookupError
 from twisted.test.proto_helpers import StringTransport
@@ -132,7 +132,7 @@ class BlacklistingAgentTest(TestCase):
         self.assertRegex(transport.value(), b"Host: example.com")
 
         # Send it the HTTP response
-        res_json = '{ "sub": "@test:example.com" }'.encode("ascii")
+        res_json = b'{ "sub": "@test:example.com" }'
         protocol.dataReceived(
             b"HTTP/1.1 200 OK\r\n"
             b"Server: Fake\r\n"
@@ -182,7 +182,7 @@ class BlacklistingAgentTest(TestCase):
         self.assertRegex(transport.value(), b"Host: example.com")
 
         # Send it the HTTP response
-        res_json = '{ "sub": "@test:example.com" }'.encode("ascii")
+        res_json = b'{ "sub": "@test:example.com" }'
         protocol.dataReceived(
             b"HTTP/1.1 200 OK\r\n"
             b"Server: Fake\r\n"

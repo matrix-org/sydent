@@ -1,0 +1,7 @@
+Remove support for Python < 3.6: 
+
+Update setup.py to state a minimum Python version of 3.6 (example from Sygnal). 
+Update pyproject.toml to state a target Python version for Black (example from Synapse).
+Remove all mention and use of six, as we no longer support Python 2.
+Remove all # -*- coding: utf-8 -*- lines from files; Python 3 is UTF-8 by default.
+Run pyupgrade on Sydent with arguments --py36-plus --keep-percent-format. 

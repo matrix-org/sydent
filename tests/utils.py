@@ -7,7 +7,6 @@ from typing import Dict
 import attr
 import twisted.logger
 from OpenSSL import crypto
-from six import text_type
 from twisted.internet import address
 from twisted.internet._resolver import SimpleResolverComplexifier
 from twisted.internet.defer import fail, succeed
@@ -76,7 +75,7 @@ def make_sydent(test_config={}):
 
 
 @attr.s
-class FakeChannel(object):
+class FakeChannel:
     """
     A fake Twisted Web Channel (the part that interfaces with the
     wire). Mostly copied from Synapse's tests framework.
@@ -214,7 +213,7 @@ def make_request(
 
     if isinstance(content, dict):
         content = json.dumps(content)
-    if isinstance(content, text_type):
+    if isinstance(content, str):
         content = content.encode("utf8")
 
     site = FakeSite()

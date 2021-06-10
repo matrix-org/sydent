@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,7 @@
 # limitations under the License.
 
 
-class Account(object):
+class Account:
     def __init__(self, user_id: str, creation_ts: int, consent_version: str) -> None:
         """
         :param user_id: The Matrix user ID for the account.
