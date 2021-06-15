@@ -1,0 +1,1 @@
+Add type hints to sydent/http/servlets/ to support mypy type checking. 
