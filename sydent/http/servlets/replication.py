@@ -26,16 +26,22 @@ from sydent.threepid import threePidAssocFromDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from twisted.web.server import Request
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
 class ReplicationPushServlet(Resource):
-    def __init__(self, sydent):
+    def __init__(self, sydent: 'Sydent') -> None:
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: 'Request') -> dict:
         peerCert = request.transport.getPeerCertificate()
         peerCertCn = peerCert.get_subject().commonName
 

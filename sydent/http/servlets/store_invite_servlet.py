@@ -27,15 +27,21 @@ from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.util.emailutils import sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from twisted.web.server import Request
+    from sydent.sydent import Sydent
+
 
 class StoreInviteServlet(Resource):
-    def __init__(self, syd, require_auth=False):
+    def __init__(self, syd: 'Sydent', require_auth: bool =False) -> None:
         self.sydent = syd
         self.random = random.SystemRandom()
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: 'Request') -> dict:
         send_cors(request)
 
         args = get_args(
@@ -176,7 +182,7 @@ class StoreInviteServlet(Resource):
 
         return resp
 
-    def redact_email_address(self, address):
+    def redact_email_address(self, address: str) -> str:
         """
         Redacts the content of a 3PID address. Redacts both the email's username and
         domain independently.
@@ -198,7 +204,7 @@ class StoreInviteServlet(Resource):
 
         return redacted_username + "@" + redacted_domain
 
-    def _redact(self, s, characters_to_reveal):
+    def _redact(self, s: str, characters_to_reveal: int) -> str:
         """
         Redacts the content of a string, using a given amount of characters to reveal.
         If the string is shorter than the given threshold, redact it based on length.
@@ -224,7 +230,7 @@ class StoreInviteServlet(Resource):
         # Otherwise truncate it and add an ellipses
         return s[:characters_to_reveal] + "..."
 
-    def _randomString(self, length):
+    def _randomString(self, length: int) -> str:
         """
         Generate a random string of the given length.
 
