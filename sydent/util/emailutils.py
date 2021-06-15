@@ -20,7 +20,7 @@ import socket
 import string
 import urllib
 from html import escape
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Dict
 
 import twisted.python.log
 
