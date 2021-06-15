@@ -18,15 +18,21 @@ from unpaddedbase64 import encode_base64
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from twisted.web.server import Request
+    from sydent.sydent import Sydent
+
 
 class Ed25519Servlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request):
+    def render_GET(self, request: 'Request') -> dict:
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
@@ -36,11 +42,11 @@ class Ed25519Servlet(Resource):
 class PubkeyIsValidServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request):
+    def render_GET(self, request: 'Request') -> dict:
         args = get_args(request, ("public_key",))
 
         pubKey = self.sydent.keyring.ed25519.verify_key
@@ -52,11 +58,11 @@ class PubkeyIsValidServlet(Resource):
 class EphemeralPubkeyIsValidServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.joinTokenStore = JoinTokenStore(syd)
 
     @jsonwrap
-    def render_GET(self, request):
+    def render_GET(self, request: 'Request') -> dict:
         args = get_args(request, ("public_key",))
         publicKey = args["public_key"]
 

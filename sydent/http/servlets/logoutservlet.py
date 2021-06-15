@@ -20,17 +20,23 @@ from sydent.db.accounts import AccountStore
 from sydent.http.auth import authV2, tokenFromRequest
 from sydent.http.servlets import jsonwrap, send_cors
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from twisted.web.server import Request
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
 class LogoutServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.sydent = syd
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: 'Request') -> dict:
         """
         Invalidate the given access token
         """
@@ -44,6 +50,6 @@ class LogoutServlet(Resource):
         accountStore.delToken(token)
         return {}
 
-    def render_OPTIONS(self, request):
+    def render_OPTIONS(self, request: 'Request') -> bytes:
         send_cors(request)
         return b""

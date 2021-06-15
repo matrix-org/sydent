@@ -22,17 +22,23 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.util import json_decoder
 
+from typing import TYPE_CHECKING, Union, Optional
+
+if TYPE_CHECKING:
+    from twisted.web.server import Request
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
 class LookupServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd):
+    def __init__(self, syd: 'Sydent') -> None:
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request):
+    def render_GET(self, request: 'Request') -> Union[dict, Optional[str]]:
         """
         Look up an individual threepid.
 
@@ -80,6 +86,6 @@ class LookupServlet(Resource):
             )
         return sgassoc
 
-    def render_OPTIONS(self, request):
+    def render_OPTIONS(self, request: 'Request') -> bytes:
         send_cors(request)
         return b""
