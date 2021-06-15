@@ -16,17 +16,16 @@ import copy
 import functools
 import json
 import logging
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 from twisted.internet import defer
 from twisted.web import server
 
 from sydent.util import json_decoder
 
-from typing import TYPE_CHECKING, Any, Dict, Tuple
-
 if TYPE_CHECKING:
-    from twisted.web.server import Request
     from twisted.python.failure import Failure
+    from twisted.web.server import Request
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ class MatrixRestError(Exception):
         self.error = error
 
 
-def get_args(request: 'Request', args: Tuple, required: bool=True) -> Dict[str, Any]:
+def get_args(request: "Request", args: Tuple, required: bool = True) -> Dict[str, Any]:
     """
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
@@ -133,7 +132,7 @@ def get_args(request: 'Request', args: Tuple, required: bool=True) -> Dict[str, 
 
 def jsonwrap(f):
     @functools.wraps(f)
-    def inner(self, request: 'Request', *args, **kwargs) -> bytes:
+    def inner(self, request: "Request", *args, **kwargs) -> bytes:
         """
         Runs a web handler function with the given request and parameters, then
         converts its result into JSON and returns it. If an error happens, also sets
@@ -169,7 +168,7 @@ def jsonwrap(f):
 
 
 def deferjsonwrap(f):
-    def reqDone(resp: Dict[str, Any], request: 'Request') -> None:
+    def reqDone(resp: Dict[str, Any], request: "Request") -> None:
         """
         Converts the given response content into JSON and encodes it to bytes, then
         writes it as the response to the given request with the right headers.
@@ -183,7 +182,7 @@ def deferjsonwrap(f):
         request.write(dict_to_json_bytes(resp))
         request.finish()
 
-    def reqErr(failure: 'Failure', request: 'Request') -> None:
+    def reqErr(failure: "Failure", request: "Request") -> None:
         """
         Logs the given failure. If the failure is a MatrixRestError, writes a response
         using the info it contains, otherwise responds with 500 Internal Server Error.
@@ -235,7 +234,7 @@ def deferjsonwrap(f):
     return inner
 
 
-def send_cors(request: 'Request') -> None:
+def send_cors(request: "Request") -> None:
     request.setHeader("Access-Control-Allow-Origin", "*")
     request.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
     request.setHeader("Access-Control-Allow-Headers", "*")

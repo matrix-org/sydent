@@ -15,6 +15,7 @@
 import random
 import string
 from email.header import Header
+from typing import TYPE_CHECKING
 
 import nacl.signing
 from twisted.web.resource import Resource
@@ -27,21 +28,20 @@ from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.util.emailutils import sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from twisted.web.server import Request
+
     from sydent.sydent import Sydent
 
 
 class StoreInviteServlet(Resource):
-    def __init__(self, syd: 'Sydent', require_auth: bool =False) -> None:
+    def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
         self.random = random.SystemRandom()
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: 'Request') -> dict:
+    def render_POST(self, request: "Request") -> dict:
         send_cors(request)
 
         args = get_args(

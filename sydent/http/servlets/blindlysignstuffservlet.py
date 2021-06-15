@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING
 
 import signedjson.key
 import signedjson.sign
@@ -22,11 +23,10 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
-    from sydent.sydent import Sydent
     from twisted.web.server import Request
+
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -34,14 +34,14 @@ logger = logging.getLogger(__name__)
 class BlindlySignStuffServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: 'Sydent', require_auth: bool=False) -> None:
+    def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
         self.server_name = syd.server_name
         self.tokenStore = JoinTokenStore(syd)
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: 'Request'):
+    def render_POST(self, request: "Request"):
         send_cors(request)
 
         if self.require_auth:
@@ -73,6 +73,6 @@ class BlindlySignStuffServlet(Resource):
 
         return signed
 
-    def render_OPTIONS(self, request: 'Request') -> bytes:
+    def render_OPTIONS(self, request: "Request") -> bytes:
         send_cors(request)
         return b""

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING, Dict, Union
+
 from twisted.web.resource import Resource
 
 from sydent.http.auth import authV2
@@ -25,21 +27,21 @@ from sydent.validators import (
     SessionExpiredException,
 )
 
-from typing import TYPE_CHECKING, Union, Dict
-
 if TYPE_CHECKING:
     from twisted.web.server import Request
+
     from sydent.sydent import Sydent
+
 
 class EmailRequestCodeServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: 'Sydent', require_auth: bool=False) -> None:
+    def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: 'Request') -> Dict:
+    def render_POST(self, request: "Request") -> Dict:
         send_cors(request)
 
         if self.require_auth:
@@ -88,7 +90,7 @@ class EmailRequestCodeServlet(Resource):
 
         return resp
 
-    def render_OPTIONS(self, request: 'Request') -> bytes:
+    def render_OPTIONS(self, request: "Request") -> bytes:
         send_cors(request)
         return b""
 
@@ -96,11 +98,11 @@ class EmailRequestCodeServlet(Resource):
 class EmailValidateCodeServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: 'Sydent', require_auth: bool=False) -> None:
+    def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
         self.require_auth = require_auth
 
-    def render_GET(self, request: 'Request') -> bytes:
+    def render_GET(self, request: "Request") -> bytes:
         args = get_args(request, ("nextLink",), required=False)
 
         resp = None
@@ -131,7 +133,7 @@ class EmailValidateCodeServlet(Resource):
         return res.encode("UTF-8")
 
     @jsonwrap
-    def render_POST(self, request: 'Request') -> Dict[str, Union[bool, str]]:
+    def render_POST(self, request: "Request") -> Dict[str, Union[bool, str]]:
         send_cors(request)
 
         if self.require_auth:
@@ -139,7 +141,7 @@ class EmailValidateCodeServlet(Resource):
 
         return self.do_validate_request(request)
 
-    def do_validate_request(self, request: 'Request') -> Dict[str, Union[bool, str]]:
+    def do_validate_request(self, request: "Request") -> Dict[str, Union[bool, str]]:
         """
         Extracts information about a validation session from the request and
         attempts to validate that session.
@@ -194,6 +196,6 @@ class EmailValidateCodeServlet(Resource):
                 "error": "No session could be found with this sid",
             }
 
-    def render_OPTIONS(self, request: 'Request') -> bytes:
+    def render_OPTIONS(self, request: "Request") -> bytes:
         send_cors(request)
         return b""

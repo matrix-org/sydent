@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING
 
 from twisted.web.resource import Resource
 
@@ -21,10 +22,9 @@ from sydent.http.auth import authV2
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from twisted.web.server import Request
+
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -33,13 +33,13 @@ logger = logging.getLogger(__name__)
 class LookupV2Servlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: 'Sydent', lookup_pepper: str) -> None:
+    def __init__(self, syd: "Sydent", lookup_pepper: str) -> None:
         self.sydent = syd
         self.globalAssociationStore = GlobalAssociationStore(self.sydent)
         self.lookup_pepper = lookup_pepper
 
     @jsonwrap
-    def render_POST(self, request: 'Request') -> dict:
+    def render_POST(self, request: "Request") -> dict:
         """
         Perform lookups with potentially hashed 3PID details.
 
@@ -142,6 +142,6 @@ class LookupV2Servlet(Resource):
         request.setResponseCode(400)
         return {"errcode": "M_INVALID_PARAM", "error": "algorithm is not supported"}
 
-    def render_OPTIONS(self, request: 'Request') -> bytes:
+    def render_OPTIONS(self, request: "Request") -> bytes:
         send_cors(request)
         return b""

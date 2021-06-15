@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING, Dict
+
 from twisted.web.resource import Resource
 
 from sydent.db.valsession import ThreePidValSessionStore
@@ -25,22 +27,21 @@ from sydent.validators import (
     SessionNotValidatedException,
 )
 
-from typing import TYPE_CHECKING, Dict
-
 if TYPE_CHECKING:
     from twisted.web.server import Request
+
     from sydent.sydent import Sydent
 
 
 class GetValidated3pidServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: 'Sydent', require_auth: bool =False) -> None:
+    def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_GET(self, request: 'Request') -> Dict:
+    def render_GET(self, request: "Request") -> Dict:
         send_cors(request)
         if self.require_auth:
             authV2(self.sydent, request)
@@ -84,6 +85,6 @@ class GetValidated3pidServlet(Resource):
 
         return {"medium": s.medium, "address": s.address, "validated_at": s.mtime}
 
-    def render_OPTIONS(self, request: 'Request') -> bytes:
+    def render_OPTIONS(self, request: "Request") -> bytes:
         send_cors(request)
         return b""

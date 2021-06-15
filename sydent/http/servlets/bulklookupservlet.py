@@ -13,17 +13,17 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 from twisted.web.resource import Resource
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 
-from typing import TYPE_CHECKING, Dict, List, Tuple
-
 if TYPE_CHECKING:
-    from sydent.sydent import Sydent
     from twisted.web.server import Request
+
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +31,11 @@ logger = logging.getLogger(__name__)
 class BulkLookupServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: 'Sydent') -> None:
+    def __init__(self, syd: "Sydent") -> None:
         self.sydent = syd
 
     @jsonwrap
-    def render_POST(self, request: 'Request') -> Dict[str, List[Tuple[str, str, str]]]:
+    def render_POST(self, request: "Request") -> Dict[str, List[Tuple[str, str, str]]]:
         """
         Bulk-lookup for threepids.
         Params: 'threepids': list of threepids, each of which is a list of medium, address
@@ -59,6 +59,6 @@ class BulkLookupServlet(Resource):
 
         return {"threepids": results}
 
-    def render_OPTIONS(self, request: 'Request') -> bytes:
+    def render_OPTIONS(self, request: "Request") -> bytes:
         send_cors(request)
         return b""

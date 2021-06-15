@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING, Any, Generator
 
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
@@ -31,25 +32,28 @@ from sydent.validators import (
     SessionNotValidatedException,
 )
 
-from typing import TYPE_CHECKING, Generator, Any
-
 if TYPE_CHECKING:
     from twisted.web.server import Request
+
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
 
 class ThreePidUnbindServlet(Resource):
-    def __init__(self, sydent: 'Sydent') -> None:
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
-    def render_POST(self, request: 'Request') -> Any: #from the twisted docs: @type NOT_DONE_YET:
-        self._async_render_POST(request)              #Opaque; do not depend on any particular type for this                                                    #value.
+    def render_POST(
+        self, request: "Request"
+    ) -> Any:  # from the twisted docs: @type NOT_DONE_YET:
+        self._async_render_POST(
+            request
+        )  # Opaque; do not depend on any particular type for this                                                    #value.
         return server.NOT_DONE_YET
 
     @defer.inlineCallbacks
-    def _async_render_POST(self, request: 'Request') -> Generator:
+    def _async_render_POST(self, request: "Request") -> Generator:
         try:
             try:
                 # json.loads doesn't allow bytes in Python 3.5

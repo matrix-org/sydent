@@ -14,6 +14,7 @@
 
 import logging
 import urllib
+from typing import TYPE_CHECKING, Generator
 
 from twisted.internet import defer
 from twisted.web.resource import Resource
@@ -23,10 +24,9 @@ from sydent.http.servlets import deferjsonwrap, get_args, send_cors
 from sydent.users.tokens import issueToken
 from sydent.util.stringutils import is_valid_matrix_server_name
 
-from typing import TYPE_CHECKING, Generator
-
 if TYPE_CHECKING:
     from twisted.web.server import Request
+
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -35,13 +35,13 @@ logger = logging.getLogger(__name__)
 class RegisterServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: 'Sydent') -> None:
+    def __init__(self, syd: "Sydent") -> None:
         self.sydent = syd
         self.client = FederationHttpClient(self.sydent)
 
     @deferjsonwrap
     @defer.inlineCallbacks
-    def render_POST(self, request: 'Request') -> Generator:
+    def render_POST(self, request: "Request") -> Generator:
         """
         Register with the Identity Server
         """
@@ -117,6 +117,6 @@ class RegisterServlet(Resource):
             }
         )
 
-    def render_OPTIONS(self, request: 'Request') -> bytes:
+    def render_OPTIONS(self, request: "Request") -> bytes:
         send_cors(request)
         return b""
