@@ -27,7 +27,7 @@ from twisted.names.error import DNSNameError, DomainError
 
 logger = logging.getLogger(__name__)
 
-SERVER_CACHE = {}
+SERVER_CACHE: Dict[bytes, List["Server"]] = {}
 
 
 @attr.s

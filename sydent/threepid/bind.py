@@ -16,7 +16,7 @@
 import collections
 import logging
 import math
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, Generator, Union, cast
 
 import signedjson.sign  # type: ignore
 from twisted.internet import defer
@@ -96,7 +96,7 @@ class ThreepidBinder:
             token["mxid"] = mxid
             token["signed"] = {
                 "mxid": mxid,
-                "token": token["token"],
+                "token": cast(str, token["token"]),
             }
             token["signed"] = signedjson.sign.sign_json(
                 token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519
@@ -127,7 +127,7 @@ class ThreepidBinder:
         self.sydent.pusher.doLocalPush()
 
     @defer.inlineCallbacks
-    def _notify(self, assoc: Dict[str, Any], attempt: int) -> None:
+    def _notify(self, assoc: Dict[str, Any], attempt: int) -> Generator:
         """
         Sends data about a new association (and, if necessary, the associated invites)
         to the associated MXID's homeserver.

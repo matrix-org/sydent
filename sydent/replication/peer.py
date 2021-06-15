@@ -68,9 +68,8 @@ class LocalPeer(Peer):
         self.hashing_store = HashingMetadataStore(sydent)
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
-        self.lastId = globalAssocStore.lastIdFromServer(self.servername)
-        if self.lastId is None:
-            self.lastId = -1
+        lastId = globalAssocStore.lastIdFromServer(self.servername)
+        self.lastId = lastId if lastId is not None else -1
 
     def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred":
         """

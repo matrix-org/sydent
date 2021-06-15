@@ -175,13 +175,13 @@ class MsisdnValidator:
         return origs[sum(int(i) for i in msisdn) % len(origs)]
 
     def validateSessionWithToken(
-        self, sid: str, clientSecret: str, token: str
+        self, sid: int, clientSecret: str, token: str
     ) -> Dict[str, bool]:
         """
         Validates the session with the given ID.
 
         :param sid: The ID of the session to validate.
-        :type sid: unicode
+        :type sid: int
         :param clientSecret: The client secret to validate.
         :type clientSecret: unicode
         :param token: The token to validate.

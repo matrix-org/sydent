@@ -20,13 +20,12 @@ from typing import Generator, Optional
 import attr
 from netaddr import IPAddress  # type: ignore
 from twisted.internet import defer
-from twisted.internet.defer import Deferred
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent
+from twisted.web.iweb import IAgent, IBodyProducer
 from zope.interface import implementer
 
 from sydent.http.httpcommon import read_body_with_max_size
@@ -75,8 +74,8 @@ class MatrixFederationAgent:
     :type _srv_resolver: SrvResolver, None
 
     :param _well_known_cache: TTLCache impl for storing cached well-known
-        lookups. None to use a default implementation.
-    :type _well_known_cache: TTLCache, None
+        lookups. Omit to use a default implementation.
+    :type _well_known_cache: TTLCache
     """
 
     def __init__(
@@ -85,7 +84,7 @@ class MatrixFederationAgent:
         tls_client_options_factory,
         _well_known_tls_policy=None,
         _srv_resolver: Optional["SrvResolver"] = None,
-        _well_known_cache: Optional["TTLCache"] = well_known_cache,
+        _well_known_cache: "TTLCache" = well_known_cache,
     ) -> None:
         self._reactor = reactor
 
@@ -166,6 +165,7 @@ class MatrixFederationAgent:
             headers = Headers()
         else:
             headers = headers.copy()
+            assert headers is not None
 
         if not headers.hasHeader(b"host"):
             headers.addRawHeader(b"host", res.host_header)
@@ -189,7 +189,7 @@ class MatrixFederationAgent:
     @defer.inlineCallbacks
     def _route_matrix_uri(
         self, parsed_uri: "URI", lookup_well_known: bool = True
-    ) -> "Deferred":
+    ) -> Generator:
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
@@ -357,7 +357,7 @@ class MatrixFederationAgent:
 
             # add some randomness to the TTL to avoid a stampeding herd every hour
             # after startup
-            cache_period = WELL_KNOWN_INVALID_CACHE_PERIOD
+            cache_period: float = WELL_KNOWN_INVALID_CACHE_PERIOD
             cache_period += random.uniform(0, WELL_KNOWN_DEFAULT_CACHE_PERIOD_JITTER)
             defer.returnValue((None, cache_period))
             return
