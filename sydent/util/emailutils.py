@@ -119,7 +119,9 @@ def sendEmail(
         smtp.quit()
     except Exception as origException:
         twisted.python.log.err()
-        raise EmailSendException() from origException
+        ese = EmailSendException()
+        ese.cause = origException
+        raise ese
 
 
 class EmailAddressException(Exception):
