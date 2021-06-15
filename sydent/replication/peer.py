@@ -17,7 +17,7 @@ import binascii
 import configparser
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, cast
+from typing import TYPE_CHECKING, Any, Dict
 
 import signedjson.key
 import signedjson.sign

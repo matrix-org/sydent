@@ -49,7 +49,9 @@ class JoinTokenStore:
         )
         self.sydent.db.commit()
 
-    def getTokens(self, medium: str, address: str) -> List[Dict[str, Union[str, Dict[str, str]]]]:
+    def getTokens(
+        self, medium: str, address: str
+    ) -> List[Dict[str, Union[str, Dict[str, str]]]]:
         """
         Retrieves the pending invites tokens for this 3PID that haven't been delivered
         yet.
