@@ -56,6 +56,10 @@ setup(
         "flake8==3.9.2",
         "black==21.5b1",
         "isort==5.8.0",
+        "mypy>=0.902",
+        "mypy-zope>=0.3.1",
+        "types-PyYAML",
+        "types-mock",
     ],
     # make sure we package the sql files
     include_package_data=True,

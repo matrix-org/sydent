@@ -22,6 +22,7 @@ from sydent.util import time_msec
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
+
 logger = logging.getLogger(__name__)
 
 

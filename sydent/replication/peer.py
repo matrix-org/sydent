@@ -25,7 +25,7 @@ from twisted.internet import defer
 from twisted.internet.defer import Deferred
 from twisted.web.client import readBody
 from twisted.web.iweb import IResponse
-from unpaddedbase64 import decode_base64  # type: ignore
+from unpaddedbase64 import decode_base64
 
 from sydent.config import ConfigError
 from sydent.db.hashing_metadata import HashingMetadataStore
