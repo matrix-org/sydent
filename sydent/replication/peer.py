@@ -68,9 +68,8 @@ class LocalPeer(Peer):
         self.hashing_store = HashingMetadataStore(sydent)
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
-        self.lastId = globalAssocStore.lastIdFromServer(self.servername)
-        if self.lastId is None:
-            self.lastId = -1
+        lastId = globalAssocStore.lastIdFromServer(self.servername)
+        self.lastId = lastId if lastId is not None else -1
 
     def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred":
         """
@@ -85,7 +84,6 @@ class LocalPeer(Peer):
         """
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
-            assert self.lastId is not None
             if localId > self.lastId:
                 assocObj = threePidAssocFromDict(sgAssocs[localId])
 
@@ -259,7 +257,7 @@ class RemotePeer(Peer):
             the status code.
         :type updateDeferred: twisted.internet.defer.Deferred
         """
-        if cast(int, result.code) >= 200 and cast(int, result.code) < 300:
+        if result.code >= 200 and result.code < 300:
             updateDeferred.callback(result)
         else:
             d = readBody(result)

@@ -26,7 +26,7 @@ def validateSessionWithToken(
     prevent attempts to guess the token for a sid.
 
     :param sid: The ID of the session to validate.
-    :type sid: unicode
+    :type sid: int
     :param clientSecret: The client secret to validate.
     :type clientSecret: unicode
     :param token: The token to validate.

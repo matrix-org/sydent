@@ -15,7 +15,7 @@
 import logging
 import random
 import time
-from typing import TYPE_CHECKING, Generator, Optional
+from typing import Generator, Optional
 
 import attr
 from netaddr import IPAddress  # type: ignore
@@ -25,16 +25,13 @@ from twisted.internet.interfaces import IStreamClientEndpoint
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent
+from twisted.web.iweb import IAgent, IBodyProducer
 from zope.interface import implementer
 
 from sydent.http.httpcommon import read_body_with_max_size
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
 from sydent.util import json_decoder
 from sydent.util.ttlcache import TTLCache
-
-if TYPE_CHECKING:
-    from twisted.web.iweb import IBodyProducer
 
 # period to cache .well-known results for by default
 WELL_KNOWN_DEFAULT_CACHE_PERIOD = 24 * 3600
@@ -77,8 +74,8 @@ class MatrixFederationAgent:
     :type _srv_resolver: SrvResolver, None
 
     :param _well_known_cache: TTLCache impl for storing cached well-known
-        lookups. None to use a default implementation.
-    :type _well_known_cache: TTLCache, None
+        lookups. Omit to use a default implementation.
+    :type _well_known_cache: TTLCache
     """
 
     def __init__(
@@ -87,7 +84,7 @@ class MatrixFederationAgent:
         tls_client_options_factory,
         _well_known_tls_policy=None,
         _srv_resolver: Optional["SrvResolver"] = None,
-        _well_known_cache: Optional["TTLCache"] = well_known_cache,
+        _well_known_cache: "TTLCache" = well_known_cache,
     ) -> None:
         self._reactor = reactor
 
@@ -168,8 +165,8 @@ class MatrixFederationAgent:
             headers = Headers()
         else:
             headers = headers.copy()
+            assert headers is not None
 
-        assert headers is not None
         if not headers.hasHeader(b"host"):
             headers.addRawHeader(b"host", res.host_header)
 
@@ -323,7 +320,6 @@ class MatrixFederationAgent:
             result, cache_period = yield self._do_get_well_known(server_name)
 
             if cache_period > 0:
-                assert self._well_known_cache is not None
                 self._well_known_cache.set(server_name, result, cache_period)
 
         defer.returnValue(result)

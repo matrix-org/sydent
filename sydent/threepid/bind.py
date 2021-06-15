@@ -16,7 +16,7 @@
 import collections
 import logging
 import math
-from typing import TYPE_CHECKING, Any, Dict, Generator, Union
+from typing import TYPE_CHECKING, Any, Dict, Generator, Union, cast
 
 import signedjson.sign  # type: ignore
 from twisted.internet import defer
@@ -92,12 +92,11 @@ class ThreepidBinder:
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(medium, address)
         invites = []
-        token: Any
         for token in pendingJoinTokens:
             token["mxid"] = mxid
             token["signed"] = {
                 "mxid": mxid,
-                "token": token["token"],
+                "token": cast(str, token["token"]),
             }
             token["signed"] = signedjson.sign.sign_json(
                 token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519

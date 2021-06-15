@@ -136,8 +136,8 @@ class _ReadBodyWithMaxSizeProtocol(protocol.Protocol):
             self.deferred.errback(BodyExceededMaxSize())
             # Close the connection (forcefully) since all the data will get
             # discarded anyway.
-            assert self.transport is not None
-            self.transport.abortConnection()
+            if self.transport is not None:
+                self.transport.abortConnection()
 
     def connectionLost(self, reason=connectionDone) -> None:
         # If the maximum size was already exceeded, there's nothing to do.
