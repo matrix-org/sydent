@@ -16,9 +16,9 @@
 import logging
 from typing import TYPE_CHECKING, Generator
 
+import twisted.internet.defer
 import twisted.internet.reactor
 import twisted.internet.task
-import twisted.internet.defer
 
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import LocalAssociationStore
