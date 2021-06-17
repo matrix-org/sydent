@@ -215,20 +215,20 @@ class MatrixFederationAgent:
             if port == -1:
                 port = 8448
             return _RoutingResult(
-                        host_header=parsed_uri.netloc,
-                        tls_server_name=parsed_uri.host,
-                        target_host=parsed_uri.host,
-                        target_port=port,
-                    )
+                host_header=parsed_uri.netloc,
+                tls_server_name=parsed_uri.host,
+                target_host=parsed_uri.host,
+                target_port=port,
+            )
 
         if parsed_uri.port != -1:
             # there is an explicit port
             return _RoutingResult(
-                        host_header=parsed_uri.netloc,
-                        tls_server_name=parsed_uri.host,
-                        target_host=parsed_uri.host,
-                        target_port=parsed_uri.port,
-                    )
+                host_header=parsed_uri.netloc,
+                tls_server_name=parsed_uri.host,
+                target_host=parsed_uri.host,
+                target_port=parsed_uri.port,
+            )
 
         if lookup_well_known:
             # try a .well-known lookup
@@ -289,11 +289,11 @@ class MatrixFederationAgent:
             )
 
         return _RoutingResult(
-                    host_header=parsed_uri.netloc,
-                    tls_server_name=parsed_uri.host,
-                    target_host=target_host,
-                    target_port=port,
-                )
+            host_header=parsed_uri.netloc,
+            tls_server_name=parsed_uri.host,
+            target_host=target_host,
+            target_port=port,
+        )
 
     @defer.inlineCallbacks
     def _get_well_known(self, server_name: bytes) -> Generator:
@@ -354,7 +354,7 @@ class MatrixFederationAgent:
             cache_period: float = WELL_KNOWN_INVALID_CACHE_PERIOD
             cache_period += random.uniform(0, WELL_KNOWN_DEFAULT_CACHE_PERIOD_JITTER)
             return (None, cache_period)
-            return #should this be deleted or is it doing something i'm missing?
+            return  # should this be deleted or is it doing something i'm missing?
 
         result = parsed_body["m.server"].encode("ascii")
 
