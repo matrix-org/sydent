@@ -39,11 +39,10 @@ class ThreePidUnbindServlet(Resource):
         self.sydent = sydent
 
     def render_POST(self, request):
-        self._async_render_POST(request)
+        defer.ensureDeferred(self._async_render_POST(request))
         return server.NOT_DONE_YET
 
-    @defer.inlineCallbacks
-    def _async_render_POST(self, request):
+    async def _async_render_POST(self, request):
         try:
             try:
                 # json.loads doesn't allow bytes in Python 3.5
@@ -158,7 +157,7 @@ class ThreePidUnbindServlet(Resource):
             else:
                 try:
                     origin_server_name = (
-                        yield self.sydent.sig_verifier.authenticate_request(
+                        await self.sydent.sig_verifier.authenticate_request(
                             request, body
                         )
                     )
