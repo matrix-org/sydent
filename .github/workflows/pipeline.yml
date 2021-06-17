@@ -44,5 +44,5 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -e .
-      - run: pip install git+https://github.com/matrix-org/matrix-is-tester.git
+      - run: pip install git+git://github.com/H-Shay/matrix-is-tester.git@fix_tests
       - run: trial matrix_is_tester

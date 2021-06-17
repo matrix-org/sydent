@@ -16,7 +16,7 @@
 import logging
 from typing import TYPE_CHECKING, Generator
 
-import twisted.internet.defer
+from twisted.internet import defer
 import twisted.internet.reactor
 import twisted.internet.task
 
