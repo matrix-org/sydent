@@ -14,7 +14,7 @@
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Dict, NoReturn, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from twisted.web.http_headers import Headers
 

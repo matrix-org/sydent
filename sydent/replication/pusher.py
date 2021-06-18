@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING
 
 import twisted.internet.reactor
 import twisted.internet.task
