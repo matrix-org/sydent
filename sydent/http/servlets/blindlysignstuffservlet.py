@@ -14,7 +14,6 @@
 
 import logging
 from typing import TYPE_CHECKING
-from sydent.types import JsonDict
 
 import signedjson.key
 import signedjson.sign
@@ -24,6 +23,7 @@ from twisted.web.server import Request
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

@@ -15,14 +15,13 @@
 import logging
 from typing import TYPE_CHECKING
 
-from sydent.types import JsonDict
-
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.accounts import AccountStore
 from sydent.http.auth import authV2, tokenFromRequest
 from sydent.http.servlets import jsonwrap, send_cors
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

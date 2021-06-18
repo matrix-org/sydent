@@ -14,12 +14,11 @@
 
 from typing import TYPE_CHECKING
 
-from sydent.types import JsonDict
-
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

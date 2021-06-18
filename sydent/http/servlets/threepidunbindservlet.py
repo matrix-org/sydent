@@ -46,9 +46,7 @@ class ThreePidUnbindServlet(Resource):
     def render_POST(
         self, request: Request
     ) -> int:  # from the twisted docs: @type NOT_DONE_YET:
-        self._async_render_POST(
-            request
-        )
+        self._async_render_POST(request)
         return server.NOT_DONE_YET
 
     @defer.inlineCallbacks

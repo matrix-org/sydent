@@ -17,8 +17,6 @@ import string
 from email.header import Header
 from typing import TYPE_CHECKING
 
-from sydent.types import JsonDict
-
 import nacl.signing
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -28,6 +26,7 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 from sydent.util.emailutils import sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
 

@@ -16,14 +16,13 @@
 import logging
 from typing import TYPE_CHECKING
 
-from sydent.types import JsonDict
-
 import phonenumbers
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     DestinationRejectedException,

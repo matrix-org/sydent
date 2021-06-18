@@ -14,14 +14,13 @@
 
 from typing import TYPE_CHECKING
 
-from sydent.types import JsonDict
-
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 from unpaddedbase64 import encode_base64
 
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

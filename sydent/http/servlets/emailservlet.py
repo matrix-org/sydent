@@ -14,13 +14,12 @@
 
 from typing import TYPE_CHECKING, Dict, Union
 
-from sydent.types import JsonDict
-
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH, is_valid_client_secret
 from sydent.validators import (

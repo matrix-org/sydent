@@ -16,8 +16,6 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from sydent.types import JsonDict
-
 import twisted.python.log
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -27,6 +25,7 @@ from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import MatrixRestError, jsonwrap
 from sydent.threepid import threePidAssocFromDict
+from sydent.types import JsonDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
 
