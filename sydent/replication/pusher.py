@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import twisted.internet.reactor
 import twisted.internet.task
@@ -72,10 +72,12 @@ class Pusher:
         peers = self.peerStore.getAllPeers()
 
         # Push to all peers in parallel
-        return defer.DeferredList([self._push_to_peer(p) for p in peers])
+        dl = []
+        for p in peers:
+            dl.append(defer.ensureDeferred(self._push_to_peer(p)))
+        return defer.DeferredList(dl)
 
-    @defer.inlineCallbacks
-    def _push_to_peer(self, p: "RemotePeer") -> Generator:
+    async def _push_to_peer(self, p: "RemotePeer") -> None:
         """
         For a given peer, retrieves the list of associations that were created since
         the last successful push to this peer (limited to ASSOCIATIONS_PUSH_LIMIT) and
@@ -109,9 +111,9 @@ class Pusher:
             logger.info(
                 "Pushing %d updates to %s:%d", len(assocs), p.servername, p.port
             )
-            result = yield p.pushUpdates(assocs)
+            result = await p.pushUpdates(assocs)
 
-            yield self.peerStore.setLastSentVersionAndPokeSucceeded(
+            await self.peerStore.setLastSentVersionAndPokeSucceeded(
                 p.servername, latest_assoc_id, time_msec()
             )
 
