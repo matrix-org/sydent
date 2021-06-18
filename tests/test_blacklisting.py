@@ -94,6 +94,7 @@ class BlacklistingAgentTest(TestCase):
 
     @patch("sydent.http.srvresolver.SrvResolver.resolve_service")
     def test_federation_client_allowed_ip(self, resolver):
+        # breakpoint()
         self.sydent.run()
 
         request, channel = make_request(
@@ -108,17 +109,15 @@ class BlacklistingAgentTest(TestCase):
             },
         )
 
-        resolver.return_value = defer.succeed(
-            [
-                Server(
-                    host=self.allowed_domain,
-                    port=443,
-                    priority=1,
-                    weight=1,
-                    expires=100,
-                )
-            ]
-        )
+        resolver.return_value = [
+            Server(
+                host=self.allowed_domain,
+                port=443,
+                priority=1,
+                weight=1,
+                expires=100,
+            )
+        ]
 
         request.render(self.sydent.servlets.registerServlet)
 
@@ -160,17 +159,15 @@ class BlacklistingAgentTest(TestCase):
             },
         )
 
-        resolver.return_value = defer.succeed(
-            [
-                Server(
-                    host=self.safe_domain,
-                    port=443,
-                    priority=1,
-                    weight=1,
-                    expires=100,
-                )
-            ]
-        )
+        resolver.return_value = [
+            Server(
+                host=self.safe_domain,
+                port=443,
+                priority=1,
+                weight=1,
+                expires=100,
+            )
+        ]
 
         request.render(self.sydent.servlets.registerServlet)
 

@@ -19,7 +19,6 @@ import time
 from typing import Callable, Dict, Generator, List, SupportsInt, Tuple
 
 import attr
-from twisted.internet import defer
 from twisted.internet.error import ConnectError
 from twisted.internet.interfaces import IResolver
 from twisted.names import client, dns
@@ -107,8 +106,7 @@ class SrvResolver:
         self._cache = cache
         self._get_time = get_time
 
-    @defer.inlineCallbacks
-    def resolve_service(self, service_name: bytes) -> "Generator":
+    async def resolve_service(self, service_name: bytes) -> "Generator":
         """Look up a SRV record
 
         :param service_name: The record to look up.
@@ -129,7 +127,7 @@ class SrvResolver:
                 return servers
 
         try:
-            answers, _, _ = yield self._dns_client.lookupService(service_name)
+            answers, _, _ = await self._dns_client.lookupService(service_name)
         except DNSNameError:
             # TODO: cache this. We can get the SOA out of the exception, and use
             # the negative-TTL value.
