@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, NoReturn
 
 import twisted.internet.reactor
 import twisted.internet.task
@@ -77,7 +77,7 @@ class Pusher:
             dl.append(defer.ensureDeferred(self._push_to_peer(p)))
         return defer.DeferredList(dl)
 
-    async def _push_to_peer(self, p: "RemotePeer") -> Generator:
+    async def _push_to_peer(self, p: "RemotePeer") -> None:
         """
         For a given peer, retrieves the list of associations that were created since
         the last successful push to this peer (limited to ASSOCIATIONS_PUSH_LIMIT) and

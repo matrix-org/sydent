@@ -354,7 +354,6 @@ class MatrixFederationAgent:
             cache_period: float = WELL_KNOWN_INVALID_CACHE_PERIOD
             cache_period += random.uniform(0, WELL_KNOWN_DEFAULT_CACHE_PERIOD_JITTER)
             return (None, cache_period)
-            return  # should this be deleted or is it doing something i'm missing?
 
         result = parsed_body["m.server"].encode("ascii")
 

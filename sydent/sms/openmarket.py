@@ -14,7 +14,7 @@
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Dict, Generator, Optional
+from typing import TYPE_CHECKING, Dict, NoReturn, Optional
 
 from twisted.web.http_headers import Headers
 
@@ -62,7 +62,7 @@ class OpenMarketSMS:
 
     async def sendTextSMS(
         self, body: Dict, dest: str, source: Optional[Dict[str, str]] = None
-    ) -> Generator:
+    ) -> None:
         """
         Sends a text message with the given body to the given MSISDN.
 
