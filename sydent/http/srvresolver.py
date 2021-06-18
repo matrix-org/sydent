@@ -16,7 +16,7 @@
 import logging
 import random
 import time
-from typing import Callable, Dict, Generator, List, SupportsInt, Tuple
+from typing import Callable, Dict, List, SupportsInt, Tuple
 
 import attr
 from twisted.internet.error import ConnectError
@@ -106,7 +106,7 @@ class SrvResolver:
         self._cache = cache
         self._get_time = get_time
 
-    async def resolve_service(self, service_name: bytes) -> "Generator":
+    async def resolve_service(self, service_name: bytes) -> List["Server"]:
         """Look up a SRV record
 
         :param service_name: The record to look up.

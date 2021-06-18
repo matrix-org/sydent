@@ -1,0 +1,1 @@
+Convert sydent/http/srvresolver.py and associated files to async/await.
