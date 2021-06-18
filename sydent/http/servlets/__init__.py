@@ -16,15 +16,14 @@ import copy
 import functools
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Tuple
+from typing import Any, Dict, Iterable
 
 from twisted.internet import defer
+from twisted.python.failure import Failure
 from twisted.web import server
 from twisted.web.server import Request
-from twisted.python.failure import Failure
 
 from sydent.util import json_decoder
-
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,9 @@ class MatrixRestError(Exception):
         self.error = error
 
 
-def get_args(request: Request, args: Tuple, required: bool = True) -> Dict[str, Any]:
+def get_args(
+    request: Request, args: Iterable[str], required: bool = True
+) -> Dict[str, Any]:
     """
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
@@ -54,7 +55,7 @@ def get_args(request: Request, args: Tuple, required: bool = True) -> Dict[str, 
     :param request: The request received by the servlet.
     :type request: twisted.web.server.Request
     :param args: The args to look for in the request's parameters.
-    :type args: tuple[unicode]
+    :type args: Iterable[str]
     :param required: Whether to raise a MatrixRestError with 400
         M_MISSING_PARAMS if an argument is not found.
     :type required: bool

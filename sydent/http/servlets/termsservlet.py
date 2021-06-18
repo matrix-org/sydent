@@ -16,7 +16,7 @@ import logging
 from typing import TYPE_CHECKING, Dict
 
 from twisted.web.resource import Resource
- from twisted.web.server import Request
+from twisted.web.server import Request
 
 from sydent.db.accounts import AccountStore
 from sydent.db.terms import TermsStore
