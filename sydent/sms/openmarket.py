@@ -14,9 +14,8 @@
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Dict, Generator, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
-from twisted.internet import defer
 from twisted.web.http_headers import Headers
 
 from sydent.http.httpclient import SimpleHttpClient
@@ -61,10 +60,9 @@ class OpenMarketSMS:
         self.sydent = sydent
         self.http_cli = SimpleHttpClient(sydent)
 
-    @defer.inlineCallbacks
-    def sendTextSMS(
+    async def sendTextSMS(
         self, body: Dict, dest: str, source: Optional[Dict[str, str]] = None
-    ) -> Generator:
+    ) -> None:
         """
         Sends a text message with the given body to the given MSISDN.
 
@@ -101,7 +99,7 @@ class OpenMarketSMS:
             }
         )
 
-        resp = yield self.http_cli.post_json_get_nothing(
+        resp = await self.http_cli.post_json_get_nothing(
             API_BASE_URL, body, {"headers": req_headers}
         )
         headers = dict(resp.headers.getAllRawHeaders())

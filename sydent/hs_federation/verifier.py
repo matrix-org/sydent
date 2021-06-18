@@ -78,7 +78,7 @@ class Verifier:
             cached = self.cache[server_name]
             now = int(time.time() * 1000)
             if cached["valid_until_ts"] > now:
-                defer.returnValue(self.cache[server_name]["verify_keys"])
+                return self.cache[server_name]["verify_keys"]
 
         client = FederationHttpClient(self.sydent)
         result = yield client.get_json(
@@ -104,7 +104,7 @@ class Verifier:
             )
             self.cache[server_name] = result
 
-        defer.returnValue(result["verify_keys"])
+        return result["verify_keys"]
 
     @defer.inlineCallbacks
     def verifyServerSignedJson(
@@ -154,7 +154,7 @@ class Verifier:
                     logger.info(
                         "Verified signature with key %s from %s", key_name, server_name
                     )
-                    defer.returnValue((server_name, key_name))
+                    return (server_name, key_name)
             logger.warning(
                 "No matching key found for signature block %r in server keys %r",
                 signed_json["signatures"],
@@ -245,4 +245,4 @@ class Verifier:
 
         logger.info("Verified request from HS %s", origin)
 
-        defer.returnValue(origin)
+        return origin
