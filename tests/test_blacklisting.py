@@ -94,7 +94,6 @@ class BlacklistingAgentTest(TestCase):
 
     @patch("sydent.http.srvresolver.SrvResolver.resolve_service")
     def test_federation_client_allowed_ip(self, resolver):
-        # breakpoint()
         self.sydent.run()
 
         request, channel = make_request(
