@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Dict, Union
 
 import phonenumbers
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.http.auth import authV2
 from sydent.http.servlets import get_args, jsonwrap, send_cors
@@ -31,8 +32,6 @@ from sydent.validators import (
 )
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -46,7 +45,7 @@ class MsisdnRequestCodeServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: "Request") -> dict:
+    def render_POST(self, request: Request) -> dict:
         send_cors(request)
 
         if self.require_auth:
@@ -113,7 +112,7 @@ class MsisdnRequestCodeServlet(Resource):
 
         return resp
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""
 
@@ -125,7 +124,7 @@ class MsisdnValidateCodeServlet(Resource):
         self.sydent = syd
         self.require_auth = require_auth
 
-    def render_GET(self, request: "Request") -> str:
+    def render_GET(self, request: Request) -> str:
         send_cors(request)
 
         err, args = get_args(request, ("token", "sid", "client_secret"))
@@ -154,7 +153,7 @@ class MsisdnValidateCodeServlet(Resource):
         return open(templateFile).read() % {"message": msg}
 
     @jsonwrap
-    def render_POST(self, request: "Request") -> Dict[str, Union[bool, str]]:
+    def render_POST(self, request: Request) -> Dict[str, Union[bool, str]]:
         send_cors(request)
 
         if self.require_auth:
@@ -162,7 +161,7 @@ class MsisdnValidateCodeServlet(Resource):
 
         return self.do_validate_request(request)
 
-    def do_validate_request(self, request: "Request") -> Dict[str, Union[bool, str]]:
+    def do_validate_request(self, request: Request) -> Dict[str, Union[bool, str]]:
         """
         Extracts information about a validation session from the request and
         attempts to validate that session.
@@ -222,6 +221,6 @@ class MsisdnValidateCodeServlet(Resource):
                 "error": "No session could be found with this sid",
             }
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

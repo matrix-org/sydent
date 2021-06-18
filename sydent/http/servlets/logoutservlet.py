@@ -36,7 +36,7 @@ class LogoutServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_POST(self, request: "Request") -> dict:
+    def render_POST(self, request: Request) -> dict:
         """
         Invalidate the given access token
         """
@@ -50,6 +50,6 @@ class LogoutServlet(Resource):
         accountStore.delToken(token)
         return {}
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

@@ -14,6 +14,7 @@
 
 from typing import TYPE_CHECKING
 
+from twisted.web.server import Request
 from twisted.web.resource import Resource
 from unpaddedbase64 import encode_base64
 
@@ -21,8 +22,6 @@ from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.servlets import get_args, jsonwrap
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 
@@ -33,7 +32,7 @@ class Ed25519Servlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: "Request") -> dict:
+    def render_GET(self, request: Request) -> dict:
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
@@ -47,7 +46,7 @@ class PubkeyIsValidServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: "Request") -> dict:
+    def render_GET(self, request: Request) -> dict:
         args = get_args(request, ("public_key",))
 
         pubKey = self.sydent.keyring.ed25519.verify_key
@@ -63,7 +62,7 @@ class EphemeralPubkeyIsValidServlet(Resource):
         self.joinTokenStore = JoinTokenStore(syd)
 
     @jsonwrap
-    def render_GET(self, request: "Request") -> dict:
+    def render_GET(self, request: Request) -> dict:
         args = get_args(request, ("public_key",))
         publicKey = args["public_key"]
 

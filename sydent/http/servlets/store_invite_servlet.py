@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 
 import nacl.signing
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 from unpaddedbase64 import encode_base64
 
 from sydent.db.invite_tokens import JoinTokenStore
@@ -29,8 +30,6 @@ from sydent.util.emailutils import sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 
@@ -41,7 +40,7 @@ class StoreInviteServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: "Request") -> dict:
+    def render_POST(self, request: Request) -> dict:
         send_cors(request)
 
         args = get_args(

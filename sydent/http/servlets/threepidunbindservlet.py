@@ -20,6 +20,7 @@ from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from twisted.web import server
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.hs_federation.verifier import InvalidServerName, NoAuthenticationError
@@ -33,8 +34,6 @@ from sydent.validators import (
 )
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -45,7 +44,7 @@ class ThreePidUnbindServlet(Resource):
         self.sydent = sydent
 
     def render_POST(
-        self, request: "Request"
+        self, request: Request
     ) -> Any:  # from the twisted docs: @type NOT_DONE_YET:
         self._async_render_POST(
             request
@@ -53,7 +52,7 @@ class ThreePidUnbindServlet(Resource):
         return server.NOT_DONE_YET
 
     @defer.inlineCallbacks
-    def _async_render_POST(self, request: "Request") -> Generator:
+    def _async_render_POST(self, request: Request) -> Generator:
         try:
             try:
                 # json.loads doesn't allow bytes in Python 3.5

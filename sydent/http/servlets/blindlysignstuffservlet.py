@@ -18,14 +18,13 @@ from typing import TYPE_CHECKING
 import signedjson.key
 import signedjson.sign
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -41,7 +40,7 @@ class BlindlySignStuffServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: "Request"):
+    def render_POST(self, request: Request):
         send_cors(request)
 
         if self.require_auth:
@@ -73,6 +72,6 @@ class BlindlySignStuffServlet(Resource):
 
         return signed
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

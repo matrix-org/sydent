@@ -16,6 +16,7 @@ import logging
 from typing import TYPE_CHECKING, Dict
 
 from twisted.web.resource import Resource
+ from twisted.web.server import Request
 
 from sydent.db.accounts import AccountStore
 from sydent.db.terms import TermsStore
@@ -24,8 +25,6 @@ from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.terms.terms import get_terms
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class TermsServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: "Request") -> Dict[str, dict]:
+    def render_GET(self, request: Request) -> Dict[str, dict]:
         """
         Get the terms that must be agreed to in order to use this service
         Returns: Object describing the terms that require agreement
@@ -50,7 +49,7 @@ class TermsServlet(Resource):
         return terms.getForClient()
 
     @jsonwrap
-    def render_POST(self, request: "Request") -> dict:
+    def render_POST(self, request: Request) -> dict:
         """
         Mark a set of terms and conditions as having been agreed to
         """
@@ -80,6 +79,6 @@ class TermsServlet(Resource):
 
         return {}
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

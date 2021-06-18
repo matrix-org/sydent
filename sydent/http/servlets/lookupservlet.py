@@ -18,14 +18,13 @@ from typing import TYPE_CHECKING, Optional, Union
 
 import signedjson.sign
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import get_args, jsonwrap, send_cors
 from sydent.util import json_decoder
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class LookupServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: "Request") -> Union[dict, Optional[str]]:
+    def render_GET(self, request: Request) -> Union[dict, Optional[str]]:
         """
         Look up an individual threepid.
 
@@ -86,6 +85,6 @@ class LookupServlet(Resource):
             )
         return sgassoc
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

@@ -16,13 +16,12 @@ import logging
 from typing import TYPE_CHECKING, Dict
 
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.http.auth import authV2
 from sydent.http.servlets import jsonwrap, send_cors
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class HashDetailsServlet(Resource):
         self.lookup_pepper = lookup_pepper
 
     @jsonwrap
-    def render_GET(self, request: "Request") -> Dict:
+    def render_GET(self, request: Request) -> Dict:
         """
         Return the hashing algorithms and pepper that this IS supports. The
         pepper included in the response is stored in the database, or
@@ -57,6 +56,6 @@ class HashDetailsServlet(Resource):
             "lookup_pepper": self.lookup_pepper,
         }
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

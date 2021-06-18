@@ -15,6 +15,7 @@
 from typing import TYPE_CHECKING, Dict
 
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.auth import authV2
@@ -28,8 +29,6 @@ from sydent.validators import (
 )
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 
@@ -41,7 +40,7 @@ class GetValidated3pidServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_GET(self, request: "Request") -> Dict:
+    def render_GET(self, request: Request) -> Dict:
         send_cors(request)
         if self.require_auth:
             authV2(self.sydent, request)
@@ -85,6 +84,6 @@ class GetValidated3pidServlet(Resource):
 
         return {"medium": s.medium, "address": s.address, "validated_at": s.mtime}
 
-    def render_OPTIONS(self, request: "Request") -> bytes:
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

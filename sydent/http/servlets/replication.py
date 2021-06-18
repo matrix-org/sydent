@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 import twisted.python.log
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
@@ -28,8 +29,6 @@ from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
 
 if TYPE_CHECKING:
-    from twisted.web.server import Request
-
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
@@ -41,7 +40,7 @@ class ReplicationPushServlet(Resource):
         self.hashing_store = HashingMetadataStore(sydent)
 
     @jsonwrap
-    def render_POST(self, request: "Request") -> dict:
+    def render_POST(self, request: Request) -> dict:
         peerCert = request.transport.getPeerCertificate()
         peerCertCn = peerCert.get_subject().commonName
 
