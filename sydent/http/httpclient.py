@@ -67,7 +67,7 @@ class HTTPClient:
         except Exception:
             logger.exception("Error parsing JSON from %s", uri)
             raise
-        defer.returnValue(json_body)
+        return json_body
 
     @defer.inlineCallbacks
     def post_json_get_nothing(
@@ -118,7 +118,7 @@ class HTTPClient:
         except BodyExceededMaxSize:
             pass
 
-        defer.returnValue(response)
+        return response
 
 
 class SimpleHttpClient(HTTPClient):

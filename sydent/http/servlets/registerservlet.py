@@ -109,12 +109,10 @@ class RegisterServlet(Resource):
         # XXX: `token` is correct for the spec, but we released with `access_token`
         # for a substantial amount of time. Serve both to make spec-compliant clients
         # happy.
-        defer.returnValue(
-            {
-                "access_token": tok,
-                "token": tok,
-            }
-        )
+        return {
+            "access_token": tok,
+            "token": tok,
+        }
 
     def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)

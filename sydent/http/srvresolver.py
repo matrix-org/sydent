@@ -126,14 +126,14 @@ class SrvResolver:
         if cache_entry:
             if all(s.expires > now for s in cache_entry):
                 servers = list(cache_entry)
-                defer.returnValue(servers)
+                return servers
 
         try:
             answers, _, _ = yield self._dns_client.lookupService(service_name)
         except DNSNameError:
             # TODO: cache this. We can get the SOA out of the exception, and use
             # the negative-TTL value.
-            defer.returnValue([])
+            return []
         except DomainError as e:
             # We failed to resolve the name (other than a NameError)
             # Try something in the cache, else rereaise
@@ -142,7 +142,7 @@ class SrvResolver:
                 logger.warning(
                     "Failed to resolve %r, falling back to cache. %r", service_name, e
                 )
-                defer.returnValue(list(cache_entry))
+                return list(cache_entry)
             else:
                 raise e
 
@@ -173,4 +173,4 @@ class SrvResolver:
             )
 
         self._cache[service_name] = list(servers)
-        defer.returnValue(servers)
+        return servers
