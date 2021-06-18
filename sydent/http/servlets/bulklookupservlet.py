@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING
+
+from sydent.types import JsonDict
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -34,7 +36,7 @@ class BulkLookupServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_POST(self, request: Request) -> Dict[str, List[Tuple[str, str, str]]]:
+    def render_POST(self, request: Request) -> JsonDict:
         """
         Bulk-lookup for threepids.
         Params: 'threepids': list of threepids, each of which is a list of medium, address

@@ -17,6 +17,8 @@ import string
 from email.header import Header
 from typing import TYPE_CHECKING
 
+from sydent.types import JsonDict
+
 import nacl.signing
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -40,7 +42,7 @@ class StoreInviteServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: Request) -> dict:
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         args = get_args(

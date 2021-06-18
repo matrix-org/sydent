@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
+
+from sydent.types import JsonDict
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -40,7 +42,7 @@ class GetValidated3pidServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_GET(self, request: Request) -> Dict:
+    def render_GET(self, request: Request) -> JsonDict:
         send_cors(request)
         if self.require_auth:
             authV2(self.sydent, request)

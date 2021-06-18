@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
+
+from sydent.types import JsonDict
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -36,7 +38,7 @@ class HashDetailsServlet(Resource):
         self.lookup_pepper = lookup_pepper
 
     @jsonwrap
-    def render_GET(self, request: Request) -> Dict:
+    def render_GET(self, request: Request) -> JsonDict:
         """
         Return the hashing algorithms and pepper that this IS supports. The
         pepper included in the response is stored in the database, or

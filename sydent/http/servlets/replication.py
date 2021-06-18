@@ -16,6 +16,8 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
+from sydent.types import JsonDict
+
 import twisted.python.log
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -40,7 +42,7 @@ class ReplicationPushServlet(Resource):
         self.hashing_store = HashingMetadataStore(sydent)
 
     @jsonwrap
-    def render_POST(self, request: Request) -> dict:
+    def render_POST(self, request: Request) -> JsonDict:
         peerCert = request.transport.getPeerCertificate()
         peerCertCn = peerCert.get_subject().commonName
 

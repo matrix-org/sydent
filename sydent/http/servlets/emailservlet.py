@@ -14,6 +14,8 @@
 
 from typing import TYPE_CHECKING, Dict, Union
 
+from sydent.types import JsonDict
+
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
@@ -40,7 +42,7 @@ class EmailRequestCodeServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: Request) -> Dict:
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         if self.require_auth:
@@ -132,7 +134,7 @@ class EmailValidateCodeServlet(Resource):
         return res.encode("UTF-8")
 
     @jsonwrap
-    def render_POST(self, request: Request) -> Dict[str, Union[bool, str]]:
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         if self.require_auth:

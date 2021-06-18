@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
+from sydent.types import JsonDict
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -32,7 +33,7 @@ class AccountServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: Request) -> Dict[str, str]:
+    def render_GET(self, request: Request) -> JsonDict:
         """
         Return information about the user's account
         (essentially just a 'who am i')

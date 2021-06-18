@@ -14,6 +14,7 @@
 
 import logging
 from typing import TYPE_CHECKING
+from sydent.types import JsonDict
 
 import signedjson.key
 import signedjson.sign
@@ -40,7 +41,7 @@ class BlindlySignStuffServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: Request):
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         if self.require_auth:

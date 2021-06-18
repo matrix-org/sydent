@@ -14,6 +14,8 @@
 
 from typing import TYPE_CHECKING
 
+from sydent.types import JsonDict
+
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 from unpaddedbase64 import encode_base64
@@ -46,7 +48,7 @@ class PubkeyIsValidServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: Request) -> dict:
+    def render_GET(self, request: Request) -> JsonDict:
         args = get_args(request, ("public_key",))
 
         pubKey = self.sydent.keyring.ed25519.verify_key
@@ -62,7 +64,7 @@ class EphemeralPubkeyIsValidServlet(Resource):
         self.joinTokenStore = JoinTokenStore(syd)
 
     @jsonwrap
-    def render_GET(self, request: Request) -> dict:
+    def render_GET(self, request: Request) -> JsonDict:
         args = get_args(request, ("public_key",))
         publicKey = args["public_key"]
 

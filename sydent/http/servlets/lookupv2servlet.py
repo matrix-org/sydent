@@ -15,6 +15,8 @@
 import logging
 from typing import TYPE_CHECKING
 
+from sydent.types import JsonDict
+
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
@@ -38,7 +40,7 @@ class LookupV2Servlet(Resource):
         self.lookup_pepper = lookup_pepper
 
     @jsonwrap
-    def render_POST(self, request: Request) -> dict:
+    def render_POST(self, request: Request) -> JsonDict:
         """
         Perform lookups with potentially hashed 3PID details.
 

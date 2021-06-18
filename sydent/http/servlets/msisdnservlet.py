@@ -14,7 +14,9 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING
+
+from sydent.types import JsonDict
 
 import phonenumbers
 from twisted.web.resource import Resource
@@ -153,7 +155,7 @@ class MsisdnValidateCodeServlet(Resource):
         return open(templateFile).read() % {"message": msg}
 
     @jsonwrap
-    def render_POST(self, request: Request) -> Dict[str, Union[bool, str]]:
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         if self.require_auth:
@@ -161,7 +163,7 @@ class MsisdnValidateCodeServlet(Resource):
 
         return self.do_validate_request(request)
 
-    def do_validate_request(self, request: Request) -> Dict[str, Union[bool, str]]:
+    def do_validate_request(self, request: Request) -> JsonDict:
         """
         Extracts information about a validation session from the request and
         attempts to validate that session.

@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Any, Generator
+from typing import TYPE_CHECKING, Generator
 
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
@@ -45,10 +45,10 @@ class ThreePidUnbindServlet(Resource):
 
     def render_POST(
         self, request: Request
-    ) -> Any:  # from the twisted docs: @type NOT_DONE_YET:
+    ) -> int:  # from the twisted docs: @type NOT_DONE_YET:
         self._async_render_POST(
             request
-        )  # Opaque; do not depend on any particular type for this                                                    #value.
+        )
         return server.NOT_DONE_YET
 
     @defer.inlineCallbacks

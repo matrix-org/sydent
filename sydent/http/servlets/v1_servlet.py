@@ -15,6 +15,8 @@
 
 from typing import TYPE_CHECKING
 
+from sydent.types import JsonDict
+
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
@@ -32,7 +34,7 @@ class V1Servlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: Request) -> dict:
+    def render_GET(self, request: Request) -> JsonDict:
         send_cors(request)
         return {}
 

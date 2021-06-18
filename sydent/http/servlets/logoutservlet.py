@@ -15,6 +15,8 @@
 import logging
 from typing import TYPE_CHECKING
 
+from sydent.types import JsonDict
+
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
@@ -35,7 +37,7 @@ class LogoutServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_POST(self, request: Request) -> dict:
+    def render_POST(self, request: Request) -> JsonDict:
         """
         Invalidate the given access token
         """

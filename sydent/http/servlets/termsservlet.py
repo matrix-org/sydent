@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
+
+from sydent.types import JsonDict
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -37,7 +39,7 @@ class TermsServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: Request) -> Dict[str, dict]:
+    def render_GET(self, request: Request) -> JsonDict:
         """
         Get the terms that must be agreed to in order to use this service
         Returns: Object describing the terms that require agreement
@@ -49,7 +51,7 @@ class TermsServlet(Resource):
         return terms.getForClient()
 
     @jsonwrap
-    def render_POST(self, request: Request) -> dict:
+    def render_POST(self, request: Request) -> JsonDict:
         """
         Mark a set of terms and conditions as having been agreed to
         """

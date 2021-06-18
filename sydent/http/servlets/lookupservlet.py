@@ -14,7 +14,9 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
+
+from sydent.types import JsonDict
 
 import signedjson.sign
 from twisted.web.resource import Resource
@@ -37,7 +39,7 @@ class LookupServlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: Request) -> Union[dict, Optional[str]]:
+    def render_GET(self, request: Request) -> JsonDict:
         """
         Look up an individual threepid.
 

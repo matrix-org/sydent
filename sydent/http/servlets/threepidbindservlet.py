@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING
+
+from sydent.types import JsonDict
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -39,7 +41,7 @@ class ThreePidBindServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: Request) -> Dict[str, Any]:
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         account = None
