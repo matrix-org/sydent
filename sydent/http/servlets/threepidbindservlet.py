@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING
+
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     IncorrectClientSecretException,
@@ -26,14 +30,17 @@ from sydent.validators import (
     SessionNotValidatedException,
 )
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 
 class ThreePidBindServlet(Resource):
-    def __init__(self, sydent, require_auth=False):
+    def __init__(self, sydent: "Sydent", require_auth: bool = False) -> None:
         self.sydent = sydent
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         account = None
@@ -88,6 +95,6 @@ class ThreePidBindServlet(Resource):
         res = self.sydent.threepidBinder.addBinding(s.medium, s.address, mxid)
         return res
 
-    def render_OPTIONS(self, request):
+    def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)
         return b""

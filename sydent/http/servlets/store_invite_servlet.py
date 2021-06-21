@@ -15,27 +15,33 @@
 import random
 import string
 from email.header import Header
+from typing import TYPE_CHECKING
 
 import nacl.signing
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 from unpaddedbase64 import encode_base64
 
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 from sydent.util.emailutils import sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 
 class StoreInviteServlet(Resource):
-    def __init__(self, syd, require_auth=False):
+    def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
         self.random = random.SystemRandom()
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         args = get_args(
@@ -176,7 +182,7 @@ class StoreInviteServlet(Resource):
 
         return resp
 
-    def redact_email_address(self, address):
+    def redact_email_address(self, address: str) -> str:
         """
         Redacts the content of a 3PID address. Redacts both the email's username and
         domain independently.
@@ -198,7 +204,7 @@ class StoreInviteServlet(Resource):
 
         return redacted_username + "@" + redacted_domain
 
-    def _redact(self, s, characters_to_reveal):
+    def _redact(self, s: str, characters_to_reveal: int) -> str:
         """
         Redacts the content of a string, using a given amount of characters to reveal.
         If the string is shorter than the given threshold, redact it based on length.
@@ -224,7 +230,7 @@ class StoreInviteServlet(Resource):
         # Otherwise truncate it and add an ellipses
         return s[:characters_to_reveal] + "..."
 
-    def _randomString(self, length):
+    def _randomString(self, length: int) -> str:
         """
         Generate a random string of the given length.
 

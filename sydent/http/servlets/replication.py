@@ -14,28 +14,34 @@
 
 import json
 import logging
+from typing import TYPE_CHECKING
 
 import twisted.python.log
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.servlets import MatrixRestError, jsonwrap
 from sydent.threepid import threePidAssocFromDict
+from sydent.types import JsonDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
 
 class ReplicationPushServlet(Resource):
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 
     @jsonwrap
-    def render_POST(self, request):
+    def render_POST(self, request: Request) -> JsonDict:
         peerCert = request.transport.getPeerCertificate()
         peerCertCn = peerCert.get_subject().commonName
 

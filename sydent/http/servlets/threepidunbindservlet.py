@@ -14,11 +14,13 @@
 # limitations under the License.
 
 import logging
+from typing import TYPE_CHECKING
 
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
 from twisted.web import server
 from twisted.web.resource import Resource
+from twisted.web.server import Request
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.hs_federation.verifier import InvalidServerName, NoAuthenticationError
@@ -31,14 +33,19 @@ from sydent.validators import (
     SessionNotValidatedException,
 )
 
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
+
 logger = logging.getLogger(__name__)
 
 
 class ThreePidUnbindServlet(Resource):
-    def __init__(self, sydent):
+    def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
-    def render_POST(self, request):
+    def render_POST(
+        self, request: Request
+    ) -> int:  # from the twisted docs: @type NOT_DONE_YET:
         defer.ensureDeferred(self._async_render_POST(request))
         return server.NOT_DONE_YET
 
