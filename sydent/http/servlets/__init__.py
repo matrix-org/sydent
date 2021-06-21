@@ -54,19 +54,15 @@ def get_args(
     parameters passed.
 
     :param request: The request received by the servlet.
-    :type request: twisted.web.server.Request
     :param args: The args to look for in the request's parameters.
-    :type args: Iterable[str]
     :param required: Whether to raise a MatrixRestError with 400
         M_MISSING_PARAMS if an argument is not found.
-    :type required: bool
 
     :raises: MatrixRestError if required is True and a given parameter
         was not found in the request's query parameters.
 
     :return: A dict containing the requested args and their values. String values
         are of type unicode.
-    :rtype: dict[unicode, any]
     """
     assert request.path is not None
     v1_path = request.path.startswith(b"/_matrix/identity/api/v1")
@@ -141,12 +137,10 @@ def jsonwrap(f):
 
         :param self: The current object.
         :param request: The request to process.
-        :type request: twisted.web.server.Request
         :param args: The arguments to pass to the function.
         :param kwargs: The keyword arguments to pass to the function.
 
         :return: The JSON payload to send as a response to the request.
-        :rtype bytes
         """
         try:
             request.setHeader("Content-Type", "application/json")
@@ -175,9 +169,7 @@ def deferjsonwrap(f):
         writes it as the response to the given request with the right headers.
 
         :param resp: The response content to convert to JSON and encode.
-        :type resp: dict[str, any]
         :param request: The request to respond to.
-        :type request: twisted.web.server.Request
         """
         request.setHeader("Content-Type", "application/json")
         request.write(dict_to_json_bytes(resp))
@@ -189,9 +181,7 @@ def deferjsonwrap(f):
         using the info it contains, otherwise responds with 500 Internal Server Error.
 
         :param failure: The failure to process.
-        :type failure: twisted.python.failure.Failure
         :param request: The request to respond to.
-        :type request: twisted.web.server.Request
         """
         request.setHeader("Content-Type", "application/json")
         if failure.check(MatrixRestError) is not None:
@@ -223,7 +213,6 @@ def deferjsonwrap(f):
 
         :return: A special code to tell the servlet that the response isn't ready yet
             and will come later.
-        :rtype: int
         """
         request = args[1]
 
@@ -245,10 +234,6 @@ def dict_to_json_bytes(content: JsonDict) -> bytes:
     """
     Converts a dict into JSON and encodes it to bytes.
 
-    :param content:
-    :type content: dict[any, any]
-
     :return: The JSON bytes.
-    :rtype: bytes
     """
     return json.dumps(content).encode("UTF-8")

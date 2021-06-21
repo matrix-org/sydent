@@ -168,12 +168,10 @@ class MsisdnValidateCodeServlet(Resource):
         attempts to validate that session.
 
         :param request: The request to extract information about the session from.
-        :type request: twisted.web.server.Request
 
         :return: A dict with a "success" key which value indicates whether the
             validation succeeded. If the validation failed, this dict also includes
             a "errcode" and a "error" keys which include information about the failure.
-        :rtype: dict[str, bool or str]
         """
 
         args = get_args(request, ("token", "sid", "client_secret"))

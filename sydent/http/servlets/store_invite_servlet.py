@@ -188,10 +188,8 @@ class StoreInviteServlet(Resource):
         domain independently.
 
         :param address: The address to redact.
-        :type address: unicode
 
         :return: The redacted address.
-        :rtype: unicode
         """
         # Extract strings from the address
         username, domain = address.split("@", 1)
@@ -210,14 +208,11 @@ class StoreInviteServlet(Resource):
         If the string is shorter than the given threshold, redact it based on length.
 
         :param s: The string to redact.
-        :type s: unicode
 
         :param characters_to_reveal: How many characters of the string to leave before
             the '...'
-        :type characters_to_reveal: int
 
         :return: The redacted string.
-        :rtype: unicode
         """
         # If the string is shorter than the defined threshold, redact based on length
         if len(s) <= characters_to_reveal:
@@ -235,9 +230,7 @@ class StoreInviteServlet(Resource):
         Generate a random string of the given length.
 
         :param length: The length of the string to generate.
-        :type length: int
 
         :return: The generated string.
-        :rtype: unicode
         """
         return "".join(self.random.choice(string.ascii_letters) for _ in range(length))
