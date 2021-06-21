@@ -11,12 +11,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pdb
-
 from unittest.mock import patch
-from tests.utils import AsyncMock
 
-from twisted.internet import defer
 from twisted.internet.error import DNSLookupError
 from twisted.test.proto_helpers import StringTransport
 from twisted.trial.unittest import TestCase
@@ -24,7 +20,8 @@ from twisted.web.client import Agent
 
 from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
 from sydent.http.srvresolver import Server
-from tests.utils import make_request, make_sydent
+from tests.utils import AsyncMock, make_request, make_sydent
+
 
 class BlacklistingAgentTest(TestCase):
     def setUp(self):
@@ -93,7 +90,9 @@ class BlacklistingAgentTest(TestCase):
                 _bindAddress,
             ) = self.reactor.tcpClients.pop()
 
-    @patch("sydent.http.srvresolver.SrvResolver.resolve_service", new_callable=AsyncMock)
+    @patch(
+        "sydent.http.srvresolver.SrvResolver.resolve_service", new_callable=AsyncMock
+    )
     def test_federation_client_allowed_ip(self, resolver):
         self.sydent.run()
 
@@ -143,7 +142,9 @@ class BlacklistingAgentTest(TestCase):
 
         self.assertEqual(channel.code, 200)
 
-    @patch("sydent.http.srvresolver.SrvResolver.resolve_service", new_callable=AsyncMock)
+    @patch(
+        "sydent.http.srvresolver.SrvResolver.resolve_service", new_callable=AsyncMock
+    )
     def test_federation_client_safe_ip(self, resolver):
         self.sydent.run()
 
@@ -208,14 +209,14 @@ class BlacklistingAgentTest(TestCase):
         )
 
         resolver.return_value = [
-                Server(
-                    host=self.unsafe_domain,
-                    port=443,
-                    priority=1,
-                    weight=1,
-                    expires=100,
-                )
-            ]
+            Server(
+                host=self.unsafe_domain,
+                port=443,
+                priority=1,
+                weight=1,
+                expires=100,
+            )
+        ]
 
         request.render(self.sydent.servlets.registerServlet)
 
