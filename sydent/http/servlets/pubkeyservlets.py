@@ -33,7 +33,7 @@ class Ed25519Servlet(Resource):
         self.sydent = syd
 
     @jsonwrap
-    def render_GET(self, request: Request) -> dict:
+    def render_GET(self, request: Request) -> JsonDict:
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 

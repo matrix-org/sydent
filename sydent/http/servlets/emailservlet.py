@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -141,7 +141,7 @@ class EmailValidateCodeServlet(Resource):
 
         return self.do_validate_request(request)
 
-    def do_validate_request(self, request: Request) -> Dict[str, Union[bool, str]]:
+    def do_validate_request(self, request: Request) -> JsonDict:
         """
         Extracts information about a validation session from the request and
         attempts to validate that session.

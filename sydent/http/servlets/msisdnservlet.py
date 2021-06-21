@@ -46,7 +46,7 @@ class MsisdnRequestCodeServlet(Resource):
         self.require_auth = require_auth
 
     @jsonwrap
-    def render_POST(self, request: Request) -> dict:
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         if self.require_auth:

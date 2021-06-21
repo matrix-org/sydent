@@ -23,6 +23,7 @@ from twisted.python.failure import Failure
 from twisted.web import server
 from twisted.web.server import Request
 
+from sydent.types import JsonDict
 from sydent.util import json_decoder
 
 logger = logging.getLogger(__name__)
@@ -240,7 +241,7 @@ def send_cors(request: Request) -> None:
     request.setHeader("Access-Control-Allow-Headers", "*")
 
 
-def dict_to_json_bytes(content: Dict[Any, Any]) -> bytes:
+def dict_to_json_bytes(content: JsonDict) -> bytes:
     """
     Converts a dict into JSON and encodes it to bytes.
 
