@@ -67,10 +67,7 @@ class OpenMarketSMS:
         Sends a text message with the given body to the given MSISDN.
 
         :param body: The message to send.
-        :type body: str
         :param dest: The destination MSISDN to send the text message to.
-        :type dest: unicode
-        :type source: dict[str, str] or None
         """
         body = {
             "mobileTerminate": {
