@@ -122,7 +122,7 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
         def post_json_get_nothing(uri, post_json, opts):
             return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
-        FederationHttpClient.post_json_get_nothing = Mock(
+        FederationHttpClient.post_json_get_nothing = AsyncMock(
             side_effect=post_json_get_nothing,
         )
 
