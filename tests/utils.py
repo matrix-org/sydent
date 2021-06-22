@@ -303,4 +303,4 @@ class ResolvingMemoryReactorClock(MemoryReactorClock):
 
 class AsyncMock(MagicMock):
     async def __call__(self, *args, **kwargs):
-        return super(AsyncMock, self).__call__(*args, **kwargs)
+        return super().__call__(*args, **kwargs)
