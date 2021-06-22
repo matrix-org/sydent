@@ -35,7 +35,6 @@ class LocalAssociationStore:
         Updates an association, or creates one if none exists with these parameters.
 
         :param assoc: The association to create or update.
-        :type assoc: ThreepidAssociation
         """
         cur = self.sydent.db.cursor()
 
@@ -63,14 +62,11 @@ class LocalAssociationStore:
         Retrieves every association after the given ID.
 
         :param afterId: The ID after which to retrieve associations.
-        :type afterId: int
         :param limit: The maximum number of associations to retrieve, or None if no
             limit.
-        :type limit: int or None
 
         :return: The retrieved associations (in a dict[id, assoc]), and the highest ID
             retrieved (or None if no ID thus no association was retrieved).
-        :rtype: tuple[dict[int, ThreepidAssociation] or int or None]
         """
         cur = self.sydent.db.cursor()
 
@@ -107,16 +103,13 @@ class LocalAssociationStore:
         """Get associations after a given ID, and sign them before returning
 
         :param afterId: The ID to return results after (not inclusive)
-        :type afterId: int
 
         :param limit: The maximum amount of signed associations to return. None for no
             limit.
-        :type limit: int|None
 
         :return: A tuple consisting of a dictionary containing the signed associations
             (id: assoc dict) and an int representing the maximum ID (which is None if
             there was no association to retrieve).
-        :rtype: tuple[dict[int, dict[str, any]] or int or None]
         """
         assocs = {}
 
@@ -136,9 +129,7 @@ class LocalAssociationStore:
         association doesn't exist, log and do nothing.
 
         :param threepid: The 3PID of the binding to remove.
-        :type threepid: dict[unicode, unicode]
         :param mxid: The MXID of the binding to remove.
-        :type mxid: unicode
         """
 
         cur = self.sydent.db.cursor()
@@ -193,13 +184,10 @@ class GlobalAssociationStore:
         if one exists.
 
         :param medium: The medium of the 3PID.
-        :type medium: unicode
         :param address: The address of the 3PID.
-        :type address: unicode
 
         :return: The signed association, or None if no association was found for this
             3PID.
-        :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
         # We treat address as case-insensitive because that's true for all the
@@ -227,12 +215,9 @@ class GlobalAssociationStore:
         Retrieves the MXID associated with a 3PID.
 
         :param medium: The medium of the 3PID.
-        :type medium: unicode
         :param address: The address of the 3PID.
-        :type address: unicode
 
         :return: The associated MXID, or None if no MXID is associated with this 3PID.
-        :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -257,10 +242,8 @@ class GlobalAssociationStore:
         database for. Output is ordered by medium, address, timestamp DESC
 
         :param threepid_tuples: List containing (medium, address) tuples
-        :type threepid_tuples: list[tuple[unicode]]
 
         :return: a list of (medium, address, mxid) tuples
-        :rtype: list[tuple[unicode]]
         """
         cur = self.sydent.db.cursor()
 
@@ -317,17 +300,12 @@ class GlobalAssociationStore:
         Saves an association received through either a replication push or a local push.
 
         :param assoc: The association to add as a high level object.
-        :type assoc: sydent.threepid.ThreepidAssociation
         :param rawSgAssoc: The original raw bytes of the signed association.
-        :type rawSgAssoc: dict[str, any]
         :param originServer: The name of the server the association was created on.
-        :type originServer: str
         :param originId: The ID of the association on the server the association was
             created on.
-        :type originId: int
         :param commit: Whether to commit the database transaction after inserting the
             association.
-        :type commit: bool
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -355,11 +333,9 @@ class GlobalAssociationStore:
         Retrieves the ID of the last association received from the given peer.
 
         :param server:
-        :type server: str
 
         :return: The the ID of the last association received from the peer, or None if
             no association has ever been received from that peer.
-        :rtype: int or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -379,9 +355,7 @@ class GlobalAssociationStore:
         Removes any association stored for the provided 3PID.
 
         :param medium: The medium for the 3PID.
-        :type medium: unicode
         :param address: The address for the 3PID.
-        :type address: unicode
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -401,10 +375,8 @@ class GlobalAssociationStore:
         """Returns a mapping from hash: mxid from a list of given lookup_hash values
 
         :param addresses: An array of lookup_hash values to check against the db
-        :type addresses: list[unicode]
 
         :returns a dictionary of lookup_hash values to mxids of all discovered matches
-        :rtype: dict[unicode, unicode]
         """
         cur = self.sydent.db.cursor()
 

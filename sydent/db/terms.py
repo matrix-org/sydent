@@ -27,10 +27,8 @@ class TermsStore:
         Retrieves the URLs of the terms the given user has agreed to.
 
         :param user_id: Matrix user ID to fetch the URLs for.
-        :type user_id: str
 
         :return: A list of the URLs of the terms accepted by the user.
-        :rtype: list[unicode]
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -53,9 +51,7 @@ class TermsStore:
         Saves that the given user has accepted the terms at the given URLs.
 
         :param user_id: The Matrix user ID that has accepted the terms.
-        :type user_id: str
         :param urls: The list of URLs.
-        :type urls: list[unicode]
         """
         cur = self.sydent.db.cursor()
         cur.executemany(

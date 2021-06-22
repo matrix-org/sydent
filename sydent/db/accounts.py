@@ -29,10 +29,8 @@ class AccountStore:
         Select the account matching the given token, if any.
 
         :param token: The token to identify the account, if any.
-        :type token: unicode
 
         :return: The account matching the token, or None if no account matched.
-        :rtype: Account or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -54,12 +52,9 @@ class AccountStore:
         Stores an account for the given user ID.
 
         :param user_id: The Matrix user ID to create an account for.
-        :type user_id: unicode
         :param creation_ts: The timestamp in milliseconds.
-        :type creation_ts: int
         :param consent_version: The version of the terms of services that the user last
             accepted.
-        :type consent_version: str or None
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -75,9 +70,7 @@ class AccountStore:
         given version.
 
         :param user_id: The Matrix ID of the user that has agreed to the terms.
-        :type user_id: str
         :param consent_version: The version of the document the user has agreed to.
-        :type consent_version: unicode or None
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -91,9 +84,7 @@ class AccountStore:
         Stores the authentication token for a given user.
 
         :param user_id: The Matrix user ID to save the given token for.
-        :type user_id: unicode
         :param token: The token to store for that user ID.
-        :type token: unicode
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -107,7 +98,6 @@ class AccountStore:
         Deletes an authentication token from the database.
 
         :param token: The token to delete from the database.
-        :type token: unicode
         """
         cur = self.sydent.db.cursor()
         cur.execute(
