@@ -53,10 +53,8 @@ def pick_server_from_list(server_list: List[Server]) -> Tuple[bytes, int]:
     """Randomly choose a server from the server list.
 
     :param server_list: List of candidate servers.
-    :type server_list: list[Server]
 
     :returns a (host, port) pair for the chosen server.
-    :rtype: Tuple[bytes, int]
     """
     if not server_list:
         raise RuntimeError("pick_server_from_list called with empty list")
@@ -87,13 +85,10 @@ class SrvResolver:
     but the cache never gets populated), so we add our own caching layer here.
 
     :param dns_client: Twisted resolver impl
-    :type dns_client: twisted.internet.interfaces.IResolver
 
     :param cache: cache object
-    :type cache: Dict
 
     :param get_time: Clock implementation. Should return seconds since the epoch.
-    :type get_time: callable
     """
 
     def __init__(
@@ -110,10 +105,9 @@ class SrvResolver:
         """Look up a SRV record
 
         :param service_name: The record to look up.
-        :type service_name: bytes
+
 
         :returns a list of the SRV records, or an empty list if none found.
-        :rtype: Deferred[list[Server]]
         """
         now = int(self._get_time())
 

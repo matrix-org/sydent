@@ -54,9 +54,7 @@ class ReplicationHttpsClient:
         Sends an POST request over HTTPS.
 
         :param uri: The URI to send the request to.
-        :type uri: unicode
         :param jsonObject: The request's body.
-        :type jsonObject: dict[any, any]
 
         :return: The request's response.
         :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]

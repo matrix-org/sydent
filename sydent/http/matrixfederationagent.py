@@ -124,20 +124,16 @@ class MatrixFederationAgent:
     ) -> Generator:
         """
         :param method: HTTP method (GET/POST/etc).
-        :type method: bytes
 
         :param uri: Absolute URI to be retrieved.
-        :type uri: bytes
 
         :param headers: HTTP headers to send with the request, or None to
             send no extra headers.
-        :type headers: twisted.web.http_headers.Headers, None
 
         :param bodyProducer: An object which can generate bytes to make up the
             body of this request (for example, the properly encoded contents of
             a file for a file upload).  Or None if the request is to have
             no body.
-        :type bodyProducer: twisted.web.iweb.IBodyProducer, None
 
         :returns a deferred that fires when the header of the response has
             been received (regardless of the response status code). Fails if
@@ -195,10 +191,8 @@ class MatrixFederationAgent:
         :param parsed_uri: uri to route. Note that it should be parsed with
             URI.fromBytes(uri, defaultPort=-1) to set the `port` to -1 if there
             is no explicit port given.
-        :type parsed_uri: twisted.web.client.URI
         :param lookup_well_known: True if we should look up the .well-known
             file if there is no SRV record.
-        :type lookup_well_known: bool
 
         :returns a routing result.
         :rtype: Deferred[_RoutingResult]
@@ -302,7 +296,6 @@ class MatrixFederationAgent:
         """Attempt to fetch and parse a .well-known file for the given server
 
         :param server_name: Name of the server, from the requested url.
-        :type server_name: bytes
 
         :returns either the new server name, from the .well-known, or None if
             there was no .well-known file.
@@ -325,7 +318,6 @@ class MatrixFederationAgent:
         """Actually fetch and parse a .well-known, without checking the cache
 
         :param server_name: Name of the server, from the requested url
-        :type server_name: bytes
 
         :returns a tuple of (result, cache period), where result is one of:
             - the new server name from the .well-known (as a `bytes`)
