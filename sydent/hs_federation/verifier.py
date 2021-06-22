@@ -63,8 +63,7 @@ class Verifier:
             # server_name: <result from keys query>,
         }
 
-    @defer.inlineCallbacks
-    def _getKeysForServer(self, server_name: str) -> Generator:
+    async def _getKeysForServer(self, server_name: str):
         """Get the signing key data from a homeserver.
 
         :param server_name: The name of the server to request the keys from.
@@ -81,9 +80,9 @@ class Verifier:
                 return self.cache[server_name]["verify_keys"]
 
         client = FederationHttpClient(self.sydent)
-        result = yield defer.ensureDeffered(client.get_json(
+        result = await client.get_json(
             "matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50
-        ))
+        )
 
         if "verify_keys" not in result:
             raise SignatureVerifyException("No key found in response")
@@ -106,12 +105,11 @@ class Verifier:
 
         return result["verify_keys"]
 
-    @defer.inlineCallbacks
-    def verifyServerSignedJson(
+    async def verifyServerSignedJson(
         self,
         signed_json: Dict[str, Any],
         acceptable_server_names: Optional[List[str]] = None,
-    ) -> Generator:
+    ):
         """Given a signed json object, try to verify any one
         of the signatures on it
 
@@ -137,7 +135,7 @@ class Verifier:
                 if server_name not in acceptable_server_names:
                     continue
 
-            server_keys = yield self._getKeysForServer(server_name)
+            server_keys = await self._getKeysForServer(server_name)
             for key_name, sig in sigs.items():
                 if key_name in server_keys:
                     if "key" not in server_keys[key_name]:
@@ -167,10 +165,9 @@ class Verifier:
         )
         raise SignatureVerifyException("No matching signature found")
 
-    @defer.inlineCallbacks
-    def authenticate_request(
+    async def authenticate_request(
         self, request: "Request", content: Optional[bytes]
-    ) -> Generator:
+    ):
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
 
@@ -241,7 +238,7 @@ class Verifier:
                 "X-Matrix header's origin parameter must be a valid Matrix server name"
             )
 
-        yield self.verifyServerSignedJson(json_request, [origin])
+        await self.verifyServerSignedJson(json_request, [origin])
 
         logger.info("Verified request from HS %s", origin)
 

@@ -41,7 +41,7 @@ class HTTPClient:
 
     agent: IAgent
 
-    async def get_json(self, uri: str, max_size: Optional[int] = None) -> Generator:
+    async def get_json(self, uri: str, max_size: Optional[int] = None):
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -70,7 +70,7 @@ class HTTPClient:
 
     async def post_json_get_nothing(
         self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
-    ) -> Generator:
+    ):
         """Make a POST request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a POST request to.
