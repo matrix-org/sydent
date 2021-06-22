@@ -52,7 +52,6 @@ class Peer:
         """
         :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
                         sgAssoc is the json object of the signed association
-        :return a deferred
         """
         pass
 
@@ -77,10 +76,8 @@ class LocalPeer(Peer):
         association if its ID is greater than the last seen ID.
 
         :param sgAssocs: The associations to save.
-        :type sgAssocs: dict[int, dict[str, any]]
 
         :return: True
-        :rtype: twisted.internet.defer.Deferred[bool]
         """
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
@@ -126,15 +123,10 @@ class RemotePeer(Peer):
     ) -> None:
         """
         :param sydent: The current Sydent instance.
-        :type sydent: sydent.sydent.Sydent
         :param server_name: The peer's server name.
-        :type server_name: unicode
         :param port: The peer's port.
-        :type port: int
         :param pubkeys: The peer's public keys in a dict[key_id, key_b64]
-        :type pubkeys: dict[unicode, unicode]
         :param lastSentVersion: The ID of the last association sent to the peer.
-        :type lastSentVersion: int
         """
         super().__init__(server_name, pubkeys)
         self.sydent = sydent
@@ -195,7 +187,6 @@ class RemotePeer(Peer):
         signature is incorrect or couldn't be verified.
 
         :param assoc: A signed association.
-        :type assoc: dict[any, any]
         """
         if "signatures" not in assoc:
             raise NoSignaturesException()
@@ -219,10 +210,8 @@ class RemotePeer(Peer):
         Pushes the given associations to the peer.
 
         :param sgAssocs: The associations to push.
-        :type sgAssocs: dict[int, dict[str, any]]
 
         :return: A deferred which results in the response to the push request.
-        :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
         body = {"sgAssocs": sgAssocs}
 
@@ -252,10 +241,8 @@ class RemotePeer(Peer):
         that's not a success, consider it a failure
 
         :param result: The HTTP response.
-        :type result: twisted.web.iweb.IResponse
         :param updateDeferred: The deferred to make either succeed or fail depending on
             the status code.
-        :type updateDeferred: twisted.internet.defer.Deferred
         """
         if result.code >= 200 and result.code < 300:
             updateDeferred.callback(result)
@@ -270,9 +257,7 @@ class RemotePeer(Peer):
         callback of the provided deferred.
 
         :param body: The response body.
-        :type body: bytes
         :param updateDeferred: The deferred to call the error callback of.
-        :type updateDeferred: twisted.internet.defer.Deferred
         """
         errObj = json_decoder.decode(body.decode("utf8"))
         e = RemotePeerError()
@@ -291,7 +276,6 @@ class RemotePeer(Peer):
         :param failure: The failure to process.
         :type failure: twisted.python.failure.Failure
         :param updateDeferred: The deferred to call the error callback of.
-        :type updateDeferred: twisted.internet.defer.Deferred
         """
         updateDeferred.errback(failure)
         return None
