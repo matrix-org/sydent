@@ -17,9 +17,7 @@ class Account:
     def __init__(self, user_id: str, creation_ts: int, consent_version: str) -> None:
         """
         :param user_id: The Matrix user ID for the account.
-        :type user_id: str
         :param creation_ts: The timestamp in milliseconds of the account's creation.
-        :type creation_ts: int
         :param consent_version: The version of the terms of services that the user last
             accepted.
         """
