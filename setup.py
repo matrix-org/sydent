@@ -54,7 +54,7 @@ setup(
         "pyyaml>=3.11",
         "mock>=3.0.5",
         "flake8==3.9.2",
-        "black==21.5b1",
+        "black==21.6b0",
         "isort==5.8.0",
         "mypy>=0.902",
         "mypy-zope>=0.3.1",
