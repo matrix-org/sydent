@@ -41,8 +41,7 @@ class HTTPClient:
 
     agent: IAgent
 
-    @defer.inlineCallbacks
-    def get_json(self, uri: str, max_size: Optional[int] = None) -> Generator:
+    async def get_json(self, uri: str, max_size: Optional[int] = None) -> Generator:
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -56,11 +55,11 @@ class HTTPClient:
         """
         logger.debug("HTTP GET %s", uri)
 
-        response = yield self.agent.request(
+        response = await self.agent.request(
             b"GET",
             uri.encode("utf8"),
         )
-        body = yield read_body_with_max_size(response, max_size)
+        body = await read_body_with_max_size(response, max_size)
         try:
             # json.loads doesn't allow bytes in Python 3.5
             json_body = json_decoder.decode(body.decode("UTF-8"))
