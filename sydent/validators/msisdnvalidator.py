@@ -84,16 +84,11 @@ class MsisdnValidator:
         corresponding phone number address with a token to use to verify the association.
 
         :param phoneNumber: The phone number to send the email to.
-        :type phoneNumber: phonenumbers.PhoneNumber
         :param clientSecret: The client secret to use.
-        :type clientSecret: unicode
         :param sendAttempt: The current send attempt.
-        :type sendAttempt: int
         :param brand: A hint at a brand from the request.
-        :type brand: str or None
 
         :return: The ID of the session created (or of the existing one if any)
-        :rtype: int
         """
         if str(phoneNumber.country_code) in self.smsRules:
             action = self.smsRules[str(phoneNumber.country_code)]
@@ -146,10 +141,8 @@ class MsisdnValidator:
         Gets an originator for a given phone number.
 
         :param destPhoneNumber: The phone number to find the originator for.
-        :type destPhoneNumber: phonenumbers.PhoneNumber
 
         :return: The originator (a dict with a "type" key and a "text" key).
-        :rtype: dict[str, str]
         """
         countryCode = str(destPhoneNumber.country_code)
 
@@ -181,14 +174,10 @@ class MsisdnValidator:
         Validates the session with the given ID.
 
         :param sid: The ID of the session to validate.
-        :type sid: int
         :param clientSecret: The client secret to validate.
-        :type clientSecret: unicode
         :param token: The token to validate.
-        :type token: unicode
 
         :return: A dict with a "success" key which is True if the session
             was successfully validated, False otherwise.
-        :rtype: dict[str, bool]
         """
         return common.validateSessionWithToken(self.sydent, sid, clientSecret, token)

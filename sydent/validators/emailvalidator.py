@@ -46,21 +46,14 @@ class EmailValidator:
         email address with a token to use to verify the association.
 
         :param emailAddress: The email address to send the email to.
-        :type emailAddress: unicode
         :param clientSecret: The client secret to use.
-        :type clientSecret: unicode
         :param sendAttempt: The current send attempt.
-        :type sendAttempt: int
         :param nextLink: The link to redirect the user to once they have completed the
             validation.
-        :type nextLink: unicode
         :param ipaddress: The requester's IP address.
-        :type ipaddress: str or None
         :param brand: A hint at a brand from the request.
-        :type brand: str or None
 
         :return: The ID of the session created (or of the existing one if any)
-        :rtype: int
         """
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
@@ -110,15 +103,11 @@ class EmailValidator:
         Creates a validation link that can be sent via email to the user.
 
         :param valSession: The current validation session.
-        :type valSession: sydent.validators.ValidationSession
         :param clientSecret: The client secret to include in the link.
-        :type clientSecret: unicode
         :param nextLink: The link to redirect the user to once they have completed the
             validation.
-        :type nextLink: unicode
 
         :return: The validation link.
-        :rtype: unicode
         """
         base = self.sydent.cfg.get("http", "client_http_base")
         link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
@@ -147,14 +136,10 @@ class EmailValidator:
         Validates the session with the given ID.
 
         :param sid: The ID of the session to validate.
-        :type sid: int
         :param clientSecret: The client secret to validate.
-        :type clientSecret: unicode
         :param token: The token to validate.
-        :type token: unicode
 
         :return: A dict with a "success" key which is True if the session
             was successfully validated, False otherwise.
-        :rtype: dict[str, bool]
         """
         return common.validateSessionWithToken(self.sydent, sid, clientSecret, token)
