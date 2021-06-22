@@ -69,8 +69,7 @@ class HTTPClient:
             raise
         return json_body
 
-    @defer.inlineCallbacks
-    def post_json_get_nothing(
+    async def post_json_get_nothing(
         self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
     ) -> Generator:
         """Make a POST request to an endpoint returning JSON and parse result
@@ -102,7 +101,7 @@ class HTTPClient:
 
         logger.debug("HTTP POST %s -> %s", json_bytes, uri)
 
-        response = yield self.agent.request(
+        response = await self.agent.request(
             b"POST",
             uri.encode("utf8"),
             headers,
@@ -114,7 +113,7 @@ class HTTPClient:
         # https://twistedmatrix.com/documents/current/web/howto/client.html
         try:
             # TODO Will this cause the server to think the request was a failure?
-            yield read_body_with_max_size(response, 0)
+            await read_body_with_max_size(response, 0)
         except BodyExceededMaxSize:
             pass
 

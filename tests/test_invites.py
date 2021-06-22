@@ -6,7 +6,7 @@ from twisted.web.client import Response
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.httpclient import FederationHttpClient
 from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
-from tests.utils import make_sydent
+from tests.utils import make_sydent, AsyncMock
 
 
 class ThreepidInvitesTestCase(unittest.TestCase):
@@ -37,7 +37,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         def post_json_get_nothing(uri, post_json, opts):
             return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
-        FederationHttpClient.post_json_get_nothing = Mock(
+        FederationHttpClient.post_json_get_nothing = AsyncMock(
             side_effect=post_json_get_nothing,
         )
 
