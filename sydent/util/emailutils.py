@@ -41,14 +41,10 @@ def sendEmail(
 
     :param sydent: The Sydent instance to use when building the configuration to send the
         email with.
-    :type sydent: sydent.sydent.Sydent
     :param templateFile: The filename of the template to use when building the body of the
         email.
-    :type templateFile: str
     :param mailTo: The email address to send the email to.
-    :type mailTo: unicode
     :param substitutions: The substitutions to use with the template.
-    :type substitutions: dict[str, str]
     """
     mailFrom = sydent.cfg.get("email", "email.from")
 

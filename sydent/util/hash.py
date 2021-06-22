@@ -22,10 +22,8 @@ def sha256_and_url_safe_base64(input_text: str) -> str:
     return
 
     :param input_text: string to hash
-    :type input_text: unicode
 
     :returns a sha256 hashed and url-safe base64 encoded digest
-    :rtype: bytes
     """
     digest = hashlib.sha256(input_text.encode()).digest()
     return unpaddedbase64.encode_base64(digest, urlsafe=True)
