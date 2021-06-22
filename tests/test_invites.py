@@ -6,7 +6,7 @@ from twisted.web.client import Response
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.httpclient import FederationHttpClient
 from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
-from tests.utils import AsyncMock, make_sydent
+from tests.utils import make_sydent
 
 
 class ThreepidInvitesTestCase(unittest.TestCase):
