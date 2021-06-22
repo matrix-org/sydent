@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 from twisted.trial import unittest
 from twisted.web.client import Response
 
@@ -32,10 +34,10 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         address = "john@example.com"
 
         # Mock post_json_get_nothing so the /onBind call doesn't fail.
-        def post_json_get_nothing(uri, post_json, opts):
+        async def post_json_get_nothing(uri, post_json, opts):
             return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
-        FederationHttpClient.post_json_get_nothing = AsyncMock(
+        FederationHttpClient.post_json_get_nothing = Mock(
             side_effect=post_json_get_nothing,
         )
 
@@ -117,10 +119,10 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
         address = "john@example.com"
 
         # Mock post_json_get_nothing so the /onBind call doesn't fail.
-        def post_json_get_nothing(uri, post_json, opts):
+        async def post_json_get_nothing(uri, post_json, opts):
             return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
-        FederationHttpClient.post_json_get_nothing = AsyncMock(
+        FederationHttpClient.post_json_get_nothing = Mock(
             side_effect=post_json_get_nothing,
         )
 
