@@ -14,12 +14,11 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import signedjson.key  # type: ignore
 import signedjson.sign  # type: ignore
 from signedjson.sign import SignatureVerifyException
-from twisted.internet import defer
 from twisted.web.server import Request
 from unpaddedbase64 import decode_base64
 
@@ -165,9 +164,7 @@ class Verifier:
         )
         raise SignatureVerifyException("No matching signature found")
 
-    async def authenticate_request(
-        self, request: "Request", content: Optional[bytes]
-    ):
+    async def authenticate_request(self, request: "Request", content: Optional[bytes]):
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
 

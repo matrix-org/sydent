@@ -19,7 +19,6 @@ from typing import Generator, Optional
 
 import attr
 from netaddr import IPAddress  # type: ignore
-from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent

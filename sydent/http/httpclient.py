@@ -15,9 +15,8 @@
 import json
 import logging
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from twisted.internet import defer
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent
