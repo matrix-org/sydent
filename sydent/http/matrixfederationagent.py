@@ -114,8 +114,7 @@ class MatrixFederationAgent:
         #   `None`:      there is no (valid) .well-known here
         self._well_known_cache = _well_known_cache
 
-    @defer.inlineCallbacks
-    def request(
+    async def request(
         self,
         method: bytes,
         uri: bytes,
@@ -146,7 +145,7 @@ class MatrixFederationAgent:
         :rtype: Deferred[twisted.web.iweb.IResponse]
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
-        res = yield self._route_matrix_uri(parsed_uri)
+        res = await self._route_matrix_uri(parsed_uri)
 
         # set up the TLS connection params
         #
@@ -183,13 +182,12 @@ class MatrixFederationAgent:
                 return ep
 
         agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
-        res = yield agent.request(method, uri, headers, bodyProducer)
+        res = await agent.request(method, uri, headers, bodyProducer)
         return res
 
-    @defer.inlineCallbacks
-    def _route_matrix_uri(
+    async def _route_matrix_uri(
         self, parsed_uri: "URI", lookup_well_known: bool = True
-    ) -> Generator:
+    ):
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
@@ -232,7 +230,7 @@ class MatrixFederationAgent:
 
         if lookup_well_known:
             # try a .well-known lookup
-            well_known_server = yield self._get_well_known(parsed_uri.host)
+            well_known_server = await self._get_well_known(parsed_uri.host)
 
             if well_known_server:
                 # if we found a .well-known, start again, but don't do another
@@ -263,14 +261,12 @@ class MatrixFederationAgent:
                     fragment=parsed_uri.fragment,
                 )
 
-                res = yield self._route_matrix_uri(new_uri, lookup_well_known=False)
+                res = await self._route_matrix_uri(new_uri, lookup_well_known=False)
                 return res
 
         # try a SRV lookup
         service_name = b"_matrix._tcp.%s" % (parsed_uri.host,)
-        server_list = yield defer.ensureDeferred(
-            self._srv_resolver.resolve_service(service_name)
-        )
+        server_list = await self._srv_resolver.resolve_service(service_name)
 
         if not server_list:
             target_host = parsed_uri.host
@@ -297,8 +293,7 @@ class MatrixFederationAgent:
             target_port=port,
         )
 
-    @defer.inlineCallbacks
-    def _get_well_known(self, server_name: bytes) -> Generator:
+    async def _get_well_known(self, server_name: bytes):
         """Attempt to fetch and parse a .well-known file for the given server
 
         :param server_name: Name of the server, from the requested url.
@@ -313,15 +308,14 @@ class MatrixFederationAgent:
         except KeyError:
             # TODO: should we linearise so that we don't end up doing two .well-known
             # requests for the same server in parallel?
-            result, cache_period = yield self._do_get_well_known(server_name)
+            result, cache_period = await self._do_get_well_known(server_name)
 
             if cache_period > 0:
                 self._well_known_cache.set(server_name, result, cache_period)
 
         return result
 
-    @defer.inlineCallbacks
-    def _do_get_well_known(self, server_name: bytes) -> Generator:
+    async def _do_get_well_known(self, server_name: bytes):
         """Actually fetch and parse a .well-known, without checking the cache
 
         :param server_name: Name of the server, from the requested url
@@ -337,8 +331,8 @@ class MatrixFederationAgent:
         uri_str = uri.decode("ascii")
         logger.info("Fetching %s", uri_str)
         try:
-            response = yield self._well_known_agent.request(b"GET", uri)
-            body = yield read_body_with_max_size(response, WELL_KNOWN_MAX_SIZE)
+            response = await self._well_known_agent.request(b"GET", uri)
+            body = await read_body_with_max_size(response, WELL_KNOWN_MAX_SIZE)
             if response.code != 200:
                 raise Exception("Non-200 response %s" % (response.code,))
 
