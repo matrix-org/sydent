@@ -3,6 +3,7 @@ import logging
 import os
 from io import BytesIO
 from typing import Dict
+from unittest.mock import MagicMock
 
 import attr
 import twisted.logger
@@ -298,3 +299,8 @@ class ResolvingMemoryReactorClock(MemoryReactorClock):
 
     def installNameResolver(self, resolver: IHostnameResolver) -> IHostnameResolver:
         raise NotImplementedError()
+
+
+class AsyncMock(MagicMock):
+    async def __call__(self, *args, **kwargs):
+        return super().__call__(*args, **kwargs)

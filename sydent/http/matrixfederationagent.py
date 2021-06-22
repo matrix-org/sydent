@@ -268,7 +268,9 @@ class MatrixFederationAgent:
 
         # try a SRV lookup
         service_name = b"_matrix._tcp.%s" % (parsed_uri.host,)
-        server_list = yield self._srv_resolver.resolve_service(service_name)
+        server_list = yield defer.ensureDeferred(
+            self._srv_resolver.resolve_service(service_name)
+        )
 
         if not server_list:
             target_host = parsed_uri.host
