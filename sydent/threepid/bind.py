@@ -109,7 +109,7 @@ class ThreepidBinder:
         signer = Signer(self.sydent)
         sgassoc = signer.signedThreePidAssociation(assoc)
 
-        self._notify(sgassoc, 0)
+        defer.ensureDeferred(self._notify(sgassoc, 0))
 
         return sgassoc
 
@@ -126,8 +126,7 @@ class ThreepidBinder:
         localAssocStore.removeAssociation(threepid, mxid)
         self.sydent.pusher.doLocalPush()
 
-    @defer.inlineCallbacks
-    def _notify(self, assoc: Dict[str, Any], attempt: int) -> Generator:
+    async def _notify(self, assoc: Dict[str, Any], attempt: int) -> Generator:
         """
         Sends data about a new association (and, if necessary, the associated invites)
         to the associated MXID's homeserver.
@@ -163,7 +162,7 @@ class ThreepidBinder:
         # Make a POST to the chosen Synapse server
         http_client = FederationHttpClient(self.sydent)
         try:
-            response = yield http_client.post_json_get_nothing(post_url, assoc, {})
+            response = await http_client.post_json_get_nothing(post_url, assoc, {})
         except Exception as e:
             self._notifyErrback(assoc, attempt, e)
             return
