@@ -120,7 +120,7 @@ class ThreepidBinder:
         localAssocStore.removeAssociation(threepid, mxid)
         self.sydent.pusher.doLocalPush()
 
-    async def _notify(self, assoc: Dict[str, Any], attempt: int) -> Generator:
+    async def _notify(self, assoc: Dict[str, Any], attempt: int) -> None:
         """
         Sends data about a new association (and, if necessary, the associated invites)
         to the associated MXID's homeserver.

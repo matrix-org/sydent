@@ -62,13 +62,12 @@ class Verifier:
             # server_name: <result from keys query>,
         }
 
-    async def _getKeysForServer(self, server_name: str):
+    async def _getKeysForServer(self, server_name: str) -> Dict[str, Dict[str, str]]:
         """Get the signing key data from a homeserver.
 
         :param server_name: The name of the server to request the keys from.
 
         :return: The verification keys returned by the server.
-        :rtype: twisted.internet.defer.Deferred[dict[unicode, dict[unicode, unicode]]]
         """
 
         if server_name in self.cache:
@@ -107,7 +106,7 @@ class Verifier:
         self,
         signed_json: Dict[str, Any],
         acceptable_server_names: Optional[List[str]] = None,
-    ):
+    ) -> Tuple[str, str]:
         """Given a signed json object, try to verify any one
         of the signatures on it
 
@@ -121,7 +120,6 @@ class Verifier:
 
         :return a tuple of the server name and key name that was
         successfully verified.
-        :rtype: twisted.internet.defer.Deferred[tuple[unicode]]
 
         :raise SignatureVerifyException: The json cannot be verified.
         """
@@ -162,7 +160,7 @@ class Verifier:
         )
         raise SignatureVerifyException("No matching signature found")
 
-    async def authenticate_request(self, request: "Request", content: Optional[bytes]):
+    async def authenticate_request(self, request: "Request", content: Optional[bytes]) -> str:
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
 
@@ -170,7 +168,6 @@ class Verifier:
         :param content: The content of the request, if any
 
         :return: The origin of the server whose signature was validated
-        :rtype: twisted.internet.defer.Deferred[unicode]
         """
         json_request = {
             "method": request.method,
