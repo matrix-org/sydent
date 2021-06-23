@@ -17,8 +17,6 @@ import logging
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from sydent.types import JsonDict
-
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent, IResponse
@@ -27,6 +25,7 @@ from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 from sydent.http.matrixfederationagent import MatrixFederationAgent
+from sydent.types import JsonDict
 from sydent.util import json_decoder
 
 if TYPE_CHECKING:

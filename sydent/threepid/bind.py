@@ -16,7 +16,7 @@
 import collections
 import logging
 import math
-from typing import TYPE_CHECKING, Any, Dict, Generator, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Union, cast
 
 import signedjson.sign  # type: ignore
 from twisted.internet import defer

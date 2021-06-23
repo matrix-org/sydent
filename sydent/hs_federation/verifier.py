@@ -160,7 +160,9 @@ class Verifier:
         )
         raise SignatureVerifyException("No matching signature found")
 
-    async def authenticate_request(self, request: "Request", content: Optional[bytes]) -> str:
+    async def authenticate_request(
+        self, request: "Request", content: Optional[bytes]
+    ) -> str:
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
 

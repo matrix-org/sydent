@@ -15,7 +15,7 @@
 import logging
 import random
 import time
-from typing import Generator, Optional, Callable, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import attr
 from netaddr import IPAddress  # type: ignore
@@ -184,7 +184,7 @@ class MatrixFederationAgent:
 
     async def _route_matrix_uri(
         self, parsed_uri: "URI", lookup_well_known: bool = True
-    ) -> '_RoutingResult':
+    ) -> "_RoutingResult":
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
@@ -307,7 +307,9 @@ class MatrixFederationAgent:
 
         return result
 
-    async def _do_get_well_known(self, server_name: bytes) -> Tuple[Union[bytes,None,object],int]:
+    async def _do_get_well_known(
+        self, server_name: bytes
+    ) -> Tuple[Union[bytes, None, object], int]:
         """Actually fetch and parse a .well-known, without checking the cache
 
         :param server_name: Name of the server, from the requested url
