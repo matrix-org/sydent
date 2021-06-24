@@ -97,7 +97,7 @@ class OpenMarketSMS:
         )
 
         resp = await self.http_cli.post_json_get_nothing(
-            API_BASE_URL, body, {"headers": req_headers}
+            API_BASE_URL, send_body, {"headers": req_headers}
         )
         headers = dict(resp.headers.getAllRawHeaders())
 
