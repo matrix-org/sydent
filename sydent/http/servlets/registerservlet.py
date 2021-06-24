@@ -21,9 +21,10 @@ from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.httpclient import FederationHttpClient
-from sydent.http.servlets import deferjsonwrap, get_args, send_cors
+from sydent.http.servlets import asyncjsonwrap, get_args, send_cors
 from sydent.users.tokens import issueToken
 from sydent.util.stringutils import is_valid_matrix_server_name
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -38,9 +39,8 @@ class RegisterServlet(Resource):
         self.sydent = syd
         self.client = FederationHttpClient(self.sydent)
 
-    @deferjsonwrap
-    @defer.inlineCallbacks
-    def render_POST(self, request: Request) -> Generator:
+    @asyncjsonwrap
+    async def render_POST(self, request: Request) -> JsonDict:
         """
         Register with the Identity Server
         """
@@ -57,8 +57,7 @@ class RegisterServlet(Resource):
                 "error": "matrix_server_name must be a valid Matrix server name (IP address or hostname)",
             }
 
-        result = yield defer.ensureDeferred(
-            self.client.get_json(
+        result = await self.client.get_json(
                 "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
                 % (
                     matrix_server,
@@ -66,7 +65,6 @@ class RegisterServlet(Resource):
                 ),
                 1024 * 5,
             )
-        )
 
         if "sub" not in result:
             raise Exception("Invalid response from homeserver")
@@ -106,7 +104,7 @@ class RegisterServlet(Resource):
                 "error": "The Matrix homeserver returned a MXID belonging to another homeserver",
             }
 
-        tok = yield issueToken(self.sydent, user_id)
+        tok = issueToken(self.sydent, user_id)
 
         # XXX: `token` is correct for the spec, but we released with `access_token`
         # for a substantial amount of time. Serve both to make spec-compliant clients

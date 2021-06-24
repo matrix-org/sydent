@@ -162,7 +162,7 @@ def jsonwrap(f):
     return inner
 
 
-def deferjsonwrap(f):
+def asyncjsonwrap(f):
     def reqDone(resp: Dict[str, Any], request: Request) -> None:
         """
         Converts the given response content into JSON and encodes it to bytes, then
@@ -216,7 +216,7 @@ def deferjsonwrap(f):
         """
         request = args[1]
 
-        d = defer.maybeDeferred(f, *args, **kwargs)
+        d = defer.ensureDeferred(f(*args, **kwargs))
         d.addCallback(reqDone, request)
         d.addErrback(reqErr, request)
         return server.NOT_DONE_YET
