@@ -40,10 +40,8 @@ def is_valid_client_secret(client_secret: str) -> bool:
     """Validate that a given string matches the client_secret regex defined by the spec
 
     :param client_secret: The client_secret to validate
-    :type client_secret: str
 
     :return: Whether the client_secret is valid
-    :rtype: bool
     """
     return (
         0 < len(client_secret) <= 255
@@ -58,10 +56,8 @@ def is_valid_hostname(string: str) -> bool:
     instance, it doesn't check that the TLD is valid).
 
     :param string: The string to validate
-    :type string: str
 
     :return: Whether the input is a valid hostname
-    :rtype: bool
     """
 
     return hostname_regex.match(string) is not None
@@ -114,10 +110,8 @@ def is_valid_matrix_server_name(string: str) -> bool:
     c. A valid hostname
 
     :param string: The string to validate
-    :type string: str
 
     :return: Whether the input is a valid Matrix server name
-    :rtype: bool
     """
 
     try:

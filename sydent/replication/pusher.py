@@ -84,7 +84,6 @@ class Pusher:
         sends them.
 
         :param p: The peer to send associations to.
-        :type p: sydent.replication.peer.RemotePeer
         """
         logger.debug("Looking for updates to push to %s", p.servername)
 

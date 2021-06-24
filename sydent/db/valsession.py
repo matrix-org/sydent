@@ -42,15 +42,11 @@ class ThreePidValSessionStore:
         or creates one if none was found.
 
         :param medium: The medium to use when looking up or creating the session.
-        :type medium: unicode
         :param address: The address to use when looking up or creating the session.
-        :type address: unicode
         :param clientSecret: The client secret to use when looking up or creating the
             session.
-        :type clientSecret: unicode
 
         :return: The session that was retrieved or created.
-        :rtype: ValidationSession
         """
         cur = self.sydent.db.cursor()
 
@@ -97,20 +93,14 @@ class ThreePidValSessionStore:
         Creates a validation session with the given parameters.
 
         :param medium: The medium to create the session for.
-        :type medium: unicode
         :param address: The address to create the session for.
-        :type address: unicode
         :param clientSecret: The client secret to use when looking up or creating the
             session.
-        :type clientSecret: unicode
         :param mtime: The current time in milliseconds.
-        :type mtime: int
         :param commit: Whether to commit the transaction after executing the insert
             statement.
-        :type commit: bool
 
         :return: The ID of the created session.
-        :rtype: int
         """
         cur = self.sydent.db.cursor()
 
@@ -132,9 +122,7 @@ class ThreePidValSessionStore:
         Updates the send attempt number for the session with the given ID.
 
         :param sid: The ID of the session to update
-        :type sid: int
         :param attemptNo: The send attempt number to update the session with.
-        :type attemptNo: int
         """
         cur = self.sydent.db.cursor()
 
@@ -149,9 +137,7 @@ class ThreePidValSessionStore:
         Updates a session to set the validated flag to the given value.
 
         :param sid: The ID of the session to update.
-        :type sid: int
         :param validated: The value to set the validated flag.
-        :type validated: bool
         """
         cur = self.sydent.db.cursor()
 
@@ -166,9 +152,7 @@ class ThreePidValSessionStore:
         Set the time of the last send attempt for the session with the given ID
 
         :param sid: The ID of the session to update.
-        :type sid: int
         :param mtime: The time of the last send attempt for that session.
-        :type mtime: int
         """
         cur = self.sydent.db.cursor()
 
@@ -183,11 +167,9 @@ class ThreePidValSessionStore:
         Retrieves the session matching the given sid.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: int
 
         :return: The retrieved session, or None if no session could be found with that
             sid.
-        :rtype: ValidationSession or None
         """
         cur = self.sydent.db.cursor()
 
@@ -210,10 +192,8 @@ class ThreePidValSessionStore:
         Retrieves a validation session using the session's ID.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: int
 
         :return: The validation session, or None if no session was found with that ID.
-        :rtype: ValidationSession or None
         """
         cur = self.sydent.db.cursor()
 
@@ -239,13 +219,10 @@ class ThreePidValSessionStore:
         one passed in.
 
         :param sid: The ID of the session to retrieve.
-        :type sid: int
         :param clientSecret: A client secret to check against the one retrieved from
             the database.
-        :type clientSecret: unicode
 
         :return: The retrieved session.
-        :rtype: ValidationSession
 
         :raise InvalidSessionIdException: No session could be found with this ID.
         :raise IncorrectClientSecretException: The session's client secret doesn't

@@ -32,12 +32,9 @@ def issueToken(sydent: "Sydent", user_id: str) -> str:
     an access token for that account.
 
     :param sydent: The Sydent instance to use for storing the token.
-    :type sydent: sydent.sydent.Sydent
     :param user_id: The Matrix user ID to issue a token for.
-    :type user_id: unicode
 
     :return: The access token for that account.
-    :rtype: unicode
     """
     accountStore = AccountStore(sydent)
     accountStore.storeAccount(user_id, int(time.time() * 1000), None)

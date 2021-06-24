@@ -29,10 +29,8 @@ class PeerStore:
         Retrieves a remote peer using it's server name.
 
         :param name: The server name of the peer.
-        :type name: unicode
 
         :return: The retrieved peer.
-        :rtype: RemotePeer
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -64,7 +62,6 @@ class PeerStore:
         Retrieve all of the remote peers from the database.
 
         :return: A list of the remote peers this server knows about.
-        :rtype: list[RemotePeer]
         """
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -104,12 +101,9 @@ class PeerStore:
         last successful request sent to that peer.
 
         :param peerName: The server name of the peer.
-        :type peerName: unicode
         :param lastSentVersion: The ID of the last association sent to that peer.
-        :type lastSentVersion: int
         :param lastPokeSucceeded: The timestamp in milliseconds of the last successful
             request sent to that peer.
-        :type lastPokeSucceeded: int
         """
         cur = self.sydent.db.cursor()
         cur.execute(

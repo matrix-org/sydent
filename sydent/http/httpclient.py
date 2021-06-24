@@ -46,10 +46,8 @@ class HTTPClient:
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
-        :type uri: unicode
 
         :param max_size: The maximum size (in bytes) to allow as a response.
-        :type max_size: int
 
         :return: A deferred containing JSON parsed into a Python object.
         :rtype: twisted.internet.defer.Deferred[dict[any, any]]
@@ -76,15 +74,12 @@ class HTTPClient:
         """Make a POST request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a POST request to.
-        :type uri: unicode
 
         :param post_json: A Python object that will be converted to a JSON
             string and POSTed to the given URI.
-        :type post_json: dict[any, any]
 
         :param opts: A dictionary of request options. Currently only opts.headers
             is supported.
-        :type opts: dict[str,any]
 
         :return: a response from the remote server.
         :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]

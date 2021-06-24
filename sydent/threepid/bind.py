@@ -53,14 +53,10 @@ class ThreepidBinder:
         the given 3pid
 
         :param medium: The medium of the 3PID to bind.
-        :type medium: unicode
         :param address: The address of the 3PID to bind.
-        :type address: unicode
         :param mxid: The MXID to bind the 3PID to.
-        :type mxid: unicode
 
         :return: The signed association.
-        :rtype: dict[str, any]
         """
         localAssocStore = LocalAssociationStore(self.sydent)
 
@@ -118,9 +114,7 @@ class ThreepidBinder:
         Removes the binding between a given 3PID and a given MXID.
 
         :param threepid: The 3PID of the binding to remove.
-        :type threepid: dict[unicode, unicode]
         :param mxid: The MXID of the binding to remove.
-        :type mxid: unicode
         """
         localAssocStore = LocalAssociationStore(self.sydent)
         localAssocStore.removeAssociation(threepid, mxid)
@@ -133,9 +127,7 @@ class ThreepidBinder:
         to the associated MXID's homeserver.
 
         :param assoc: The association to send down to the homeserver.
-        :type assoc: dict[str, any]
         :param attempt: The number of previous attempts to send this association.
-        :type attempt: int
         """
         mxid = assoc["mxid"]
         mxid_parts = mxid.split(":", 1)
@@ -202,11 +194,8 @@ class ThreepidBinder:
         logging the error and scheduling a new attempt.
 
         :param assoc: The association to send down to the homeserver.
-        :type assoc: dict[str, any]
         :param attempt: The number of previous attempts to send this association.
-        :type attempt: int
         :param error: The error that was raised when trying to send the association.
-        :type error: Exception
         """
         logger.warning(
             "Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error

@@ -30,7 +30,6 @@ class HashingMetadataStore:
 
         :return: A pepper if it exists in the database, or None if one does
                  not exist
-        :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("select lookup_pepper from hashing_metadata")
@@ -53,10 +52,8 @@ class HashingMetadataStore:
         """Stores a new lookup pepper in the hashing_metadata db table and rehashes all 3PIDs
 
         :param hashing_function: A function with single input and output strings
-        :type hashing_function func(str) -> str
 
         :param pepper: The pepper to store in the database
-        :type pepper: str
         """
         cur = self.sydent.db.cursor()
 

@@ -24,10 +24,8 @@ def generateTokenForMedium(medium: str) -> str:
     alphanumeric one if the medium is email, a 6 characters numeric one otherwise.
 
     :param medium: The medium to generate a token for.
-    :type medium: unicode
 
     :return: The generated token.
-    :rtype: unicode
     """
     if medium == "email":
         return generateAlphanumericTokenOfLength(32)
@@ -40,10 +38,8 @@ def generateNumericTokenOfLength(length: int) -> str:
     Generates a token of the given length with the character set [0-9].
 
     :param length: The length of the token to generate.
-    :type length: int
 
     :return: The generated token.
-    :rtype: unicode
     """
     return "".join([r.choice(string.digits) for _ in range(length)])
 
@@ -53,10 +49,8 @@ def generateAlphanumericTokenOfLength(length: int) -> str:
     Generates a token of the given length with the character set [a-zA-Z0-9].
 
     :param length: The length of the token to generate.
-    :type length: int
 
     :return: The generated token.
-    :rtype: unicode
     """
     return "".join(
         [

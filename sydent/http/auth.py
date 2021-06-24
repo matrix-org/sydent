@@ -32,10 +32,8 @@ def tokenFromRequest(request: "Request") -> Optional[str]:
     """Extract token from header of query parameter.
 
     :param request: The request to look for an access token in.
-    :type request: twisted.web.server.Request
 
     :return: The token or None if not found
-    :rtype: unicode or None
     """
     token = None
     # check for Authorization header first
@@ -63,9 +61,7 @@ def authV2(
     """For v2 APIs check that the request has a valid access token associated with it
 
     :param sydent: The Sydent instance to use.
-    :type sydent: sydent.sydent.Sydent
     :param request: The request to look for an access token in.
-    :type request: twisted.web.server.Request
     :param requireTermsAgreed: Whether to deny authentication if the user hasn't accepted
         the terms of service.
 

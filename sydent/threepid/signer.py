@@ -30,10 +30,8 @@ class Signer:
         Signs a 3PID association.
 
         :param assoc: The association to sign.
-        :type assoc: sydent.threepid.ThreepidAssociation
 
         :return: A signed representation of the association.
-        :rtype: dict[str, any]
         """
         sgassoc = {
             "medium": assoc.medium,

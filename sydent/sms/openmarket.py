@@ -61,18 +61,15 @@ class OpenMarketSMS:
         self.http_cli = SimpleHttpClient(sydent)
 
     async def sendTextSMS(
-        self, body: Dict, dest: str, source: Optional[Dict[str, str]] = None
+        self, body: str, dest: str, source: Optional[Dict[str, str]] = None
     ) -> None:
         """
         Sends a text message with the given body to the given MSISDN.
 
         :param body: The message to send.
-        :type body: str
         :param dest: The destination MSISDN to send the text message to.
-        :type dest: unicode
-        :type source: dict[str, str] or None
         """
-        body = {
+        send_body = {
             "mobileTerminate": {
                 "message": {"content": body, "type": "text"},
                 "destination": {
@@ -81,7 +78,7 @@ class OpenMarketSMS:
             },
         }
         if source:
-            body["mobileTerminate"]["source"] = {
+            send_body["mobileTerminate"]["source"] = {
                 "ton": tonFromType(source["type"]),
                 "address": source["text"],
             }
@@ -100,7 +97,7 @@ class OpenMarketSMS:
         )
 
         resp = await self.http_cli.post_json_get_nothing(
-            API_BASE_URL, body, {"headers": req_headers}
+            API_BASE_URL, send_body, {"headers": req_headers}
         )
         headers = dict(resp.headers.getAllRawHeaders())
 

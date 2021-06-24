@@ -68,7 +68,6 @@ class Verifier:
         """Get the signing key data from a homeserver.
 
         :param server_name: The name of the server to request the keys from.
-        :type server_name: unicode
 
         :return: The verification keys returned by the server.
         :rtype: twisted.internet.defer.Deferred[dict[unicode, dict[unicode, unicode]]]
@@ -122,7 +121,6 @@ class Verifier:
 
         :param acceptable_server_names: If provided and not None,
         only signatures from servers in this list will be accepted.
-        :type acceptable_server_names: list[unicode] or None
 
         :return a tuple of the server name and key name that was
         successfully verified.
@@ -175,9 +173,7 @@ class Verifier:
         XXX: Copied largely from synapse
 
         :param request: The request object to authenticate
-        :type request: twisted.web.server.Request
         :param content: The content of the request, if any
-        :type content: bytes or None
 
         :return: The origin of the server whose signature was validated
         :rtype: twisted.internet.defer.Deferred[unicode]
@@ -200,10 +196,8 @@ class Verifier:
             authentication header.
 
             :param header_str: The content of the header
-            :type header_str: unicode
 
             :return: The server name, the signing key, and the payload signature.
-            :rtype: tuple[unicode]
             """
             try:
                 params = header_str.split(" ")[1].split(",")

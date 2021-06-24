@@ -29,15 +29,10 @@ class JoinTokenStore:
         Store a new invite token and its metadata.
 
         :param medium: The medium of the 3PID the token is associated to.
-        :type medium: unicode
         :param address: The address of the 3PID the token is associated to.
-        :type address: unicode
         :param roomId: The ID of the room the 3PID is invited in.
-        :type roomId: unicode
         :param sender: The MXID of the user that sent the invite.
-        :type sender: unicode
         :param token: The token to store.
-        :type token: unicode
         """
         cur = self.sydent.db.cursor()
 
@@ -57,13 +52,10 @@ class JoinTokenStore:
         yet.
 
         :param medium: The medium of the 3PID to get tokens for.
-        :type medium: unicode
         :param address: The address of the 3PID to get tokens for.
-        :type address: unicode
 
         :return: A list of dicts, each containing a pending token and its metadata for
             this 3PID.
-        :rtype: list[dict[str, unicode or dict[str, unicode]]
         """
         cur = self.sydent.db.cursor()
 
@@ -112,9 +104,7 @@ class JoinTokenStore:
         delivered to a homeserver so they're not delivered again in the future.
 
         :param medium: The medium of the 3PID to update tokens for.
-        :type medium: unicode
         :param address: The address of the 3PID to update tokens for.
-        :type address: unicode
         """
         cur = self.sydent.db.cursor()
 
@@ -133,7 +123,6 @@ class JoinTokenStore:
         Saves the provided ephemeral public key.
 
         :param publicKey: The key to store.
-        :type publicKey: unicode
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -150,10 +139,8 @@ class JoinTokenStore:
         verification count.
 
         :param publicKey: The public key to validate.
-        :type publicKey: unicode
 
         :return: Whether the key is valid.
-        :rtype: bool
         """
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -170,11 +157,9 @@ class JoinTokenStore:
         Retrieves the MXID of the user that sent the invite the provided token is for.
 
         :param token: The token to retrieve the sender of.
-        :type token: unicode
 
         :return: The invite's sender, or None if the token doesn't match an existing
             invite.
-        :rtype: unicode or None
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT sender FROM invite_tokens WHERE token = ?", (token,))
@@ -188,9 +173,7 @@ class JoinTokenStore:
         Deletes every token for a given 3PID.
 
         :param medium: The medium of the 3PID to delete tokens for.
-        :type medium: unicode
         :param address: The address of the 3PID to delete tokens for.
-        :type address: unicode
         """
         cur = self.sydent.db.cursor()
 
