@@ -14,17 +14,16 @@
 
 import logging
 import urllib
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
-from twisted.internet import defer
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.httpclient import FederationHttpClient
 from sydent.http.servlets import asyncjsonwrap, get_args, send_cors
+from sydent.types import JsonDict
 from sydent.users.tokens import issueToken
 from sydent.util.stringutils import is_valid_matrix_server_name
-from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -58,13 +57,13 @@ class RegisterServlet(Resource):
             }
 
         result = await self.client.get_json(
-                "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
-                % (
-                    matrix_server,
-                    urllib.parse.quote(args["access_token"]),
-                ),
-                1024 * 5,
-            )
+            "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
+            % (
+                matrix_server,
+                urllib.parse.quote(args["access_token"]),
+            ),
+            1024 * 5,
+        )
 
         if "sub" not in result:
             raise Exception("Invalid response from homeserver")
