@@ -57,13 +57,15 @@ class RegisterServlet(Resource):
                 "error": "matrix_server_name must be a valid Matrix server name (IP address or hostname)",
             }
 
-        result = yield self.client.get_json(
-            "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
-            % (
-                matrix_server,
-                urllib.parse.quote(args["access_token"]),
-            ),
-            1024 * 5,
+        result = yield defer.ensureDeferred(
+            self.client.get_json(
+                "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
+                % (
+                    matrix_server,
+                    urllib.parse.quote(args["access_token"]),
+                ),
+                1024 * 5,
+            )
         )
 
         if "sub" not in result:

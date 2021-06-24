@@ -15,9 +15,8 @@
 import json
 import logging
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from twisted.internet import defer
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent
@@ -41,8 +40,7 @@ class HTTPClient:
 
     agent: IAgent
 
-    @defer.inlineCallbacks
-    def get_json(self, uri: str, max_size: Optional[int] = None) -> Generator:
+    async def get_json(self, uri: str, max_size: Optional[int] = None):
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -54,11 +52,11 @@ class HTTPClient:
         """
         logger.debug("HTTP GET %s", uri)
 
-        response = yield self.agent.request(
+        response = await self.agent.request(
             b"GET",
             uri.encode("utf8"),
         )
-        body = yield read_body_with_max_size(response, max_size)
+        body = await read_body_with_max_size(response, max_size)
         try:
             # json.loads doesn't allow bytes in Python 3.5
             json_body = json_decoder.decode(body.decode("UTF-8"))
@@ -67,10 +65,9 @@ class HTTPClient:
             raise
         return json_body
 
-    @defer.inlineCallbacks
-    def post_json_get_nothing(
+    async def post_json_get_nothing(
         self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
-    ) -> Generator:
+    ):
         """Make a POST request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a POST request to.
@@ -97,7 +94,7 @@ class HTTPClient:
 
         logger.debug("HTTP POST %s -> %s", json_bytes, uri)
 
-        response = yield self.agent.request(
+        response = await self.agent.request(
             b"POST",
             uri.encode("utf8"),
             headers,
@@ -109,7 +106,7 @@ class HTTPClient:
         # https://twistedmatrix.com/documents/current/web/howto/client.html
         try:
             # TODO Will this cause the server to think the request was a failure?
-            yield read_body_with_max_size(response, 0)
+            await read_body_with_max_size(response, 0)
         except BodyExceededMaxSize:
             pass
 

@@ -34,7 +34,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         address = "john@example.com"
 
         # Mock post_json_get_nothing so the /onBind call doesn't fail.
-        def post_json_get_nothing(uri, post_json, opts):
+        async def post_json_get_nothing(uri, post_json, opts):
             return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
         FederationHttpClient.post_json_get_nothing = Mock(
@@ -119,7 +119,7 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
         address = "john@example.com"
 
         # Mock post_json_get_nothing so the /onBind call doesn't fail.
-        def post_json_get_nothing(uri, post_json, opts):
+        async def post_json_get_nothing(uri, post_json, opts):
             return Response((b"HTTP", 1, 1), 200, b"OK", None, None)
 
         FederationHttpClient.post_json_get_nothing = Mock(
