@@ -1,6 +1,6 @@
 import json
+from unittest.mock import Mock
 
-from mock import Mock
 from twisted.internet import defer
 from twisted.trial import unittest
 from twisted.web.client import Response
