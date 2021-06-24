@@ -52,7 +52,6 @@ setup(
         "netaddr>=0.7.0",
         "sortedcontainers>=2.1.0",
         "pyyaml>=3.11",
-        "mock>=3.0.5",
         "flake8==3.9.2",
         "black==21.5b1",
         "isort==5.8.0",
