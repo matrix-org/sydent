@@ -1,1 +1,1 @@
-Replace mock with unittest.mock
+Use `mock` module from the standard library.
