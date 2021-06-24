@@ -19,6 +19,7 @@ from typing import Generator, Optional
 
 import attr
 from netaddr import IPAddress  # type: ignore
+from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
@@ -113,7 +114,8 @@ class MatrixFederationAgent:
         #   `None`:      there is no (valid) .well-known here
         self._well_known_cache = _well_known_cache
 
-    async def request(
+    @defer.inlineCallbacks
+    def request(
         self,
         method: bytes,
         uri: bytes,
@@ -144,7 +146,7 @@ class MatrixFederationAgent:
         :rtype: Deferred[twisted.web.iweb.IResponse]
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
-        res = await self._route_matrix_uri(parsed_uri)
+        res = yield defer.ensureDeferred(self._route_matrix_uri(parsed_uri))
 
         # set up the TLS connection params
         #
@@ -181,7 +183,7 @@ class MatrixFederationAgent:
                 return ep
 
         agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
-        res = await agent.request(method, uri, headers, bodyProducer)
+        res = yield agent.request(method, uri, headers, bodyProducer)
         return res
 
     async def _route_matrix_uri(
