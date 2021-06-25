@@ -183,7 +183,7 @@ class MatrixFederationAgent:
 
     async def _route_matrix_uri(
         self, parsed_uri: "URI", lookup_well_known: bool = True
-    ) -> '_RoutingResult':
+    ) -> "_RoutingResult":
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
