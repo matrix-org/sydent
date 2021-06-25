@@ -1,1 +1,1 @@
-Run flake8 linting tests on all files in sydent/ directory. 
+Configure Flake8 and resolve errors.

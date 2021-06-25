@@ -1,1 +1,1 @@
-Convert inlineCallbacks to async/await.
+Convert `inlineCallbacks` to async/await.
