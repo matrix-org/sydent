@@ -19,7 +19,7 @@ import logging
 from typing import Any, Dict, Iterable
 
 from twisted.internet import defer
-from twisted.python.failure import Failure
+from twisted.python import failure
 from twisted.web import server
 from twisted.web.server import Request
 
@@ -163,45 +163,32 @@ def jsonwrap(f):
 
 
 def asyncjsonwrap(f):
-    def reqDone(resp: Dict[str, Any], request: Request) -> None:
-        """
-        Converts the given response content into JSON and encodes it to bytes, then
-        writes it as the response to the given request with the right headers.
-
-        :param resp: The response content to convert to JSON and encode.
-        :param request: The request to respond to.
-        """
-        request.setHeader("Content-Type", "application/json")
-        request.write(dict_to_json_bytes(resp))
-        request.finish()
-
-    def reqErr(failure: Failure, request: Request) -> None:
-        """
-        Logs the given failure. If the failure is a MatrixRestError, writes a response
-        using the info it contains, otherwise responds with 500 Internal Server Error.
-
-        :param failure: The failure to process.
-        :param request: The request to respond to.
-        """
-        request.setHeader("Content-Type", "application/json")
-        if failure.check(MatrixRestError) is not None:
-            request.setResponseCode(failure.value.httpStatus)
-            request.write(
-                dict_to_json_bytes(
-                    {"errcode": failure.value.errcode, "error": failure.value.error}
+    async def render(f, *args, **kwargs):
+        request = args[1]
+        try:
+            result = await f(*args, **kwargs)
+            request.setHeader("Content-Type", "application/json")
+            request.write(dict_to_json_bytes(result))
+            request.finish()
+        except Exception:
+            f = failure.Failure()
+            request.setHeader("Content-Type", "application/json")
+            if f.check(MatrixRestError) is not None:
+                request.setResponseCode(f.value.httpStatus)
+                request.write(
+                    dict_to_json_bytes(
+                        {"errcode": f.value.errcode, "error": f.value.error}
+                    )
                 )
-            )
-        else:
-            logger.error(
-                "Request processing failed: %r, %s", failure, failure.getTraceback()
-            )
-            request.setResponseCode(500)
-            request.write(
-                dict_to_json_bytes(
-                    {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
+            else:
+                logger.error("Request processing failed: %r, %s", f, f.getTraceback())
+                request.setResponseCode(500)
+                request.write(
+                    dict_to_json_bytes(
+                        {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
+                    )
                 )
-            )
-        request.finish()
+            request.finish()
 
     def inner(*args, **kwargs) -> int:
         """
@@ -214,11 +201,7 @@ def asyncjsonwrap(f):
         :return: A special code to tell the servlet that the response isn't ready yet
             and will come later.
         """
-        request = args[1]
-
-        d = defer.ensureDeferred(f(*args, **kwargs))
-        d.addCallback(reqDone, request)
-        d.addErrback(reqErr, request)
+        defer.ensureDeferred(render(f, *args, **kwargs))
         return server.NOT_DONE_YET
 
     return inner
