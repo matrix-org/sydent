@@ -1,1 +1,1 @@
-Update return types on converted async functions.
+Add type hints and validate with mypy.
