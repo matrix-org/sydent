@@ -16,7 +16,7 @@
 import collections
 import logging
 import math
-from typing import TYPE_CHECKING, Any, Dict, Generator, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Union, cast
 
 import signedjson.sign  # type: ignore
 from twisted.internet import defer
@@ -120,7 +120,7 @@ class ThreepidBinder:
         localAssocStore.removeAssociation(threepid, mxid)
         self.sydent.pusher.doLocalPush()
 
-    async def _notify(self, assoc: Dict[str, Any], attempt: int) -> Generator:
+    async def _notify(self, assoc: Dict[str, Any], attempt: int) -> None:
         """
         Sends data about a new association (and, if necessary, the associated invites)
         to the associated MXID's homeserver.

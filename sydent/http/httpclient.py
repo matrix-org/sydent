@@ -19,12 +19,13 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent
+from twisted.web.iweb import IAgent, IResponse
 
 from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 from sydent.http.httpcommon import BodyExceededMaxSize, read_body_with_max_size
 from sydent.http.matrixfederationagent import MatrixFederationAgent
+from sydent.types import JsonDict
 from sydent.util import json_decoder
 
 if TYPE_CHECKING:
@@ -40,7 +41,7 @@ class HTTPClient:
 
     agent: IAgent
 
-    async def get_json(self, uri: str, max_size: Optional[int] = None):
+    async def get_json(self, uri: str, max_size: Optional[int] = None) -> JsonDict:
         """Make a GET request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a GET request to.
@@ -48,7 +49,6 @@ class HTTPClient:
         :param max_size: The maximum size (in bytes) to allow as a response.
 
         :return: A deferred containing JSON parsed into a Python object.
-        :rtype: twisted.internet.defer.Deferred[dict[any, any]]
         """
         logger.debug("HTTP GET %s", uri)
 
@@ -67,7 +67,7 @@ class HTTPClient:
 
     async def post_json_get_nothing(
         self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
-    ):
+    ) -> IResponse:
         """Make a POST request to an endpoint returning JSON and parse result
 
         :param uri: The URI to make a POST request to.
@@ -79,7 +79,6 @@ class HTTPClient:
             is supported.
 
         :return: a response from the remote server.
-        :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
         json_bytes = json.dumps(post_json).encode("utf8")
 

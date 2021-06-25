@@ -15,7 +15,7 @@
 import logging
 import random
 import time
-from typing import Generator, Optional
+from typing import Optional, Tuple, Union
 
 import attr
 from netaddr import IPAddress  # type: ignore
@@ -25,7 +25,7 @@ from twisted.internet.interfaces import IStreamClientEndpoint
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent, IBodyProducer
+from twisted.web.iweb import IAgent, IBodyProducer, IResponse
 from zope.interface import implementer
 
 from sydent.http.httpcommon import read_body_with_max_size
@@ -121,7 +121,7 @@ class MatrixFederationAgent:
         uri: bytes,
         headers: Optional["Headers"] = None,
         bodyProducer: Optional["IBodyProducer"] = None,
-    ) -> Generator:
+    ) -> IResponse:
         """
         :param method: HTTP method (GET/POST/etc).
 
@@ -139,7 +139,6 @@ class MatrixFederationAgent:
             been received (regardless of the response status code). Fails if
             there is any problem which prevents that response from being received
             (including problems that prevent the request from being sent).
-        :rtype: Deferred[twisted.web.iweb.IResponse]
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
         res = yield defer.ensureDeferred(self._route_matrix_uri(parsed_uri))
@@ -184,7 +183,7 @@ class MatrixFederationAgent:
 
     async def _route_matrix_uri(
         self, parsed_uri: "URI", lookup_well_known: bool = True
-    ):
+    ) -> "_RoutingResult":
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
@@ -194,7 +193,6 @@ class MatrixFederationAgent:
             file if there is no SRV record.
 
         :returns a routing result.
-        :rtype: Deferred[_RoutingResult]
         """
         # check for an IP literal
         try:
@@ -288,14 +286,13 @@ class MatrixFederationAgent:
             target_port=port,
         )
 
-    async def _get_well_known(self, server_name: bytes):
+    async def _get_well_known(self, server_name: bytes) -> Optional[bytes]:
         """Attempt to fetch and parse a .well-known file for the given server
 
         :param server_name: Name of the server, from the requested url.
 
         :returns either the new server name, from the .well-known, or None if
             there was no .well-known file.
-        :rtype: Deferred[bytes|None]
         """
         try:
             result = self._well_known_cache[server_name]
@@ -309,7 +306,9 @@ class MatrixFederationAgent:
 
         return result
 
-    async def _do_get_well_known(self, server_name: bytes):
+    async def _do_get_well_known(
+        self, server_name: bytes
+    ) -> Tuple[Union[bytes, None, object], int]:
         """Actually fetch and parse a .well-known, without checking the cache
 
         :param server_name: Name of the server, from the requested url
@@ -318,7 +317,6 @@ class MatrixFederationAgent:
             - the new server name from the .well-known (as a `bytes`)
             - None if there was no .well-known file.
             - INVALID_WELL_KNOWN if the .well-known was invalid
-        :rtype: Deferred[Tuple[bytes|None|object],int]
         """
         uri = b"https://%s/.well-known/matrix/server" % (server_name,)
         uri_str = uri.decode("ascii")
