@@ -1,1 +1,1 @@
-Remove inlineCallbacks.
+Convert `inlineCallbacks` to async/await.
