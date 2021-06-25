@@ -168,11 +168,10 @@ def asyncjsonwrap(f):
         try:
             result = await f(servlet, request, **kwargs)
             request.write(dict_to_json_bytes(result))
-            request.finish()
         except MatrixRestError as e:
-            request.setResponseCode(e.value.httpStatus)
+            request.setResponseCode(e.httpStatus)
             request.write(
-                dict_to_json_bytes({"errcode": e.value.errcode, "error": e.value.error})
+                dict_to_json_bytes({"errcode": e.errcode, "error": e.error})
             )
         except Exception:
             f = failure.Failure()
@@ -183,7 +182,7 @@ def asyncjsonwrap(f):
                     {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
                 )
             )
-            request.finish()
+        request.finish()
 
     def inner(*args, **kwargs) -> int:
         """
