@@ -163,31 +163,26 @@ def jsonwrap(f):
 
 
 def asyncjsonwrap(f):
-    async def render(f, *args, **kwargs):
-        request = args[1]
+    async def render(f, servlet, request, **kwargs):
+        request.setHeader("Content-Type", "application/json")
         try:
-            result = await f(*args, **kwargs)
-            request.setHeader("Content-Type", "application/json")
+            result = await f(servlet, request, **kwargs)
             request.write(dict_to_json_bytes(result))
             request.finish()
+        except MatrixRestError as e:
+            request.setResponseCode(e.value.httpStatus)
+            request.write(
+                dict_to_json_bytes({"errcode": e.value.errcode, "error": e.value.error})
+            )
         except Exception:
             f = failure.Failure()
-            request.setHeader("Content-Type", "application/json")
-            if f.check(MatrixRestError) is not None:
-                request.setResponseCode(f.value.httpStatus)
-                request.write(
-                    dict_to_json_bytes(
-                        {"errcode": f.value.errcode, "error": f.value.error}
-                    )
+            logger.error("Request processing failed: %r, %s", f, f.getTraceback())
+            request.setResponseCode(500)
+            request.write(
+                dict_to_json_bytes(
+                    {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
                 )
-            else:
-                logger.error("Request processing failed: %r, %s", f, f.getTraceback())
-                request.setResponseCode(500)
-                request.write(
-                    dict_to_json_bytes(
-                        {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
-                    )
-                )
+            )
             request.finish()
 
     def inner(*args, **kwargs) -> int:
