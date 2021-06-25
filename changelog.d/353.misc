@@ -1,1 +1,1 @@
-Add isort check to Github Actions. 
+Reformat imports using isort.

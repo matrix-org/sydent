@@ -1,1 +1,1 @@
-Stop using deprecated logging.warn() method. Use logging.warning() instead.
+Replace deprecated `logging.warn()` method with `logging.warning()`.

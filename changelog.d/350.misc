@@ -1,2 +1,1 @@
-setup.py: Bump depedency on Twisted to 18.4.0.
-Replace request.getClientIP() calls (deprecated upstream) by request.getClientAddress().host calls.
+Bump minimum supported version of Twisted to 18.4.0 and stop calling deprecated APIs.

@@ -1,1 +1,1 @@
-Reformat sydent/, tests/, matrix_is_test/ and setup.py using isort. 
+Reformat imports using isort.

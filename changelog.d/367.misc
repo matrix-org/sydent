@@ -1,1 +1,1 @@
-Remove redundant type hints from docstrings.
+Add type hints and validate with mypy.
