@@ -139,7 +139,6 @@ class MatrixFederationAgent:
             been received (regardless of the response status code). Fails if
             there is any problem which prevents that response from being received
             (including problems that prevent the request from being sent).
-        :rtype: Deferred[twisted.web.iweb.IResponse]
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
         res = yield defer.ensureDeferred(self._route_matrix_uri(parsed_uri))
@@ -184,7 +183,7 @@ class MatrixFederationAgent:
 
     async def _route_matrix_uri(
         self, parsed_uri: "URI", lookup_well_known: bool = True
-    ) -> "_RoutingResult":
+    ) -> '_RoutingResult':
         """Helper for `request`: determine the routing for a Matrix URI
 
         :param parsed_uri: uri to route. Note that it should be parsed with
