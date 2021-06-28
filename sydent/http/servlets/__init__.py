@@ -163,10 +163,10 @@ def jsonwrap(f):
 
 
 def asyncjsonwrap(f):
-    async def render(f, servlet, request, **kwargs):
+    async def render(f, self, request: Request, **kwargs):
         request.setHeader("Content-Type", "application/json")
         try:
-            result = await f(servlet, request, **kwargs)
+            result = await f(self, request, **kwargs)
             request.write(dict_to_json_bytes(result))
         except MatrixRestError as e:
             request.setResponseCode(e.httpStatus)
@@ -182,11 +182,12 @@ def asyncjsonwrap(f):
             )
         request.finish()
 
+    @functools.wraps(f)
     def inner(*args, **kwargs) -> int:
         """
-        Runs an asynchronous web handler function with the given arguments and add
-        reqDone and reqErr as the resulting Deferred's callbacks.
+        Runs an asynchronous web handler function with the given arguments.
 
+        :param f: The original function passed to the asyncjsonwrap decorator
         :param args: The arguments to pass to the function.
         :param kwargs: The keyword arguments to pass to the function.
 
