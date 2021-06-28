@@ -170,9 +170,7 @@ def asyncjsonwrap(f):
             request.write(dict_to_json_bytes(result))
         except MatrixRestError as e:
             request.setResponseCode(e.httpStatus)
-            request.write(
-                dict_to_json_bytes({"errcode": e.errcode, "error": e.error})
-            )
+            request.write(dict_to_json_bytes({"errcode": e.errcode, "error": e.error}))
         except Exception:
             f = failure.Failure()
             logger.error("Request processing failed: %r, %s", f, f.getTraceback())
