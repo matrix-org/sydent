@@ -187,7 +187,6 @@ def asyncjsonwrap(f):
         """
         Runs an asynchronous web handler function with the given arguments.
 
-        :param f: The original function passed to the asyncjsonwrap decorator
         :param args: The arguments to pass to the function.
         :param kwargs: The keyword arguments to pass to the function.
 
