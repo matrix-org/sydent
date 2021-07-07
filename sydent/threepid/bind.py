@@ -58,6 +58,9 @@ class ThreepidBinder:
 
         :return: The signed association.
         """
+        if medium == 'email':
+            address = address.casefold()
+
         localAssocStore = LocalAssociationStore(self.sydent)
 
         # Fill out the association details
