@@ -189,6 +189,7 @@ class GlobalAssociationStore:
         :return: The signed association, or None if no association was found for this
             3PID.
         """
+
         cur = self.sydent.db.cursor()
         # We treat address as case-insensitive because that's true for all the
         # threepids we have currently (we treat the local part of email addresses as
@@ -219,6 +220,9 @@ class GlobalAssociationStore:
 
         :return: The associated MXID, or None if no MXID is associated with this 3PID.
         """
+        if medium == "email":
+            address = address.casefold()
+
         cur = self.sydent.db.cursor()
         res = cur.execute(
             "select mxid from global_threepid_associations where "
@@ -307,6 +311,9 @@ class GlobalAssociationStore:
         :param commit: Whether to commit the database transaction after inserting the
             association.
         """
+        if assoc.medium == "email":
+            assoc.address = assoc.address.casefold()
+
         cur = self.sydent.db.cursor()
         cur.execute(
             "insert or ignore into global_threepid_associations "
@@ -357,6 +364,9 @@ class GlobalAssociationStore:
         :param medium: The medium for the 3PID.
         :param address: The address for the 3PID.
         """
+        if medium == "email":
+            address = address.casefold()
+
         cur = self.sydent.db.cursor()
         cur.execute(
             "DELETE FROM global_threepid_associations WHERE "

@@ -34,7 +34,7 @@ class JoinTokenStore:
         :param sender: The MXID of the user that sent the invite.
         :param token: The token to store.
         """
-        if medium == 'email':
+        if medium == "email":
             address = address.casefold()
 
         cur = self.sydent.db.cursor()
