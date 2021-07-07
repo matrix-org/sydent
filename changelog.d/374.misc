@@ -1,0 +1,1 @@
+Implements casefolding on email addresses when binding to mxid, storing associations, or looking up asssociations by email. 
