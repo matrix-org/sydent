@@ -152,6 +152,7 @@ CONFIG_DEFAULTS = {
         "email.from": "Sydent Validation <noreply@{hostname}>",
         "email.subject": "Your Validation Token",
         "email.invite.subject": "%(sender_display_name)s has invited you to chat",
+        "email.invite.subject_space": "%(sender_display_name)s has invited you to a space",
         "email.smtphost": "localhost",
         "email.smtpport": "25",
         "email.smtpusername": "",
