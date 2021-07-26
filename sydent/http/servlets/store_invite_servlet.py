@@ -123,8 +123,12 @@ class StoreInviteServlet(Resource):
             substitutions.setdefault(k, "")
 
         # MSC3288
-        substitutions["room_type"] = substitutions.pop("org.matrix.msc3288.room_type", "")
-        substitutions["room_type_name"] = "space" if substitutions["room_type"] == "m.space" else "room"
+        substitutions["room_type"] = substitutions.pop(
+            "org.matrix.msc3288.room_type", ""
+        )
+        substitutions["room_type_name"] = (
+            "space" if substitutions["room_type"] == "m.space" else "room"
+        )
 
         substitutions["bracketed_verified_sender"] = ""
         if verified_sender:
@@ -143,7 +147,9 @@ class StoreInviteServlet(Resource):
         subject_header = Header(
             self.sydent.cfg.get(
                 "email",
-                "email.invite.subject_space" if substitutions["room_type"] == "m.space" else "email.invite.subject",
+                "email.invite.subject_space"
+                if substitutions["room_type"] == "m.space"
+                else "email.invite.subject",
                 raw=True,
             )
             % substitutions,
