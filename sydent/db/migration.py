@@ -1,7 +1,10 @@
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.emailutils import sendEmail
+import os.path
+import sqlite3
+from unittest.mock import patch
 
-def update_assosc(conn: sqlite3.Connection):
+def update_assosc(self, conn: sqlite3.Connection):
 # from table local_threepid_associations, select all associations where the medium is 'email'
     cur = conn.cursor()
 
@@ -19,7 +22,7 @@ def update_assosc(conn: sqlite3.Connection):
 
         # rehash the email since hash functions are case-sensitive
         pepper_result = cur.execute("SELECT lookup_pepper from hashing_metadata")
-        pepper = pepper_result.fetchone()
+        pepper = pepper_result.fetchone()[0]
         combo = "%s %s %s" % (casefold_address, "email", pepper)
         lookup_hash = sha256_and_url_safe_base64(combo)
 
@@ -43,9 +46,15 @@ def update_assosc(conn: sqlite3.Connection):
                 mxids.append(assoc_tuple[1])
 
     for mxid in mxids:
-        res = cur.execute("SELECT address FROM local_threepid_associations WHERE mxid = ?", mxid)
-        address = res.fetchone
-        sendEmail(sydent, templateFile: str, address, substitutions: Dict[str, str])
+        templateFile = self.get_branded_template(
+            "matrix-org",
+            "migration_template.eml",
+            ("email", "email.template"),
+        )
+        res = cur.execute("SELECT address FROM local_threepid_associations WHERE mxid = ?", (mxid,))
+        address = res.fetchone()[0]
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
+            sendEmail(self, templateFile, address, {"mxid":"mxid", "subject_header_value": "MatrixID Deletion"})
 
     if len(to_delete) > 0:
         cur.executemany("DELETE FROM local_threepid_associations WHERE address = ?", to_delete)
