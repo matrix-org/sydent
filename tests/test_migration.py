@@ -1,14 +1,14 @@
-from tests.utils import make_sydent
-from twisted.trial import unittest
-from sydent.util.hash import sha256_and_url_safe_base64
-from sydent.util.emailutils import sendEmail
-import os.path
-from sydent.db.migration import update_assosc, update_global_assoc
-from unittest.mock import patch
-import signedjson.sign
-from sydent.db.threepid_associations import GlobalAssociationStore
 import json
+import os.path
+from unittest.mock import patch
+
+from twisted.trial import unittest
+
+from sydent.db.migration import update_assosc, update_global_assoc
 from sydent.util import json_decoder
+from sydent.util.emailutils import sendEmail
+from sydent.util.hash import sha256_and_url_safe_base64
+from tests.utils import make_sydent
 
 
 class MigrationTestCase(unittest.TestCase):
@@ -121,7 +121,9 @@ class MigrationTestCase(unittest.TestCase):
                         "originServer": originServer,
                         "originId": i,
                         "sgAssoc": json.dumps(
-                            self.create_signedassoc("email", address, mxid, ts, 0, 99999999999)
+                            self.create_signedassoc(
+                                "email", address, mxid, ts, 0, 99999999999
+                            )
                         ),
                     }
                 )
@@ -142,7 +144,9 @@ class MigrationTestCase(unittest.TestCase):
                         "originServer": originServer,
                         "originId": i,
                         "sgAssoc": json.dumps(
-                            self.create_signedassoc("email", address, mxid, ts, 0, 99999999999)
+                            self.create_signedassoc(
+                                "email", address, mxid, ts, 0, 99999999999
+                            )
                         ),
                     }
                 )
@@ -184,14 +188,17 @@ class MigrationTestCase(unittest.TestCase):
                 self.sydent,
                 templateFile,
                 "bob@example.com",
-                {"mxid": "@bob:example.com", "subject_header_value": "MatrixID Deletion"},
+                {
+                    "mxid": "@bob:example.com",
+                    "subject_header_value": "MatrixID Deletion",
+                },
             )
             smtp = smtplib.SMTP.return_value
             email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
             self.assertIn("This is a notification", email_contents)
 
     def test_local_db_migration(self):
-        with patch("sydent.util.emailutils.smtplib") as smtplib:
+        with patch("sydent.util.emailutils.smtplib"):
             update_assosc(self, self.sydent.db)
 
         cur = self.sydent.db.cursor()
@@ -209,22 +216,22 @@ class MigrationTestCase(unittest.TestCase):
             )
 
     def test_global_db_migration(self):
-        with patch("sydent.util.emailutils.smtplib") as smtplib:
+        with patch("sydent.util.emailutils.smtplib"):
             update_global_assoc(self, self.sydent.db)
 
-            cur = self.sydent.db.cursor()
-            res = cur.execute("SELECT * FROM global_threepid_associations")
+        cur = self.sydent.db.cursor()
+        res = cur.execute("SELECT * FROM global_threepid_associations")
 
-            # five addresses should have been deleted
-            self.assertEqual(len(res.fetchall()), 10)
+        # five addresses should have been deleted
+        self.assertEqual(len(res.fetchall()), 10)
 
-            # iterate through db and make sure all addresses are casefolded and hash matches casefolded address
-            # and make sure the casefolded address matches the address in sgAssoc
-            for row in res.fetchall():
-                casefolded = row[2].casefold()
-                self.assertEqual(row[2], casefolded)
-                self.assertEqual(
-                    self.calculate_lookup(row[2]), self.calculate_lookup(casefolded)
-                )
-                sgassoc = json_decoder.decode(row[9])
-                self.assertEqual(row[2], sgassoc["address"])
+        # iterate through db and make sure all addresses are casefolded and hash matches casefolded address
+        # and make sure the casefolded address matches the address in sgAssoc
+        for row in res.fetchall():
+            casefolded = row[2].casefold()
+            self.assertEqual(row[2], casefolded)
+            self.assertEqual(
+                self.calculate_lookup(row[2]), self.calculate_lookup(casefolded)
+            )
+            sgassoc = json_decoder.decode(row[9])
+            self.assertEqual(row[2], sgassoc["address"])
