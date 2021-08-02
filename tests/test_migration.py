@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from twisted.trial import unittest
 
-from sydent.db.migration import update_assosc, update_global_assoc
+from sydent.db.migration import update_local_associations, update_global_assoc
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -197,9 +197,12 @@ class MigrationTestCase(unittest.TestCase):
             email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
             self.assertIn("This is a notification", email_contents)
 
+            # test email was sent
+            smtp.sendmail.assert_called()
+
     def test_local_db_migration(self):
-        with patch("sydent.util.emailutils.smtplib"):
-            update_assosc(self, self.sydent.db)
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
+            update_local_associations(self, self.sydent.db)
 
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT * FROM local_threepid_associations")

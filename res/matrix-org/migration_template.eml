@@ -11,10 +11,13 @@ Content-Type: multipart/alternative;
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
-Hi,
+Hello,
 
-This is a notification to let you know that matrix id %(mxid)s was associated with
-a depreciated version of your email address and has been deleted.
+In the past, identity services did not take case into account when creating and storing
+mxids. This led to your email address, %(to)s being stored with two mxids. A recent update
+changed this behavior and streamlined the mxids associated with your email address.
+This is a notification to let you know that matrix id %(mxid)s has been deleted in accordance
+with this update.
 
 
 About Matrix:
