@@ -201,7 +201,7 @@ class MigrationTestCase(unittest.TestCase):
             smtp.sendmail.assert_called()
 
     def test_local_db_migration(self):
-        with patch("sydent.util.emailutils.smtplib") as smtplib:
+        with patch("sydent.util.emailutils.smtplib"):
             update_local_associations(self, self.sydent.db)
 
         cur = self.sydent.db.cursor()

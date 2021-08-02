@@ -5,21 +5,16 @@ import signedjson.sign
 
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
-from sydent.util.hash import sha256_and_url_safe_base64
 
 
 def update_local_associations(self, conn: sqlite3.Connection):
     """Update the DB table local_threepid_associations so that all stored
-       emails are casefolded, and any duplicate mxid's associated with the
-       given email are deleted.
+    emails are casefolded, and any duplicate mxid's associated with the
+    given email are deleted.
 
-       :return: None
+    :return: None
     """
     cur = conn.cursor()
-
-    # fetch lookup pepper for lookup hashes
-    pepper_result = cur.execute("SELECT lookup_pepper from hashing_metadata")
-    pepper = pepper_result.fetchone()[0]
 
     res = cur.execute(
         "SELECT address, mxid FROM local_threepid_associations WHERE medium = 'email'"
@@ -100,10 +95,10 @@ def update_local_associations(self, conn: sqlite3.Connection):
 
 def update_global_assoc(self, conn: sqlite3.Connection):
     """Update the DB table global_threepid_associations so that all stored
-       emails are casefolded, the signed association is re-signed and any duplicate
-       mxid's associated with the given email are deleted.
+    emails are casefolded, the signed association is re-signed and any duplicate
+    mxid's associated with the given email are deleted.
 
-       :return: None
+    :return: None
     """
 
     # get every row where the local server is origin server and medium is email
