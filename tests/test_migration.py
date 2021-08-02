@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from twisted.trial import unittest
 
-from sydent.db.migration import update_local_associations, update_global_assoc
+from sydent.db.migration import update_global_assoc, update_local_associations
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
