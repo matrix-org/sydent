@@ -6,6 +6,8 @@ import signedjson.sign
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 
+from typing import Dict, List, Tuple, Any
+
 
 def update_local_associations(self, conn: sqlite3.Connection):
     """Update the DB table local_threepid_associations so that all stored
@@ -44,7 +46,7 @@ def update_local_associations(self, conn: sqlite3.Connection):
     to_delete: List[Tuple[str]] = []
 
     # list of mxids to send emails to letting them know the mxid has been deleted
-    mxids: List[str] = []
+    mxids: List[Tuple[str, str]] = []
 
     for casefold_address, assoc_tuples in associations.items():
         db_update_args.append(
@@ -141,14 +143,14 @@ def update_global_assoc(self, conn: sqlite3.Connection):
             associations[casefold_address] = [(address, mxid, lookup_hash, sg_assoc)]
 
     # list of arguments to update db with
-    db_update_args: List[Tuple[str, str, str, str]] = []
+    db_update_args: List[Tuple[Any, str, str, str, str]] = []
 
     # list of mxids to delete
     to_delete: List[Tuple[str]] = []
 
     # list of mxids and addresses to send emails to letting them know the mxid
     # has been deleted
-    mxids: List[Tuple[str]] = []
+    mxids: List[Tuple[Any, Any]] = []
 
     for casefold_address, assoc_tuples in associations.items():
         db_update_args.append(

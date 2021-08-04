@@ -21,7 +21,7 @@ class MigrationTestCase(unittest.TestCase):
         return lookup_hash
 
     def create_signedassoc(self, medium, address, mxid, ts, not_before, not_after):
-        sgassoc = {
+        return {
             "medium": medium,
             "address": address,
             "mxid": mxid,
@@ -29,7 +29,6 @@ class MigrationTestCase(unittest.TestCase):
             "not_before": not_before,
             "not_after": not_after,
         }
-        return sgassoc
 
     def setUp(self):
         # Create a new sydent
@@ -201,8 +200,20 @@ class MigrationTestCase(unittest.TestCase):
             smtp.sendmail.assert_called()
 
     def test_local_db_migration(self):
-        with patch("sydent.util.emailutils.smtplib"):
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_local_associations(self, self.sydent.db)
+
+        # test 5 emails were sent
+        smtp = smtplib.SMTP.return_value
+        self.assertEqual(smtp.sendmail.call_count, 5)
+
+        # don't send emails to people who weren't affected
+        self.assertNotIn(smtp.sendmail.call_args_list, ['bob5@example.com', 'bob6@example.com'
+                                                        'bob7@example.com, bob8@example.com'
+                                                        'bob9@example.com'])
+
+        # make sure someone who is affected gets email
+        self.assertIn('bob4@example.com', smtp.sendmail.call_args_list[0][0])
 
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT * FROM local_threepid_associations")
@@ -219,8 +230,20 @@ class MigrationTestCase(unittest.TestCase):
             )
 
     def test_global_db_migration(self):
-        with patch("sydent.util.emailutils.smtplib"):
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_global_assoc(self, self.sydent.db)
+
+        # test 5 emails were sent
+        smtp = smtplib.SMTP.return_value
+        self.assertEqual(smtp.sendmail.call_count, 5)
+
+        # don't send emails to people who weren't affected
+        self.assertNotIn(smtp.sendmail.call_args_list, ['bob5@example.com', 'bob6@example.com'
+                                                        'bob7@example.com, bob8@example.com'
+                                                        'bob9@example.com'])
+
+        # make sure someone who is affected gets email
+        self.assertIn('bob4@example.com', smtp.sendmail.call_args_list[0][0])
 
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT * FROM global_threepid_associations")
