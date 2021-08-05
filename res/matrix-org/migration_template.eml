@@ -13,11 +13,10 @@ Content-Disposition: inline
 
 Hello,
 
-In the past, identity services did not take case into account when creating and storing
-mxids. This led to your email address, %(to)s being stored with two mxids. A recent update
-changed this behavior and streamlined the mxids associated with your email address.
-This is a notification to let you know that matrix id %(mxid)s has been deleted in accordance
-with this update.
+We’ve recently improved how people discover your Matrix account.
+In the past, identity services did not take capitalization into account when creating and storing Matrix IDs. We’ve now updated this behavior so anyone can find you, no matter how your email is capitalized. As part of this recent update, the duplicate Matrix ID %(mxid)s is no longer associated with this e-mail address.
+
+No action is needed on your part. This doesn’t affect any passwords or password reset options on your account.
 
 
 About Matrix:

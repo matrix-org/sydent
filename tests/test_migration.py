@@ -194,7 +194,7 @@ class MigrationTestCase(unittest.TestCase):
             )
             smtp = smtplib.SMTP.return_value
             email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
-            self.assertIn("This is a notification", email_contents)
+            self.assertIn("In the past", email_contents)
 
             # test email was sent
             smtp.sendmail.assert_called()
