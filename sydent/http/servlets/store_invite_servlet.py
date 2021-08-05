@@ -28,7 +28,7 @@ from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.types import JsonDict
 from sydent.util.emailutils import sendEmail
-from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH
+from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH, normalise_address
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -58,6 +58,9 @@ class StoreInviteServlet(Resource):
         roomId = args["room_id"]
         sender = args["sender"]
 
+        # ensure we are casefolding email address before storing
+        normalised_address = normalise_address(address, medium)
+
         verified_sender = None
         if self.require_auth:
             account = authV2(self.sydent, request)
@@ -66,7 +69,7 @@ class StoreInviteServlet(Resource):
                 raise MatrixRestError(403, "M_UNAUTHORIZED", "'sender' doesn't match")
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
-        mxid = globalAssocStore.getMxid(medium, address)
+        mxid = globalAssocStore.getMxid(medium, normalised_address)
         if mxid:
             request.setResponseCode(400)
             return {
@@ -97,7 +100,7 @@ class StoreInviteServlet(Resource):
         ephemeralPublicKeyBase64 = encode_base64(ephemeralPublicKey.encode(), True)
 
         tokenStore.storeEphemeralPublicKey(ephemeralPublicKeyBase64)
-        tokenStore.storeToken(medium, address, roomId, sender, token)
+        tokenStore.storeToken(medium, normalised_address, roomId, sender, token)
 
         # Variables to substitute in the template.
         substitutions = {}
@@ -150,7 +153,7 @@ class StoreInviteServlet(Resource):
             ("email", "email.invite_template"),
         )
 
-        sendEmail(self.sydent, templateFile, address, substitutions)
+        sendEmail(self.sydent, templateFile, normalised_address, substitutions)
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())

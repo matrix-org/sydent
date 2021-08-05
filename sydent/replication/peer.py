@@ -33,6 +33,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.util.stringutils import is_valid_matrix_server_name, normalise_address
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -83,6 +84,9 @@ class LocalPeer(Peer):
         for localId in sgAssocs:
             if localId > self.lastId:
                 assocObj = threePidAssocFromDict(sgAssocs[localId])
+
+                # ensure we are casefolding email addresses
+                assocObj.address = normalise_address(assocObj.address, assocObj.medium)
 
                 if assocObj.mxid is not None:
                     # Assign a lookup_hash to this association

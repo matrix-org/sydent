@@ -33,6 +33,8 @@ class LocalAssociationStore:
     def addOrUpdateAssociation(self, assoc: ThreepidAssociation) -> None:
         """
         Updates an association, or creates one if none exists with these parameters.
+        Please note that email addresses in the association should be casefolded
+        before calling this function
 
         :param assoc: The association to create or update.
         """
@@ -126,7 +128,8 @@ class LocalAssociationStore:
     def removeAssociation(self, threepid: Dict[str, str], mxid: str) -> None:
         """
         Delete the association between a 3PID and a MXID, if it exists. If the
-        association doesn't exist, log and do nothing.
+        association doesn't exist, log and do nothing. Please note that email
+        addresses must be casefolded before calling this function.
 
         :param threepid: The 3PID of the binding to remove.
         :param mxid: The MXID of the binding to remove.
@@ -213,15 +216,14 @@ class GlobalAssociationStore:
 
     def getMxid(self, medium: str, address: str) -> Optional[str]:
         """
-        Retrieves the MXID associated with a 3PID.
+        Retrieves the MXID associated with a 3PID. Please note that 
+        emails need to be casefolded before calling this function.
 
         :param medium: The medium of the 3PID.
         :param address: The address of the 3PID.
 
         :return: The associated MXID, or None if no MXID is associated with this 3PID.
         """
-        if medium == "email":
-            address = address.casefold()
 
         cur = self.sydent.db.cursor()
         res = cur.execute(
@@ -302,6 +304,8 @@ class GlobalAssociationStore:
     ) -> None:
         """
         Saves an association received through either a replication push or a local push.
+        Please note that emails in the association need to be casefolded before calling
+        this function.
 
         :param assoc: The association to add as a high level object.
         :param rawSgAssoc: The original raw bytes of the signed association.
@@ -311,8 +315,6 @@ class GlobalAssociationStore:
         :param commit: Whether to commit the database transaction after inserting the
             association.
         """
-        if assoc.medium == "email":
-            assoc.address = assoc.address.casefold()
 
         cur = self.sydent.db.cursor()
         cur.execute(
@@ -359,13 +361,13 @@ class GlobalAssociationStore:
 
     def removeAssociation(self, medium: str, address: str) -> None:
         """
-        Removes any association stored for the provided 3PID.
+        Removes any association stored for the provided 3PID. Please
+        note that email addresses must be casefolded beforee calling
+        this function.
 
         :param medium: The medium for the 3PID.
         :param address: The address for the 3PID.
         """
-        if medium == "email":
-            address = address.casefold()
 
         cur = self.sydent.db.cursor()
         cur.execute(

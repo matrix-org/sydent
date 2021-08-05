@@ -26,7 +26,8 @@ class JoinTokenStore:
         self, medium: str, address: str, roomId: str, sender: str, token: str
     ) -> None:
         """
-        Store a new invite token and its metadata.
+        Store a new invite token and its metadata. Please note that email
+        addresses need to be casefolded before calling this function.
 
         :param medium: The medium of the 3PID the token is associated to.
         :param address: The address of the 3PID the token is associated to.
@@ -34,8 +35,6 @@ class JoinTokenStore:
         :param sender: The MXID of the user that sent the invite.
         :param token: The token to store.
         """
-        if medium == "email":
-            address = address.casefold()
 
         cur = self.sydent.db.cursor()
 
