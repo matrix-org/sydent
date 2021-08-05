@@ -216,7 +216,7 @@ class GlobalAssociationStore:
 
     def getMxid(self, medium: str, address: str) -> Optional[str]:
         """
-        Retrieves the MXID associated with a 3PID. Please note that 
+        Retrieves the MXID associated with a 3PID. Please note that
         emails need to be casefolded before calling this function.
 
         :param medium: The medium of the 3PID.

@@ -33,7 +33,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
-from sydent.util.stringutils import is_valid_matrix_server_name, normalise_address
+from sydent.util.stringutils import normalise_address
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent

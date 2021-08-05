@@ -1,12 +1,11 @@
 import json
 import sqlite3
+from typing import Any, Dict, List, Tuple
 
 import signedjson.sign
 
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
-
-from typing import Dict, List, Tuple, Any
 
 
 def update_local_associations(self, conn: sqlite3.Connection):

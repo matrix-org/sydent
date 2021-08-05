@@ -208,12 +208,18 @@ class MigrationTestCase(unittest.TestCase):
         self.assertEqual(smtp.sendmail.call_count, 5)
 
         # don't send emails to people who weren't affected
-        self.assertNotIn(smtp.sendmail.call_args_list, ['bob5@example.com', 'bob6@example.com'
-                                                        'bob7@example.com, bob8@example.com'
-                                                        'bob9@example.com'])
+        self.assertNotIn(
+            smtp.sendmail.call_args_list,
+            [
+                "bob5@example.com",
+                "bob6@example.com"
+                "bob7@example.com, bob8@example.com"
+                "bob9@example.com",
+            ],
+        )
 
         # make sure someone who is affected gets email
-        self.assertIn('bob4@example.com', smtp.sendmail.call_args_list[0][0])
+        self.assertIn("bob4@example.com", smtp.sendmail.call_args_list[0][0])
 
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT * FROM local_threepid_associations")
@@ -238,12 +244,18 @@ class MigrationTestCase(unittest.TestCase):
         self.assertEqual(smtp.sendmail.call_count, 5)
 
         # don't send emails to people who weren't affected
-        self.assertNotIn(smtp.sendmail.call_args_list, ['bob5@example.com', 'bob6@example.com'
-                                                        'bob7@example.com, bob8@example.com'
-                                                        'bob9@example.com'])
+        self.assertNotIn(
+            smtp.sendmail.call_args_list,
+            [
+                "bob5@example.com",
+                "bob6@example.com"
+                "bob7@example.com, bob8@example.com"
+                "bob9@example.com",
+            ],
+        )
 
         # make sure someone who is affected gets email
-        self.assertIn('bob4@example.com', smtp.sendmail.call_args_list[0][0])
+        self.assertIn("bob4@example.com", smtp.sendmail.call_args_list[0][0])
 
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT * FROM global_threepid_associations")
