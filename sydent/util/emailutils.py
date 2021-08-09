@@ -22,6 +22,8 @@ import urllib
 from html import escape
 from typing import TYPE_CHECKING, Dict
 
+from jinja2 import Template
+
 import twisted.python.log
 
 from sydent.util import time_msec
@@ -73,7 +75,10 @@ def sendEmail(
     # conflicting with it.
     allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
 
-    mailString = open(templateFile).read() % allSubstitutions
+    with open(templateFile) as file_:
+        template = Template(file_.read())
+        mailString = template.render(allSubstitutions)
+
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
     if parsedFrom == "" or parsedTo == "":
