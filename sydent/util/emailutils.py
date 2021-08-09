@@ -22,9 +22,8 @@ import urllib
 from html import escape
 from typing import TYPE_CHECKING, Dict
 
-from jinja2 import Template
-
 import twisted.python.log
+from jinja2 import Template
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
