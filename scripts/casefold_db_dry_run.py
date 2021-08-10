@@ -22,8 +22,10 @@ import signedjson.sign
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 
+# this is a version of the migrate_db.py script which runs through the steps but does not
+# make any changes or send any emails
 
-def update_local_associations(self, conn: sqlite3.Connection):
+def update_local_associations_dry_run(self, conn: sqlite3.Connection):
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
     given email are deleted.
@@ -79,28 +81,6 @@ def update_local_associations(self, conn: sqlite3.Connection):
                 to_delete.append((address,))
                 mxids.append((mxid, address))
 
-
-    # iterate through the mxids and send email, let's only send on email per mxid
-    for mxid, address in mxids:
-        processed_mxids = []
-
-        if mxid in processed_mxids:
-            continue
-        else:
-            templateFile = self.sydent.get_branded_template(
-                "matrix-org",
-                "migration_template.eml",
-                ("email", "email.template"),
-            )
-
-            sendEmail(
-                self.sydent,
-                templateFile,
-                address,
-                {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
-            )
-            processed_mxids.append(mxid)
-
     if len(to_delete) > 0:
         cur.executemany(
             "DELETE FROM local_threepid_associations WHERE address = ?", to_delete
@@ -112,11 +92,8 @@ def update_local_associations(self, conn: sqlite3.Connection):
             db_update_args,
         )
 
-    # We've finished updating the database, committing the transaction.
-    conn.commit()
 
-
-def update_global_assoc(self, conn: sqlite3.Connection):
+def update_global_assoc_dry_run(self, conn: sqlite3.Connection):
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
     mxid's associated with the given email are deleted.
@@ -191,21 +168,6 @@ def update_global_assoc(self, conn: sqlite3.Connection):
                 to_delete.append((address,))
                 mxids.append((mxid, address))
 
-    # iterate through the mxids and send email
-    for mxid, address in mxids:
-        templateFile = self.sydent.get_branded_template(
-            "matrix-org",
-            "migration_template.eml",
-            ("email", "email.template"),
-        )
-
-        sendEmail(
-            self.sydent,
-            templateFile,
-            address,
-            {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
-        )
-
     if len(to_delete) > 0:
         cur.executemany(
             "DELETE FROM global_threepid_associations WHERE address = ?", to_delete
@@ -217,9 +179,7 @@ def update_global_assoc(self, conn: sqlite3.Connection):
             db_update_args,
         )
 
-    conn.commit()
-
 if __name__ == "__main__":
     # need an instance of sydent and an instance of the db
-    update_global_assoc()
-    update_local_associations()
+    update_global_assoc_dry_run()
+    update_local_associations_dry_run()

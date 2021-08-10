@@ -214,13 +214,13 @@ class GlobalAssociationStore:
 
         return sgAssocStr
 
-    def getMxid(self, medium: str, address: str) -> Optional[str]:
+    def getMxid(self, medium: str, normalised_address: str) -> Optional[str]:
         """
         Retrieves the MXID associated with a 3PID. Please note that
         emails need to be casefolded before calling this function.
 
         :param medium: The medium of the 3PID.
-        :param address: The address of the 3PID.
+        :param normalised_address: The address of the 3PID.
 
         :return: The associated MXID, or None if no MXID is associated with this 3PID.
         """
@@ -230,7 +230,7 @@ class GlobalAssociationStore:
             "select mxid from global_threepid_associations where "
             "medium = ? and lower(address) = lower(?) and notBefore < ? and notAfter > ? "
             "order by ts desc limit 1",
-            (medium, address, time_msec(), time_msec()),
+            (medium, normalised_address, time_msec(), time_msec()),
         )
 
         row = res.fetchone()
@@ -359,27 +359,27 @@ class GlobalAssociationStore:
 
         return row[0]
 
-    def removeAssociation(self, medium: str, address: str) -> None:
+    def removeAssociation(self, medium: str, normalised_address: str) -> None:
         """
         Removes any association stored for the provided 3PID. Please
-        note that email addresses must be casefolded beforee calling
+        note that email addresses must be casefolded before calling
         this function.
 
         :param medium: The medium for the 3PID.
-        :param address: The address for the 3PID.
+        :param normalised_address: The address for the 3PID.
         """
 
         cur = self.sydent.db.cursor()
         cur.execute(
             "DELETE FROM global_threepid_associations WHERE "
             "medium = ? AND address = ?",
-            (medium, address),
+            (medium, normalised_address),
         )
         logger.info(
             "Deleted %d rows from global associations for %s/%s",
             cur.rowcount,
             medium,
-            address,
+            normalised_address,
         )
         self.sydent.db.commit()
 
