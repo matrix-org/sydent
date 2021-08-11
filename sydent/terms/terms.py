@@ -107,7 +107,7 @@ def get_terms(sydent) -> Optional[Terms]:
             return Terms(None)
 
         with open(termsPath) as fp:
-            termsYaml = yaml.safe_load(fp)
+            termsYaml = yaml.full_load(fp)
         if "master_version" not in termsYaml:
             raise Exception("No master version")
         if "docs" not in termsYaml:
