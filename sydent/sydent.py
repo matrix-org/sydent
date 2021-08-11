@@ -474,7 +474,9 @@ class Sydent:
         root_template_path = self.cfg.get("general", "templates.path")
 
         # Grab jinja template if it exists
-        if os.path.exists(os.path.join(root_template_path, brand, template_name + ".j2")):
+        if os.path.exists(
+            os.path.join(root_template_path, brand, template_name + ".j2")
+        ):
             return os.path.join(root_template_path, brand, template_name + ".j2")
         else:
             return os.path.join(root_template_path, brand, template_name)
