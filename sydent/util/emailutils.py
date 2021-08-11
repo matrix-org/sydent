@@ -21,9 +21,10 @@ import string
 import urllib
 from html import escape
 from typing import TYPE_CHECKING, Dict
+import os.path
 
 import twisted.python.log
-from jinja2 import Template
+from jinja2 import Template, Environment, select_autoescape, FileSystemLoader
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
@@ -75,9 +76,18 @@ def sendEmail(
     allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
 
     # Render template with Jinja if using Jinja template
+    root_template_path = sydent.cfg.get("general", "templates.path")
+    env = Environment(
+    loader=FileSystemLoader(root_template_path),
+    autoescape=select_autoescape(['html', 'xml']))
+
+    # extract branded template name from templateFile
+    file_parts = templateFile.split('/')
+    template_name = file_parts[-2] + '/' + file_parts[-1]
+
     with open(templateFile) as template_file:
         if templateFile.endswith(".j2"):
-            template = Template(template_file.read())
+            template = env.get_template(template_name)
             mailString = template.render(allSubstitutions)
         else:
             mailString = template_file.read() % allSubstitutions
