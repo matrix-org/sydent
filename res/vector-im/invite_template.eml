@@ -1,20 +1,20 @@
-Date: {{ date }}
-From: {{ from }}
-To: {{ to }}
-Message-ID: {{ messageid }}
-Subject: {{ subject_header_value }}
+Date: %(date)s
+From: %(from)s
+To: %(to)s
+Message-ID: %(messageid)s
+Subject: %(subject_header_value)s
 MIME-Version: 1.0
 Content-Type: multipart/alternative;
-	boundary="{{ multipart_boundary }}"
+	boundary="%(multipart_boundary)s"
 
---{{ multipart_boundary }}
+--%(multipart_boundary)s
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
 Hi,
 
-{{ sender_display_name }} {{ bracketed_verified_sender }}has invited you into a room
-{{ bracketed_room_name }}on Element. To join the conversation please follow the
+%(sender_display_name)s %(bracketed_verified_sender)shas invited you into a room
+%(bracketed_room_name)son Element. To join the conversation please follow the
 link below.
 
 
@@ -54,7 +54,7 @@ decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.
 
---{{ multipart_boundary }}
+--%(multipart_boundary)s
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -125,12 +125,12 @@ pre, code {
 
 <p>Hi,</p>
 
-<p>{{ sender_display_name_forhtml }} <span class="low-contrast">{{ bracketed_verified_sender_forhtml }}</span> has invited you into a
-room {{ bracketed_room_name_forhtml }} on Element.</p>
+<p>%(sender_display_name_forhtml)s <span class="low-contrast">%(bracketed_verified_sender_forhtml)s</span> has invited you into a
+room %(bracketed_room_name_forhtml)s on Element.</p>
 
 <p>
     <a
-    href="https://app.element.io/#/room/{{ room_id_forurl }}?email={{ to_forurl }}&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D{{ token }}%%26private_key%%3D{{ ephemeral_private_key }}&room_name={{ room_name_forurl }}&room_avatar_url={{ room_avatar_url_forurl }}&inviter_name={{ sender_display_name_forurl }}&guest_access_token={{ guest_access_token_forurl }}&guest_user_id={{ guest_user_id_forurl }}">Join the conversation.</a>
+    href="https://app.element.io/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fvector.im%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s">Join the conversation.</a>
 </p>
 
 <p>Element is an open source collaboration app built on the Matrix.org
@@ -176,4 +176,4 @@ Matrix visit https://matrix.org.</p>
     </body>
 </html>
 
---{{ multipart_boundary }}--
+--%(multipart_boundary)s--

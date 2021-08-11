@@ -74,9 +74,13 @@ def sendEmail(
     # conflicting with it.
     allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
 
-    with open(templateFile) as file_:
-        template = Template(file_.read())
-        mailString = template.render(allSubstitutions)
+    # Render template with Jinja if using Jinja template
+    if templateFile.endswith('.j2'):
+        with open(templateFile) as file_:
+            template = Template(file_.read())
+            mailString = template.render(allSubstitutions)
+    else:
+        mailString = open(templateFile).read() % allSubstitutions
 
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
