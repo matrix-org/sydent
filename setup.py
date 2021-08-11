@@ -41,7 +41,7 @@ setup(
     description="Reference Matrix Identity Verification and Lookup Server",
     python_requires=">=3.6",
     install_requires=[
-        "jinja2",
+        "jinja2>=3.0.0",
         "signedjson==1.1.1",
         "unpaddedbase64==1.1.0",
         "Twisted>=18.4.0",
