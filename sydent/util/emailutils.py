@@ -75,12 +75,12 @@ def sendEmail(
     allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
 
     # Render template with Jinja if using Jinja template
-    if templateFile.endswith(".j2"):
-        with open(templateFile) as file_:
-            template = Template(file_.read())
+    with open(templateFile) as template_file:
+        if templateFile.endswith(".j2"):
+            template = Template(template_file.read())
             mailString = template.render(allSubstitutions)
-    else:
-        mailString = open(templateFile).read() % allSubstitutions
+        else:
+            mailString = template_file.read() % allSubstitutions
 
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
