@@ -38,6 +38,8 @@ def update_local_associations_dry_run(sydent, db: sqlite3.Connection):
     """
     cur = db.cursor()
 
+    cur.execute("BEGIN TRANSACTION;")
+
     res = cur.execute(
         "SELECT address, mxid FROM local_threepid_associations WHERE medium = 'email'"
         "ORDER BY ts DESC"
@@ -95,8 +97,7 @@ def update_local_associations_dry_run(sydent, db: sqlite3.Connection):
             "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
             db_update_args,
         )
-    # close the connection instead of committing changes    
-    db.close()
+    cur.execute("ROLLBACK TRANSACTION;")
 
 
 def update_global_assoc_dry_run(sydent, db: sqlite3.Connection):
@@ -112,6 +113,7 @@ def update_global_assoc_dry_run(sydent, db: sqlite3.Connection):
     medium = "email"
 
     cur = db.cursor()
+    cur.execute("BEGIN TRANSACTION;")
     res = cur.execute(
         "SELECT address, mxid, sgAssoc FROM global_threepid_associations WHERE medium = ?"
         "AND originServer = ? ORDER BY ts DESC",
@@ -185,8 +187,7 @@ def update_global_assoc_dry_run(sydent, db: sqlite3.Connection):
             db_update_args,
         )
 
-    # close the connection instead of committing changes
-    db.close()
+    cur.execute("ROLLBACK TRANSACTION;")
 
 if __name__ == "__main__":
     # need an instance of sydent and an instance of the db

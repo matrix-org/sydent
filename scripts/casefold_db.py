@@ -201,20 +201,26 @@ def update_global_assoc(sydent, db: sqlite3.Connection):
                 to_delete.append((address,))
                 mxids.append((mxid, address))
 
-    # iterate through the mxids and send email
+    # iterate through the mxids and send email, let's only send on email per mxid
     for mxid, address in mxids:
-        templateFile = sydent.get_branded_template(
-            "matrix-org",
-            "migration_template.eml",
-            ("email", "email.template"),
-        )
+        processed_mxids = []
 
-        sendEmail(
-            sydent,
-            templateFile,
-            address,
-            {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
-        )
+        if mxid in processed_mxids:
+            continue
+        else:
+            templateFile = sydent.get_branded_template(
+                "matrix-org",
+                "migration_template.eml",
+                ("email", "email.template"),
+            )
+
+            sendEmail(
+                sydent,
+                templateFile,
+                address,
+                {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
+            )
+            processed_mxids.append(mxid)
 
     if len(to_delete) > 0:
         cur.executemany(

@@ -1,7 +1,7 @@
 import json
 import os.path
 from unittest.mock import patch
-
+import sqlite3
 from twisted.trial import unittest
 
 from scripts.casefold_db import (
@@ -9,6 +9,11 @@ from scripts.casefold_db import (
     update_global_assoc,
     update_local_associations,
 )
+
+from scripts.casefold_db_dry_run import (
+    update_global_assoc_dry_run,
+    update_local_associations_dry_run)
+
 from scripts.casefold_db_no_email import (
     update_global_assoc_no_email,
     update_local_associations_no_email,
@@ -273,7 +278,7 @@ class MigrationTestCase(unittest.TestCase):
             sgassoc = json_decoder.decode(row[9])
             self.assertEqual(row[2], sgassoc["address"])
 
-    def test_global_no_email(self):
+    def test_global_no_email_does_not_send_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_global_assoc_no_email(self.sydent, self.sydent.db)
             smtp = smtplib.SMTP.return_value
@@ -281,10 +286,48 @@ class MigrationTestCase(unittest.TestCase):
             # test no emails were sent
             self.assertEqual(smtp.sendmail.call_count, 0)
 
-    def test_local_no_email(self):
+    def test_local_no_email_does_not_send_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_local_associations_no_email(self.sydent, self.sydent.db)
             smtp = smtplib.SMTP.return_value
 
             # test no emails were sent
             self.assertEqual(smtp.sendmail.call_count, 0)
+
+
+    def test_dry_run_does_nothing(self):
+        # reset DB
+        self.setUp()
+
+        cur = self.sydent.db.cursor()
+
+        # grab a snapshot of global table before running script
+        res1 = cur.execute("SELECT mxid FROM global_threepid_associations")
+        list1 = res1.fetchall()
+
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
+            update_global_assoc_dry_run(self.sydent, self.sydent.db)
+
+        # test no emails were sent
+        smtp = smtplib.SMTP.return_value
+        self.assertEqual(smtp.sendmail.call_count, 0)
+
+        res2 = cur.execute("SELECT mxid FROM global_threepid_associations")
+        list2 = res2.fetchall()
+
+        self.assertEqual(list1, list2)
+
+        # grab a snapshot of local table db before running script
+        res3 = cur.execute("SELECT mxid FROM local_threepid_associations")
+        list3 = res3.fetchall()
+
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
+            update_local_associations_dry_run(self.sydent, self.sydent.db)
+
+        # test no emails were sent
+        smtp = smtplib.SMTP.return_value
+        self.assertEqual(smtp.sendmail.call_count, 0)
+
+        res4 = cur.execute("SELECT mxid FROM local_threepid_associations")
+        list4 = res4.fetchall()
+        self.assertEqual(list3, list4)
