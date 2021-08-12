@@ -4,7 +4,15 @@ from unittest.mock import patch
 
 from twisted.trial import unittest
 
-from scripts.casefold_db import update_global_assoc, update_local_associations, calculate_lookup_hash
+from scripts.casefold_db import (
+    calculate_lookup_hash,
+    update_global_assoc,
+    update_local_associations,
+)
+from scripts.casefold_db_no_email import (
+    update_global_assoc_no_email,
+    update_local_associations_no_email,
+)
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from tests.utils import make_sydent
@@ -103,7 +111,7 @@ class MigrationTestCase(unittest.TestCase):
                     {
                         "medium": "email",
                         "address": address,
-                        "lookup_hash": calculate_lookup_hash(self.sydent,address),
+                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
                         "mxid": mxid,
                         "ts": ts,
                         "not_before": 0,
@@ -264,3 +272,19 @@ class MigrationTestCase(unittest.TestCase):
             )
             sgassoc = json_decoder.decode(row[9])
             self.assertEqual(row[2], sgassoc["address"])
+
+    def test_global_no_email(self):
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
+            update_global_assoc_no_email(self.sydent, self.sydent.db)
+            smtp = smtplib.SMTP.return_value
+
+            # test no emails were sent
+            self.assertEqual(smtp.sendmail.call_count, 0)
+
+    def test_local_no_email(self):
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
+            update_local_associations_no_email(self.sydent, self.sydent.db)
+            smtp = smtplib.SMTP.return_value
+
+            # test no emails were sent
+            self.assertEqual(smtp.sendmail.call_count, 0)
