@@ -4,22 +4,13 @@ from unittest.mock import patch
 
 from twisted.trial import unittest
 
-from sydent.db.migration import update_global_assoc, update_local_associations
+from scripts.casefold_db import update_global_assoc, update_local_associations, calculate_lookup_hash
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
-from sydent.util.hash import sha256_and_url_safe_base64
 from tests.utils import make_sydent
 
 
 class MigrationTestCase(unittest.TestCase):
-    def calculate_lookup(self, address):
-        cur = self.sydent.db.cursor()
-        pepper_result = cur.execute("SELECT lookup_pepper from hashing_metadata")
-        pepper = pepper_result.fetchone()[0]
-        combo = "%s %s %s" % (address, "email", pepper)
-        lookup_hash = sha256_and_url_safe_base64(combo)
-        return lookup_hash
-
     def create_signedassoc(self, medium, address, mxid, ts, not_before, not_after):
         return {
             "medium": medium,
@@ -54,7 +45,7 @@ class MigrationTestCase(unittest.TestCase):
                     {
                         "medium": "email",
                         "address": address,
-                        "lookup_hash": self.calculate_lookup(address),
+                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
                         "mxid": "@bob%d:example.com" % i,
                         "ts": (i * 10000),
                         "not_before": 0,
@@ -68,7 +59,7 @@ class MigrationTestCase(unittest.TestCase):
                     {
                         "medium": "email",
                         "address": address,
-                        "lookup_hash": self.calculate_lookup(address),
+                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
                         "mxid": "@BOB%d:example.com" % (i - 10),
                         "ts": (i * 10000),
                         "not_before": 0,
@@ -112,7 +103,7 @@ class MigrationTestCase(unittest.TestCase):
                     {
                         "medium": "email",
                         "address": address,
-                        "lookup_hash": self.calculate_lookup(address),
+                        "lookup_hash": calculate_lookup_hash(self.sydent,address),
                         "mxid": mxid,
                         "ts": ts,
                         "not_before": 0,
@@ -135,7 +126,7 @@ class MigrationTestCase(unittest.TestCase):
                     {
                         "medium": "email",
                         "address": address,
-                        "lookup_hash": self.calculate_lookup(address),
+                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
                         "mxid": mxid,
                         "ts": ts,
                         "not_before": 0,
@@ -201,7 +192,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_local_db_migration(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_local_associations(self, self.sydent.db)
+            update_local_associations(self.sydent, self.sydent.db)
 
         # test 5 emails were sent
         smtp = smtplib.SMTP.return_value
@@ -237,7 +228,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_global_db_migration(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_global_assoc(self, self.sydent.db)
+            update_global_assoc(self.sydent, self.sydent.db)
 
         # test 5 emails were sent
         smtp = smtplib.SMTP.return_value
