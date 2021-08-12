@@ -19,7 +19,7 @@ Matrix client from https://matrix.org/docs/projects/try-matrix-now.html or use
 the single-click link below to join via Element (requires Chrome, Firefox,
 Safari, iOS or Android)
 
-{{ web_client_location }}/#/room/{{ room_id_forurl }}?email={{ to_forurl }}&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D{{ token }}%%26private_key%%3D{{ ephemeral_private_key }}&room_name={{ room_name_forurl }}&room_avatar_url={{ room_avatar_url_forurl }}&inviter_name={{ sender_display_name_forurl }}&guest_access_token={{ guest_access_token_forurl }}&guest_user_id={{ guest_user_id_forurl }}
+{{ web_client_location|e }}/#/room/{{ room_id_forurl|e }}?email={{ to_forurl|e }}&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D{{ token|e }}%%26private_key%%3D{{ ephemeral_private_key|e }}&room_name={{ room_name_forurl|e }}&room_avatar_url={{ room_avatar_url_forurl|e }}&inviter_name={{ sender_display_name_forurl|e }}&guest_access_token={{ guest_access_token_forurl|e }}&guest_user_id={{ guest_user_id_forurl|e }}
 
 
 About Matrix:
