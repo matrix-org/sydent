@@ -1,7 +1,7 @@
 import json
 import os.path
 from unittest.mock import patch
-import sqlite3
+
 from twisted.trial import unittest
 
 from scripts.casefold_db import (
@@ -9,11 +9,10 @@ from scripts.casefold_db import (
     update_global_assoc,
     update_local_associations,
 )
-
 from scripts.casefold_db_dry_run import (
     update_global_assoc_dry_run,
-    update_local_associations_dry_run)
-
+    update_local_associations_dry_run,
+)
 from scripts.casefold_db_no_email import (
     update_global_assoc_no_email,
     update_local_associations_no_email,
@@ -293,7 +292,6 @@ class MigrationTestCase(unittest.TestCase):
 
             # test no emails were sent
             self.assertEqual(smtp.sendmail.call_count, 0)
-
 
     def test_dry_run_does_nothing(self):
         # reset DB
