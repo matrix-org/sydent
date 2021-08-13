@@ -74,20 +74,14 @@ def sendEmail(
     # conflicting with it.
     allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
 
-    # Render template with Jinja if using Jinja template
-    root_template_path = sydent.cfg.get("general", "templates.path")
-    env = Environment(
-        loader=FileSystemLoader(root_template_path),
-        autoescape=select_autoescape(["html", "xml"]),
-    )
-
     # extract branded template name from templateFile
     file_parts = templateFile.split("/")
     template_name = file_parts[-2] + "/" + file_parts[-1]
 
+    # use jinja for rendering if jinja templates are present
     with open(templateFile) as template_file:
         if templateFile.endswith(".j2"):
-            template = env.get_template(template_name)
+            template = sydent.template_environment.get_template(template_name)
             mailString = template.render(allSubstitutions)
         else:
             mailString = template_file.read() % allSubstitutions

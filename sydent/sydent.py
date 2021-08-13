@@ -21,6 +21,7 @@ import logging
 import logging.handlers
 import os
 from typing import Set
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import twisted.internet.reactor
 from twisted.internet import address, task
@@ -293,6 +294,10 @@ class Sydent:
             self.cfg.get(
                 "email", "email.third_party_invite_domain_obfuscate_characters"
             )
+        )
+        self.template_environment = Environment(
+            loader=FileSystemLoader(self.cfg.get("general", "templates.path")),
+            autoescape=select_autoescape(default = True),
         )
 
         # See if a pepper already exists in the database
