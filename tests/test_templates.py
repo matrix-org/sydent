@@ -4,7 +4,7 @@ from unittest.mock import patch
 from twisted.trial import unittest
 
 from sydent.util.emailutils import sendEmail
-from tests.utils import make_sydent
+from tests.utils import make_sydent, make_request
 
 
 class TestTemplate(unittest.TestCase):
@@ -51,11 +51,10 @@ class TestTemplate(unittest.TestCase):
         self.assertIn("mickey@mouse.org", email_contents)
 
     def test_jinja_escapes_invite(self):
-        # test matrix invite template
         templateFile = self.sydent.get_branded_template(
             "matrix", "invite_template.eml.j2", ("email", "email.invite_template")
         )
-        substitutions = {"to": "<malicious html>"}
+        substitutions = {"sender_display_name_forhtml": "<malicious html>"}
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             sendEmail(self.sydent, templateFile, "blah@nowhere.com", substitutions)
@@ -64,17 +63,17 @@ class TestTemplate(unittest.TestCase):
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
         self.assertNotIn("<malicious html>", email_contents)
 
-        # test vector-im verification template
+    def test_jinja_does_not_escape_safe_values(self):
         templateFile = self.sydent.get_branded_template(
             "vector-im",
             "verification_template.eml.j2",
             ("email", "email.verification_template"),
         )
-        substitutions = {"to": "<malicious html>"}
+        substitutions = {"link": "<i'm html>"}
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             sendEmail(self.sydent, templateFile, "blah@nowhere.com", substitutions)
 
         smtp = smtplib.SMTP.return_value
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
-        self.assertNotIn("<malicious html>", email_contents)
+        self.assertIn("<i'm html>", email_contents)
