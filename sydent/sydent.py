@@ -21,9 +21,9 @@ import logging
 import logging.handlers
 import os
 from typing import Set
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import twisted.internet.reactor
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from twisted.internet import address, task
 from twisted.python import log
 
@@ -297,7 +297,7 @@ class Sydent:
         )
         self.template_environment = Environment(
             loader=FileSystemLoader(self.cfg.get("general", "templates.path")),
-            autoescape=select_autoescape(default = True),
+            autoescape=select_autoescape(default=True),
         )
 
         # See if a pepper already exists in the database

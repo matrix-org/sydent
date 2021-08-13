@@ -4,7 +4,7 @@ from unittest.mock import patch
 from twisted.trial import unittest
 
 from sydent.util.emailutils import sendEmail
-from tests.utils import make_sydent, make_request
+from tests.utils import make_sydent
 
 
 class TestTemplate(unittest.TestCase):
