@@ -17,6 +17,7 @@ import json
 import sqlite3
 from typing import Any, Dict, List, Tuple
 from tests.utils import ResolvingMemoryReactorClock
+import argparse
 
 import signedjson.sign
 
@@ -26,14 +27,14 @@ from sydent.sydent import Sydent, parse_config_file, get_config_file_path, parse
 from sydent.util.hash import sha256_and_url_safe_base64
 
 def calculate_lookup_hash(sydent, address):
-        cur = sydent.db.cursor()
-        pepper_result = cur.execute("SELECT lookup_pepper from hashing_metadata")
-        pepper = pepper_result.fetchone()[0]
-        combo = "%s %s %s" % (address, "email", pepper)
-        lookup_hash = sha256_and_url_safe_base64(combo)
-        return lookup_hash
+    cur = sydent.db.cursor()
+    pepper_result = cur.execute("SELECT lookup_pepper from hashing_metadata")
+    pepper = pepper_result.fetchone()[0]
+    combo = "%s %s %s" % (address, "email", pepper)
+    lookup_hash = sha256_and_url_safe_base64(combo)
+    return lookup_hash
 
-def update_local_associations(sydent, db: sqlite3.Connection):
+def update_local_associations(sydent, db: sqlite3.Connection, flag):
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
     given email are deleted.
@@ -91,42 +92,48 @@ def update_local_associations(sydent, db: sqlite3.Connection):
 
 
     # iterate through the mxids and send email, let's only send on email per mxid
-    for mxid, address in mxids:
-        processed_mxids = []
+    if flag == 'no_email' or flag == 'dry_run':
+            pass
+    else:
+        for mxid, address in mxids:
+            processed_mxids = []
 
-        if mxid in processed_mxids:
-            continue
-        else:
-            templateFile = sydent.get_branded_template(
-                "matrix-org",
-                "migration_template.eml",
-                ("email", "email.template"),
+            if mxid in processed_mxids:
+                continue
+            else:
+                templateFile = sydent.get_branded_template(
+                    "matrix-org",
+                    "migration_template.eml",
+                    ("email", "email.template"),
+                )
+
+                sendEmail(
+                    sydent,
+                    templateFile,
+                    address,
+                    {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
+                )
+                processed_mxids.append(mxid)
+
+    if flag == 'dry_run':
+        pass
+    else:
+        if len(to_delete) > 0:
+            cur.executemany(
+                "DELETE FROM local_threepid_associations WHERE address = ?", to_delete
             )
 
-            sendEmail(
-                sydent,
-                templateFile,
-                address,
-                {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
+        if len(db_update_args) > 0:
+            cur.executemany(
+                "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
+                db_update_args,
             )
-            processed_mxids.append(mxid)
 
-    if len(to_delete) > 0:
-        cur.executemany(
-            "DELETE FROM local_threepid_associations WHERE address = ?", to_delete
-        )
-
-    if len(db_update_args) > 0:
-        cur.executemany(
-            "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
-            db_update_args,
-        )
-
-    # We've finished updating the database, committing the transaction.
-    db.commit()
+        # We've finished updating the database, committing the transaction.
+        db.commit()
 
 
-def update_global_assoc(sydent, db: sqlite3.Connection):
+def update_global_assoc(sydent, db: sqlite3.Connection, flag):
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
     mxid's associated with the given email are deleted.
@@ -202,44 +209,65 @@ def update_global_assoc(sydent, db: sqlite3.Connection):
                 mxids.append((mxid, address))
 
     # iterate through the mxids and send email, let's only send on email per mxid
-    for mxid, address in mxids:
-        processed_mxids = []
+    if flag == 'no_email' or flag == 'dry_run':
+        pass
+    else:
+        for mxid, address in mxids:
+            processed_mxids = []
 
-        if mxid in processed_mxids:
-            continue
-        else:
-            templateFile = sydent.get_branded_template(
-                "matrix-org",
-                "migration_template.eml",
-                ("email", "email.template"),
+            if mxid in processed_mxids:
+                continue
+            else:
+                templateFile = sydent.get_branded_template(
+                    "matrix-org",
+                    "migration_template.eml",
+                    ("email", "email.template"),
+                )
+
+                sendEmail(
+                    sydent,
+                    templateFile,
+                    address,
+                    {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
+                )
+                processed_mxids.append(mxid)
+
+    if flag == 'dry_run':
+        pass
+    else:
+        if len(to_delete) > 0:
+            cur.executemany(
+                "DELETE FROM global_threepid_associations WHERE address = ?", to_delete
             )
 
-            sendEmail(
-                sydent,
-                templateFile,
-                address,
-                {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
+        if len(db_update_args) > 0:
+            cur.executemany(
+                "UPDATE global_threepid_associations SET address = ?, lookup_hash = ?, sgAssoc = ? WHERE address = ? AND mxid = ?",
+                db_update_args,
             )
-            processed_mxids.append(mxid)
 
-    if len(to_delete) > 0:
-        cur.executemany(
-            "DELETE FROM global_threepid_associations WHERE address = ?", to_delete
-        )
-
-    if len(db_update_args) > 0:
-        cur.executemany(
-            "UPDATE global_threepid_associations SET address = ?, lookup_hash = ?, sgAssoc = ? WHERE address = ? AND mxid = ?",
-            db_update_args,
-        )
-
-    db.commit()
+        db.commit()
 
 if __name__ == "__main__":
-    # need an instance of sydent and an instance of the db
+    parser = argparse.ArgumentParser(description="Casefold email addresses in database")
+    parser.add_argument('--no_email', action="store_true", help='run script but do not send emails')
+    parser.add_argument('--apply', action="store_true", help='run full script')
+    parser.add_argument('--dry_run', action='store_true', help='run script but do not send emails or alter database')
+
+    args = parser.parse_args()
+
+    if args.no_email:
+        flag = 'no_email'
+
+    if args.dry_run:
+        flag = 'dry_run'
+
+    if args.apply:
+        flag = 'apply'
+
     reactor = ResolvingMemoryReactorClock()
     config = parse_config_file(get_config_file_path())
     sydent = Sydent(config, reactor, False)
 
-    update_global_assoc(sydent, sydent.db)
-    update_local_associations(sydent, sydent.db)
+    update_global_assoc(sydent, sydent.db, flag)
+    update_local_associations(sydent, sydent.db, flag)

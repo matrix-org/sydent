@@ -9,14 +9,7 @@ from scripts.casefold_db import (
     update_global_assoc,
     update_local_associations,
 )
-from scripts.casefold_db_dry_run import (
-    update_global_assoc_dry_run,
-    update_local_associations_dry_run,
-)
-from scripts.casefold_db_no_email import (
-    update_global_assoc_no_email,
-    update_local_associations_no_email,
-)
+
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from tests.utils import make_sydent
@@ -204,7 +197,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_local_db_migration(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_local_associations(self.sydent, self.sydent.db)
+            update_local_associations(self.sydent, self.sydent.db, "apply")
 
         # test 5 emails were sent
         smtp = smtplib.SMTP.return_value
@@ -240,7 +233,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_global_db_migration(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_global_assoc(self.sydent, self.sydent.db)
+            update_global_assoc(self.sydent, self.sydent.db, "apply")
 
         # test 5 emails were sent
         smtp = smtplib.SMTP.return_value
@@ -279,7 +272,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_global_no_email_does_not_send_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_global_assoc_no_email(self.sydent, self.sydent.db)
+            update_global_assoc(self.sydent, self.sydent.db, "no_email")
             smtp = smtplib.SMTP.return_value
 
             # test no emails were sent
@@ -287,7 +280,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_local_no_email_does_not_send_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_local_associations_no_email(self.sydent, self.sydent.db)
+            update_local_associations(self.sydent, self.sydent.db, "no_email")
             smtp = smtplib.SMTP.return_value
 
             # test no emails were sent
@@ -304,7 +297,7 @@ class MigrationTestCase(unittest.TestCase):
         list1 = res1.fetchall()
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_global_assoc_dry_run(self.sydent, self.sydent.db)
+            update_global_assoc(self.sydent, self.sydent.db, "dry_run")
 
         # test no emails were sent
         smtp = smtplib.SMTP.return_value
@@ -320,7 +313,7 @@ class MigrationTestCase(unittest.TestCase):
         list3 = res3.fetchall()
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_local_associations_dry_run(self.sydent, self.sydent.db)
+            update_local_associations(self.sydent, self.sydent.db, "dry_run")
 
         # test no emails were sent
         smtp = smtplib.SMTP.return_value
