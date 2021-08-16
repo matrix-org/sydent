@@ -35,7 +35,7 @@ Matrix defines the standard, and provides open source reference implementations 
 Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
 create new communication solutions or extend the capabilities and reach of existing ones.
 
---{{ multipart_boundary }}
+--{{ multipart_boundary|safe }}
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -59,11 +59,11 @@ body {
 identity server. If this was you who made this request, you may use the
 following link to complete the verification of your email address:</p>
 
-<p><a href="{{ link }}">Complete email verification</a></p>
+<p><a href="{{ link|safe }}">Complete email verification</a></p>
 
 <p>...or copy this link into your web browser:</p>
 
-<p>{{ link }}</p>
+<p>{{ link|safe }}</p>
 
 <p>If your client requires a code, the code is {{ token }}</p>
 
@@ -85,4 +85,4 @@ create new communication solutions or extend the capabilities and reach of exist
 </body>
 </html>
 
---{{ multipart_boundary }}--
+--{{ multipart_boundary|safe }}--

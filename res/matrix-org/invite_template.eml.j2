@@ -39,7 +39,7 @@ Thanks,
 
 Matrix
 
---{{ multipart_boundary }}
+--{{ multipart_boundary|safe }}
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -142,4 +142,4 @@ create new communication solutions or extend the capabilities and reach of exist
     </body>
 </html>
 
---{{ multipart_boundary }}--
+--{{ multipart_boundary|safe }}--

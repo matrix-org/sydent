@@ -7,7 +7,7 @@ MIME-Version: 1.0
 Content-Type: multipart/alternative;
 	boundary="{{ multipart_boundary|safe }}"
 
---{{ multipart_boundary }}
+--{{ multipart_boundary|safe }}
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
@@ -51,7 +51,7 @@ decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.
 
---{{ multipart_boundary }}
+--{{ multipart_boundary|safe }}
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -125,7 +125,8 @@ pre, code {
                     <p>If it was really you who made this request, you can click on the following link to
                     complete the verification of your email address:</p>
 
-                    <p><a href="{{ link }}">Complete email verification</a></p>
+                    <p><a href="{{ link|safe }}">Complete email verification</a></p>
+
 
                     <p>Please note that Element requires
                     <a href="https://www.google.com/chrome">Chrome</a>,
@@ -167,4 +168,4 @@ pre, code {
     </body>
 </html>
 
---{{ multipart_boundary }}--
+--{{ multipart_boundary|safe }}--
