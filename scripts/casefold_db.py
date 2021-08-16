@@ -18,6 +18,7 @@ import sqlite3
 from typing import Any, Dict, List, Tuple
 from tests.utils import ResolvingMemoryReactorClock
 import argparse
+import sys
 
 import signedjson.sign
 
@@ -114,6 +115,8 @@ def update_local_associations(sydent, db: sqlite3.Connection, flag):
                     {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
                 )
                 processed_mxids.append(mxid)
+
+    print(f'{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations')
 
     if flag == 'dry_run':
         pass
@@ -232,6 +235,8 @@ def update_global_assoc(sydent, db: sqlite3.Connection, flag):
                 )
                 processed_mxids.append(mxid)
 
+    print(f'{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations')
+
     if flag == 'dry_run':
         pass
     else:
@@ -254,16 +259,19 @@ if __name__ == "__main__":
     parser.add_argument('--apply', action="store_true", help='run full script')
     parser.add_argument('--dry_run', action='store_true', help='run script but do not send emails or alter database')
 
-    args = parser.parse_args()
+    args = vars(parser.parse_args())
 
-    if args.no_email:
-        flag = 'no_email'
+    count = 0
+    for _, value in args.items():
+        if value:
+            count += 1
+            flag = value
 
-    if args.dry_run:
-        flag = 'dry_run'
-
-    if args.apply:
-        flag = 'apply'
+    # exit if we have been given more than one flag or no flag
+    if count > 1:
+        sys.exit("Please specify only one flag to execute, refer to -help for options.")
+    elif count == 0:
+        sys.exit("Please specify a flag to execute, refer to -help for more help.")
 
     reactor = ResolvingMemoryReactorClock()
     config = parse_config_file(get_config_file_path())
