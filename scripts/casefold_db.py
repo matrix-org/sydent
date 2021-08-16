@@ -13,19 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import json
 import sqlite3
-from typing import Any, Dict, List, Tuple
-from tests.utils import ResolvingMemoryReactorClock
-import argparse
 import sys
+from typing import Any, Dict, List, Tuple
 
 import signedjson.sign
 
+from sydent.sydent import Sydent, get_config_file_path, parse_config_file
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
-from sydent.sydent import Sydent, parse_config_file, get_config_file_path, parse_config_dict
 from sydent.util.hash import sha256_and_url_safe_base64
+from tests.utils import ResolvingMemoryReactorClock
+
 
 def calculate_lookup_hash(sydent, address):
     cur = sydent.db.cursor()
@@ -34,6 +35,7 @@ def calculate_lookup_hash(sydent, address):
     combo = "%s %s %s" % (address, "email", pepper)
     lookup_hash = sha256_and_url_safe_base64(combo)
     return lookup_hash
+
 
 def update_local_associations(sydent, db: sqlite3.Connection, flag):
     """Update the DB table local_threepid_associations so that all stored
@@ -91,10 +93,9 @@ def update_local_associations(sydent, db: sqlite3.Connection, flag):
                 to_delete.append((address,))
                 mxids.append((mxid, address))
 
-
     # iterate through the mxids and send email, let's only send on email per mxid
-    if flag == 'no_email' or flag == 'dry_run':
-            pass
+    if flag == "no_email" or flag == "dry_run":
+        pass
     else:
         for mxid, address in mxids:
             processed_mxids = []
@@ -116,9 +117,11 @@ def update_local_associations(sydent, db: sqlite3.Connection, flag):
                 )
                 processed_mxids.append(mxid)
 
-    print(f'{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations')
+    print(
+        f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations"
+    )
 
-    if flag == 'dry_run':
+    if flag == "dry_run":
         pass
     else:
         if len(to_delete) > 0:
@@ -212,7 +215,7 @@ def update_global_assoc(sydent, db: sqlite3.Connection, flag):
                 mxids.append((mxid, address))
 
     # iterate through the mxids and send email, let's only send on email per mxid
-    if flag == 'no_email' or flag == 'dry_run':
+    if flag == "no_email" or flag == "dry_run":
         pass
     else:
         for mxid, address in mxids:
@@ -235,9 +238,11 @@ def update_global_assoc(sydent, db: sqlite3.Connection, flag):
                 )
                 processed_mxids.append(mxid)
 
-    print(f'{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations')
+    print(
+        f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
+    )
 
-    if flag == 'dry_run':
+    if flag == "dry_run":
         pass
     else:
         if len(to_delete) > 0:
@@ -253,11 +258,18 @@ def update_global_assoc(sydent, db: sqlite3.Connection, flag):
 
         db.commit()
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Casefold email addresses in database")
-    parser.add_argument('--no_email', action="store_true", help='run script but do not send emails')
-    parser.add_argument('--apply', action="store_true", help='run full script')
-    parser.add_argument('--dry_run', action='store_true', help='run script but do not send emails or alter database')
+    parser.add_argument(
+        "--no_email", action="store_true", help="run script but do not send emails"
+    )
+    parser.add_argument("--apply", action="store_true", help="run full script")
+    parser.add_argument(
+        "--dry_run",
+        action="store_true",
+        help="run script but do not send emails or alter database",
+    )
 
     args = vars(parser.parse_args())
 
