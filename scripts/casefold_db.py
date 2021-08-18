@@ -15,13 +15,13 @@
 
 import argparse
 import json
+import os
 import sqlite3
-import sys
 from typing import Any, Dict, List, Tuple
 
 import signedjson.sign
 
-from sydent.sydent import Sydent, get_config_file_path, parse_config_file
+from sydent.sydent import Sydent, parse_config_file
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -37,7 +37,9 @@ def calculate_lookup_hash(sydent, address):
     return lookup_hash
 
 
-def update_local_associations(sydent, db: sqlite3.Connection, flag):
+def update_local_associations(
+    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+):
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
     given email are deleted.
@@ -94,9 +96,7 @@ def update_local_associations(sydent, db: sqlite3.Connection, flag):
                 mxids.append((mxid, address))
 
     # iterate through the mxids and send email, let's only send on email per mxid
-    if flag == "no_email" or flag == "dry_run":
-        pass
-    else:
+    if send_email and not dry_run:
         for mxid, address in mxids:
             processed_mxids = []
 
@@ -121,9 +121,7 @@ def update_local_associations(sydent, db: sqlite3.Connection, flag):
         f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations"
     )
 
-    if flag == "dry_run":
-        pass
-    else:
+    if not dry_run:
         if len(to_delete) > 0:
             cur.executemany(
                 "DELETE FROM local_threepid_associations WHERE address = ?", to_delete
@@ -139,7 +137,9 @@ def update_local_associations(sydent, db: sqlite3.Connection, flag):
         db.commit()
 
 
-def update_global_assoc(sydent, db: sqlite3.Connection, flag):
+def update_global_assoc(
+    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+):
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
     mxid's associated with the given email are deleted.
@@ -215,9 +215,7 @@ def update_global_assoc(sydent, db: sqlite3.Connection, flag):
                 mxids.append((mxid, address))
 
     # iterate through the mxids and send email, let's only send on email per mxid
-    if flag == "no_email" or flag == "dry_run":
-        pass
-    else:
+    if send_email and not dry_run:
         for mxid, address in mxids:
             processed_mxids = []
 
@@ -242,9 +240,7 @@ def update_global_assoc(sydent, db: sqlite3.Connection, flag):
         f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
     )
 
-    if flag == "dry_run":
-        pass
-    else:
+    if not dry_run:
         if len(to_delete) > 0:
             cur.executemany(
                 "DELETE FROM global_threepid_associations WHERE address = ?", to_delete
@@ -262,32 +258,27 @@ def update_global_assoc(sydent, db: sqlite3.Connection, flag):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Casefold email addresses in database")
     parser.add_argument(
-        "--no_email", action="store_true", help="run script but do not send emails"
+        "--no-email", action="store_true", help="run script but do not send emails"
     )
-    parser.add_argument("--apply", action="store_true", help="run full script")
     parser.add_argument(
-        "--dry_run",
+        "--dry-run",
         action="store_true",
         help="run script but do not send emails or alter database",
     )
 
-    args = vars(parser.parse_args())
+    parser.add_argument("config_path", help="path to the sydent configuration file")
 
-    count = 0
-    for _, value in args.items():
-        if value:
-            count += 1
-            flag = value
+    args = parser.parse_args()
 
-    # exit if we have been given more than one flag or no flag
-    if count > 1:
-        sys.exit("Please specify only one flag to execute, refer to -help for options.")
-    elif count == 0:
-        sys.exit("Please specify a flag to execute, refer to -help for more help.")
+    # if the path the user gives us doesn't work, find it for them
+    if os.path.exists(args.config_path):
+        config = parse_config_file(args.config_path)
+    else:
+        config_file_path = os.environ.get("SYDENT_CONF", "sydent.conf")
+        config = parse_config_file(config_file_path)
 
     reactor = ResolvingMemoryReactorClock()
-    config = parse_config_file(get_config_file_path())
     sydent = Sydent(config, reactor, False)
 
-    update_global_assoc(sydent, sydent.db, flag)
-    update_local_associations(sydent, sydent.db, flag)
+    update_global_assoc(sydent, sydent.db, not args.no_email, args.dry_run)
+    update_local_associations(sydent, sydent.db, not args.no_email, args.dry_run)
