@@ -67,11 +67,9 @@ def sendEmail(
 
     for k, v in substitutions.items():
         allSubstitutions[k] = v
-        if templateFile.endswith(".j2"):
-            allSubstitutions[k + "_forhtml"] = v
-        else:
+        if not templateFile.endswith(".j2"):
             allSubstitutions[k + "_forhtml"] = escape(v)
-        allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
+            allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
 
     # We add randomize the multipart boundary to stop user input from
     # conflicting with it.
