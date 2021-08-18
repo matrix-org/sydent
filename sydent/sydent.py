@@ -23,7 +23,7 @@ import os
 from typing import Set
 
 import twisted.internet.reactor
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 from twisted.internet import address, task
 from twisted.python import log
 
@@ -297,7 +297,7 @@ class Sydent:
         )
         self.template_environment = Environment(
             loader=FileSystemLoader(self.cfg.get("general", "templates.path")),
-            autoescape=select_autoescape(default=True),
+            autoescape=True,
         )
 
         # See if a pepper already exists in the database
