@@ -19,7 +19,8 @@ Matrix client from https://matrix.org/docs/projects/try-matrix-now.html or use
 the single-click link below to join via Element (requires Chrome, Firefox,
 Safari, iOS or Android)
 
-{{ web_client_location }}/#/room/{{ room_id_forurl }}?email={{ to_forurl }}&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D{{ token }}%%26private_key%%3D{{ ephemeral_private_key }}&room_name={{ room_name_forurl }}&room_avatar_url={{ room_avatar_url_forurl }}&inviter_name={{ sender_display_name_forurl }}&guest_access_token={{ guest_access_token_forurl }}&guest_user_id={{ guest_user_id_forurl }}
+
+{{ web_client_location }}/#/room/{{ room_id|urlencode }}?email={{ to|urlencode }}&signurl=https%3A%2F%2Fmatrix.org%2F_matrix%2Fidentity%2Fapi%2Fv1%2Fsign-ed25519%3Ftoken%3D{{ token|urlencode }}%26private_key%3D{{ ephemeral_private_key|urlencode }}&room_name={{ room_name|urlencode }}&room_avatar_url={{ room_avatar_url|urlencode }}&inviter_name={{ sender_display_name|urlencode }}&guest_access_token={{ guest_access_token|urlencode }}&guest_user_id={{ guest_user_id|urlencode }}
 
 
 About Matrix:
@@ -104,7 +105,7 @@ pre, code {
 
 <p>Hi,</p>
 
-<p>{{ sender_display_name_forhtml }} <span class="low-contrast">{{ bracketed_verified_sender_forhtml }}</span> has invited you into a room {{ bracketed_room_name_forhtml }} on
+<p>{{ sender_display_name }} <span class="low-contrast">{{ bracketed_verified_sender }}</span> has invited you into a room {{ bracketed_room_name }} on
 Matrix. To join the conversation, either <a href="https://matrix.org/docs/projects/try-matrix-now.html">pick a Matrix client</a> or use the single-click
 link below to join via Element (requires
 <a href="https://www.google.com/chrome">Chrome</a>,
@@ -115,7 +116,7 @@ or iOS or Android on mobile.)</p>
 
 <p>
     <a
-    href="https://app.element.io/#/room/{{ room_id_forurl }}?email={{ to_forurl }}&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D{{ token }}%%26private_key%%3D{{ ephemeral_private_key }}&room_name={{ room_name_forurl }}&room_avatar_url={{ room_avatar_url_forurl }}&inviter_name={{ sender_display_name_forurl }}&guest_access_token={{ guest_access_token_forurl }}&guest_user_id={{ guest_user_id_forurl }}">Join the conversation.</a>
+    href="https://app.element.io/#/room/{{ room_id|urlencode }}?email={{ to|urlencode }}&signurl=https%3A%2F%2Fmatrix.org%2F_matrix%2Fidentity%2Fapi%2Fv1%2Fsign-ed25519%3Ftoken%3D{{ token|urlencode }}%26private_key%3D{{ ephemeral_private_key|urlencode }}&room_name={{ room_name|urlencode }}&room_avatar_url={{ room_avatar_url|urlencode }}&inviter_name={{ sender_display_name|urlencode }}&guest_access_token={{ guest_access_token|urlencode }}&guest_user_id={{ guest_user_id|urlencode }}">Join the conversation.</a>
 </p>
 
 <br>

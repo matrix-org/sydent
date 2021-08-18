@@ -19,7 +19,7 @@ distributed and secure shared workspace for the web that's built on Matrix.
 If it was really you who made this request, you can click on the following link to
 complete the verification of your email address:
 
-{{ link|safe }}
+{{ link|urlencode }}
 
 Please note that you will need to use Chrome, Firefox or Safari on the web, or
 iOS or Android on mobile.
@@ -125,7 +125,7 @@ pre, code {
                     <p>If it was really you who made this request, you can click on the following link to
                     complete the verification of your email address:</p>
 
-                    <p><a href="{{ link|safe }}">Complete email verification</a></p>
+                    <p><a href="{{ link|urlencode }}">Complete email verification</a></p>
 
 
                     <p>Please note that Element requires
