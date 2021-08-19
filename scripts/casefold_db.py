@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import sqlite3
+import sys
 from typing import Any, Dict, List, Tuple
 
 import signedjson.sign
@@ -271,11 +272,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # if the path the user gives us doesn't work, find it for them
-    if os.path.exists(args.config_path):
-        config = parse_config_file(args.config_path)
-    else:
-        config_file_path = os.environ.get("SYDENT_CONF", "sydent.conf")
-        config = parse_config_file(config_file_path)
+    if not os.path.exists(args.config_path):
+        print(f"The config file '{args.config_path}' does not exist.")
+        sys.exit(1)
+
+    config = parse_config_file(args.config_path)
 
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(config, reactor, False)
