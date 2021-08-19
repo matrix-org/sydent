@@ -1,6 +1,6 @@
 import os.path
 import urllib
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from twisted.trial import unittest
 
@@ -165,15 +165,16 @@ class TestTemplate(unittest.TestCase):
         smtp = smtplib.SMTP.return_value
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
 
-        # test url input is encoded
-        self.assertIn(urllib.parse.quote("https://link_test.com"), email_contents)
-
         # test html input is escaped
         self.assertIn("&lt;&lt;token&gt;&gt;", email_contents)
 
         # test safe values are not escaped
         self.assertIn("<<token>>", email_contents)
 
+    @patch(
+        "sydent.util.emailutils.generateAlphanumericTokenOfLength",
+        Mock(return_value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+    )
     def test_jinja_vector_verification(self):
         substitutions = {
             "address": "foo@example.com",
@@ -194,9 +195,6 @@ class TestTemplate(unittest.TestCase):
         smtp = smtplib.SMTP.return_value
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
 
-        # test url input is encoded
-        self.assertIn(urllib.parse.quote("https://link_test.com"), email_contents)
-
         path = os.path.join(
             self.sydent.cfg.get("general", "templates.path"),
             "vector_verification_sample.txt",
@@ -205,12 +203,8 @@ class TestTemplate(unittest.TestCase):
         with open(path, "r") as file:
             expected_text = file.read()
 
-        # remove headers as they are variable
-        email_contents = email_contents.splitlines()[13:]
-
-        # remove multipart headers as they are variable
-        del email_contents[40]
-        del email_contents[156]
+        # remove the email headers as they are variable
+        email_contents = email_contents[email_contents.index("Hello") :]
 
         # test all ouput is as expected
-        self.assertEqual("\n".join(email_contents), expected_text)
+        self.assertEqual(email_contents, expected_text)

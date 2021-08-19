@@ -6,7 +6,7 @@ distributed and secure shared workspace for the web that's built on Matrix.
 If it was really you who made this request, you can click on the following link to
 complete the verification of your email address:
 
-https%3A//link_test.com
+https://link_test.com
 
 Please note that you will need to use Chrome, Firefox or Safari on the web, or
 iOS or Android on mobile.
@@ -38,6 +38,7 @@ decentralized communication delivering a community of users, bridged networks,
 integrated bots and applications plus full end-to-end encryption. To learn more about
 Matrix visit https://matrix.org.
 
+--aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -111,7 +112,7 @@ pre, code {
                     <p>If it was really you who made this request, you can click on the following link to
                     complete the verification of your email address:</p>
 
-                    <p><a href="https%3A//link_test.com">Complete email verification</a></p>
+                    <p><a href="https://link_test.com">Complete email verification</a></p>
 
 
                     <p>Please note that Element requires
@@ -153,3 +154,5 @@ pre, code {
         </table>
     </body>
 </html>
+
+--aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa--

@@ -17,7 +17,7 @@ We have received a request to use this email address with a matrix.org identity
 server. If this was you who made this request, you may use the following link
 to complete the verification of your email address:
 
-{{ link|urlencode }}
+{{ link|safe}}
 
 If your client requires a code, the code is {{ token|safe }}
 
@@ -59,11 +59,11 @@ body {
 identity server. If this was you who made this request, you may use the
 following link to complete the verification of your email address:</p>
 
-<p><a href="{{ link|urlencode }}">Complete email verification</a></p>
+<p><a href="{{ link }}">Complete email verification</a></p>
 
 <p>...or copy this link into your web browser:</p>
 
-<p>{{ link|urlencode }}</p>
+<p>{{ link }}</p>
 
 <p>If your client requires a code, the code is {{ token }}</p>
 
