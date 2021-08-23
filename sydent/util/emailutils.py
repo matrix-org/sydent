@@ -79,7 +79,9 @@ def sendEmail(
             for k, v in substitutions.items():
                 allSubstitutions[k + "_forhtml"] = escape(v)
                 allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
-            allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
+            allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(
+                32
+            )
             mailString = template_file.read() % allSubstitutions
 
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
