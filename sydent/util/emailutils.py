@@ -65,26 +65,21 @@ def sendEmail(
 
     allSubstitutions = {}
 
-    for k, v in substitutions.items():
-        allSubstitutions[k] = v
-        if not templateFile.endswith(".j2"):
-            allSubstitutions[k + "_forhtml"] = escape(v)
-            allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
-
-    # We add randomize the multipart boundary to stop user input from
-    # conflicting with it.
-    allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
-
-    # extract branded template name from templateFile
-    file_parts = templateFile.split("/")
-    template_name = file_parts[-2] + "/" + file_parts[-1]
-
     # use jinja for rendering if jinja templates are present
-    with open(templateFile) as template_file:
-        if templateFile.endswith(".j2"):
-            template = sydent.template_environment.get_template(template_name)
-            mailString = template.render(allSubstitutions)
-        else:
+    if templateFile.endswith(".j2"):
+        for k, v in substitutions.items():
+            allSubstitutions[k] = v
+        # We add randomize the multipart boundary to stop user input from
+        # conflicting with it.
+        allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
+        template = sydent.template_environment.get_template(templateFile)
+        mailString = template.render(allSubstitutions)
+    else:
+        with open(templateFile) as template_file:
+            for k, v in substitutions.items():
+                allSubstitutions[k + "_forhtml"] = escape(v)
+                allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
+            allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
             mailString = template_file.read() % allSubstitutions
 
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
