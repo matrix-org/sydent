@@ -123,7 +123,7 @@ class MigrationTestCase(unittest.TestCase):
         for i in range(5):
             address = "BOB%d@example.com" % i
             mxid = "@BOB%d:example.com" % i
-            ts = (10000 * i)
+            ts = 10000 * i
             associations.append(
                 {
                     "medium": "email",
@@ -230,7 +230,8 @@ class MigrationTestCase(unittest.TestCase):
             casefolded = row[2].casefold()
             self.assertEqual(row[2], casefolded)
             self.assertEqual(
-                calculate_lookup_hash(self.sydent, row[2]), calculate_lookup_hash(self.sydent,casefolded)
+                calculate_lookup_hash(self.sydent, row[2]),
+                calculate_lookup_hash(self.sydent, casefolded),
             )
 
     def test_global_db_migration(self):
@@ -252,7 +253,8 @@ class MigrationTestCase(unittest.TestCase):
             casefolded = row[2].casefold()
             self.assertEqual(row[2], casefolded)
             self.assertEqual(
-                calculate_lookup_hash(self.sydent,row[2]), calculate_lookup_hash(self.sydent,casefolded)
+                calculate_lookup_hash(self.sydent, row[2]),
+                calculate_lookup_hash(self.sydent, casefolded),
             )
             sgassoc = json_decoder.decode(row[9])
             self.assertEqual(row[2], sgassoc["address"])
