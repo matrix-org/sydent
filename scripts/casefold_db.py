@@ -96,7 +96,7 @@ def update_local_associations(
                 to_delete.append((address,))
                 mxids.append((mxid, address))
 
-    # iterate through the mxids and send email, let's only send on email per mxid
+    # iterate through the mxids and send email, let's only send one email per mxid
     if send_email and not dry_run:
         for mxid, address in mxids:
             processed_mxids = []
@@ -105,7 +105,7 @@ def update_local_associations(
                 continue
             else:
                 templateFile = sydent.get_branded_template(
-                    "matrix-org",
+                    "none",
                     "migration_template.eml",
                     ("email", "email.template"),
                 )
@@ -138,7 +138,7 @@ def update_local_associations(
         db.commit()
 
 
-def update_global_assoc(
+def update_global_associations(
     sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
 ):
     """Update the DB table global_threepid_associations so that all stored
@@ -193,10 +193,6 @@ def update_global_assoc(
     # list of mxids to delete
     to_delete: List[Tuple[str]] = []
 
-    # list of mxids and addresses to send emails to letting them know the mxid
-    # has been deleted
-    mxids: List[Tuple[Any, Any]] = []
-
     for casefold_address, assoc_tuples in associations.items():
         db_update_args.append(
             (
@@ -213,29 +209,6 @@ def update_global_assoc(
             # processed it.
             for address, mxid, _, _ in assoc_tuples[1:]:
                 to_delete.append((address,))
-                mxids.append((mxid, address))
-
-    # iterate through the mxids and send email, let's only send on email per mxid
-    if send_email and not dry_run:
-        for mxid, address in mxids:
-            processed_mxids = []
-
-            if mxid in processed_mxids:
-                continue
-            else:
-                templateFile = sydent.get_branded_template(
-                    "matrix-org",
-                    "migration_template.eml",
-                    ("email", "email.template"),
-                )
-
-                sendEmail(
-                    sydent,
-                    templateFile,
-                    address,
-                    {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
-                )
-                processed_mxids.append(mxid)
 
     print(
         f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
@@ -281,5 +254,5 @@ if __name__ == "__main__":
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(config, reactor, False)
 
-    update_global_assoc(sydent, sydent.db, not args.no_email, args.dry_run)
+    update_global_associations(sydent, sydent.db, not args.no_email, args.dry_run)
     update_local_associations(sydent, sydent.db, not args.no_email, args.dry_run)

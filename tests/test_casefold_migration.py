@@ -6,7 +6,7 @@ from twisted.trial import unittest
 
 from scripts.casefold_db import (
     calculate_lookup_hash,
-    update_global_assoc,
+    update_global_associations,
     update_local_associations,
 )
 from sydent.util import json_decoder
@@ -42,34 +42,33 @@ class MigrationTestCase(unittest.TestCase):
         # create some local associations
         associations = []
 
-        for i in range(15):
-            if i < 10:
-                address = "bob%d@example.com" % i
-                associations.append(
-                    {
-                        "medium": "email",
-                        "address": address,
-                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
-                        "mxid": "@bob%d:example.com" % i,
-                        "ts": (i * 10000),
-                        "not_before": 0,
-                        "not_after": 99999999999,
-                    }
-                )
-            else:
-                # create some casefold-conflicting associations
-                address = "BOB%d@example.com" % (i - 10)
-                associations.append(
-                    {
-                        "medium": "email",
-                        "address": address,
-                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
-                        "mxid": "@BOB%d:example.com" % (i - 10),
-                        "ts": (i * 10000),
-                        "not_before": 0,
-                        "not_after": 99999999999,
-                    }
-                )
+        for i in range(10):
+            address = "bob%d@example.com" % i
+            associations.append(
+                {
+                    "medium": "email",
+                    "address": address,
+                    "lookup_hash": calculate_lookup_hash(self.sydent, address),
+                    "mxid": "@bob%d:example.com" % i,
+                    "ts": (i * 10000),
+                    "not_before": 0,
+                    "not_after": 99999999999,
+                }
+            )
+        # create some casefold-conflicting associations
+        for i in range(5):
+            address = "BOB%d@example.com" % i
+            associations.append(
+                {
+                    "medium": "email",
+                    "address": address,
+                    "lookup_hash": calculate_lookup_hash(self.sydent, address),
+                    "mxid": "@BOB%d:example.com" % i,
+                    "ts": (i * 10000),
+                    "not_before": 0,
+                    "not_after": 99999999999,
+                }
+            )
 
         # add all associations to db
         cur = self.sydent.db.cursor()
@@ -98,52 +97,51 @@ class MigrationTestCase(unittest.TestCase):
         associations = []
         originServer = self.sydent.server_name
 
-        for i in range(15):
-            if i < 10:
-                address = "bob%d@example.com" % i
-                mxid = "@bob%d:example.com" % i
-                ts = 10000 * i
-                associations.append(
-                    {
-                        "medium": "email",
-                        "address": address,
-                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
-                        "mxid": mxid,
-                        "ts": ts,
-                        "not_before": 0,
-                        "not_after": 99999999999,
-                        "originServer": originServer,
-                        "originId": i,
-                        "sgAssoc": json.dumps(
-                            self.create_signedassoc(
-                                "email", address, mxid, ts, 0, 99999999999
-                            )
-                        ),
-                    }
-                )
-            else:
-                # create some casefold-conflicting associations
-                address = "BOB%d@example.com" % (i - 10)
-                mxid = "@BOB%d:example.com" % (i - 10)
-                ts = 10000 * i
-                associations.append(
-                    {
-                        "medium": "email",
-                        "address": address,
-                        "lookup_hash": calculate_lookup_hash(self.sydent, address),
-                        "mxid": mxid,
-                        "ts": ts,
-                        "not_before": 0,
-                        "not_after": 99999999999,
-                        "originServer": originServer,
-                        "originId": i,
-                        "sgAssoc": json.dumps(
-                            self.create_signedassoc(
-                                "email", address, mxid, ts, 0, 99999999999
-                            )
-                        ),
-                    }
-                )
+        for i in range(10):
+            address = "bob%d@example.com" % i
+            mxid = "@bob%d:example.com" % i
+            ts = 10000 * i
+            associations.append(
+                {
+                    "medium": "email",
+                    "address": address,
+                    "lookup_hash": calculate_lookup_hash(self.sydent, address),
+                    "mxid": mxid,
+                    "ts": ts,
+                    "not_before": 0,
+                    "not_after": 99999999999,
+                    "originServer": originServer,
+                    "originId": i,
+                    "sgAssoc": json.dumps(
+                        self.create_signedassoc(
+                            "email", address, mxid, ts, 0, 99999999999
+                        )
+                    ),
+                }
+            )
+        # create some casefold-conflicting associations
+        for i in range(5):
+            address = "BOB%d@example.com" % i
+            mxid = "@BOB%d:example.com" % i
+            ts = (10000 * i)
+            associations.append(
+                {
+                    "medium": "email",
+                    "address": address,
+                    "lookup_hash": calculate_lookup_hash(self.sydent, address),
+                    "mxid": mxid,
+                    "ts": ts + 1,
+                    "not_before": 0,
+                    "not_after": 99999999999,
+                    "originServer": originServer,
+                    "originId": i + 10,
+                    "sgAssoc": json.dumps(
+                        self.create_signedassoc(
+                            "email", address, mxid, ts, 0, 99999999999
+                        )
+                    ),
+                }
+            )
 
         # add all associations to db
         cur = self.sydent.db.cursor()
@@ -209,8 +207,9 @@ class MigrationTestCase(unittest.TestCase):
             smtp.sendmail.call_args_list,
             [
                 "bob5@example.com",
-                "bob6@example.com"
-                "bob7@example.com, bob8@example.com"
+                "bob6@example.com",
+                "bob7@example.com",
+                "bob8@example.com",
                 "bob9@example.com",
             ],
         )
@@ -221,67 +220,42 @@ class MigrationTestCase(unittest.TestCase):
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT * FROM local_threepid_associations")
 
+        db_state = res.fetchall()
+
         # five addresses should have been deleted
-        self.assertEqual(len(res.fetchall()), 10)
+        self.assertEqual(len(db_state), 10)
 
         # iterate through db and make sure all addresses are casefolded and hash matches casefolded address
-        for row in res.fetchall():
+        for row in db_state:
             casefolded = row[2].casefold()
             self.assertEqual(row[2], casefolded)
             self.assertEqual(
-                self.calculate_lookup(row[2]), self.calculate_lookup(casefolded)
+                calculate_lookup_hash(self.sydent, row[2]), calculate_lookup_hash(self.sydent,casefolded)
             )
 
     def test_global_db_migration(self):
-        with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_global_assoc(
-                self.sydent, self.sydent.db, send_email=True, dry_run=False
-            )
-
-        # test 5 emails were sent
-        smtp = smtplib.SMTP.return_value
-        self.assertEqual(smtp.sendmail.call_count, 5)
-
-        # don't send emails to people who weren't affected
-        self.assertNotIn(
-            smtp.sendmail.call_args_list,
-            [
-                "bob5@example.com",
-                "bob6@example.com"
-                "bob7@example.com, bob8@example.com"
-                "bob9@example.com",
-            ],
+        update_global_associations(
+            self.sydent, self.sydent.db, send_email=True, dry_run=False
         )
-
-        # make sure someone who is affected gets email
-        self.assertIn("bob4@example.com", smtp.sendmail.call_args_list[0][0])
 
         cur = self.sydent.db.cursor()
         res = cur.execute("SELECT * FROM global_threepid_associations")
 
+        db_state = res.fetchall()
+
         # five addresses should have been deleted
-        self.assertEqual(len(res.fetchall()), 10)
+        self.assertEqual(len(db_state), 10)
 
         # iterate through db and make sure all addresses are casefolded and hash matches casefolded address
         # and make sure the casefolded address matches the address in sgAssoc
-        for row in res.fetchall():
+        for row in db_state:
             casefolded = row[2].casefold()
             self.assertEqual(row[2], casefolded)
             self.assertEqual(
-                self.calculate_lookup(row[2]), self.calculate_lookup(casefolded)
+                calculate_lookup_hash(self.sydent,row[2]), calculate_lookup_hash(self.sydent,casefolded)
             )
             sgassoc = json_decoder.decode(row[9])
             self.assertEqual(row[2], sgassoc["address"])
-
-    def test_global_no_email_does_not_send_email(self):
-        with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_global_assoc(
-                self.sydent, self.sydent.db, send_email=False, dry_run=False
-            )
-            smtp = smtplib.SMTP.return_value
-
-            # test no emails were sent
-            self.assertEqual(smtp.sendmail.call_count, 0)
 
     def test_local_no_email_does_not_send_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
@@ -304,7 +278,7 @@ class MigrationTestCase(unittest.TestCase):
         list1 = res1.fetchall()
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            update_global_assoc(
+            update_global_associations(
                 self.sydent, self.sydent.db, send_email=True, dry_run=True
             )
 
