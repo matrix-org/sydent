@@ -67,13 +67,11 @@ def sendEmail(
 
     # use jinja for rendering if jinja templates are present
     if templateFile.endswith(".j2"):
-        for k, v in substitutions.items():
-            allSubstitutions[k] = v
         # We add randomize the multipart boundary to stop user input from
         # conflicting with it.
-        allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
+        substitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
         template = sydent.template_environment.get_template(templateFile)
-        mailString = template.render(allSubstitutions)
+        mailString = template.render(substitutions)
     else:
         with open(templateFile) as template_file:
             for k, v in substitutions.items():
