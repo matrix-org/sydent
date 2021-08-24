@@ -63,8 +63,6 @@ def sendEmail(
         }
     )
 
-    allSubstitutions = {}
-
     # use jinja for rendering if jinja templates are present
     if templateFile.endswith(".j2"):
         # We add randomize the multipart boundary to stop user input from
@@ -73,13 +71,12 @@ def sendEmail(
         template = sydent.template_environment.get_template(templateFile)
         mailString = template.render(substitutions)
     else:
+        allSubstitutions = {}
+        for k, v in substitutions.items():
+            allSubstitutions[k + "_forhtml"] = escape(v)
+            allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
+        allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
         with open(templateFile) as template_file:
-            for k, v in substitutions.items():
-                allSubstitutions[k + "_forhtml"] = escape(v)
-                allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
-            allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(
-                32
-            )
             mailString = template_file.read() % allSubstitutions
 
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
