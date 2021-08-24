@@ -172,7 +172,7 @@ class MigrationTestCase(unittest.TestCase):
     def test_migration_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             templateFile = self.sydent.get_branded_template(
-               None,
+                None,
                 "migration_template.eml",
                 ("email", "email.template"),
             )
