@@ -1,0 +1,88 @@
+Date: {{ date|safe }}
+From: {{ from|safe }}
+To: {{ to|safe }}
+Message-ID: {{ messageid|safe }}
+Subject: Confirm your email address for Matrix
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="{{ multipart_boundary|safe }}"
+
+--{{ multipart_boundary|safe }}
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hello,
+
+We have received a request to use this email address with a matrix.org identity
+server. If this was you who made this request, you may use the following link
+to complete the verification of your email address:
+
+{{ link|safe }}
+
+If your client requires a code, the code is {{ token|safe }}
+
+If you aren't aware of making such a request, please disregard this email.
+
+
+About Matrix:
+
+Matrix is an open standard for interoperable, decentralised, real-time communication
+over IP. It can be used to power Instant Messaging, VoIP/WebRTC signalling, Internet
+of Things communication - or anywhere you need a standard HTTP API for publishing and
+subscribing to data whilst tracking the conversation history.
+
+Matrix defines the standard, and provides open source reference implementations of
+Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
+create new communication solutions or extend the capabilities and reach of existing ones.
+
+--{{ multipart_boundary|safe }}
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title></title>
+<style>
+body {
+    font-family: "Myriad Pro", "Myriad", Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+    margin: 0px;
+}
+</style>
+</head>
+<body>
+<p>Hello,</p>
+
+<p>We have received a request to use this email address with a matrix.org
+identity server. If this was you who made this request, you may use the
+following link to complete the verification of your email address:</p>
+
+<p><a href="{{ link }}">Complete email verification</a></p>
+
+<p>...or copy this link into your web browser:</p>
+
+<p>{{ link }}</p>
+
+<p>If your client requires a code, the code is {{ token }}</p>
+
+<p>If you aren't aware of making such a request, please disregard this
+email.</p>
+
+<br>
+<p>About Matrix:</p>
+
+<p>Matrix is an open standard for interoperable, decentralised, real-time communication
+over IP. It can be used to power Instant Messaging, VoIP/WebRTC signalling, Internet
+of Things communication - or anywhere you need a standard HTTP API for publishing and
+subscribing to data whilst tracking the conversation history.</p>
+
+<p>Matrix defines the standard, and provides open source reference implementations of
+Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
+create new communication solutions or extend the capabilities and reach of existing ones.</p>
+
+</body>
+</html>
+
+--{{ multipart_boundary|safe }}--

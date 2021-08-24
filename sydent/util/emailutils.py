@@ -63,17 +63,23 @@ def sendEmail(
         }
     )
 
-    allSubstitutions = {}
-    for k, v in substitutions.items():
-        allSubstitutions[k] = v
-        allSubstitutions[k + "_forhtml"] = escape(v)
-        allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
+    # use jinja for rendering if jinja templates are present
+    if templateFile.endswith(".j2"):
+        # We add randomize the multipart boundary to stop user input from
+        # conflicting with it.
+        substitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
+        template = sydent.template_environment.get_template(templateFile)
+        mailString = template.render(substitutions)
+    else:
+        allSubstitutions = {}
+        for k, v in substitutions.items():
+            allSubstitutions[k] = v
+            allSubstitutions[k + "_forhtml"] = escape(v)
+            allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
+        allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
+        with open(templateFile) as template_file:
+            mailString = template_file.read() % allSubstitutions
 
-    # We add randomize the multipart boundary to stop user input from
-    # conflicting with it.
-    allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
-
-    mailString = open(templateFile).read() % allSubstitutions
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
     parsedTo = email.utils.parseaddr(mailTo)[1]
     if parsedFrom == "" or parsedTo == "":
