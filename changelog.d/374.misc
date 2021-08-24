@@ -1,0 +1,1 @@
+Case-fold email addresses when binding to MXIDs or performing look-ups. Contributed by H. Shay.

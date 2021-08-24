@@ -12,9 +12,9 @@ jobs:
         with:
           python-version: '3.6'
       - run: python -m pip install -e .
-      - run: black --check --diff sydent/ tests/ matrix_is_test/ setup.py
-      - run: flake8 sydent/ tests/ matrix_is_test/ setup.py
-      - run: isort --check-only --diff sydent/ tests/ matrix_is_test/ setup.py
+      - run: black --check --diff sydent/ tests/ matrix_is_test/ scripts/ setup.py
+      - run: flake8 sydent/ tests/ matrix_is_test/ scripts/ setup.py
+      - run: isort --check-only --diff sydent/ tests/ matrix_is_test/ scripts/ setup.py
 
   run-unit-tests:
     needs: [check-code-style]

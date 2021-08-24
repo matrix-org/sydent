@@ -23,24 +23,26 @@ class JoinTokenStore:
         self.sydent = sydent
 
     def storeToken(
-        self, medium: str, address: str, roomId: str, sender: str, token: str
+        self, medium: str, normalised_address: str, roomId: str, sender: str, token: str
     ) -> None:
         """
-        Store a new invite token and its metadata.
+        Store a new invite token and its metadata. Please note that email
+        addresses need to be casefolded before calling this function.
 
         :param medium: The medium of the 3PID the token is associated to.
-        :param address: The address of the 3PID the token is associated to.
+        :param normalised_address: The address of the 3PID the token is associated to.
         :param roomId: The ID of the room the 3PID is invited in.
         :param sender: The MXID of the user that sent the invite.
         :param token: The token to store.
         """
+
         cur = self.sydent.db.cursor()
 
         cur.execute(
             "INSERT INTO invite_tokens"
             " ('medium', 'address', 'room_id', 'sender', 'token', 'received_ts')"
             " VALUES (?, ?, ?, ?, ?, ?)",
-            (medium, address, roomId, sender, token, int(time.time())),
+            (medium, normalised_address, roomId, sender, token, int(time.time())),
         )
         self.sydent.db.commit()
 
