@@ -73,6 +73,7 @@ def sendEmail(
     else:
         allSubstitutions = {}
         for k, v in substitutions.items():
+            allSubstitutions[k] = v
             allSubstitutions[k + "_forhtml"] = escape(v)
             allSubstitutions[k + "_forurl"] = urllib.parse.quote(v)
         allSubstitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
