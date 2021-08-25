@@ -1,1 +1,0 @@
-Add support for using Jinja2 in e-mail templates. Contributed by H-Shay.
