@@ -14,8 +14,7 @@ Content-Disposition: inline
 Hello,
 
 We’ve recently improved how people discover your Matrix account.
-In the past, identity services did not take capitalization into account when creating and storing Matrix IDs. We’ve now updated this behavior so anyone can find you, no matter how your email is capitalized. As part of this recent update, the duplicate Matrix ID %(mxid)s is no longer associated with this e-mail address.
-
+In the past, identity services took capitalisation into account when storing email addresses. This means Alice@example.com and alice@example.com would be considered to be two different addresses, and could be associated to different Matrix accounts. We’ve now updated this behaviour so anyone can find you, no matter how your email is capitalised. As part of this recent update, we've dissociated the Matrix account %(mxid)s from this e-mail address.
 No action is needed on your part. This doesn’t affect any passwords or password reset options on your account.
 
 
