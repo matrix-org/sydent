@@ -18,7 +18,7 @@ import json
 import os
 import sqlite3
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Set
 
 import signedjson.sign
 
@@ -27,6 +27,8 @@ from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
 from tests.utils import ResolvingMemoryReactorClock
+
+EMAIL_SUBJECT = "No action required: we have changed the way your Matrix account and email address are associated"
 
 
 def calculate_lookup_hash(sydent, address):
@@ -76,8 +78,13 @@ def update_local_associations(
     # list of mxids to delete
     to_delete: List[Tuple[str]] = []
 
-    # list of mxids to send emails to letting them know the mxid has been deleted
-    mxids: List[Tuple[str, str]] = []
+    # The MXIDs associated with rows we're about to delete, indexed by the casefolded
+    # address they're associated with.
+    to_delete_mxids: Dict[str, Set[str]] = {}
+    # The MXIDs associated with rows we're not going to delete, so we can compare the one
+    # associated with a given casefolded address with the one(s) we want to delete for the
+    # same address and figure out if we want to send them an email.
+    to_keep_mxids: Dict[str, str] = {}
 
     for casefold_address, assoc_tuples in associations.items():
         db_update_args.append(
@@ -92,18 +99,21 @@ def update_local_associations(
         if len(assoc_tuples) > 1:
             # Iterate over all associations except for the first one, since we've already
             # processed it.
+            to_delete_mxids[casefold_address] = set()
+            to_keep_mxids[casefold_address] = assoc_tuples[0][1].lower()
             for address, mxid, _ in assoc_tuples[1:]:
                 to_delete.append((address,))
-                mxids.append((mxid, address))
+                to_delete_mxids[casefold_address].add(mxid.lower())
 
-    # iterate through the mxids and send email, let's only send one email per mxid
+    # iterate through the mxids and send emails
     if send_email and not dry_run:
-        for mxid, address in mxids:
-            processed_mxids = []
+        for address, mxids in to_delete_mxids.items():
+            for mxid in mxids:
+                # If the MXID is one that will still be associated with this email address
+                # after this run, don't send an email for it.
+                if mxid == to_keep_mxids[address]:
+                    continue
 
-            if mxid in processed_mxids:
-                continue
-            else:
                 templateFile = sydent.get_branded_template(
                     None,
                     "migration_template.eml",
@@ -114,9 +124,8 @@ def update_local_associations(
                     sydent,
                     templateFile,
                     address,
-                    {"mxid": "mxid", "subject_header_value": "MatrixID Update"},
+                    {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
                 )
-                processed_mxids.append(mxid)
 
     print(
         f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations"
