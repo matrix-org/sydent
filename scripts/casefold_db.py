@@ -42,7 +42,11 @@ def calculate_lookup_hash(sydent, address):
 
 
 def update_local_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool, test=False,
+    sydent,
+    db: sqlite3.Connection,
+    send_email: bool,
+    dry_run: bool,
+    test=False,
 ):
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
@@ -170,7 +174,11 @@ def update_local_associations(
 
 
 def update_global_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool, test=False,
+    sydent,
+    db: sqlite3.Connection,
+    send_email: bool,
+    dry_run: bool,
+    test=False,
 ):
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
