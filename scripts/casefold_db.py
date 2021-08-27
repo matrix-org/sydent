@@ -42,7 +42,7 @@ def calculate_lookup_hash(sydent, address):
 
 
 def update_local_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool, test=False,
 ):
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
@@ -106,6 +106,28 @@ def update_local_associations(
                 to_delete.append((address,))
                 to_delete_mxids[casefold_address].add(mxid.lower())
 
+    if not test:
+        print(
+            f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations"
+        )
+
+    # Update the database before sending the emails, that way if the update fails the
+    # affected users haven't been notified.
+    if not dry_run:
+        if len(to_delete) > 0:
+            cur.executemany(
+                "DELETE FROM local_threepid_associations WHERE address = ?", to_delete
+            )
+
+        if len(db_update_args) > 0:
+            cur.executemany(
+                "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
+                db_update_args,
+            )
+
+        # We've finished updating the database, committing the transaction.
+        db.commit()
+
     # iterate through the mxids and send emails
     if send_email and not dry_run:
         for address, mxids in to_delete_mxids.items():
@@ -134,38 +156,21 @@ def update_local_associations(
                             address,
                             {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
                         )
-                        print("Sent email to %s" % address)
+                        if not test:
+                            print("Sent email to %s" % address)
                     except Exception:
-                        print(
-                            "Failed to send email to %s, retrying in %ds"
-                            % (address, backoff * 2)
-                        )
+                        if not test:
+                            print(
+                                "Failed to send email to %s, retrying in %ds"
+                                % (address, backoff * 2)
+                            )
                         sendWithBackoff(backoff * 2)
 
-                sendWithBackoff(1)
-
-    print(
-        f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations"
-    )
-
-    if not dry_run:
-        if len(to_delete) > 0:
-            cur.executemany(
-                "DELETE FROM local_threepid_associations WHERE address = ?", to_delete
-            )
-
-        if len(db_update_args) > 0:
-            cur.executemany(
-                "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
-                db_update_args,
-            )
-
-        # We've finished updating the database, committing the transaction.
-        db.commit()
+                sendWithBackoff(1 if not test else 0)
 
 
 def update_global_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool, test=False,
 ):
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
@@ -236,9 +241,10 @@ def update_global_associations(
             for address, mxid, _, _ in assoc_tuples[1:]:
                 to_delete.append((address,))
 
-    print(
-        f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
-    )
+    if not test:
+        print(
+            f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
+        )
 
     if not dry_run:
         if len(to_delete) > 0:
