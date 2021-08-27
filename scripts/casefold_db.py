@@ -18,7 +18,8 @@ import json
 import os
 import sqlite3
 import sys
-from typing import Any, Dict, List, Tuple, Set
+import time
+from typing import Any, Dict, List, Set, Tuple
 
 import signedjson.sign
 
@@ -114,18 +115,34 @@ def update_local_associations(
                 if mxid == to_keep_mxids[address]:
                     continue
 
-                templateFile = sydent.get_branded_template(
-                    None,
-                    "migration_template.eml",
-                    ("email", "email.template"),
-                )
+                # Send the email with exponential backoff - that way we don't stop
+                # sending halfway through if the SMTP server rejects our email (e.g.
+                # because of rate limiting). The alternative would mean the first
+                # addresses of the list receive duplicate emails.
+                def sendWithBackoff(backoff):
+                    time.sleep(backoff)
+                    try:
+                        templateFile = sydent.get_branded_template(
+                            None,
+                            "migration_template.eml",
+                            ("email", "email.template"),
+                        )
 
-                sendEmail(
-                    sydent,
-                    templateFile,
-                    address,
-                    {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
-                )
+                        sendEmail(
+                            sydent,
+                            templateFile,
+                            address,
+                            {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
+                        )
+                        print("Sent email to %s" % address)
+                    except Exception:
+                        print(
+                            "Failed to send email to %s, retrying in %ds"
+                            % (address, backoff * 2)
+                        )
+                        sendWithBackoff(backoff * 2)
+
+                sendWithBackoff(1)
 
     print(
         f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations"
