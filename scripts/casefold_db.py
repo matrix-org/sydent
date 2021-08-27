@@ -25,7 +25,7 @@ import signedjson.sign
 
 from sydent.sydent import Sydent, parse_config_file
 from sydent.util import json_decoder
-from sydent.util.emailutils import sendEmail
+from sydent.util.emailutils import sendEmail, EmailSendException
 from sydent.util.hash import sha256_and_url_safe_base64
 from tests.utils import ResolvingMemoryReactorClock
 
@@ -159,10 +159,11 @@ def update_local_associations(
                             templateFile,
                             address,
                             {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
+                            log_send_errors=False,
                         )
                         if not test:
                             print("Sent email to %s" % address)
-                    except Exception:
+                    except EmailSendException:
                         if not test:
                             print(
                                 "Failed to send email to %s, retrying in %ds"

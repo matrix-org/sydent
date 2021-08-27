@@ -34,7 +34,11 @@ logger = logging.getLogger(__name__)
 
 
 def sendEmail(
-    sydent: "Sydent", templateFile: str, mailTo: str, substitutions: Dict[str, str]
+    sydent: "Sydent",
+    templateFile: str,
+    mailTo: str,
+    substitutions: Dict[str, str],
+    log_send_errors: bool = True,
 ) -> None:
     """
     Sends an email with the given parameters.
@@ -45,6 +49,7 @@ def sendEmail(
         email.
     :param mailTo: The email address to send the email to.
     :param substitutions: The substitutions to use with the template.
+    :param log_send_errors: Whether to log errors happening when sending an email.
     """
     mailFrom = sydent.cfg.get("email", "email.from")
 
@@ -121,7 +126,8 @@ def sendEmail(
         smtp.sendmail(mailFrom, mailTo, mailString.encode("utf-8"))
         smtp.quit()
     except Exception as origException:
-        twisted.python.log.err()
+        if log_send_errors:
+            twisted.python.log.err()
         raise EmailSendException() from origException
 
 
