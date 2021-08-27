@@ -25,7 +25,7 @@ import signedjson.sign
 
 from sydent.sydent import Sydent, parse_config_file
 from sydent.util import json_decoder
-from sydent.util.emailutils import sendEmail, EmailSendException
+from sydent.util.emailutils import EmailSendException, sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
 from tests.utils import ResolvingMemoryReactorClock
 
