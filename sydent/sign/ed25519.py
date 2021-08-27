@@ -28,6 +28,7 @@ class SydentEd25519:
 
         save_key = False
 
+        # azren TODO
         sk_str = self.sydent.cfg.get("crypto", "ed25519.signingkey")
         sk_parts = sk_str.split(" ")
 
@@ -59,6 +60,8 @@ class SydentEd25519:
                 self.signing_key.version,
                 signedjson.key.encode_signing_key_base64(self.signing_key),
             )
-            self.sydent.cfg.set("crypto", "ed25519.signingkey", sk_str)
-            self.sydent.save_config()
-            logger.info("Key saved")
+            # azren TODO
+            if self.sydent.using_legacy_config:
+                self.sydent.cfg.set("crypto", "ed25519.signingkey", sk_str)
+                self.sydent.save_config()
+                logger.info("Key saved")

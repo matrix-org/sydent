@@ -100,8 +100,10 @@ def get_terms(sydent) -> Optional[Terms]:
 
     :returns Terms
     """
+
     try:
         termsYaml = None
+        # azren TODO
         termsPath = sydent.cfg.get("general", "terms.path")
         if termsPath == "":
             return Terms(None)
@@ -129,6 +131,7 @@ def get_terms(sydent) -> Optional[Terms]:
 
         return Terms(termsYaml)
     except Exception:
+        # azren TODO
         logger.exception(
             "Couldn't read terms file '%s'", sydent.cfg.get("general", "terms.path")
         )

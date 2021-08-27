@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# azren TODO
 import configparser
 import copy
 import gc
@@ -78,7 +79,7 @@ from sydent.validators.msisdnvalidator import MsisdnValidator
 
 logger = logging.getLogger(__name__)
 
-CONFIG_DEFAULTS = {
+LEGACY_CONFIG_DEFAULTS = {
     "general": {
         "server.name": os.environ.get("SYDENT_SERVER_NAME", ""),
         "log.path": "",
@@ -203,8 +204,107 @@ class Sydent:
         self, cfg, reactor=twisted.internet.reactor, use_tls_for_federation=True
     ):
         self.reactor = reactor
-        self.config_file = get_config_file_path()
         self.use_tls_for_federation = use_tls_for_federation
+
+        # azren TODO
+        self.using_legacy_config = True
+        self.read_legacy_config(cfg)
+
+        # See if a pepper already exists in the database
+        # Note: This MUST be run before we start serving requests, otherwise lookups for
+        # 3PID hashes may come in before we've completed generating them
+        hashing_metadata_store = HashingMetadataStore(self)
+        lookup_pepper = hashing_metadata_store.get_lookup_pepper()
+        if not lookup_pepper:
+            # No pepper defined in the database, generate one
+            lookup_pepper = generateAlphanumericTokenOfLength(5)
+
+            # Store it in the database and rehash 3PIDs
+            hashing_metadata_store.store_lookup_pepper(
+                sha256_and_url_safe_base64, lookup_pepper
+            )
+
+        self.validators = Validators()
+        self.validators.email = EmailValidator(self)
+        self.validators.msisdn = MsisdnValidator(self)
+
+        self.keyring = Keyring()
+        self.keyring.ed25519 = SydentEd25519(self).signing_key
+        self.keyring.ed25519.alg = "ed25519"
+
+        self.sig_verifier = Verifier(self)
+
+        self.servlets = Servlets()
+        self.servlets.v1 = V1Servlet(self)
+        self.servlets.v2 = V2Servlet(self)
+        self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
+        self.servlets.emailRequestCodeV2 = EmailRequestCodeServlet(
+            self, require_auth=True
+        )
+        self.servlets.emailValidate = EmailValidateCodeServlet(self)
+        self.servlets.emailValidateV2 = EmailValidateCodeServlet(
+            self, require_auth=True
+        )
+        self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
+        self.servlets.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(
+            self, require_auth=True
+        )
+        self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
+        self.servlets.msisdnValidateV2 = MsisdnValidateCodeServlet(
+            self, require_auth=True
+        )
+        self.servlets.lookup = LookupServlet(self)
+        self.servlets.bulk_lookup = BulkLookupServlet(self)
+        self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
+        self.servlets.lookup_v2 = LookupV2Servlet(self, lookup_pepper)
+        self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
+        self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
+        self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
+        self.servlets.threepidBind = ThreePidBindServlet(self)
+        self.servlets.threepidBindV2 = ThreePidBindServlet(self, require_auth=True)
+        self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
+        self.servlets.replicationPush = ReplicationPushServlet(self)
+        self.servlets.getValidated3pid = GetValidated3pidServlet(self)
+        self.servlets.getValidated3pidV2 = GetValidated3pidServlet(
+            self, require_auth=True
+        )
+        self.servlets.storeInviteServlet = StoreInviteServlet(self)
+        self.servlets.storeInviteServletV2 = StoreInviteServlet(self, require_auth=True)
+        self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
+        self.servlets.blindlySignStuffServletV2 = BlindlySignStuffServlet(
+            self, require_auth=True
+        )
+        self.servlets.termsServlet = TermsServlet(self)
+        self.servlets.accountServlet = AccountServlet(self)
+        self.servlets.registerServlet = RegisterServlet(self)
+        self.servlets.logoutServlet = LogoutServlet(self)
+
+        self.threepidBinder = ThreepidBinder(self)
+
+        self.sslComponents = SslComponents(self)
+
+        self.clientApiHttpServer = ClientApiHttpServer(self)
+        self.replicationHttpsServer = ReplicationHttpsServer(self)
+        self.replicationHttpsClient = ReplicationHttpsClient(self)
+
+        self.pusher = Pusher(self)
+
+        # A dedicated validation session store just to clean up old sessions every N minutes
+        self.cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.clock = self.reactor
+        cb.start(10 * 60.0)
+
+        # workaround for https://github.com/getsentry/sentry-python/issues/803: we
+        # disable automatic GC and run it periodically instead.
+        gc.disable()
+        cb = task.LoopingCall(run_gc)
+        cb.clock = self.reactor
+        cb.start(1.0)
+
+    # azren TODO
+    def read_legacy_config(self, cfg):
+        self.config_file = get_legacy_config_file_path()
 
         self.cfg = cfg
 
@@ -300,98 +400,16 @@ class Sydent:
             autoescape=True,
         )
 
-        # See if a pepper already exists in the database
-        # Note: This MUST be run before we start serving requests, otherwise lookups for
-        # 3PID hashes may come in before we've completed generating them
-        hashing_metadata_store = HashingMetadataStore(self)
-        lookup_pepper = hashing_metadata_store.get_lookup_pepper()
-        if not lookup_pepper:
-            # No pepper defined in the database, generate one
-            lookup_pepper = generateAlphanumericTokenOfLength(5)
+        self.internalport = self.cfg.get("http", "internalapi.http.port")
+        if self.internalport:
+            try:
+                self.interface = self.cfg.get("http", "internalapi.http.bind_address")
+            except configparser.NoOptionError:
+                self.interface = "::1"
 
-            # Store it in the database and rehash 3PIDs
-            hashing_metadata_store.store_lookup_pepper(
-                sha256_and_url_safe_base64, lookup_pepper
-            )
+        self.federation_verifycerts = cfg.getboolean("http", "federation.verifycerts")
 
-        self.validators = Validators()
-        self.validators.email = EmailValidator(self)
-        self.validators.msisdn = MsisdnValidator(self)
-
-        self.keyring = Keyring()
-        self.keyring.ed25519 = SydentEd25519(self).signing_key
-        self.keyring.ed25519.alg = "ed25519"
-
-        self.sig_verifier = Verifier(self)
-
-        self.servlets = Servlets()
-        self.servlets.v1 = V1Servlet(self)
-        self.servlets.v2 = V2Servlet(self)
-        self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
-        self.servlets.emailRequestCodeV2 = EmailRequestCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.emailValidate = EmailValidateCodeServlet(self)
-        self.servlets.emailValidateV2 = EmailValidateCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
-        self.servlets.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
-        self.servlets.msisdnValidateV2 = MsisdnValidateCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.lookup = LookupServlet(self)
-        self.servlets.bulk_lookup = BulkLookupServlet(self)
-        self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
-        self.servlets.lookup_v2 = LookupV2Servlet(self, lookup_pepper)
-        self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
-        self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
-        self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
-        self.servlets.threepidBind = ThreePidBindServlet(self)
-        self.servlets.threepidBindV2 = ThreePidBindServlet(self, require_auth=True)
-        self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
-        self.servlets.replicationPush = ReplicationPushServlet(self)
-        self.servlets.getValidated3pid = GetValidated3pidServlet(self)
-        self.servlets.getValidated3pidV2 = GetValidated3pidServlet(
-            self, require_auth=True
-        )
-        self.servlets.storeInviteServlet = StoreInviteServlet(self)
-        self.servlets.storeInviteServletV2 = StoreInviteServlet(self, require_auth=True)
-        self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
-        self.servlets.blindlySignStuffServletV2 = BlindlySignStuffServlet(
-            self, require_auth=True
-        )
-        self.servlets.termsServlet = TermsServlet(self)
-        self.servlets.accountServlet = AccountServlet(self)
-        self.servlets.registerServlet = RegisterServlet(self)
-        self.servlets.logoutServlet = LogoutServlet(self)
-
-        self.threepidBinder = ThreepidBinder(self)
-
-        self.sslComponents = SslComponents(self)
-
-        self.clientApiHttpServer = ClientApiHttpServer(self)
-        self.replicationHttpsServer = ReplicationHttpsServer(self)
-        self.replicationHttpsClient = ReplicationHttpsClient(self)
-
-        self.pusher = Pusher(self)
-
-        # A dedicated validation session store just to clean up old sessions every N minutes
-        self.cleanupValSession = ThreePidValSessionStore(self)
-        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
-        cb.clock = self.reactor
-        cb.start(10 * 60.0)
-
-        # workaround for https://github.com/getsentry/sentry-python/issues/803: we
-        # disable automatic GC and run it periodically instead.
-        gc.disable()
-        cb = task.LoopingCall(run_gc)
-        cb.clock = self.reactor
-        cb.start(1.0)
-
+    # azren TODO
     def save_config(self):
         fp = open(self.config_file, "w")
         self.cfg.write(fp)
@@ -402,14 +420,9 @@ class Sydent:
         self.replicationHttpsServer.setup()
         self.pusher.setup()
 
-        internalport = self.cfg.get("http", "internalapi.http.port")
-        if internalport:
-            try:
-                interface = self.cfg.get("http", "internalapi.http.bind_address")
-            except configparser.NoOptionError:
-                interface = "::1"
+        if self.internalport:
             self.internalApiHttpServer = InternalApiHttpServer(self)
-            self.internalApiHttpServer.setup(interface, int(internalport))
+            self.internalApiHttpServer.setup(self.interface, int(self.internalport))
 
         if self.pidfile:
             with open(self.pidfile, "w") as pidfile:
@@ -462,10 +475,12 @@ class Sydent:
         """
 
         # If the deprecated setting is defined, return it.
-        try:
-            return self.cfg.get(*deprecated_template_name)
-        except configparser.NoOptionError:
-            pass
+        # azren TODO
+        if self.using_legacy_config:
+            try:
+                return self.cfg.get(*deprecated_template_name)
+            except configparser.NoOptionError:
+                pass
 
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:
@@ -498,15 +513,15 @@ class Servlets:
 class Keyring:
     pass
 
-
-def parse_config_dict(config_dict):
+# azren TODO
+def parse_legacy_config_dict(config_dict):
     """Parse the given config from a dictionary, populating missing items and sections
 
     Args:
         config_dict (dict): the configuration dictionary to be parsed
     """
     # Build a config dictionary from the defaults merged with the given dictionary
-    config = copy.deepcopy(CONFIG_DEFAULTS)
+    config = copy.deepcopy(LEGACY_CONFIG_DEFAULTS)
     for section, section_dict in config_dict.items():
         if section not in config:
             config[section] = {}
@@ -522,8 +537,8 @@ def parse_config_dict(config_dict):
 
     return cfg
 
-
-def parse_config_file(config_file):
+# azren TODO
+def parse_legacy_config_file(config_file):
     """Parse the given config from a filepath, populating missing items and
     sections
     Args:
@@ -538,7 +553,7 @@ def parse_config_file(config_file):
     # because sydent used to be braindead).
     use_defaults = not os.path.exists(config_file)
     cfg = configparser.ConfigParser()
-    for sect, entries in CONFIG_DEFAULTS.items():
+    for sect, entries in LEGACY_CONFIG_DEFAULTS.items():
         cfg.add_section(sect)
         for k, v in entries.items():
             cfg.set(configparser.DEFAULTSECT if use_defaults else sect, k, v)
@@ -575,8 +590,8 @@ def setup_logging(cfg):
     observer = log.PythonLoggingObserver()
     observer.start()
 
-
-def get_config_file_path():
+# azren TODO
+def get_legacy_config_file_path():
     return os.environ.get("SYDENT_CONF", "sydent.conf")
 
 
@@ -599,7 +614,8 @@ def run_gc():
 
 
 if __name__ == "__main__":
-    cfg = parse_config_file(get_config_file_path())
+    # azren TODO
+    cfg = parse_legacy_config_file(get_legacy_config_file_path())
     setup_logging(cfg)
     syd = Sydent(cfg)
     syd.run()

@@ -37,9 +37,11 @@ class MsisdnValidator:
         # cache originators & sms rules from config file
         self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
+        # azren TODO
         for opt in self.sydent.cfg.options("sms"):
             if opt.startswith("originators."):
                 country = opt.split(".")[1]
+                # azren TODO
                 rawVal = self.sydent.cfg.get("sms", opt)
                 rawList = [i.strip() for i in rawVal.split(",")]
 
@@ -62,6 +64,7 @@ class MsisdnValidator:
                     )
             elif opt.startswith("smsrule."):
                 country = opt.split(".")[1]
+                # azren TODO
                 action = self.sydent.cfg.get("sms", opt)
 
                 if action not in ["allow", "reject"]:
@@ -115,6 +118,7 @@ class MsisdnValidator:
             )
             return valSession.id
 
+        # azren TODO
         smsBodyTemplate = self.sydent.cfg.get("sms", "bodyTemplate")
         originator = self.getOriginator(phoneNumber)
 

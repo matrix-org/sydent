@@ -46,6 +46,7 @@ def sendEmail(
     :param mailTo: The email address to send the email to.
     :param substitutions: The substitutions to use with the template.
     """
+    # azren TODO
     mailFrom = sydent.cfg.get("email", "email.from")
 
     myHostname = sydent.cfg.get("email", "email.hostname")
@@ -90,6 +91,7 @@ def sendEmail(
         logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
         raise EmailAddressException()
 
+    # azren TODO
     mailServer = sydent.cfg.get("email", "email.smtphost")
     mailPort = sydent.cfg.get("email", "email.smtpport")
     mailUsername = sydent.cfg.get("email", "email.smtpusername")

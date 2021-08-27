@@ -14,6 +14,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
 
     def setUp(self):
         # Create a new sydent
+        # azren TODO
         config = {
             "email": {
                 # Used by test_invited_email_address_obfuscation
@@ -108,6 +109,7 @@ class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
 
     def setUp(self):
         # Create a new sydent
+        # azren TODO
         config = {"general": {"delete_tokens_on_bind": "false"}}
         self.sydent = make_sydent(test_config=config)
 

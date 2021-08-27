@@ -85,6 +85,7 @@ class OpenMarketSMS:
 
         # Make sure username and password are bytes otherwise we can't use them with
         # b64encode.
+        # azren TODO
         username = self.sydent.cfg.get("sms", "username").encode("UTF-8")
         password = self.sydent.cfg.get("sms", "password").encode("UTF-8")
 

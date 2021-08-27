@@ -23,7 +23,7 @@ from twisted.web.http_headers import Headers
 from twisted.web.server import Request, Site
 from zope.interface import implementer
 
-from sydent.sydent import Sydent, parse_config_dict
+from sydent.sydent import Sydent, parse_legacy_config_dict
 
 # Expires on Jan 11 2030 at 17:53:40 GMT
 FAKE_SERVER_CERT_PEM = """
@@ -62,15 +62,17 @@ def make_sydent(test_config={}):
     # Use an in-memory SQLite database. Note that the database isn't cleaned up between
     # tests, so by default the same database will be used for each test if changed to be
     # a file on disk.
+    # azren TODO
     if "db" not in test_config:
         test_config["db"] = {"db.file": ":memory:"}
     else:
         test_config["db"].setdefault("db.file", ":memory:")
 
     reactor = ResolvingMemoryReactorClock()
+    # azren TODO
     return Sydent(
         reactor=reactor,
-        cfg=parse_config_dict(test_config),
+        cfg=parse_legacy_config_dict(test_config),
         use_tls_for_federation=False,
     )
 

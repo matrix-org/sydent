@@ -145,7 +145,7 @@ class FederationHttpClient(HTTPClient):
                 ip_whitelist=sydent.ip_whitelist,
                 ip_blacklist=sydent.ip_blacklist,
             ),
-            ClientTLSOptionsFactory(sydent.cfg)
+            ClientTLSOptionsFactory(sydent.federation_verifycerts)
             if sydent.use_tls_for_federation
             else None,
         )

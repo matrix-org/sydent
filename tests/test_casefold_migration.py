@@ -27,6 +27,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def setUp(self):
         # Create a new sydent
+        # azren TODO
         config = {
             "general": {
                 "templates.path": os.path.join(

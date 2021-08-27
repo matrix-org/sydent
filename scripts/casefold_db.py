@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Tuple
 
 import signedjson.sign
 
-from sydent.sydent import Sydent, parse_config_file
+from sydent.sydent import Sydent, parse_legacy_config_file
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -240,6 +240,7 @@ if __name__ == "__main__":
         help="run script but do not send emails or alter database",
     )
 
+    # azren TODO
     parser.add_argument("config_path", help="path to the sydent configuration file")
 
     args = parser.parse_args()
@@ -249,7 +250,7 @@ if __name__ == "__main__":
         print(f"The config file '{args.config_path}' does not exist.")
         sys.exit(1)
 
-    config = parse_config_file(args.config_path)
+    config = parse_legacy_config_file(args.config_path)
 
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(config, reactor, False)
