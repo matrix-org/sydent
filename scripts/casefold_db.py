@@ -106,7 +106,7 @@ def update_local_associations(
             else:
                 templateFile = sydent.get_branded_template(
                     None,
-                    "migration_template.eml",
+                    "migration_template.eml.j2",
                     ("email", "email.template"),
                 )
 

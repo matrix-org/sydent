@@ -1,0 +1,143 @@
+Date: {{ date|safe }}
+From: {{ from|safe }}
+To: {{ to|safe }}
+Message-ID: {{ messageid|safe }}
+Subject: {{ subject_header_value|safe }}
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="{{ multipart_boundary|safe }}"
+
+--{{ multipart_boundary|safe }}
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hello,
+
+We’ve recently improved how people discover your Matrix account.
+In the past, identity services took capitalisation into account when storing email
+addresses. This means Alice@example.com and alice@example.com would be considered to be
+two different addresses, and could be associated with different Matrix accounts. We’ve
+now updated this behaviour so anyone can find you, no matter how your email is capitalised.
+As part of this recent update, we've dissociated the Matrix account {{ mxid|safe }} from
+this e-mail address.
+No action is needed on your part. This doesn’t affect any passwords or password reset
+options on your account.
+
+
+About Matrix:
+
+Matrix.org is an open standard for interoperable, decentralised, real-time communication
+over IP, supporting group chat, file transfer, voice and video calling, integrations to
+other apps, bridges to other communication systems and much more. It can be used to power
+Instant Messaging, VoIP/WebRTC signalling, Internet of Things communication - or anywhere
+you need a standard HTTP API for publishing and subscribing to data whilst tracking the
+conversation history.
+
+Matrix defines the standard, and provides open source reference implementations of
+Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
+create new communication solutions or extend the capabilities and reach of existing ones.
+
+Thanks,
+
+Matrix
+
+--{{ multipart_boundary|safe }}
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <style type="text/css">
+body {
+    margin: 0px;
+}
+
+pre, code {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#page {
+    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+    font-color: #454545;
+    font-size: 12pt;
+    width: 100%%;
+    padding: 20px;
+}
+
+.low-contrast {
+    color: #666666
+}
+
+#inner {
+    width: 640px;
+}
+
+.header {
+    width: 100%%;
+    height: 87px;
+    color: #454545;
+    border-bottom: 4px solid #e5e5e5;
+}
+
+.logo {
+    text-align: right;
+    margin-left: 20px;
+}
+        </style>
+    </head>
+    <body>
+        <table id="page">
+            <tr>
+                <td> </td>
+                <td id="inner">
+                    <table class="header">
+                        <tr>
+                            <td>
+                            </td>
+                            <td class="logo">
+                                    <img src="http://matrix.org/img/matrix-120x51.png" width="120" height="51" alt="[matrix]"/>
+                            </td>
+                        </tr>
+                    </table>
+
+<p>Hello,</p>
+
+<p>
+    We’ve recently improved how people discover your Matrix account.<br/>
+    In the past, identity services took capitalisation into account when storing email
+    addresses. This means Alice@example.com and alice@example.com would be considered to
+    be two different addresses, and could be associated with different Matrix accounts.
+    We’ve now updated this behaviour so anyone can find you, no matter how your email is
+    capitalised. As part of this recent update, we've dissociated the Matrix account
+    {{ mxid|safe }} from this e-mail address.<br/>
+    No action is needed on your part. This doesn’t affect any passwords or password reset
+    options on your account.
+</p>
+
+<br>
+<p>About Matrix:</p>
+
+<p>Matrix.org is an open standard for interoperable, decentralised, real-time communication
+over IP, supporting group chat, file transfer, voice and video calling, integrations to
+other apps, bridges to other communication systems and much more. It can be used to power
+Instant Messaging, VoIP/WebRTC signalling, Internet of Things communication - or anywhere
+you need a standard HTTP API for publishing and subscribing to data whilst tracking the
+conversation history.</p>
+
+<p>Matrix defines the standard, and provides open source reference implementations of
+Matrix-compatible Servers, Clients, Client SDKs and Application Services to help you
+create new communication solutions or extend the capabilities and reach of existing ones.</p>
+
+<p>Thanks,</p>
+
+<p>Matrix</p>
+                </td>
+                <td> </td>
+            </tr>
+        </table>
+    </body>
+</html>
+
+--{{ multipart_boundary|safe }}--
