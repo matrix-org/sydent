@@ -13,7 +13,7 @@ Content-Disposition: inline
 
 Hi,
 
-%(sender_display_name)s %(bracketed_verified_sender)shas invited you into a %(room_type_name)s
+%(sender_display_name)s %(bracketed_verified_sender)shas invited you into a room
 %(bracketed_room_name)son Element. To join the conversation please follow the
 link below.
 
@@ -124,7 +124,7 @@ pre, code {
 <p>Hi,</p>
 
 <p>%(sender_display_name_forhtml)s <span class="low-contrast">%(bracketed_verified_sender_forhtml)s</span> has invited you into a
-%(room_type_name)s %(bracketed_room_name_forhtml)s on Element.</p>
+room %(bracketed_room_name_forhtml)s on Element.</p>
 
 <p>
     <a
