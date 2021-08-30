@@ -129,9 +129,6 @@ class StoreInviteServlet(Resource):
         substitutions["room_type"] = substitutions.pop(
             "org.matrix.msc3288.room_type", ""
         )
-        substitutions["room_type_name"] = (
-            "space" if substitutions["room_type"] == "m.space" else "room"
-        )
 
         substitutions["bracketed_verified_sender"] = ""
         if verified_sender:
