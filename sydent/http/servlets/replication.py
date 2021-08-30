@@ -28,6 +28,7 @@ from sydent.threepid import threePidAssocFromDict
 from sydent.types import JsonDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.util.stringutils import normalise_address
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -112,6 +113,9 @@ class ReplicationPushServlet(Resource):
                     continue
 
                 assocObj = threePidAssocFromDict(sgAssoc)
+
+                # ensure we are casefolding email addresses before hashing/storing
+                assocObj.address = normalise_address(assocObj.address, assocObj.medium)
 
                 if assocObj.mxid is not None:
                     # Calculate the lookup hash with our own pepper for this association

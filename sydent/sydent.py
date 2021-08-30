@@ -23,6 +23,7 @@ import os
 from typing import Set
 
 import twisted.internet.reactor
+from jinja2 import Environment, FileSystemLoader
 from twisted.internet import address, task
 from twisted.python import log
 
@@ -295,6 +296,10 @@ class Sydent:
                 "email", "email.third_party_invite_domain_obfuscate_characters"
             )
         )
+        self.template_environment = Environment(
+            loader=FileSystemLoader(self.cfg.get("general", "templates.path")),
+            autoescape=True,
+        )
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
@@ -473,7 +478,14 @@ class Sydent:
             brand = self.cfg.get("general", "brand.default")
 
         root_template_path = self.cfg.get("general", "templates.path")
-        return os.path.join(root_template_path, brand, template_name)
+
+        # Grab jinja template if it exists
+        if os.path.exists(
+            os.path.join(root_template_path, brand, template_name + ".j2")
+        ):
+            return os.path.join(brand, template_name + ".j2")
+        else:
+            return os.path.join(root_template_path, brand, template_name)
 
 
 class Validators:

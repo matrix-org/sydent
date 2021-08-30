@@ -29,7 +29,7 @@ from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
 from sydent.util import time_msec
 from sydent.util.hash import sha256_and_url_safe_base64
-from sydent.util.stringutils import is_valid_matrix_server_name
+from sydent.util.stringutils import is_valid_matrix_server_name, normalise_address
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -58,6 +58,10 @@ class ThreepidBinder:
 
         :return: The signed association.
         """
+
+        # ensure we casefold email address before storing
+        normalised_address = normalise_address(address, medium)
+
         localAssocStore = LocalAssociationStore(self.sydent)
 
         # Fill out the association details
@@ -67,13 +71,13 @@ class ThreepidBinder:
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
         str_to_hash = " ".join(
-            [address, medium, self.hashing_store.get_lookup_pepper()],
+            [normalised_address, medium, self.hashing_store.get_lookup_pepper()],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
         assoc = ThreepidAssociation(
             medium,
-            address,
+            normalised_address,
             lookup_hash,
             mxid,
             createdAt,
@@ -86,7 +90,7 @@ class ThreepidBinder:
         self.sydent.pusher.doLocalPush()
 
         joinTokenStore = JoinTokenStore(self.sydent)
-        pendingJoinTokens = joinTokenStore.getTokens(medium, address)
+        pendingJoinTokens = joinTokenStore.getTokens(medium, normalised_address)
         invites = []
         for token in pendingJoinTokens:
             token["mxid"] = mxid
@@ -100,7 +104,7 @@ class ThreepidBinder:
             invites.append(token)
         if invites:
             assoc.extra_fields["invites"] = invites
-            joinTokenStore.markTokensAsSent(medium, address)
+            joinTokenStore.markTokensAsSent(medium, normalised_address)
 
         signer = Signer(self.sydent)
         sgassoc = signer.signedThreePidAssociation(assoc)
@@ -116,6 +120,10 @@ class ThreepidBinder:
         :param threepid: The 3PID of the binding to remove.
         :param mxid: The MXID of the binding to remove.
         """
+
+        # ensure we are casefolding email addresses
+        threepid["address"] = normalise_address(threepid["address"], threepid["email"])
+
         localAssocStore = LocalAssociationStore(self.sydent)
         localAssocStore.removeAssociation(threepid, mxid)
         self.sydent.pusher.doLocalPush()
