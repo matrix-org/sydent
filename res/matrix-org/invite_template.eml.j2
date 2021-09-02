@@ -116,7 +116,7 @@ or iOS or Android on mobile.)</p>
 
 <p>
     <a
-    href="https://app.element.io/#/room/{{ room_id|urlencode }}?email={{ to|urlencode }}&signurl=https%3A%2F%2Fmatrix.org%2F_matrix%2Fidentity%2Fapi%2Fv1%2Fsign-ed25519%3Ftoken%3D{{ token|urlencode }}%26private_key%3D{{ ephemeral_private_key|urlencode }}&room_name={{ room_name|urlencode }}&room_avatar_url={{ room_avatar_url|urlencode }}&inviter_name={{ sender_display_name|urlencode }}&guest_access_token={{ guest_access_token|urlencode }}&guest_user_id={{ guest_user_id|urlencode }}">Join the conversation.</a>
+    href="{{ web_client_location }}/#/room/{{ room_id|urlencode }}?email={{ to|urlencode }}&signurl=https%3A%2F%2Fmatrix.org%2F_matrix%2Fidentity%2Fapi%2Fv1%2Fsign-ed25519%3Ftoken%3D{{ token|urlencode }}%26private_key%3D{{ ephemeral_private_key|urlencode }}&room_name={{ room_name|urlencode }}&room_avatar_url={{ room_avatar_url|urlencode }}&inviter_name={{ sender_display_name|urlencode }}&guest_access_token={{ guest_access_token|urlencode }}&guest_user_id={{ guest_user_id|urlencode }}">Join the conversation.</a>
 </p>
 
 <br>
