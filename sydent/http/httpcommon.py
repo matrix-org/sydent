@@ -42,6 +42,7 @@ class SslComponents:
         self.trustRoot = self.makeTrustRoot()
 
     def makeMyCertificate(self):
+        # azren TODO Move this loading into parse_config
         privKeyAndCertFilename = self.sydent.cfg.get(
             "http", "replication.https.certfile"
         )

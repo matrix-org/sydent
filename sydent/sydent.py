@@ -21,6 +21,7 @@ import gc
 import logging
 import logging.handlers
 import os
+from sydent.config.server import SydentConfig
 from typing import Set
 
 import twisted.internet.reactor
@@ -85,7 +86,7 @@ LEGACY_CONFIG_DEFAULTS = {
         "log.path": "",
         "log.level": "INFO",
         "pidfile.path": os.environ.get("SYDENT_PID_FILE", "sydent.pid"),
-        "terms.path": "",
+        "terms.path": "", # azren TODO: put into terms section
         "address_lookup_limit": "10000",  # Maximum amount of addresses in a single /lookup request
         # The root path to use for load templates. This should contain branded
         # directories. Each directory should contain the following templates:
@@ -96,7 +97,7 @@ LEGACY_CONFIG_DEFAULTS = {
         "templates.path": "res",
         # The brand directory to use if no brand hint (or an invalid brand hint)
         # is provided by the request.
-        "brand.default": "matrix-org",
+        "brand.default": "matrix-org", # azren TOOD: is a templates option
         # The following can be added to your local config file to enable prometheus
         # support.
         # 'prometheus_port': '8080',  # The port to serve metrics on
@@ -139,7 +140,7 @@ LEGACY_CONFIG_DEFAULTS = {
         "replication.https.port": "4434",
         "obey_x_forwarded_for": "False",
         "federation.verifycerts": "True",
-        # verify_response_template is deprecated, but still used if defined Define
+        # verify_response_template is deprecated, but still used if defined. Define
         # templates.path and brand.default under general instead.
         #
         # 'verify_response_template': 'res/verify_response_page_template',
@@ -476,11 +477,10 @@ class Sydent:
 
         # If the deprecated setting is defined, return it.
         # azren TODO
-        if self.using_legacy_config:
-            try:
-                return self.cfg.get(*deprecated_template_name)
-            except configparser.NoOptionError:
-                pass
+        try:
+            return self.cfg.get(*deprecated_template_name)
+        except configparser.NoOptionError:
+            pass
 
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:
@@ -615,7 +615,8 @@ def run_gc():
 
 if __name__ == "__main__":
     # azren TODO
-    cfg = parse_legacy_config_file(get_legacy_config_file_path())
+    config = SydentConfig()
+    config.parse_legacy_config_file(get_legacy_config_file_path())
     setup_logging(cfg)
     syd = Sydent(cfg)
     syd.run()
