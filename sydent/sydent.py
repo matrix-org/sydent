@@ -86,7 +86,7 @@ LEGACY_CONFIG_DEFAULTS = {
         "log.path": "",
         "log.level": "INFO",
         "pidfile.path": os.environ.get("SYDENT_PID_FILE", "sydent.pid"),
-        "terms.path": "", # azren TODO: put into terms section
+        "terms.path": "",  # azren TODO: put into terms section
         "address_lookup_limit": "10000",  # Maximum amount of addresses in a single /lookup request
         # The root path to use for load templates. This should contain branded
         # directories. Each directory should contain the following templates:
@@ -97,7 +97,7 @@ LEGACY_CONFIG_DEFAULTS = {
         "templates.path": "res",
         # The brand directory to use if no brand hint (or an invalid brand hint)
         # is provided by the request.
-        "brand.default": "matrix-org", # azren TOOD: is a templates option
+        "brand.default": "matrix-org",  # azren TOOD: is a templates option
         # The following can be added to your local config file to enable prometheus
         # support.
         # 'prometheus_port': '8080',  # The port to serve metrics on
@@ -202,14 +202,18 @@ LEGACY_CONFIG_DEFAULTS = {
 
 class Sydent:
     def __init__(
-        self, cfg, reactor=twisted.internet.reactor, use_tls_for_federation=True
+        self,
+        config: SydentConfig,
+        reactor=twisted.internet.reactor,
+        use_tls_for_federation=True,
     ):
+        logger.info("Starting Sydent Server")
+
+        self.config = config
         self.reactor = reactor
         self.use_tls_for_federation = use_tls_for_federation
 
-        # azren TODO
-        self.using_legacy_config = True
-        self.read_legacy_config(cfg)
+        self.db = SqliteDatabase(self).db
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
@@ -230,7 +234,7 @@ class Sydent:
         self.validators.msisdn = MsisdnValidator(self)
 
         self.keyring = Keyring()
-        self.keyring.ed25519 = SydentEd25519(self).signing_key
+        self.keyring.ed25519 = config.crypto.signing_key
         self.keyring.ed25519.alg = "ed25519"
 
         self.sig_verifier = Verifier(self)
@@ -303,17 +307,14 @@ class Sydent:
         cb.clock = self.reactor
         cb.start(1.0)
 
-    # azren TODO
-    def read_legacy_config(self, cfg):
+    # azren TODO - moved to config/SOMETHING.py 
+    # need to check none of these still used!
+    def _read_legacy_config(self, cfg):
         self.config_file = get_legacy_config_file_path()
 
         self.cfg = cfg
 
-        logger.info("Starting Sydent server")
-
         self.pidfile = self.cfg.get("general", "pidfile.path")
-
-        self.db = SqliteDatabase(self).db
 
         self.server_name = self.cfg.get("general", "server.name")
         if self.server_name == "":
@@ -410,32 +411,35 @@ class Sydent:
 
         self.federation_verifycerts = cfg.getboolean("http", "federation.verifycerts")
 
-    # azren TODO
-    def save_config(self):
-        fp = open(self.config_file, "w")
-        self.cfg.write(fp)
-        fp.close()
+    # azren TODO - moved to config/server.py
+    def _save_config(self):
+        pass
 
     def run(self):
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
 
-        if self.internalport:
+        if self.config.http.internal_port:
             self.internalApiHttpServer = InternalApiHttpServer(self)
-            self.internalApiHttpServer.setup(self.interface, int(self.internalport))
+            self.internalApiHttpServer.setup(
+                self.config.http.internal_bind_address,
+                self.config.http.internal_port,
+            )
 
-        if self.pidfile:
-            with open(self.pidfile, "w") as pidfile:
+        if self.config.general.pidfile:
+            with open(self.config.general.pidfile, "w") as pidfile:
                 pidfile.write(str(os.getpid()) + "\n")
 
         self.reactor.run()
 
     def ip_from_request(self, request):
-        if self.cfg.get(
-            "http", "obey_x_forwarded_for"
-        ) and request.requestHeaders.hasHeader("X-Forwarded-For"):
+        # azren TODO
+        if self.config.http.obey_x_forwarded_for and request.requestHeaders.hasHeader(
+            "X-Forwarded-For"
+        ):
             return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
+    
         client = request.getClientAddress()
         if isinstance(client, (address.IPv4Address, address.IPv6Address)):
             return client.host
@@ -456,7 +460,8 @@ class Sydent:
             return request.args[b"brand"][0].decode("utf-8")
         return None
 
-    def get_branded_template(self, brand, template_name, deprecated_template_name):
+    # azren TODO: change all usages to check deprecated config template before calling
+    def get_branded_template(self, brand, template_name):
         """
         Calculate a (maybe) branded template filename to use.
 
@@ -475,13 +480,6 @@ class Sydent:
         :rtype: str
         """
 
-        # If the deprecated setting is defined, return it.
-        # azren TODO
-        try:
-            return self.cfg.get(*deprecated_template_name)
-        except configparser.NoOptionError:
-            pass
-
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:
             if brand not in self.valid_brands:
@@ -489,9 +487,9 @@ class Sydent:
 
         # If the brand hint is not valid, or not provided, fallback to the default brand.
         if not brand:
-            brand = self.cfg.get("general", "brand.default")
+            brand = self.config.general.default_brand
 
-        root_template_path = self.cfg.get("general", "templates.path")
+        root_template_path = self.config.general.templates_path
 
         # Grab jinja template if it exists
         if os.path.exists(
@@ -513,7 +511,8 @@ class Servlets:
 class Keyring:
     pass
 
-# azren TODO
+
+# azren TODO: move to config/server.py (only used for testing atm)
 def parse_legacy_config_dict(config_dict):
     """Parse the given config from a dictionary, populating missing items and sections
 
@@ -537,8 +536,9 @@ def parse_legacy_config_dict(config_dict):
 
     return cfg
 
-# azren TODO
-def parse_legacy_config_file(config_file):
+
+# azren TODO - moved out into config/server.py
+def _parse_legacy_config_file(config_file):
     """Parse the given config from a filepath, populating missing items and
     sections
     Args:
@@ -562,8 +562,8 @@ def parse_legacy_config_file(config_file):
 
     return cfg
 
-
-def setup_logging(cfg):
+# azren TODO: moved out into config/server.py
+def _setup_logging(cfg):
     log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
     formatter = logging.Formatter(log_format)
 
@@ -590,16 +590,17 @@ def setup_logging(cfg):
     observer = log.PythonLoggingObserver()
     observer.start()
 
+
 # azren TODO
 def get_legacy_config_file_path():
     return os.environ.get("SYDENT_CONF", "sydent.conf")
 
-
-def parse_cfg_bool(value):
+# azren TODO moved to config/server.py
+def _parse_cfg_bool(value):
     return value.lower() == "true"
 
-
-def set_from_comma_sep_string(rawstr: str) -> Set[str]:
+# azren TODO moved to config/general.py
+def _set_from_comma_sep_string(rawstr: str) -> Set[str]:
     if rawstr == "":
         return set()
     return {x.strip() for x in rawstr.split(",")}
@@ -617,6 +618,5 @@ if __name__ == "__main__":
     # azren TODO
     config = SydentConfig()
     config.parse_legacy_config_file(get_legacy_config_file_path())
-    setup_logging(cfg)
-    syd = Sydent(cfg)
+    syd = Sydent(config)
     syd.run()

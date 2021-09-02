@@ -63,7 +63,7 @@ class LookupServlet(Resource):
             return {}
 
         sgassoc = json_decoder.decode(sgassoc)
-        if self.sydent.server_name not in sgassoc["signatures"]:
+        if self.sydent.config.general.server_name not in sgassoc["signatures"]:
             # We have not yet worked out what the proper trust model should be.
             #
             # Maybe clients implicitly trust a server they talk to (and so we

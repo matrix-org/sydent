@@ -125,8 +125,8 @@ class SimpleHttpClient(HTTPClient):
         self.agent = Agent(
             BlacklistingReactorWrapper(
                 reactor=self.sydent.reactor,
-                ip_whitelist=sydent.ip_whitelist,
-                ip_blacklist=sydent.ip_blacklist,
+                ip_whitelist=sydent.config.general.ip_whitelist,
+                ip_blacklist=sydent.config.general.ip_blacklist,
             ),
             connectTimeout=15,
         )
@@ -142,10 +142,10 @@ class FederationHttpClient(HTTPClient):
         self.agent = MatrixFederationAgent(
             BlacklistingReactorWrapper(
                 reactor=self.sydent.reactor,
-                ip_whitelist=sydent.ip_whitelist,
-                ip_blacklist=sydent.ip_blacklist,
+                ip_whitelist=sydent.config.general.ip_whitelist,
+                ip_blacklist=sydent.config.general.ip_blacklist,
             ),
-            ClientTLSOptionsFactory(sydent.federation_verifycerts)
+            ClientTLSOptionsFactory(sydent.config.http.verify_federation_certs)
             if sydent.use_tls_for_federation
             else None,
         )

@@ -13,11 +13,14 @@
 # limitations under the License.
 
 from OpenSSL import SSL
+import logging
 from twisted.internet import ssl
 from twisted.internet.abstract import isIPAddress, isIPv6Address
 from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
+from twisted.python.failure import Failure
 from zope.interface import implementer
 
+logger = logging.getLogger(__name__)
 
 def _tolerateErrors(wrapped):
     """

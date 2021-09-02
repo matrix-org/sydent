@@ -43,9 +43,7 @@ class SslComponents:
 
     def makeMyCertificate(self):
         # azren TODO Move this loading into parse_config
-        privKeyAndCertFilename = self.sydent.cfg.get(
-            "http", "replication.https.certfile"
-        )
+        privKeyAndCertFilename = self.sydent.config.http.cert_file
         if privKeyAndCertFilename == "":
             logger.warning(
                 "No HTTPS private key / cert found: not starting replication server "
@@ -70,7 +68,7 @@ class SslComponents:
     def makeTrustRoot(self):
         # If this option is specified, use a specific root CA cert. This is useful for testing when it's not
         # practical to get the client cert signed by a real root CA but should never be used on a production server.
-        caCertFilename = self.sydent.cfg.get("http", "replication.https.cacert")
+        caCertFilename = self.sydent.config.http.ca_cert_File
         if len(caCertFilename) > 0:
             try:
                 fp = open(caCertFilename)

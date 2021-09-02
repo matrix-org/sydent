@@ -63,11 +63,13 @@ class EmailValidator:
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
-        templateFile = self.sydent.get_branded_template(
-            brand,
-            "verification_template.eml",
-            ("email", "email.template"),
-        )
+        if self.sydent.config.email.template is None:
+            templateFile = self.sydent.get_branded_template(
+                brand,
+                "verification_template.eml",
+            )
+        else:
+            templateFile = self.sydent.config.email.template
 
         if int(valSession.sendAttemptNumber) >= int(sendAttempt):
             logger.info(
@@ -110,7 +112,7 @@ class EmailValidator:
         :return: The validation link.
         """
         # azren TODO
-        base = self.sydent.cfg.get("http", "client_http_base")
+        base = self.sydent.config.http.server_http_url_base
         link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
             base,
             urllib.parse.quote(valSession.token),

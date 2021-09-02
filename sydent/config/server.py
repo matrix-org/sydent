@@ -142,20 +142,20 @@ class BaseConfig:
 class SydentConfig:
 
     def __init__(self):
-        general = GeneralConfig()
-        email = EmailConfig()
-        database = DatabaseConfig()
-        http = HTTPConfig()
-        sms = SMSConfig()
-        crypto = CryptoConfig()
+        self.general = GeneralConfig()
+        self.email = EmailConfig()
+        self.database = DatabaseConfig()
+        self.http = HTTPConfig()
+        self.sms = SMSConfig()
+        self.crypto = CryptoConfig()
 
         self.config_sections = [
-            general,
-            email,
-            database,
-            http,
-            sms,
-            crypto,
+            self.general,
+            self.email,
+            self.database,
+            self.http,
+            self.sms,
+            self.crypto,
         ]
 
     def parse_legacy_config_file(self, config_file):
@@ -184,6 +184,14 @@ class SydentConfig:
 
         for section in self.config_sections:
             section.parse_legacy_config(cfg)
+
+            # In the legacy config, changes can be saved back to file (e.g. generated keys)
+            if hasattr(section, "update_legacy_cfg") and section.update_legacy_cfg:
+                fp = open(self.config_file, "w")
+                self.cfg.write(fp)
+                fp.close()
+
+        
 
 def setup_legacy_logging(cfg):
     log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"

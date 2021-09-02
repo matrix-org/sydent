@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import phonenumbers  # type: ignore
 
@@ -35,45 +35,8 @@ class MsisdnValidator:
         self.omSms = OpenMarketSMS(sydent)
 
         # cache originators & sms rules from config file
-        self.originators: Dict[str, List[Dict[str, str]]] = {}
-        self.smsRules = {}
-        # azren TODO
-        for opt in self.sydent.cfg.options("sms"):
-            if opt.startswith("originators."):
-                country = opt.split(".")[1]
-                # azren TODO
-                rawVal = self.sydent.cfg.get("sms", opt)
-                rawList = [i.strip() for i in rawVal.split(",")]
-
-                self.originators[country] = []
-                for origString in rawList:
-                    parts = origString.split(":")
-                    if len(parts) != 2:
-                        raise Exception(
-                            "Originators must be in form: long:<number>, short:<number> or alpha:<text>, separated by commas"
-                        )
-                    if parts[0] not in ["long", "short", "alpha"]:
-                        raise Exception(
-                            "Invalid originator type: valid types are long, short and alpha"
-                        )
-                    self.originators[country].append(
-                        {
-                            "type": parts[0],
-                            "text": parts[1],
-                        }
-                    )
-            elif opt.startswith("smsrule."):
-                country = opt.split(".")[1]
-                # azren TODO
-                action = self.sydent.cfg.get("sms", opt)
-
-                if action not in ["allow", "reject"]:
-                    raise Exception(
-                        "Invalid SMS rule action: %s, expecting 'allow' or 'reject'"
-                        % action
-                    )
-
-                self.smsRules[country] = action
+        self.originators = self.sydent.config.sms.originators
+        self.smsRules = self.sydent.config.sms.smsRules
 
     def requestToken(
         self,
@@ -119,7 +82,7 @@ class MsisdnValidator:
             return valSession.id
 
         # azren TODO
-        smsBodyTemplate = self.sydent.cfg.get("sms", "bodyTemplate")
+        smsBodyTemplate = self.sydent.config.sms.body_template
         originator = self.getOriginator(phoneNumber)
 
         logger.info(

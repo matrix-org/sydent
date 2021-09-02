@@ -1,10 +1,9 @@
 from configparser import ConfigParser
 import logging
-from logging.handlers import QueueHandler
 import os
 from typing import Set
+from jinja2.environment import Environment
 
-from jinja2 import environment
 from jinja2.loaders import FileSystemLoader
 
 from sydent.config.server import BaseConfig
@@ -30,7 +29,7 @@ class GeneralConfig(BaseConfig):
 
         self.terms_path = cfg.get("general", "terms.path")
 
-        self.address_lookup_limit = cfg.get("general", "address_lookup_limit")
+        self.address_lookup_limit = cfg.int("general", "address_lookup_limit")
 
         # Get the possible brands by looking at directories under the
         # templates.path directory.
@@ -49,7 +48,7 @@ class GeneralConfig(BaseConfig):
             # email.template, and email.invite_template are defined.
             self.valid_brands = set()
             
-        self.template_environment = environment(
+        self.template_environment = Environment(
             loader=FileSystemLoader(self.cfg.get("general", "templates.path")),
             autoescape=True,
         )

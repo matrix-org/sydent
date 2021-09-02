@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import binascii
-import configparser
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict
@@ -104,7 +103,7 @@ class LocalPeer(Peer):
                     globalAssocStore.addAssociation(
                         assocObj,
                         json.dumps(sgAssocs[localId]),
-                        self.sydent.server_name,
+                        self.sydent.config.general.server_name,
                         localId,
                     )
                 else:
@@ -139,16 +138,12 @@ class RemotePeer(Peer):
 
         # look up or build the replication URL
         # azren TODO
-        if sydent.using_legacy_config:
-            try:
-                replication_url = sydent.cfg.get(
-                    "peer.%s" % server_name,
-                    "base_replication_url",
-                )
-            except (configparser.NoSectionError, configparser.NoOptionError):
-                if not port:
-                    port = 1001
-                replication_url = "https://%s:%i" % (server_name, port)
+        replication_url = self.sydent.config.http.base_replecation_urls.get(server_name)
+
+        if replication_url is None:
+            if not port:
+                port = 1001
+            replication_url = "https://%s:%i" % (server_name, port)
 
         if replication_url[-1:] != "/":
             replication_url += "/"
@@ -175,7 +170,7 @@ class RemotePeer(Peer):
             # Check for base64 encoding
             try:
                 pubkey_decoded = decode_base64(pubkey)
-            # azren TODO
+            # azren TODO should this really be a config error
             except Exception as e:
                 raise ConfigError(
                     "Unable to decode public key for peer %s: %s" % (server_name, e),

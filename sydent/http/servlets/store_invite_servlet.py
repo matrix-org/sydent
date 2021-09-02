@@ -15,6 +15,7 @@
 import random
 import string
 from email.header import Header
+from sydent.config import email, general
 from typing import TYPE_CHECKING
 
 import nacl.signing
@@ -133,7 +134,9 @@ class StoreInviteServlet(Resource):
         if substitutions["room_name"] != "":
             substitutions["bracketed_room_name"] = "(%s) " % substitutions["room_name"]
 
-        substitutions["web_client_location"] = self.sydent.default_web_client_location
+        substitutions[
+            "web_client_location"
+        ] = self.sydent.config.email.default_web_client_location
         if "org.matrix.web_client_location" in substitutions:
             substitutions["web_client_location"] = substitutions.pop(
                 "org.matrix.web_client_location"
@@ -141,18 +144,19 @@ class StoreInviteServlet(Resource):
 
         # azren TODO
         subject_header = Header(
-            self.sydent.cfg.get("email", "email.invite.subject", raw=True)
-            % substitutions,
+            self.sydent.config.email.invite_subject % substitutions,
             "utf8",
         )
         substitutions["subject_header_value"] = subject_header.encode()
 
         brand = self.sydent.brand_from_request(request)
-        templateFile = self.sydent.get_branded_template(
-            brand,
-            "invite_template.eml",
-            ("email", "email.invite_template"),
-        )
+        if self.sydent.config.email.invite_template is None:
+            templateFile = self.sydent.get_branded_template(    
+                brand,
+                "invite_template.eml",
+            )
+        else:
+            templateFile = self.sydent.config.email.invite_template
 
         sendEmail(self.sydent, templateFile, normalised_address, substitutions)
 
@@ -161,7 +165,7 @@ class StoreInviteServlet(Resource):
 
         # azren TODO
         baseUrl = "%s/_matrix/identity/api/v1" % (
-            self.sydent.cfg.get("http", "client_http_base"),
+            self.sydent.config.http.server_http_url_base,
         )
 
         keysToReturn = []
@@ -201,9 +205,9 @@ class StoreInviteServlet(Resource):
 
         # Obfuscate strings
         redacted_username = self._redact(
-            username, self.sydent.username_obfuscate_characters
+            username, self.sydent.config.email.username_obfuscate_characters
         )
-        redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
+        redacted_domain = self._redact(domain, self.sydent.config.email.domain_obfuscate_characters)
 
         return redacted_username + "@" + redacted_domain
 

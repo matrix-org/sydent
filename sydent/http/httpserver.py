@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import logging
+from sydent import http
 from typing import TYPE_CHECKING
 
 import twisted.internet.ssl
@@ -139,8 +140,9 @@ class ClientApiHttpServer:
         self.factory.displayTracebacks = False
 
     def setup(self):
-        httpPort = int(self.sydent.cfg.get("http", "clientapi.http.port"))
-        interface = self.sydent.cfg.get("http", "clientapi.http.bind_address")
+        httpPort = self.sydent.config.http.client_port
+        interface = self.sydent.config.http.client_bind_address
+
         logger.info("Starting Client API HTTP server on %s:%d", interface, httpPort)
         self.sydent.reactor.listenTCP(
             httpPort,
@@ -199,8 +201,8 @@ class ReplicationHttpsServer:
         self.factory.displayTracebacks = False
 
     def setup(self):
-        httpPort = int(self.sydent.cfg.get("http", "replication.https.port"))
-        interface = self.sydent.cfg.get("http", "replication.https.bind_address")
+        httpPort = self.sydent.config.http.replication_port
+        interface = self.sydent.config.http.replication_bind_address
 
         if self.sydent.sslComponents.myPrivateCertificate:
             # We will already have logged a warn if this is absent, so don't do it again

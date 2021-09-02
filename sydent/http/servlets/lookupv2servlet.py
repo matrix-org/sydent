@@ -81,7 +81,7 @@ class LookupV2Servlet(Resource):
 
         # Ensure address count is under the configured limit
         # azren TODO
-        limit = int(self.sydent.cfg.get("general", "address_lookup_limit"))
+        limit = self.sydent.config.general.address_lookup_limit
         if len(addresses) > limit:
             request.setResponseCode(400)
             return {
