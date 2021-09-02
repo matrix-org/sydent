@@ -1,25 +1,27 @@
-Date: %(date)s
-From: %(from)s
-To: %(to)s
-Message-ID: %(messageid)s
-Subject: %(subject_header_value)s
+Date: {{ date|safe }}
+From: {{ from|safe }}
+To: {{ to|safe }}
+Message-ID: {{ messageid|safe }}
+Subject: {{ subject_header_value|safe }}
 MIME-Version: 1.0
 Content-Type: multipart/alternative;
-	boundary="%(multipart_boundary)s"
+	boundary="{{ multipart_boundary|safe }}"
 
---%(multipart_boundary)s
+--{{ multipart_boundary|safe }}
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
-Hi,
+Hello,
 
-%(sender_display_name)s %(bracketed_verified_sender)shas invited you into a room
-%(bracketed_room_name)son Matrix. To join the conversation, either pick a
-Matrix client from https://matrix.org/docs/projects/try-matrix-now.html or use
-the single-click link below to join via Element (requires Chrome, Firefox,
-Safari, iOS or Android)
-
-%(web_client_location)s/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s&room_type=%(room_type)s
+We’ve recently improved how people discover your Matrix account.
+In the past, identity services took capitalisation into account when storing email
+addresses. This means Alice@example.com and alice@example.com would be considered to be
+two different addresses, and could be associated with different Matrix accounts. We’ve
+now updated this behaviour so anyone can find you, no matter how your email is capitalised.
+As part of this recent update, we've dissociated the Matrix account {{ mxid|safe }} from
+this e-mail address.
+No action is needed on your part. This doesn’t affect any passwords or password reset
+options on your account.
 
 
 About Matrix:
@@ -39,7 +41,7 @@ Thanks,
 
 Matrix
 
---%(multipart_boundary)s
+--{{ multipart_boundary|safe }}
 Content-Type: text/html; charset=UTF-8
 Content-Disposition: inline
 
@@ -100,20 +102,18 @@ pre, code {
                         </tr>
                     </table>
 
-<p>Hi,</p>
-
-<p>%(sender_display_name_forhtml)s <span class="low-contrast">%(bracketed_verified_sender_forhtml)s</span> has invited you into a room %(bracketed_room_name_forhtml)s on
-Matrix. To join the conversation, either <a href="https://matrix.org/docs/projects/try-matrix-now.html">pick a Matrix client</a> or use the single-click
-link below to join via Element (requires
-<a href="https://www.google.com/chrome">Chrome</a>,
-<a href="https://www.getfirefox.com">Firefox</a> or
-<a href="https://www.apple.com/safari">Safari</a> on the web,
-or iOS or Android on mobile.)</p>
-</p>
+<p>Hello,</p>
 
 <p>
-    <a
-    href="%(web_client_location)s/#/room/%(room_id_forurl)s?email=%(to_forurl)s&signurl=https%%3A%%2F%%2Fmatrix.org%%2F_matrix%%2Fidentity%%2Fapi%%2Fv1%%2Fsign-ed25519%%3Ftoken%%3D%(token)s%%26private_key%%3D%(ephemeral_private_key)s&room_name=%(room_name_forurl)s&room_avatar_url=%(room_avatar_url_forurl)s&inviter_name=%(sender_display_name_forurl)s&guest_access_token=%(guest_access_token_forurl)s&guest_user_id=%(guest_user_id_forurl)s&room_type=%(room_type)s">Join the conversation.</a>
+    We’ve recently improved how people discover your Matrix account.<br/>
+    In the past, identity services took capitalisation into account when storing email
+    addresses. This means Alice@example.com and alice@example.com would be considered to
+    be two different addresses, and could be associated with different Matrix accounts.
+    We’ve now updated this behaviour so anyone can find you, no matter how your email is
+    capitalised. As part of this recent update, we've dissociated the Matrix account
+    {{ mxid|safe }} from this e-mail address.<br/>
+    No action is needed on your part. This doesn’t affect any passwords or password reset
+    options on your account.
 </p>
 
 <br>
@@ -140,4 +140,4 @@ create new communication solutions or extend the capabilities and reach of exist
     </body>
 </html>
 
---%(multipart_boundary)s--
+--{{ multipart_boundary|safe }}--

@@ -11,21 +11,17 @@ Content-Type: multipart/alternative;
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
-Hi,
+Hello,
 
-{{ sender_display_name|safe }} {{ bracketed_verified_sender|safe }}has invited you into a {% if room_type == "m.space" %}space{% else %}room{% endif %}
-{{ bracketed_room_name|safe }}on Element. To join the conversation please follow the
-link below.
-
-{{ web_client_location }}/#/room/{{ room_id|urlencode }}?email={{ to|urlencode }}&signurl=https%3A%2F%2Fvector.im%2F_matrix%2Fidentity%2Fapi%2Fv1%2Fsign-ed25519%3Ftoken%3D{{ token|urlencode }}%26private_key%3D{{ ephemeral_private_key|urlencode }}&room_name={{ room_name|urlencode }}&room_avatar_url={{ room_avatar_url|urlencode }}&inviter_name={{ sender_display_name|urlencode }}&guest_access_token={{ guest_access_token|urlencode }}&guest_user_id={{ guest_user_id|urlencode }}&room_type={{ room_type|urlencode }}
-
-Element is an open source collaboration app built on the Matrix.org
-open standard for interoperable communication: supporting group chat,
-file transfer, voice and video calling, integrations to other apps, bridges
-to other communication systems and much more.
-
-Please note that you will need to use Chrome, Firefox or Safari on the web, or
-iOS or Android on mobile.
+We’ve recently improved how people discover your Matrix account.
+In the past, identity services took capitalisation into account when storing email
+addresses. This means Alice@example.com and alice@example.com would be considered to be
+two different addresses, and could be associated with different Matrix accounts. We’ve
+now updated this behaviour so anyone can find you, no matter how your email is capitalised.
+As part of this recent update, we've dissociated the Matrix account {{ mxid|safe }} from
+this e-mail address.
+No action is needed on your part. This doesn’t affect any passwords or password reset
+options on your account.
 
 Thanks,
 
@@ -121,26 +117,19 @@ pre, code {
                         </tr>
                     </table>
 
-<p>Hi,</p>
-
-<p>{{ sender_display_name }} <span class="low-contrast">{{ bracketed_verified_sender }}</span> has invited you into a
-{% if room_type == "m.space" %}space{% else %}room{% endif %} {{ bracketed_room_name }} on Element.</p>
+<p>Hello,</p>
 
 <p>
-    <a
-    href="{{ web_client_location }}/#/room/{{ room_id|urlencode }}?email={{ to|urlencode }}&signurl=https%3A%2F%2Fvector.im%2F_matrix%2Fidentity%2Fapi%2Fv1%2Fsign-ed25519%3Ftoken%3D{{ token|urlencode }}%26private_key%3D{{ ephemeral_private_key|urlencode }}&room_name={{ room_name|urlencode }}&room_avatar_url={{ room_avatar_url|urlencode }}&inviter_name={{ sender_display_name|urlencode }}&guest_access_token={{ guest_access_token|urlencode }}&guest_user_id={{ guest_user_id|urlencode }}&room_type={{ room_type|urlencode }}">Join the conversation.</a>
+    We’ve recently improved how people discover your Matrix account.<br/>
+    In the past, identity services took capitalisation into account when storing email
+    addresses. This means Alice@example.com and alice@example.com would be considered to
+    be two different addresses, and could be associated with different Matrix accounts.
+    We’ve now updated this behaviour so anyone can find you, no matter how your email is
+    capitalised. As part of this recent update, we've dissociated the Matrix account
+    {{ mxid|safe }} from this e-mail address.<br/>
+    No action is needed on your part. This doesn’t affect any passwords or password reset
+    options on your account.
 </p>
-
-<p>Element is an open source collaboration app built on the Matrix.org
-open standard for interoperable communication: supporting group chat, file
-transfer, voice and video calling, integrations to other apps, bridges
-to other communication systems and much more.</p>
-
-<p>Please note that Element requires
-<a href="https://www.google.com/chrome">Chrome</a>,
-<a href="https://www.getfirefox.com">Firefox</a> or
-<a href="https://www.apple.com/safari">Safari</a> on the web,
-or iOS or Android on mobile.</p>
 
 <p>Thanks,</p>
 
