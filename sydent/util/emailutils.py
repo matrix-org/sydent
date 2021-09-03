@@ -16,7 +16,6 @@ import email.utils
 import logging
 import random
 import smtplib
-import socket
 import string
 import urllib
 from html import escape

@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import argparse
-import configparser
 import json
 import os
 import sqlite3
@@ -24,7 +23,6 @@ from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 import signedjson.sign
 
-from sydent.sydent import Sydent
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64

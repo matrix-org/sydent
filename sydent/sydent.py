@@ -15,19 +15,14 @@
 # limitations under the License.
 
 # azren TODO
-import configparser
-import copy
 import gc
 import logging
 import logging.handlers
 import os
 from sydent.config.server import SydentConfig
-from typing import Set
 
 import twisted.internet.reactor
-from jinja2 import Environment, FileSystemLoader
 from twisted.internet import address, task
-from twisted.python import log
 
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.sqlitedb import SqliteDatabase
@@ -70,10 +65,8 @@ from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from sydent.http.servlets.v1_servlet import V1Servlet
 from sydent.http.servlets.v2_servlet import V2Servlet
 from sydent.replication.pusher import Pusher
-from sydent.sign.ed25519 import SydentEd25519
 from sydent.threepid.bind import ThreepidBinder
 from sydent.util.hash import sha256_and_url_safe_base64
-from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 from sydent.validators.emailvalidator import EmailValidator
 from sydent.validators.msisdnvalidator import MsisdnValidator

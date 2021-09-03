@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import logging
-from sydent import http
 from typing import TYPE_CHECKING
 
 import twisted.internet.ssl
