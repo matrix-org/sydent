@@ -284,35 +284,6 @@ class Servlets:
 class Keyring:
     pass
 
-# azren TODO: moved out into config/server.py
-def _setup_logging(cfg):
-    log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
-    formatter = logging.Formatter(log_format)
-
-    logPath = cfg.get("general", "log.path")
-    if logPath != "":
-        handler = logging.handlers.TimedRotatingFileHandler(
-            logPath, when="midnight", backupCount=365
-        )
-        handler.setFormatter(formatter)
-
-        def sighup(signum, stack):
-            logger.info("Closing log file due to SIGHUP")
-            handler.doRollover()
-            logger.info("Opened new log file due to SIGHUP")
-
-    else:
-        handler = logging.StreamHandler()
-
-    handler.setFormatter(formatter)
-    rootLogger = logging.getLogger("")
-    rootLogger.setLevel(cfg.get("general", "log.level"))
-    rootLogger.addHandler(handler)
-
-    observer = log.PythonLoggingObserver()
-    observer.start()
-
-
 # azren TODO
 def get_legacy_config_file_path():
     return os.environ.get("SYDENT_CONF", "sydent.conf")
