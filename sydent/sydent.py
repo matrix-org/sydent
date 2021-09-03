@@ -482,7 +482,7 @@ class Sydent:
 
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:
-            if brand not in self.valid_brands:
+            if brand not in self.config.general.valid_brands:
                 brand = None
 
         # If the brand hint is not valid, or not provided, fallback to the default brand.
