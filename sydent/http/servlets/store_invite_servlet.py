@@ -15,7 +15,6 @@
 import random
 import string
 from email.header import Header
-from sydent.config import email, general
 from typing import TYPE_CHECKING
 
 import nacl.signing
