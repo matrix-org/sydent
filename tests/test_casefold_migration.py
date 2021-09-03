@@ -96,7 +96,7 @@ class MigrationTestCase(unittest.TestCase):
 
         # create some global associations
         associations = []
-        originServer = self.sydent.server_name
+        originServer = self.sydent.config.general.server_name
 
         for i in range(10):
             address = "bob%d@example.com" % i
@@ -172,11 +172,15 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_migration_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            templateFile = self.sydent.get_branded_template(
-                None,
-                "migration_template.eml",
-                ("email", "email.template"),
-            )
+            if self.sydent.config.email.template is None:
+                templateFile = self.sydent.get_branded_template(
+                    None,
+                    "migration_template.eml",
+                    ("email", "email.template"),
+                )
+            else:
+                templateFile = self.sydent.config.email.template
+                
             sendEmail(
                 self.sydent,
                 templateFile,

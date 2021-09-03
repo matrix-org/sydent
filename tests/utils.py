@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from io import BytesIO
+from sydent.config.server import SydentConfig
 from typing import Dict
 from unittest.mock import MagicMock
 
@@ -23,7 +24,7 @@ from twisted.web.http_headers import Headers
 from twisted.web.server import Request, Site
 from zope.interface import implementer
 
-from sydent.sydent import Sydent, parse_legacy_config_dict
+from sydent.sydent import Sydent
 
 # Expires on Jan 11 2030 at 17:53:40 GMT
 FAKE_SERVER_CERT_PEM = """
@@ -69,10 +70,12 @@ def make_sydent(test_config={}):
         test_config["db"].setdefault("db.file", ":memory:")
 
     reactor = ResolvingMemoryReactorClock()
+    config = SydentConfig()
+    config.parse_legacy_config_dict(test_config)
     # azren TODO
     return Sydent(
         reactor=reactor,
-        cfg=parse_legacy_config_dict(test_config),
+        cfg=config,
         use_tls_for_federation=False,
     )
 
@@ -254,6 +257,7 @@ class ToTwistedHandler(logging.Handler):
     def emit(self, record):
         log_entry = self.format(record)
         log_level = record.levelname.lower().replace("warning", "warn")
+
         self.tx_log.emit(
             twisted.logger.LogLevel.levelWithName(log_level), "{entry}", entry=log_entry
         )

@@ -203,13 +203,13 @@ LEGACY_CONFIG_DEFAULTS = {
 class Sydent:
     def __init__(
         self,
-        config: SydentConfig,
+        cfg: SydentConfig,
         reactor=twisted.internet.reactor,
         use_tls_for_federation=True,
     ):
         logger.info("Starting Sydent Server")
 
-        self.config = config
+        self.config = cfg
         self.reactor = reactor
         self.use_tls_for_federation = use_tls_for_federation
 
@@ -234,7 +234,7 @@ class Sydent:
         self.validators.msisdn = MsisdnValidator(self)
 
         self.keyring = Keyring()
-        self.keyring.ed25519 = config.crypto.signing_key
+        self.keyring.ed25519 = self.config.crypto.signing_key
         self.keyring.ed25519.alg = "ed25519"
 
         self.sig_verifier = Verifier(self)
@@ -513,7 +513,7 @@ class Keyring:
 
 
 # azren TODO: move to config/server.py (only used for testing atm)
-def parse_legacy_config_dict(config_dict):
+def _parse_legacy_config_dict(config_dict):
     """Parse the given config from a dictionary, populating missing items and sections
 
     Args:

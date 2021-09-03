@@ -14,19 +14,24 @@
 # limitations under the License.
 
 import argparse
+import configparser
 import json
 import os
 import sqlite3
+from sydent.config.server import SydentConfig
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 import signedjson.sign
 
-from sydent.sydent import Sydent, parse_legacy_config_file
+from sydent.sydent import Sydent
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
 from tests.utils import ResolvingMemoryReactorClock
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 
 def calculate_lookup_hash(sydent, address):
@@ -39,7 +44,7 @@ def calculate_lookup_hash(sydent, address):
 
 
 def update_local_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+    sydent: "Sydent", db: sqlite3.Connection, send_email: bool, dry_run: bool
 ):
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
@@ -104,11 +109,13 @@ def update_local_associations(
             if mxid in processed_mxids:
                 continue
             else:
-                templateFile = sydent.get_branded_template(
-                    None,
-                    "migration_template.eml",
-                    ("email", "email.template"),
-                )
+                if sydent.config.email.template is None:
+                    templateFile = sydent.get_branded_template(
+                        None,
+                        "migration_template.eml",
+                    )
+                else:
+                    templateFile = sydent.config.email.template
 
                 sendEmail(
                     sydent,
@@ -139,7 +146,7 @@ def update_local_associations(
 
 
 def update_global_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+    sydent: "Sydent", db: sqlite3.Connection, send_email: bool, dry_run: bool
 ):
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
@@ -149,7 +156,7 @@ def update_global_associations(
     """
 
     # get every row where the local server is origin server and medium is email
-    origin_server = sydent.server_name
+    origin_server = sydent.config.general.server_name
     medium = "email"
 
     cur = db.cursor()
@@ -176,7 +183,7 @@ def update_global_associations(
         sg_assoc["address"] = address.casefold()
         sg_assoc = json.dumps(
             signedjson.sign.sign_json(
-                sg_assoc, sydent.server_name, sydent.keyring.ed25519
+                sg_assoc, sydent.config.general.server_name, sydent.keyring.ed25519
             )
         )
 
@@ -250,7 +257,8 @@ if __name__ == "__main__":
         print(f"The config file '{args.config_path}' does not exist.")
         sys.exit(1)
 
-    config = parse_legacy_config_file(args.config_path)
+    config = SydentConfig()
+    config.parse_legacy_config_file(args.config_path)
 
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(config, reactor, False)

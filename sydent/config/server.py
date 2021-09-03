@@ -1,4 +1,5 @@
 import configparser
+import copy
 import logging
 import logging.handlers
 import os
@@ -186,6 +187,32 @@ class SydentConfig:
                 cfg.write(fp)
                 fp.close()
 
+    def parse_legacy_config_dict(self, config_dict):
+        """Parse the given config from a dictionary, populating missing items and sections
+
+        Args:
+            config_dict (dict): the configuration dictionary to be parsed
+        """
+        # Build a config dictionary from the defaults merged with the given dictionary
+        config = copy.deepcopy(LEGACY_CONFIG_DEFAULTS)
+        for section, section_dict in config_dict.items():
+            if section not in config:
+                config[section] = {}
+            for option in section_dict.keys():
+                config[section][option] = config_dict[section][option]
+
+        # Build a ConfigParser from the merged dictionary
+        cfg = configparser.ConfigParser()
+        for section, section_dict in config.items():
+            cfg.add_section(section)
+            for option, value in section_dict.items():
+                cfg.set(section, option, value)
+
+        # This is only ever called by tests so don't configure logging
+        # setup_legacy_logging(cfg)
+
+        for section in self.config_sections:
+            section.parse_legacy_config(cfg)
         
 
 def setup_legacy_logging(cfg):
