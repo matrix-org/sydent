@@ -27,8 +27,6 @@ class HTTPConfig(BaseConfig):
             "http", "replication.https.bind_address"
         )
         self.replication_port = cfg.getint("http", "replication.https.port")
-        if self.replication_port:
-            self.replication_port = int(self.replication_port)
 
         self.obey_x_forwarded_for = cfg.get("http", "obey_x_forwarded_for")
 
