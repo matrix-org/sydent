@@ -1,5 +1,6 @@
-from configparser import ConfigParser
 import socket
+from configparser import ConfigParser
+
 from sydent.config._base import BaseConfig
 
 

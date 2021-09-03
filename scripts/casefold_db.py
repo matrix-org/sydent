@@ -17,12 +17,12 @@ import argparse
 import json
 import os
 import sqlite3
-from sydent.config.server import SydentConfig
 import sys
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 import signedjson.sign
 
+from sydent.config.server import SydentConfig
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -245,7 +245,6 @@ if __name__ == "__main__":
         help="run script but do not send emails or alter database",
     )
 
-    # azren TODO
     parser.add_argument("config_path", help="path to the sydent configuration file")
 
     args = parser.parse_args()

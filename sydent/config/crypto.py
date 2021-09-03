@@ -1,5 +1,6 @@
-from configparser import ConfigParser
 import logging
+from configparser import ConfigParser
+
 import nacl
 import signedjson.key
 

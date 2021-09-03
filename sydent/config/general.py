@@ -1,13 +1,13 @@
-from configparser import ConfigParser
 import logging
 import os
+from configparser import ConfigParser
 from typing import Set
-from jinja2.environment import Environment
 
+from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
 
-from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 from sydent.config._base import BaseConfig
+from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 
 logger = logging.getLogger(__name__)
 

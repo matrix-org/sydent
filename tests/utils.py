@@ -2,7 +2,6 @@ import json
 import logging
 import os
 from io import BytesIO
-from sydent.config.server import SydentConfig
 from typing import Dict
 from unittest.mock import MagicMock
 
@@ -24,6 +23,7 @@ from twisted.web.http_headers import Headers
 from twisted.web.server import Request, Site
 from zope.interface import implementer
 
+from sydent.config.server import SydentConfig
 from sydent.sydent import Sydent
 
 # Expires on Jan 11 2030 at 17:53:40 GMT

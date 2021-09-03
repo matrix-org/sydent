@@ -14,16 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# azren TODO
 import gc
 import logging
 import logging.handlers
 import os
-from sydent.config.server import SydentConfig
 
 import twisted.internet.reactor
 from twisted.internet import address, task
 
+from sydent.config.server import SydentConfig
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.sqlitedb import SqliteDatabase
 from sydent.db.valsession import ThreePidValSessionStore
@@ -200,7 +199,6 @@ class Sydent:
         self.reactor.run()
 
     def ip_from_request(self, request):
-        # azren TODO
         if self.config.http.obey_x_forwarded_for and request.requestHeaders.hasHeader(
             "X-Forwarded-For"
         ):
@@ -226,7 +224,6 @@ class Sydent:
             return request.args[b"brand"][0].decode("utf-8")
         return None
 
-    # azren TODO: change all usages to check deprecated config template before calling
     def get_branded_template(self, brand, template_name):
         """
         Calculate a (maybe) branded template filename to use.
