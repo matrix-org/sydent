@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class GeneralConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: ConfigParser):
+    def parse_config(self, cfg: ConfigParser):
         self.server_name = cfg.get("general", "server.name")
         if self.server_name == "":
             self.server_name = os.uname()[1]
@@ -75,11 +75,11 @@ class GeneralConfig(BaseConfig):
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.server_name)
 
-        self.enable_v1_associations = parse_legacy_cfg_bool(
+        self.enable_v1_associations = parse_cfg_bool(
             cfg.get("general", "enable_v1_associations")
         )
 
-        self.delete_tokens_on_bind = parse_legacy_cfg_bool(
+        self.delete_tokens_on_bind = parse_cfg_bool(
             cfg.get("general", "delete_tokens_on_bind")
         )
 
@@ -99,5 +99,5 @@ def set_from_comma_sep_string(rawstr: str) -> Set[str]:
     return {x.strip() for x in rawstr.split(",")}
 
 
-def parse_legacy_cfg_bool(value):
+def parse_cfg_bool(value):
     return value.lower() == "true"

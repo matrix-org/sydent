@@ -5,7 +5,7 @@ from sydent.config._base import BaseConfig
 
 
 class EmailConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: ConfigParser):
+    def parse_config(self, cfg: ConfigParser):
 
         self.template = None
         if cfg.has_option("email", "email.template"):

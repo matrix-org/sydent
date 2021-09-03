@@ -255,7 +255,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     config = SydentConfig()
-    config.parse_legacy_config_file(args.config_path)
+    config.parse_config_file(args.config_path)
 
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(config, reactor, False)

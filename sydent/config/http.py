@@ -4,7 +4,7 @@ from sydent.config._base import BaseConfig
 
 
 class HTTPConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: ConfigParser):
+    def parse_config(self, cfg: ConfigParser):
         self.client_bind_address = cfg.get("http", "clientapi.http.bind_address")
         self.client_port = cfg.get("http", "clientapi.http.port")
         if self.client_port:

@@ -15,7 +15,7 @@ from sydent.config.sms import SMSConfig
 
 logger = logging.getLogger(__name__)
 
-LEGACY_CONFIG_DEFAULTS = {
+CONFIG_DEFAULTS = {
     "general": {
         "server.name": os.environ.get("SYDENT_SERVER_NAME", ""),
         "log.path": "",
@@ -153,7 +153,7 @@ class SydentConfig:
             self.crypto,
         ]
 
-    def parse_legacy_config_file(self, config_file):
+    def parse_config_file(self, config_file):
         """Parse the given config from a filepath, populating missing items and
         sections
         Args:
@@ -168,32 +168,32 @@ class SydentConfig:
         # because sydent used to be braindead).
         use_defaults = not os.path.exists(config_file)
         cfg = configparser.ConfigParser()
-        for sect, entries in LEGACY_CONFIG_DEFAULTS.items():
+        for sect, entries in CONFIG_DEFAULTS.items():
             cfg.add_section(sect)
             for k, v in entries.items():
                 cfg.set(configparser.DEFAULTSECT if use_defaults else sect, k, v)
 
         cfg.read(config_file)
 
-        setup_legacy_logging(cfg)
+        setup_logging(cfg)
 
         for section in self.config_sections:
-            section.parse_legacy_config(cfg)
+            section.parse_config(cfg)
 
-            # In the legacy config, changes can be saved back to file (e.g. generated keys)
-            if hasattr(section, "update_legacy_cfg") and section.update_legacy_cfg:
+            # Changes can be saved back to file (e.g. generated keys)
+            if hasattr(section, "update_cfg") and section.update_cfg:
                 fp = open(config_file, "w")
                 cfg.write(fp)
                 fp.close()
 
-    def parse_legacy_config_dict(self, config_dict):
+    def parse_config_dict(self, config_dict):
         """Parse the given config from a dictionary, populating missing items and sections
 
         Args:
             config_dict (dict): the configuration dictionary to be parsed
         """
         # Build a config dictionary from the defaults merged with the given dictionary
-        config = copy.deepcopy(LEGACY_CONFIG_DEFAULTS)
+        config = copy.deepcopy(CONFIG_DEFAULTS)
         for section, section_dict in config_dict.items():
             if section not in config:
                 config[section] = {}
@@ -208,13 +208,12 @@ class SydentConfig:
                 cfg.set(section, option, value)
 
         # This is only ever called by tests so don't configure logging
-        # setup_legacy_logging(cfg)
 
         for section in self.config_sections:
-            section.parse_legacy_config(cfg)
+            section.parse_config(cfg)
 
 
-def setup_legacy_logging(cfg):
+def setup_logging(cfg):
     log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
     formatter = logging.Formatter(log_format)
 

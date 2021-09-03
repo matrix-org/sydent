@@ -5,7 +5,7 @@ from sydent.config._base import BaseConfig
 
 
 class SMSConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: ConfigParser):
+    def parse_config(self, cfg: ConfigParser):
         self.body_template = cfg.get("sms", "bodyTemplate")
         self.api_username = cfg.get("sms", "username").encode("UTF-8")
         self.api_password = cfg.get("sms", "password").encode("UTF-8")

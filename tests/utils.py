@@ -70,7 +70,7 @@ def make_sydent(test_config={}):
 
     reactor = ResolvingMemoryReactorClock()
     config = SydentConfig()
-    config.parse_legacy_config_dict(test_config)
+    config.parse_config_dict(test_config)
     return Sydent(
         reactor=reactor,
         cfg=config,

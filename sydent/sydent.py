@@ -275,7 +275,7 @@ class Keyring:
     pass
 
 
-def get_legacy_config_file_path():
+def get_config_file_path():
     return os.environ.get("SYDENT_CONF", "sydent.conf")
 
 
@@ -289,6 +289,6 @@ def run_gc():
 
 if __name__ == "__main__":
     config = SydentConfig()
-    config.parse_legacy_config_file(get_legacy_config_file_path())
+    config.parse_config_file(get_config_file_path())
     syd = Sydent(config)
     syd.run()
