@@ -25,7 +25,6 @@ from tests.utils import AsyncMock, make_request, make_sydent
 
 class BlacklistingAgentTest(TestCase):
     def setUp(self):
-        # azren TODO
         config = {
             "general": {
                 "ip.blacklist": "5.0.0.0/8",

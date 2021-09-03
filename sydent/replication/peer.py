@@ -137,7 +137,6 @@ class RemotePeer(Peer):
         self.lastSentVersion = lastSentVersion
 
         # look up or build the replication URL
-        # azren TODO
         replication_url = self.sydent.config.http.base_replecation_urls.get(server_name)
 
         if replication_url is None:
@@ -170,7 +169,6 @@ class RemotePeer(Peer):
             # Check for base64 encoding
             try:
                 pubkey_decoded = decode_base64(pubkey)
-            # azren TODO should this really be a config error
             except Exception as e:
                 raise ConfigError(
                     "Unable to decode public key for peer %s: %s" % (server_name, e),

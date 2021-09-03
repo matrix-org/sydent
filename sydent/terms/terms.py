@@ -134,7 +134,6 @@ def get_terms(sydent: "Sydent") -> Optional[Terms]:
 
         return Terms(termsYaml)
     except Exception:
-        # azren TODO
         logger.exception(
             "Couldn't read terms file '%s'", sydent.config.general.terms_path
         )

@@ -141,7 +141,6 @@ class StoreInviteServlet(Resource):
                 "org.matrix.web_client_location"
             )
 
-        # azren TODO
         subject_header = Header(
             self.sydent.config.email.invite_subject % substitutions,
             "utf8",
@@ -162,7 +161,6 @@ class StoreInviteServlet(Resource):
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
 
-        # azren TODO
         baseUrl = "%s/_matrix/identity/api/v1" % (
             self.sydent.config.http.server_http_url_base,
         )

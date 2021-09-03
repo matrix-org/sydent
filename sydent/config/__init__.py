@@ -12,6 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# azren TODO
 class ConfigError(Exception):
     pass

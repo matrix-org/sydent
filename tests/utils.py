@@ -63,7 +63,6 @@ def make_sydent(test_config={}):
     # Use an in-memory SQLite database. Note that the database isn't cleaned up between
     # tests, so by default the same database will be used for each test if changed to be
     # a file on disk.
-    # azren TODO
     if "db" not in test_config:
         test_config["db"] = {"db.file": ":memory:"}
     else:
@@ -72,7 +71,6 @@ def make_sydent(test_config={}):
     reactor = ResolvingMemoryReactorClock()
     config = SydentConfig()
     config.parse_legacy_config_dict(test_config)
-    # azren TODO
     return Sydent(
         reactor=reactor,
         cfg=config,

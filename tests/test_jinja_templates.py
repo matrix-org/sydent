@@ -25,7 +25,6 @@ from tests.utils import make_sydent
 class TestTemplate(unittest.TestCase):
     def setUp(self):
         # Create a new sydent
-        # azren TODO
         config = {
             "general": {
                 "templates.path": os.path.join(
@@ -218,7 +217,6 @@ class TestTemplate(unittest.TestCase):
         smtp = smtplib.SMTP.return_value
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
 
-        # azren TODO
         path = os.path.join(
             self.sydent.config.general.templates_path,
             "vector_verification_sample.txt",

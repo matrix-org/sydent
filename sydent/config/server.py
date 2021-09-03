@@ -21,7 +21,7 @@ LEGACY_CONFIG_DEFAULTS = {
         "log.path": "",
         "log.level": "INFO",
         "pidfile.path": os.environ.get("SYDENT_PID_FILE", "sydent.pid"),
-        "terms.path": "",  # azren TODO: put into terms section
+        "terms.path": "",
         "address_lookup_limit": "10000",  # Maximum amount of addresses in a single /lookup request
         # The root path to use for load templates. This should contain branded
         # directories. Each directory should contain the following templates:
@@ -32,7 +32,7 @@ LEGACY_CONFIG_DEFAULTS = {
         "templates.path": "res",
         # The brand directory to use if no brand hint (or an invalid brand hint)
         # is provided by the request.
-        "brand.default": "matrix-org",  # azren TOOD: is a templates option
+        "brand.default": "matrix-org",
         # The following can be added to your local config file to enable prometheus
         # support.
         # 'prometheus_port': '8080',  # The port to serve metrics on

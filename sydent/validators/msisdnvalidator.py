@@ -81,7 +81,6 @@ class MsisdnValidator:
             )
             return valSession.id
 
-        # azren TODO
         smsBodyTemplate = self.sydent.config.sms.body_template
         originator = self.getOriginator(phoneNumber)
 

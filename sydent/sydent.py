@@ -275,7 +275,6 @@ class Keyring:
     pass
 
 
-# azren TODO
 def get_legacy_config_file_path():
     return os.environ.get("SYDENT_CONF", "sydent.conf")
 
@@ -289,7 +288,6 @@ def run_gc():
 
 
 if __name__ == "__main__":
-    # azren TODO
     config = SydentConfig()
     config.parse_legacy_config_file(get_legacy_config_file_path())
     syd = Sydent(config)

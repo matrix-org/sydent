@@ -15,7 +15,6 @@ class ReplicationTestCase(unittest.TestCase):
 
     def setUp(self):
         # Create a new sydent
-        # azren TODO
         config = {
             "crypto": {
                 "ed25519.signingkey": "ed25519 0 FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
@@ -65,7 +64,6 @@ class ReplicationTestCase(unittest.TestCase):
         # of that, the replication servlet expects a TLS certificate in the request so it
         # can extract a common name and figure out which peer sent it from its common
         # name. The common name of the certificate we use for tests is fake.server.
-        # azren TODO
         config = {
             "general": {"server.name": "fake.server"},
             "crypto": {

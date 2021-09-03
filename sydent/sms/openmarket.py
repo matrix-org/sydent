@@ -85,7 +85,6 @@ class OpenMarketSMS:
 
         # Make sure username and password are bytes otherwise we can't use them with
         # b64encode.
-        # azren TODO
         username = self.sydent.config.sms.api_username
         password = self.sydent.config.sms.api_password
 

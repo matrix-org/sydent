@@ -95,7 +95,6 @@ class ClientTLSOptionsFactory:
     to remote servers for federation."""
 
     def __init__(self, verify_requests):
-        # azren TODO
         if verify_requests:
             self._options = ssl.CertificateOptions(trustRoot=ssl.platformTrust())
         else:
