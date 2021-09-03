@@ -80,7 +80,7 @@ class LookupV2Servlet(Resource):
             return {"errcode": "M_INVALID_PARAM", "error": "algorithm is not supported"}
 
         # Ensure address count is under the configured limit
-        limit = int(self.sydent.cfg.get("general", "address_lookup_limit"))
+        limit = self.sydent.config.general.address_lookup_limit
         if len(addresses) > limit:
             request.setResponseCode(400)
             return {

@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from OpenSSL import SSL
 from twisted.internet import ssl
 from twisted.internet.abstract import isIPAddress, isIPv6Address
 from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
+from twisted.python.failure import Failure
 from zope.interface import implementer
+
+logger = logging.getLogger(__name__)
 
 
 def _tolerateErrors(wrapped):
@@ -89,8 +94,7 @@ class ClientTLSOptionsFactory:
     """Factory for Twisted ClientTLSOptions that are used to make connections
     to remote servers for federation."""
 
-    def __init__(self, config):
-        verify_requests = config.getboolean("http", "federation.verifycerts")
+    def __init__(self, verify_requests):
         if verify_requests:
             self._options = ssl.CertificateOptions(trustRoot=ssl.platformTrust())
         else:
