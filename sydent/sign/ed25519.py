@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-# azren TODO just remove this class
+# TODO just remove this class
 class SydentEd25519:
     def __init__(self, syd: "Sydent"):
         self.sydent = syd

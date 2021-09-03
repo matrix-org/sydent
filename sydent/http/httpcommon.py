@@ -42,7 +42,7 @@ class SslComponents:
         self.trustRoot = self.makeTrustRoot()
 
     def makeMyCertificate(self):
-        # azren TODO Move this loading into parse_config
+        # TODO Move some of this loading into parse_config
         privKeyAndCertFilename = self.sydent.config.http.cert_file
         if privKeyAndCertFilename == "":
             logger.warning(

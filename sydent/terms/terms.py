@@ -106,7 +106,7 @@ def get_terms(sydent: "Sydent") -> Optional[Terms]:
 
     try:
         termsYaml = None
-        # azren TODO - move some of this to parse_config
+        # TODO - move some of this to parse_config
         termsPath = sydent.config.general.terms_path
         if termsPath == "":
             return Terms(None)
