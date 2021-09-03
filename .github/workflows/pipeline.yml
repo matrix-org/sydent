@@ -2,7 +2,7 @@ name: Linting and tests
 on:
   pull_request:
   push:
-    branches: ["main"]
+    branches: ["main", "azren/migrate_to_yaml_config"]
 jobs:
   check-code-style:
     runs-on: ubuntu-latest
