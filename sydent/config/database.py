@@ -1,8 +1,8 @@
-import configparser
+from configparser import ConfigParser
 
-from sydent.config.server import BaseConfig
+from sydent.config._base import BaseConfig
 
 
 class DatabaseConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: configparser):
-        self.database_path = self.sydent.cfg.get("db", "db.file")
+    def parse_legacy_config(self, cfg: ConfigParser):
+        self.database_path = cfg.get("db", "db.file")

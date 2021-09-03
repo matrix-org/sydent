@@ -1,20 +1,23 @@
-import configparser
+from configparser import ConfigParser, NoOptionError
 
-from sydent.config.server import BaseConfig
+from sydent.config._base import BaseConfig
 
 
 class HTTPConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: configparser):
+    def parse_legacy_config(self, cfg: ConfigParser):
         self.client_bind_address = cfg.get("http", "clientapi.http.bind_address")
-        self.client_port = cfg.getint("http", "clientapi.http.port")
+        self.client_port = cfg.get("http", "clientapi.http.port")
+        if self.client_port:
+            self.client_port = int(self.client_port)
 
-        self.internal_port = cfg.getint("http", "internalapi.http.port")
-        if self.internalport:
+        self.internal_port = cfg.get("http", "internalapi.http.port")
+        if self.internal_port:
+            self.internal_port = int(self.internal_port)
             try:
-                self.internal_bind_address = self.cfg.get(
+                self.internal_bind_address = cfg.get(
                     "http", "internalapi.http.bind_address"
                 )
-            except configparser.NoOptionError:
+            except NoOptionError:
                 self.internal_bind_address = "::1"
 
         self.cert_file = cfg.get("http", "replication.https.certfile")
@@ -24,6 +27,8 @@ class HTTPConfig(BaseConfig):
             "http", "replication.https.bind_address"
         )
         self.replication_port = cfg.getint("http", "replication.https.port")
+        if self.replication_port:
+            self.replication_port = int(self.replication_port)
 
         self.obey_x_forwarded_for = cfg.get("http", "obey_x_forwarded_for")
 

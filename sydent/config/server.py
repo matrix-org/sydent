@@ -4,7 +4,6 @@ import logging.handlers
 import os
 from twisted.python import log
 
-from sydent.sydent import setup_logging
 from sydent.config.sms import SMSConfig
 from sydent.config.http import HTTPConfig
 from sydent.config.crypto import CryptoConfig
@@ -134,10 +133,6 @@ LEGACY_CONFIG_DEFAULTS = {
 }
 
 
-class BaseConfig:
-    def parse_legacy_cfg_bool(value):
-        return value.lower() == "true"
-
     
 class SydentConfig:
 
@@ -187,8 +182,8 @@ class SydentConfig:
 
             # In the legacy config, changes can be saved back to file (e.g. generated keys)
             if hasattr(section, "update_legacy_cfg") and section.update_legacy_cfg:
-                fp = open(self.config_file, "w")
-                self.cfg.write(fp)
+                fp = open(config_file, "w")
+                cfg.write(fp)
                 fp.close()
 
         

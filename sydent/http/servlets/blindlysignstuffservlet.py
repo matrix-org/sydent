@@ -34,10 +34,10 @@ logger = logging.getLogger(__name__)
 class BlindlySignStuffServlet(Resource):
     isLeaf = True
 
-    def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
-        self.sydent = syd
-        self.server_name = syd.server_name
-        self.tokenStore = JoinTokenStore(syd)
+    def __init__(self, sydent: "Sydent", require_auth: bool = False) -> None:
+        self.sydent = sydent
+        self.server_name = sydent.config.general.server_name
+        self.tokenStore = JoinTokenStore(sydent)
         self.require_auth = require_auth
 
     @jsonwrap

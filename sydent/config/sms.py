@@ -1,7 +1,7 @@
 import configparser
 from typing import Dict, List
 
-from sydent.config.server import BaseConfig
+from sydent.config._base import BaseConfig
 
 
 class SMSConfig(BaseConfig):
@@ -13,10 +13,10 @@ class SMSConfig(BaseConfig):
         self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
 
-        for opt in self.sydent.cfg.options("sms"):
+        for opt in cfg.options("sms"):
             if opt.startswith("originators."):
                 country = opt.split(".")[1]
-                rawVal = self.sydent.cfg.get("sms", opt)
+                rawVal = cfg.get("sms", opt)
                 rawList = [i.strip() for i in rawVal.split(",")]
 
                 self.originators[country] = []
@@ -38,7 +38,7 @@ class SMSConfig(BaseConfig):
                     )
             elif opt.startswith("smsrule."):
                 country = opt.split(".")[1]
-                action = self.sydent.cfg.get("sms", opt)
+                action = cfg.get("sms", opt)
 
                 if action not in ["allow", "reject"]:
                     raise Exception(

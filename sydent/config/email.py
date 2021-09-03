@@ -1,10 +1,10 @@
-import configparser
+from configparser import ConfigParser
 import socket
-from sydent.config.server import BaseConfig
+from sydent.config._base import BaseConfig
 
 
 class EmailConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: configparser):
+    def parse_legacy_config(self, cfg: ConfigParser):
 
         self.template = None
         if cfg.has_option("email", "email.template"):
@@ -22,7 +22,7 @@ class EmailConfig(BaseConfig):
 
         # These are deprecated options as subject is now set by templates
         self.validation_subject = cfg.get("email", "email.subject")
-        self.invite_subject = cfg.get("email", "email.invite.subject")
+        self.invite_subject = cfg.get("email", "email.invite.subject", raw=True)
 
         self.smtp_server = cfg.get("email", "email.smtphost")
         self.smtp_port = cfg.get("email", "email.smtpport")

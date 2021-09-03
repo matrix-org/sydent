@@ -1,15 +1,15 @@
-import configparser
+from configparser import ConfigParser
 import logging
 import nacl
 import signedjson.key
 
-from sydent.config.server import BaseConfig
+from sydent.config._base import BaseConfig
 
 logger = logging.getLogger(__name__)
 
 
 class CryptoConfig(BaseConfig):
-    def parse_legacy_config(self, cfg: configparser):
+    def parse_legacy_config(self, cfg: ConfigParser):
         signing_key_str = cfg.get("crypto", "ed25519.signingkey")
         signing_key_parts = signing_key_str.split(" ")
 
@@ -46,5 +46,5 @@ class CryptoConfig(BaseConfig):
                 self.signing_key.version,
                 signedjson.key.encode_signing_key_base64(self.signing_key),
             )
-            self.sydent.cfg.set("crypto", "ed25519.signingkey", signing_key_str)
+            cfg.set("crypto", "ed25519.signingkey", signing_key_str)
             self.update_legacy_cfg = True
