@@ -151,7 +151,7 @@ class StoreInviteServlet(Resource):
 
         brand = self.sydent.brand_from_request(request)
         if self.sydent.config.email.invite_template is None:
-            templateFile = self.sydent.get_branded_template(    
+            templateFile = self.sydent.get_branded_template(
                 brand,
                 "invite_template.eml",
             )
@@ -207,7 +207,9 @@ class StoreInviteServlet(Resource):
         redacted_username = self._redact(
             username, self.sydent.config.email.username_obfuscate_characters
         )
-        redacted_domain = self._redact(domain, self.sydent.config.email.domain_obfuscate_characters)
+        redacted_domain = self._redact(
+            domain, self.sydent.config.email.domain_obfuscate_characters
+        )
 
         return redacted_username + "@" + redacted_domain
 

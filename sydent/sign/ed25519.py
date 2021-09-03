@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
+
 class SydentEd25519:
     def __init__(self, syd: "Sydent"):
         self.sydent = syd

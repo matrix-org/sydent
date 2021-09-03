@@ -83,15 +83,11 @@ class GeneralConfig(BaseConfig):
             cfg.get("general", "delete_tokens_on_bind")
         )
 
-        ip_blacklist = set_from_comma_sep_string(
-            cfg.get("general", "ip.blacklist")
-        )
+        ip_blacklist = set_from_comma_sep_string(cfg.get("general", "ip.blacklist"))
         if not ip_blacklist:
             ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
 
-        ip_whitelist = set_from_comma_sep_string(
-            cfg.get("general", "ip.whitelist")
-        )
+        ip_whitelist = set_from_comma_sep_string(cfg.get("general", "ip.whitelist"))
 
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)

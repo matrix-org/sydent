@@ -82,7 +82,9 @@ class LookupServlet(Resource):
             # replication, so that we can undo this decision in the future if
             # we wish, without having destroyed the raw underlying data.
             sgassoc = signedjson.sign.sign_json(
-                sgassoc, self.sydent.config.general.server_name, self.sydent.keyring.ed25519
+                sgassoc,
+                self.sydent.config.general.server_name,
+                self.sydent.keyring.ed25519,
             )
         return sgassoc
 

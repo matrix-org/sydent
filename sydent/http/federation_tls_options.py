@@ -22,6 +22,7 @@ from zope.interface import implementer
 
 logger = logging.getLogger(__name__)
 
+
 def _tolerateErrors(wrapped):
     """
     Wrap up an info_callback for pyOpenSSL so that if something goes wrong

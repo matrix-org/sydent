@@ -284,9 +284,11 @@ class Servlets:
 class Keyring:
     pass
 
+
 # azren TODO
 def get_legacy_config_file_path():
     return os.environ.get("SYDENT_CONF", "sydent.conf")
+
 
 def run_gc():
     threshold = gc.get_threshold()
