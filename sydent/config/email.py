@@ -24,6 +24,9 @@ class EmailConfig(BaseConfig):
         # These are deprecated options as subject is now set by templates
         self.validation_subject = cfg.get("email", "email.subject")
         self.invite_subject = cfg.get("email", "email.invite.subject", raw=True)
+        self.invite_subject_space = cfg.get(
+            "email", "email.invite.subject_space", raw=True
+        )
 
         self.smtp_server = cfg.get("email", "email.smtphost")
         self.smtp_port = cfg.get("email", "email.smtpport")

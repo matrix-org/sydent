@@ -51,6 +51,7 @@ class TestTemplate(unittest.TestCase):
             "token": "a_token",
             "ephemeral_private_key": "mystery_key",
             "web_client_location": "https://app.element.io",
+            "room_type": "",
         }
 
         if self.sydent.config.email.invite_template is None:
@@ -92,7 +93,7 @@ class TestTemplate(unittest.TestCase):
             + urllib.parse.quote("mxc://example.org/s0meM3dia")
             + "&inviter_name="
             + urllib.parse.quote("<Bob Smith>")
-            + "&guest_access_token=&guest_user_id="
+            + "&guest_access_token=&guest_user_id=&room_type="
         )
         text = email_contents.splitlines()
         link = text[19]
@@ -115,6 +116,7 @@ class TestTemplate(unittest.TestCase):
             "token": "a_token",
             "ephemeral_private_key": "mystery_key",
             "web_client_location": "https://matrix.org",
+            "room_type": "",
         }
 
         if self.sydent.config.email.invite_template is None:
@@ -156,7 +158,7 @@ class TestTemplate(unittest.TestCase):
             + urllib.parse.quote("mxc://example.org/s0meM3dia")
             + "&inviter_name="
             + urllib.parse.quote("<Bob Smith>")
-            + "&guest_access_token=&guest_user_id="
+            + "&guest_access_token=&guest_user_id=&room_type="
         )
         text = email_contents.splitlines()
         link = text[22]
