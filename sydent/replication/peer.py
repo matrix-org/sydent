@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import binascii
-import configparser
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict
@@ -63,7 +62,7 @@ class LocalPeer(Peer):
     """
 
     def __init__(self, sydent: "Sydent") -> None:
-        super().__init__(sydent.server_name, {})
+        super().__init__(sydent.config.general.server_name, {})
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 
@@ -104,7 +103,7 @@ class LocalPeer(Peer):
                     globalAssocStore.addAssociation(
                         assocObj,
                         json.dumps(sgAssocs[localId]),
-                        self.sydent.server_name,
+                        self.sydent.config.general.server_name,
                         localId,
                     )
                 else:
@@ -138,12 +137,9 @@ class RemotePeer(Peer):
         self.lastSentVersion = lastSentVersion
 
         # look up or build the replication URL
-        try:
-            replication_url = sydent.cfg.get(
-                "peer.%s" % server_name,
-                "base_replication_url",
-            )
-        except (configparser.NoSectionError, configparser.NoOptionError):
+        replication_url = self.sydent.config.http.base_replication_urls.get(server_name)
+
+        if replication_url is None:
             if not port:
                 port = 1001
             replication_url = "https://%s:%i" % (server_name, port)

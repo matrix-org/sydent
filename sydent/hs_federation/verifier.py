@@ -174,7 +174,7 @@ class Verifier:
         json_request = {
             "method": request.method,
             "uri": request.uri,
-            "destination_is": self.sydent.server_name,
+            "destination_is": self.sydent.config.general.server_name,
             "signatures": {},
         }
 

@@ -99,7 +99,9 @@ class ThreepidBinder:
                 "token": cast(str, token["token"]),
             }
             token["signed"] = signedjson.sign.sign_json(
-                token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519
+                token["signed"],
+                self.sydent.config.general.server_name,
+                self.sydent.keyring.ed25519,
             )
             invites.append(token)
         if invites:
@@ -176,7 +178,7 @@ class ThreepidBinder:
             logger.info("Successfully notified on bind for %s" % (mxid,))
 
             # Skip the deletion step if instructed so by the config.
-            if not self.sydent.delete_tokens_on_bind:
+            if not self.sydent.config.general.delete_tokens_on_bind:
                 return
 
             # Only remove sent tokens when they've been successfully sent.

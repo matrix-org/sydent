@@ -16,7 +16,6 @@ import email.utils
 import logging
 import random
 import smtplib
-import socket
 import string
 import urllib
 from html import escape
@@ -46,11 +45,9 @@ def sendEmail(
     :param mailTo: The email address to send the email to.
     :param substitutions: The substitutions to use with the template.
     """
-    mailFrom = sydent.cfg.get("email", "email.from")
+    mailFrom = sydent.config.email.sender
+    myHostname = sydent.config.email.host_name
 
-    myHostname = sydent.cfg.get("email", "email.hostname")
-    if myHostname == "":
-        myHostname = socket.getfqdn()
     midRandom = "".join([random.choice(string.ascii_letters) for _ in range(16)])
     messageid = "<%d%s@%s>" % (time_msec(), midRandom, myHostname)
 
@@ -68,7 +65,7 @@ def sendEmail(
         # We add randomize the multipart boundary to stop user input from
         # conflicting with it.
         substitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
-        template = sydent.template_environment.get_template(templateFile)
+        template = sydent.config.general.template_environment.get_template(templateFile)
         mailString = template.render(substitutions)
     else:
         allSubstitutions = {}
@@ -90,11 +87,13 @@ def sendEmail(
         logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
         raise EmailAddressException()
 
-    mailServer = sydent.cfg.get("email", "email.smtphost")
-    mailPort = sydent.cfg.get("email", "email.smtpport")
-    mailUsername = sydent.cfg.get("email", "email.smtpusername")
-    mailPassword = sydent.cfg.get("email", "email.smtppassword")
-    mailTLSMode = sydent.cfg.get("email", "email.tlsmode")
+    mailServer = sydent.config.email.smtp_server
+    mailPort = sydent.config.email.smtp_port
+    mailUsername = sydent.config.email.smtp_username
+    mailPassword = sydent.config.email.smtp_password
+
+    mailTLSMode = sydent.config.email.tls_mode
+
     logger.info(
         "Sending mail to %s with mail server: %s"
         % (
