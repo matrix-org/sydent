@@ -19,8 +19,9 @@ import os
 import sqlite3
 import sys
 import time
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Tuple
 
+import attr
 import signedjson.sign
 
 from sydent.sydent import Sydent, parse_config_file
@@ -32,6 +33,30 @@ from tests.utils import ResolvingMemoryReactorClock
 EMAIL_SUBJECT = "No action required: we have changed the way your Matrix account and email address are associated"
 
 
+@attr.s(auto_attribs=True)
+class UpdateDelta:
+    """A row to update in the local_threepid_associations table."""
+    address: str
+    mxid: str
+    lookup_hash: str
+
+
+@attr.s(auto_attribs=True)
+class DeleteDelta:
+    """A row to delete from the local_threepid_associations table."""
+    address: str
+    mxid: str
+
+
+@attr.s(auto_attribs=True)
+class Delta:
+    """Delta to apply to the local_threepid_associations table for a single
+    case-insensitive email address.
+    """
+    to_update: UpdateDelta
+    to_delete: List[DeleteDelta] = []
+
+
 def calculate_lookup_hash(sydent, address):
     cur = sydent.db.cursor()
     pepper_result = cur.execute("SELECT lookup_pepper from hashing_metadata")
@@ -39,6 +64,40 @@ def calculate_lookup_hash(sydent, address):
     combo = "%s %s %s" % (address, "email", pepper)
     lookup_hash = sha256_and_url_safe_base64(combo)
     return lookup_hash
+
+
+def sendEmailWithBackoff(
+    sydent: Sydent, address: str, mxid: str, backoff: int, test: bool = False,
+) -> None:
+    """Send an email with exponential backoff - that way we don't stop sending halfway
+    through if the SMTP server rejects our email (e.g. because of rate limiting).
+
+    Setting test to True disables the logging.
+    """
+    time.sleep(backoff)
+    try:
+        template_file = sydent.get_branded_template(
+            None,
+            "migration_template.eml",
+            ("email", "email.template"),
+        )
+
+        sendEmail(
+            sydent,
+            template_file,
+            address,
+            {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
+            log_send_errors=False,
+        )
+        if not test:
+            print("Sent email to %s" % address)
+    except EmailSendException:
+        if not test:
+            print(
+                "Failed to send email to %s, retrying in %ds"
+                % (address, backoff * 2)
+            )
+        sendEmailWithBackoff(sydent, address, mxid, backoff * 2, test)
 
 
 def update_local_associations(
@@ -59,9 +118,7 @@ def update_local_associations(
 
     :return: None
     """
-    cur = db.cursor()
-
-    res = cur.execute(
+    res = db.execute(
         "SELECT address, mxid FROM local_threepid_associations WHERE medium = 'email'"
         "ORDER BY ts DESC"
     )
@@ -82,102 +139,83 @@ def update_local_associations(
         else:
             associations[casefold_address] = [(address, mxid, lookup_hash)]
 
-    # list of arguments to update db with
-    db_update_args: List[Tuple[str, str, str, str]] = []
+    # Deltas to apply to the database, associated with the casefolded address they're for.
+    deltas: Dict[str, Delta] = {}
 
-    # list of mxids to delete
-    to_delete: List[Tuple[str]] = []
-
-    # The MXIDs associated with rows we're about to delete, indexed by the casefolded
-    # address they're associated with.
-    to_delete_mxids: Dict[str, Set[str]] = {}
-    
-    # The MXIDs associated with rows we're not going to delete, so we can compare the one
-    # associated with a given casefolded address with the one(s) we want to delete for the
-    # same address and figure out if we want to send them an email.
-    to_keep_mxids: Dict[str, str] = {}
-
+    # Iterate through the results, to build the deltas.
     for casefold_address, assoc_tuples in associations.items():
-        db_update_args.append(
-            (
-                casefold_address,
-                assoc_tuples[0][2],
-                assoc_tuples[0][0],
-                assoc_tuples[0][1],
+        deltas[casefold_address] = Delta(
+            to_update=UpdateDelta(
+                mxid=assoc_tuples[0][0],
+                lookup_hash=assoc_tuples[0][1],
+                address=assoc_tuples[0][2],
             )
         )
 
         if len(assoc_tuples) > 1:
             # Iterate over all associations except for the first one, since we've already
             # processed it.
-            to_delete_mxids[casefold_address] = set()
-            to_keep_mxids[casefold_address] = assoc_tuples[0][1].lower()
             for address, mxid, _ in assoc_tuples[1:]:
-                to_delete.append((address,))
-                to_delete_mxids[casefold_address].add(mxid.lower())
+                deltas[casefold_address].to_delete.append(
+                    DeleteDelta(
+                        address=address,
+                        mxid=mxid,
+                    )
+                )
 
     if not test:
         print(
-            f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in local_threepid_associations"
+            f"{len(deltas)} rows to update in local_threepid_associations"
         )
 
-    # Update the database before sending the emails, that way if the update fails the
-    # affected users haven't been notified.
-    if not dry_run:
-        if len(to_delete) > 0:
-            cur.executemany(
-                "DELETE FROM local_threepid_associations WHERE address = ?", to_delete
+    # Apply the deltas
+    for casefolded_address, delta in deltas.items():
+        if not test:
+            print(
+                f"Updating {casefolded_address} and deleting {len(delta.to_delete)} rows associated with it"
             )
 
-        if len(db_update_args) > 0:
-            cur.executemany(
-                "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
-                db_update_args,
-            )
+        # Delete each association, and send an email mentioning the affected MXID.
+        for to_delete in delta.to_delete:
+            cur = db.cursor()
+            if not dry_run:
+                cur.execute(
+                    "DELETE FROM local_threepid_associations WHERE address = ?",
+                    (to_delete.address,)
+                )
 
-        # We've finished updating the database, committing the transaction.
-        db.commit()
-
-    # iterate through the mxids and send emails
-    if send_email and not dry_run:
-        for address, mxids in to_delete_mxids.items():
-            for mxid in mxids:
+            if send_email and not dry_run:
                 # If the MXID is one that will still be associated with this email address
                 # after this run, don't send an email for it.
-                if mxid == to_keep_mxids[address]:
+                if to_delete.mxid == delta.to_update.mxid:
                     continue
 
-                # Send the email with exponential backoff - that way we don't stop
-                # sending halfway through if the SMTP server rejects our email (e.g.
-                # because of rate limiting). The alternative would mean the first
-                # addresses of the list receive duplicate emails.
-                def sendWithBackoff(backoff):
-                    time.sleep(backoff)
-                    try:
-                        templateFile = sydent.get_branded_template(
-                            None,
-                            "migration_template.eml",
-                            ("email", "email.template"),
-                        )
+                sendEmailWithBackoff(
+                    sydent,
+                    to_delete.address,
+                    to_delete.mxid,
+                    backoff=1 if not test else 0,
+                    test=test,
+                )
 
-                        sendEmail(
-                            sydent,
-                            templateFile,
-                            address,
-                            {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
-                            log_send_errors=False,
-                        )
-                        if not test:
-                            print("Sent email to %s" % address)
-                    except EmailSendException:
-                        if not test:
-                            print(
-                                "Failed to send email to %s, retrying in %ds"
-                                % (address, backoff * 2)
-                            )
-                        sendWithBackoff(backoff * 2)
+            # We commit here, so that if we couldn't send the email for some reason we
+            # don't update the database and have another go at it next time we run the
+            # script.
+            db.commit()
 
-                sendWithBackoff(1 if not test else 0)
+        # Update the row now that there's no duplicate.
+        if not dry_run:
+            cur = db.cursor()
+            cur.execute(
+                "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
+                (
+                    casefolded_address,
+                    delta.to_update.lookup_hash,
+                    delta.to_update.address,
+                    delta.to_update.mxid
+                )
+            )
+            db.commit()
 
 
 def update_global_associations(
