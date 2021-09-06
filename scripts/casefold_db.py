@@ -52,6 +52,11 @@ def update_local_associations(
     emails are casefolded, and any duplicate mxid's associated with the
     given email are deleted.
 
+    Setting dry_run to True means that the script is being run in dry-run mode
+    by the user, i.e. it will run but will not send any email nor update the database.
+    Setting test to True means that the function is being called as part of an automated
+    test, and therefore we should neither backoff when sending emails or log.
+
     :return: None
     """
     cur = db.cursor()
@@ -178,13 +183,17 @@ def update_local_associations(
 def update_global_associations(
     sydent,
     db: sqlite3.Connection,
-    send_email: bool,
     dry_run: bool,
     test: bool = False,
 ) -> None:
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
     mxid's associated with the given email are deleted.
+
+    Setting dry_run to True means that the script is being run in dry-run mode
+    by the user, i.e. it will run but will not send any email nor update the database.
+    Setting test to True means that the function is being called as part of an automated
+    test, and therefore we should suppress logs.
 
     :return: None
     """
@@ -296,5 +305,7 @@ if __name__ == "__main__":
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(config, reactor, False)
 
-    update_global_associations(sydent, sydent.db, not args.no_email, args.dry_run)
-    update_local_associations(sydent, sydent.db, not args.no_email, args.dry_run)
+    update_global_associations(sydent, sydent.db, dry_run=args.dry_run)
+    update_local_associations(
+        sydent, sydent.db, send_email=not args.no_email, dry_run=args.dry_run,
+    )
