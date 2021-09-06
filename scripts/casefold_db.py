@@ -46,8 +46,8 @@ def update_local_associations(
     db: sqlite3.Connection,
     send_email: bool,
     dry_run: bool,
-    test=False,
-):
+    test: bool = False,
+) -> None:
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
     given email are deleted.
@@ -86,6 +86,7 @@ def update_local_associations(
     # The MXIDs associated with rows we're about to delete, indexed by the casefolded
     # address they're associated with.
     to_delete_mxids: Dict[str, Set[str]] = {}
+    
     # The MXIDs associated with rows we're not going to delete, so we can compare the one
     # associated with a given casefolded address with the one(s) we want to delete for the
     # same address and figure out if we want to send them an email.
@@ -179,8 +180,8 @@ def update_global_associations(
     db: sqlite3.Connection,
     send_email: bool,
     dry_run: bool,
-    test=False,
-):
+    test: bool = False,
+) -> None:
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
     mxid's associated with the given email are deleted.
