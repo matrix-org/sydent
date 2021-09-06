@@ -39,6 +39,7 @@ MAX_ATTEMPTS_FOR_EMAIL = 10
 @attr.s(auto_attribs=True)
 class UpdateDelta:
     """A row to update in the local_threepid_associations table."""
+
     address: str
     mxid: str
     lookup_hash: str
@@ -47,6 +48,7 @@ class UpdateDelta:
 @attr.s(auto_attribs=True)
 class DeleteDelta:
     """A row to delete from the local_threepid_associations table."""
+
     address: str
     mxid: str
 
@@ -56,6 +58,7 @@ class Delta:
     """Delta to apply to the local_threepid_associations table for a single
     case-insensitive email address.
     """
+
     to_update: UpdateDelta
     to_delete: List[DeleteDelta] = []
 
@@ -64,6 +67,7 @@ class CantSendEmailException(Exception):
     """Raised when we didn't succeed to send an email after MAX_ATTEMPTS_FOR_EMAIL
     attempts.
     """
+
     pass
 
 
@@ -182,9 +186,7 @@ def update_local_associations(
                 )
 
     if not test:
-        print(
-            f"{len(deltas)} rows to update in local_threepid_associations"
-        )
+        print(f"{len(deltas)} rows to update in local_threepid_associations")
 
     # Apply the deltas
     for casefolded_address, delta in deltas.items():
@@ -200,7 +202,7 @@ def update_local_associations(
                 if not dry_run:
                     cur.execute(
                         "DELETE FROM local_threepid_associations WHERE address = ?",
-                        (to_delete.address,)
+                        (to_delete.address,),
                     )
 
                 if send_email and not dry_run:
@@ -231,8 +233,8 @@ def update_local_associations(
                         casefolded_address,
                         delta.to_update.lookup_hash,
                         delta.to_update.address,
-                        delta.to_update.mxid
-                    )
+                        delta.to_update.mxid,
+                    ),
                 )
                 db.commit()
 
@@ -375,5 +377,8 @@ if __name__ == "__main__":
 
     update_global_associations(sydent, sydent.db, dry_run=args.dry_run)
     update_local_associations(
-        sydent, sydent.db, send_email=not args.no_email, dry_run=args.dry_run,
+        sydent,
+        sydent.db,
+        send_email=not args.no_email,
+        dry_run=args.dry_run,
     )
