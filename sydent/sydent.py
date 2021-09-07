@@ -23,7 +23,6 @@ import os
 from typing import Set
 
 import twisted.internet.reactor
-from jinja2 import Environment, FileSystemLoader
 from twisted.internet import address, task
 from twisted.python import log
 
@@ -238,21 +237,6 @@ class Sydent:
                 addr=self.cfg.get("general", "prometheus_addr"),
             )
 
-        if self.cfg.has_option("general", "templates.path"):
-            # Get the possible brands by looking at directories under the
-            # templates.path directory.
-            root_template_path = self.cfg.get("general", "templates.path")
-            if os.path.exists(root_template_path):
-                self.valid_brands = {
-                    p
-                    for p in os.listdir(root_template_path)
-                    if os.path.isdir(os.path.join(root_template_path, p))
-                }
-            else:
-                # This is a legacy code-path and assumes that verify_response_template,
-                # email.template, and email.invite_template are defined.
-                self.valid_brands = set()
-
         self.enable_v1_associations = parse_cfg_bool(
             self.cfg.get("general", "enable_v1_associations")
         )
@@ -273,11 +257,6 @@ class Sydent:
 
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
-
-        self.template_environment = Environment(
-            loader=FileSystemLoader(self.cfg.get("general", "templates.path")),
-            autoescape=True,
-        )
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
@@ -446,14 +425,14 @@ class Sydent:
 
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:
-            if brand not in self.valid_brands:
+            if brand not in self.config.general.valid_brands:
                 brand = None
 
         # If the brand hint is not valid, or not provided, fallback to the default brand.
         if not brand:
-            brand = self.cfg.get("general", "brand.default")
+            brand = self.config.general.default_brand
 
-        root_template_path = self.cfg.get("general", "templates.path")
+        root_template_path = self.config.general.templates_path
 
         # Grab jinja template if it exists
         if os.path.exists(

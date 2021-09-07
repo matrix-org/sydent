@@ -65,7 +65,7 @@ def sendEmail(
         # We add randomize the multipart boundary to stop user input from
         # conflicting with it.
         substitutions["multipart_boundary"] = generateAlphanumericTokenOfLength(32)
-        template = sydent.template_environment.get_template(templateFile)
+        template = sydent.config.general.template_environment.get_template(templateFile)
         mailString = template.render(substitutions)
     else:
         allSubstitutions = {}

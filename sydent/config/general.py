@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import logging
 import os
 from typing import TYPE_CHECKING
+
+from jinja2.environment import Environment
+from jinja2.loaders import FileSystemLoader
 
 if TYPE_CHECKING:
     from configparser import ConfigParser
@@ -37,3 +41,27 @@ class GeneralConfig:
                 "If this is incorrect, you should edit 'general.server.name' in the config file."
                 % (self.server_name,)
             )
+
+        # Get the possible brands by looking at directories under the
+        # templates.path directory.
+        self.templates_path = cfg.get("general", "templates.path")
+        if os.path.exists(self.templates_path):
+            self.valid_brands = {
+                p
+                for p in os.listdir(self.templates_path)
+                if os.path.isdir(os.path.join(self.templates_path, p))
+            }
+        else:
+            logging.warning(
+                "The path specified by 'general.templates.path' does not exist."
+            )
+            # This is a legacy code-path and assumes that verify_response_template,
+            # email.template, and email.invite_template are defined.
+            self.valid_brands = set()
+
+        self.template_environment = Environment(
+            loader=FileSystemLoader(cfg.get("general", "templates.path")),
+            autoescape=True,
+        )
+
+        self.default_brand = cfg.get("general", "brand.default")

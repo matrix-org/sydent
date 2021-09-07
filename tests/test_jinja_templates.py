@@ -218,7 +218,7 @@ class TestTemplate(unittest.TestCase):
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
 
         path = os.path.join(
-            self.sydent.cfg.get("general", "templates.path"),
+            self.sydent.config.general.templates_path,
             "vector_verification_sample.txt",
         )
 
