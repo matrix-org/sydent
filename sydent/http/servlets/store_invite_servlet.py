@@ -146,18 +146,12 @@ class StoreInviteServlet(Resource):
                 "org.matrix.web_client_location"
             )
 
-        subject_header = Header(
-            self.sydent.cfg.get(
-                "email",
-                "email.invite.subject_space"
-                if substitutions["room_type"] == "m.space"
-                else "email.invite.subject",
-                raw=True,
-            )
-            % substitutions,
-            "utf8",
-        )
-        substitutions["subject_header_value"] = subject_header.encode()
+        if substitutions["room_type"] == "m.space":
+            subject = self.sydent.config.email.invite_subject_space % substitutions
+        else:
+            subject = self.sydent.config.email.invite_subject % substitutions
+
+        substitutions["subject_header_value"] = Header(subject, "utf8").encode()
 
         brand = self.sydent.brand_from_request(request)
 
