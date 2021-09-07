@@ -320,6 +320,11 @@ def update_global_associations(
     to_delete: List[Tuple[str]] = []
 
     for casefold_address, assoc_tuples in associations.items():
+        # If the row is already in the right state and there's no duplicate, don't compute
+        # a delta for it.
+        if len(assoc_tuples) == 1 and assoc_tuples[0][0] == casefold_address:
+            continue
+
         db_update_args.append(
             (
                 casefold_address,
