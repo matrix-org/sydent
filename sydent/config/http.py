@@ -20,8 +20,7 @@ class HTTPConfig:
         """
         Parse the http section of the config
 
-        Args:
-            cfg (ConfigParser): the configuration to be parsed
+        :param cfg: the configuration to be parsed
         """
         self.client_bind_address = cfg.get("http", "clientapi.http.bind_address")
         self.client_port = cfg.getint("http", "clientapi.http.port")

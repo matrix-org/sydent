@@ -27,8 +27,7 @@ class CryptoConfig:
         """
         Parse the crypto section of the config
 
-        Args:
-            cfg (ConfigParser): the configuration to be parsed
+        :param cfg: the configuration to be parsed
         """
 
         signing_key_str = cfg.get("crypto", "ed25519.signingkey")

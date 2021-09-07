@@ -156,6 +156,13 @@ class ConfigError(Exception):
 
 
 class SydentConfig:
+    """ This is the class in charge of handling Sydents configuration.
+    Handling of each individual section is delegated to other classes.
+
+    To use this class, create a new object and then call one of
+    `parse_config_file` or `parse_config_dict` before creating the
+    Sydent object that uses it.
+    """
     def __init__(self):
         self.general = GeneralConfig()
         self.email = EmailConfig()
@@ -176,8 +183,8 @@ class SydentConfig:
     def parse_config_file(self, config_file: str) -> None:
         """Parse the given config from a filepath, populating missing items and
         sections
-        Args:
-            config_file (str): the file to be parsed
+        
+        :param config_file: the file to be parsed
         """
         # If the config file doesn't exist, prepopulate the config object
         # with the defaults, in the right section.
@@ -211,8 +218,7 @@ class SydentConfig:
     def parse_config_dict(self, config_dict: Dict) -> None:
         """Parse the given config from a dictionary, populating missing items and sections
 
-        Args:
-            config_dict (dict): the configuration dictionary to be parsed
+        :param config_dict: the configuration dictionary to be parsed
         """
         # Build a config dictionary from the defaults merged with the given dictionary
         config = copy.deepcopy(CONFIG_DEFAULTS)
@@ -240,8 +246,7 @@ def setup_logging(cfg: configparser.ConfigParser) -> None:
     """
     Setup logging using the options selected in the config
 
-    Args:
-        cfg (ConfigParser): the configuration
+    :param cfg: the configuration
     """
     log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
     formatter = logging.Formatter(log_format)

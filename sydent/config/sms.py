@@ -21,8 +21,7 @@ class SMSConfig:
         """
         Parse the sms section of the config
 
-        Args:
-            cfg (ConfigParser): the configuration to be parsed
+        :param cfg: the configuration to be parsed
         """
         self.body_template = cfg.get("sms", "bodyTemplate")
         self.api_username = cfg.get("sms", "username").encode("UTF-8")

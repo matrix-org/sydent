@@ -35,8 +35,7 @@ class GeneralConfig:
         """
         Parse the 'general' section of the config
 
-        Args:
-            cfg (ConfigParser): the configuration to be parsed
+        :param cfg: the configuration to be parsed
         """
         self.server_name = cfg.get("general", "server.name")
         if self.server_name == "":

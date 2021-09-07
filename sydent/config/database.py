@@ -20,7 +20,6 @@ class DatabaseConfig:
         """
         Parse the database section of the config
 
-        Args:
-            cfg (ConfigParser): the configuration to be parsed
+        :param cfg: the configuration to be parsed
         """
         self.database_path = cfg.get("db", "db.file")
