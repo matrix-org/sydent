@@ -166,6 +166,11 @@ def update_local_associations(
 
     # Iterate through the results, to build the deltas.
     for casefold_address, assoc_tuples in associations.items():
+        # If the row is already in the right state and there's no duplicate, don't compute
+        # a delta for it.
+        if len(assoc_tuples) == 1 and assoc_tuples[0][0] == casefold_address:
+            continue
+
         deltas[casefold_address] = Delta(
             to_update=UpdateDelta(
                 address=assoc_tuples[0][0],
