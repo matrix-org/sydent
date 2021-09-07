@@ -1,3 +1,17 @@
+# Copyright 2021 The Matrix.org Foundation C.I.C.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import logging
 import os
 from configparser import ConfigParser
@@ -6,14 +20,18 @@ from typing import Set
 from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
 
-from sydent.config._base import BaseConfig
 from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 
 logger = logging.getLogger(__name__)
 
+_NO_SERVER_NAME_WARNING = """\
+You have not specified a server name. I have guessed that this server is called '%s'.
+If this is incorrect, you should edit 'general.server.name' in the config file.
+"""
 
-class GeneralConfig(BaseConfig):
-    def parse_config(self, cfg: ConfigParser):
+
+class GeneralConfig:
+    def parse_config(self, cfg: ConfigParser) -> None:
         """
         Parse the 'general' section of the config
 
@@ -23,13 +41,7 @@ class GeneralConfig(BaseConfig):
         self.server_name = cfg.get("general", "server.name")
         if self.server_name == "":
             self.server_name = os.uname()[1]
-            logger.warning(
-                (
-                    "You had not specified a server name. I have guessed that this server is called '%s' "
-                    + "If this is incorrect, you should edit 'general.server.name' in the config file."
-                )
-                % (self.server_name,)
-            )
+            logger.warning(_NO_SERVER_NAME_WARNING % (self.server_name,))
 
         self.pidfile = cfg.get("general", "pidfile.path")
 
@@ -61,25 +73,14 @@ class GeneralConfig(BaseConfig):
 
         self.default_brand = cfg.get("general", "brand.default")
 
-        if cfg.has_option("general", "prometheus_port"):
-            prometheus_port = cfg.getint("general", "prometheus_port")
-            prometheus_addr = cfg.get("general", "prometheus_addr")
+        self.prometheus_enabled = cfg.has_option("general", "prometheus_port")
+        if self.prometheus_enabled:
+            self.prometheus_port = cfg.getint("general", "prometheus_port")
+            self.prometheus_addr = cfg.get("general", "prometheus_addr")
 
-            import prometheus_client
-
-            prometheus_client.start_http_server(
-                port=prometheus_port,
-                addr=prometheus_addr,
-            )
-
-        if cfg.has_option("general", "sentry_dsn"):
-            sentry_dsn = cfg.get("general", "sentry_dsn")
-
-            import sentry_sdk
-
-            sentry_sdk.init(dsn=sentry_dsn)
-            with sentry_sdk.configure_scope() as scope:
-                scope.set_tag("sydent_server_name", self.server_name)
+        self.sentry_enabled = cfg.has_option("general", "sentry_dsn")
+        if self.sentry_enabled:
+            self.sentry_dsn = cfg.get("general", "sentry_dsn")
 
         self.enable_v1_associations = parse_cfg_bool(
             cfg.get("general", "enable_v1_associations")

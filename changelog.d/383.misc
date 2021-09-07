@@ -1,1 +1,1 @@
-Seperated the config parsing from the rest of the code.
+Separate the code handling the configuration file into new modules.

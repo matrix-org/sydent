@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 import signedjson.sign
 
-from sydent.config.server import SydentConfig
+from sydent.config import SydentConfig
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
