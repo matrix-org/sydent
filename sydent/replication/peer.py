@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import binascii
-import configparser
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict
@@ -138,12 +137,9 @@ class RemotePeer(Peer):
         self.lastSentVersion = lastSentVersion
 
         # look up or build the replication URL
-        try:
-            replication_url = sydent.cfg.get(
-                "peer.%s" % server_name,
-                "base_replication_url",
-            )
-        except (configparser.NoSectionError, configparser.NoOptionError):
+        replication_url = self.sydent.config.http.base_replication_urls.get(server_name)
+
+        if replication_url is None:
             if not port:
                 port = 1001
             replication_url = "https://%s:%i" % (server_name, port)

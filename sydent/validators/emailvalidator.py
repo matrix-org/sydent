@@ -112,7 +112,7 @@ class EmailValidator:
 
         :return: The validation link.
         """
-        base = self.sydent.cfg.get("http", "client_http_base")
+        base = self.sydent.config.http.server_http_url_base
         link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
             base,
             urllib.parse.quote(valSession.token),

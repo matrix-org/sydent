@@ -170,7 +170,7 @@ class StoreInviteServlet(Resource):
         pubKeyBase64 = encode_base64(pubKey.encode())
 
         baseUrl = "%s/_matrix/identity/api/v1" % (
-            self.sydent.cfg.get("http", "client_http_base"),
+            self.sydent.config.http.server_http_url_base,
         )
 
         keysToReturn = []

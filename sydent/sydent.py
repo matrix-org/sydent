@@ -395,14 +395,12 @@ class Sydent:
         self.replicationHttpsServer.setup()
         self.pusher.setup()
 
-        internalport = self.cfg.get("http", "internalapi.http.port")
-        if internalport:
-            try:
-                interface = self.cfg.get("http", "internalapi.http.bind_address")
-            except configparser.NoOptionError:
-                interface = "::1"
+        if self.config.http.internal_api_enabled:
+            internalport = self.config.http.internal_port
+            interface = self.config.http.internal_bind_address
+
             self.internalApiHttpServer = InternalApiHttpServer(self)
-            self.internalApiHttpServer.setup(interface, int(internalport))
+            self.internalApiHttpServer.setup(interface, internalport)
 
         if self.pidfile:
             with open(self.pidfile, "w") as pidfile:
@@ -411,9 +409,9 @@ class Sydent:
         self.reactor.run()
 
     def ip_from_request(self, request):
-        if self.cfg.get(
-            "http", "obey_x_forwarded_for"
-        ) and request.requestHeaders.hasHeader("X-Forwarded-For"):
+        if self.config.http.obey_x_forwarded_for and request.requestHeaders.hasHeader(
+            "X-Forwarded-For"
+        ):
             return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
         client = request.getClientAddress()
         if isinstance(client, (address.IPv4Address, address.IPv6Address)):
