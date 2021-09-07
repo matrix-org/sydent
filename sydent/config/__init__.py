@@ -14,6 +14,7 @@
 
 from configparser import ConfigParser
 
+from sydent.config.crypto import CryptoConfig
 from sydent.config.database import DatabaseConfig
 
 
@@ -29,8 +30,12 @@ class SydentConfig:
 
     def __init__(self):
         self.database = DatabaseConfig()
+        self.crypto = CryptoConfig()
 
-        self.config_sections = [self.database]
+        self.config_sections = [
+            self.database,
+            self.crypto,
+        ]
 
     def _parse_config(self, cfg: ConfigParser) -> None:
         """
@@ -42,10 +47,17 @@ class SydentConfig:
         for section in self.config_sections:
             section.parse_config(cfg)
 
-    def parse_from_config_parser(self, cfg: ConfigParser) -> None:
+    def parse_from_config_parser(self, cfg: ConfigParser) -> bool:
         """
         Parse the configuration from a ConfigParser object
 
         :param cfg: the configuration to be parsed
+        ...
+        :return: Whether or not cfg has been changed and needs saving
         """
         self._parse_config(cfg)
+
+        # TODO: Don't alter config file when starting Sydent unless
+        #       user has asked for this specifially (e.g. on first
+        #       run only, or when specify --generate-config)
+        return self.crypto.save_key

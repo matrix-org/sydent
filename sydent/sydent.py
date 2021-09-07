@@ -69,7 +69,6 @@ from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from sydent.http.servlets.v1_servlet import V1Servlet
 from sydent.http.servlets.v2_servlet import V2Servlet
 from sydent.replication.pusher import Pusher
-from sydent.sign.ed25519 import SydentEd25519
 from sydent.threepid.bind import ThreepidBinder
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
@@ -326,7 +325,7 @@ class Sydent:
         self.validators.msisdn = MsisdnValidator(self)
 
         self.keyring = Keyring()
-        self.keyring.ed25519 = SydentEd25519(self).signing_key
+        self.keyring.ed25519 = self.config.crypto.signing_key
         self.keyring.ed25519.alg = "ed25519"
 
         self.sig_verifier = Verifier(self)
@@ -610,7 +609,11 @@ if __name__ == "__main__":
     setup_logging(cfg)
 
     sydent_config = SydentConfig()
-    sydent_config.parse_from_config_parser(cfg)
+    cfg_needs_saving = sydent_config.parse_from_config_parser(cfg)
 
     syd = Sydent(cfg, sydent_config=sydent_config)
+
+    if cfg_needs_saving:
+        syd.save_config()
+
     syd.run()
