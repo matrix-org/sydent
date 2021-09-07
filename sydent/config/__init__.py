@@ -12,6 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from configparser import ConfigParser
+
 
 class ConfigError(Exception):
     pass
+
+
+class SydentConfig:
+    """This is the class in charge of handling Sydent's configuration.
+    Handling of each individual section is delegated to other classes
+    stored in a `config_sections` list.
+    """
+
+    def __init__(self):
+        self.config_sections = []
+
+    def _parse_config(self, cfg: ConfigParser) -> None:
+        """
+        Run the parse_config method on each of the objects in
+        self.config_sections
+
+        :param cfg: the configuration to be parsed
+        """
+        for section in self.config_sections:
+            section.parse_config(cfg)

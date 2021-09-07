@@ -27,6 +27,7 @@ from jinja2 import Environment, FileSystemLoader
 from twisted.internet import address, task
 from twisted.python import log
 
+from sydent.config import SydentConfig
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.sqlitedb import SqliteDatabase
 from sydent.db.valsession import ThreePidValSessionStore
@@ -201,13 +202,18 @@ CONFIG_DEFAULTS = {
 
 class Sydent:
     def __init__(
-        self, cfg, reactor=twisted.internet.reactor, use_tls_for_federation=True
+        self,
+        cfg,
+        sydent_config: SydentConfig,
+        reactor=twisted.internet.reactor,
+        use_tls_for_federation=True,
     ):
+        self.cfg = cfg
+        self.config = sydent_config
+
         self.reactor = reactor
         self.config_file = get_config_file_path()
         self.use_tls_for_federation = use_tls_for_federation
-
-        self.cfg = cfg
 
         logger.info("Starting Sydent server")
 
@@ -602,5 +608,7 @@ def run_gc():
 if __name__ == "__main__":
     cfg = parse_config_file(get_config_file_path())
     setup_logging(cfg)
-    syd = Sydent(cfg)
+
+    sydent_config = SydentConfig()
+    syd = Sydent(cfg, sydent_config=sydent_config)
     syd.run()

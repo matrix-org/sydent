@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Tuple
 
 import signedjson.sign
 
+from sydent.config import SydentConfig
 from sydent.sydent import Sydent, parse_config_file
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
@@ -251,8 +252,10 @@ if __name__ == "__main__":
 
     config = parse_config_file(args.config_path)
 
+    sydent_config = SydentConfig()
+
     reactor = ResolvingMemoryReactorClock()
-    sydent = Sydent(config, reactor, False)
+    sydent = Sydent(config, sydent_config, reactor, False)
 
     update_global_associations(sydent, sydent.db, not args.no_email, args.dry_run)
     update_local_associations(sydent, sydent.db, not args.no_email, args.dry_run)
