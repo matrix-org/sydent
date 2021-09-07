@@ -4,6 +4,7 @@
 .vscode/
 *.iml
 _trial_temp
+_trial_temp.lock
 *.egg
 *.egg-info
 .python-version
@@ -11,4 +12,5 @@ _trial_temp
 # Runtime files
 /sydent.conf
 /sydent.db
+/sydent.pid
 /matrix_is_test/sydent.stderr
