@@ -242,7 +242,6 @@ class MigrationTestCase(unittest.TestCase):
         update_global_associations(
             self.sydent,
             self.sydent.db,
-            send_email=True,
             dry_run=False,
             test=True,
         )
@@ -295,7 +294,6 @@ class MigrationTestCase(unittest.TestCase):
             update_global_associations(
                 self.sydent,
                 self.sydent.db,
-                send_email=True,
                 dry_run=True,
                 test=True,
             )
