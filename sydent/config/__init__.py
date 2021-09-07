@@ -16,6 +16,7 @@ from configparser import ConfigParser
 
 from sydent.config.crypto import CryptoConfig
 from sydent.config.database import DatabaseConfig
+from sydent.config.sms import SMSConfig
 
 
 class ConfigError(Exception):
@@ -31,10 +32,12 @@ class SydentConfig:
     def __init__(self):
         self.database = DatabaseConfig()
         self.crypto = CryptoConfig()
+        self.sms = SMSConfig()
 
         self.config_sections = [
             self.database,
             self.crypto,
+            self.sms,
         ]
 
     def _parse_config(self, cfg: ConfigParser) -> None:
