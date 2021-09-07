@@ -19,7 +19,7 @@ import os
 import sqlite3
 import sys
 import time
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import attr
 import signedjson.sign
