@@ -3,7 +3,7 @@ on: [pull_request]
 
 jobs:
   check-newsfile:
-    if: ${{ github.base_ref == 'main'  || contains(github.base_ref, 'release-') }}
+    if: ${{ github.base_ref == 'main' || contains(github.base_ref, 'release-') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
