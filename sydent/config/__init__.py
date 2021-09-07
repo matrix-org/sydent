@@ -156,13 +156,14 @@ class ConfigError(Exception):
 
 
 class SydentConfig:
-    """ This is the class in charge of handling Sydents configuration.
+    """This is the class in charge of handling Sydents configuration.
     Handling of each individual section is delegated to other classes.
 
     To use this class, create a new object and then call one of
     `parse_config_file` or `parse_config_dict` before creating the
     Sydent object that uses it.
     """
+
     def __init__(self):
         self.general = GeneralConfig()
         self.email = EmailConfig()
@@ -183,7 +184,7 @@ class SydentConfig:
     def parse_config_file(self, config_file: str) -> None:
         """Parse the given config from a filepath, populating missing items and
         sections
-        
+
         :param config_file: the file to be parsed
         """
         # If the config file doesn't exist, prepopulate the config object
