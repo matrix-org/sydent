@@ -203,7 +203,9 @@ def update_local_associations(
         if not test:
             log_msg = f"Updating {casefolded_address}"
             if delta.to_delete is not None:
-                log_msg += f" and deleting {len(delta.to_delete)} rows associated with it"
+                log_msg += (
+                    f" and deleting {len(delta.to_delete)} rows associated with it"
+                )
             print(log_msg)
 
         try:
