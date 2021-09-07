@@ -70,7 +70,6 @@ from sydent.http.servlets.v2_servlet import V2Servlet
 from sydent.replication.pusher import Pusher
 from sydent.threepid.bind import ThreepidBinder
 from sydent.util.hash import sha256_and_url_safe_base64
-from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 from sydent.validators.emailvalidator import EmailValidator
 from sydent.validators.msisdnvalidator import MsisdnValidator
@@ -215,48 +214,22 @@ class Sydent:
 
         logger.info("Starting Sydent server")
 
-        self.pidfile = self.cfg.get("general", "pidfile.path")
-
         self.db = SqliteDatabase(self).db
 
-        if self.cfg.has_option("general", "sentry_dsn"):
-            # Only import and start sentry SDK if configured.
+        if self.config.general.sentry_enabled:
             import sentry_sdk
 
-            sentry_sdk.init(
-                dsn=self.cfg.get("general", "sentry_dsn"),
-            )
+            sentry_sdk.init(dsn=self.config.general.sentry_dsn)
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.config.general.server_name)
 
-        if self.cfg.has_option("general", "prometheus_port"):
+        if self.config.general.prometheus_enabled:
             import prometheus_client
 
             prometheus_client.start_http_server(
-                port=self.cfg.getint("general", "prometheus_port"),
-                addr=self.cfg.get("general", "prometheus_addr"),
+                port=self.config.general.prometheus_port,
+                addr=self.config.general.prometheus_addr,
             )
-
-        self.enable_v1_associations = parse_cfg_bool(
-            self.cfg.get("general", "enable_v1_associations")
-        )
-
-        self.delete_tokens_on_bind = parse_cfg_bool(
-            self.cfg.get("general", "delete_tokens_on_bind")
-        )
-
-        ip_blacklist = set_from_comma_sep_string(
-            self.cfg.get("general", "ip.blacklist")
-        )
-        if not ip_blacklist:
-            ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
-
-        ip_whitelist = set_from_comma_sep_string(
-            self.cfg.get("general", "ip.whitelist")
-        )
-
-        self.ip_blacklist = generate_ip_set(ip_blacklist)
-        self.ip_whitelist = generate_ip_set(ip_whitelist)
 
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
@@ -367,8 +340,8 @@ class Sydent:
             self.internalApiHttpServer = InternalApiHttpServer(self)
             self.internalApiHttpServer.setup(interface, internalport)
 
-        if self.pidfile:
-            with open(self.pidfile, "w") as pidfile:
+        if self.config.general.pidfile:
+            with open(self.config.general.pidfile, "w") as pidfile:
                 pidfile.write(str(os.getpid()) + "\n")
 
         self.reactor.run()

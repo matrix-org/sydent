@@ -15,10 +15,12 @@
 
 import logging
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Set
 
 from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
+
+from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 
 if TYPE_CHECKING:
     from configparser import ConfigParser
@@ -65,3 +67,56 @@ class GeneralConfig:
         )
 
         self.default_brand = cfg.get("general", "brand.default")
+
+        self.pidfile = cfg.get("general", "pidfile.path")
+
+        self.terms_path = cfg.get("general", "terms.path")
+
+        self.address_lookup_limit = cfg.getint("general", "address_lookup_limit")
+
+        self.prometheus_enabled = cfg.has_option("general", "prometheus_port")
+        if self.prometheus_enabled:
+            self.prometheus_port = cfg.getint("general", "prometheus_port")
+            self.prometheus_addr = cfg.get("general", "prometheus_addr")
+
+        self.sentry_enabled = cfg.has_option("general", "sentry_dsn")
+        if self.sentry_enabled:
+            self.sentry_dsn = cfg.get("general", "sentry_dsn")
+
+        self.enable_v1_associations = parse_cfg_bool(
+            cfg.get("general", "enable_v1_associations")
+        )
+
+        self.delete_tokens_on_bind = parse_cfg_bool(
+            cfg.get("general", "delete_tokens_on_bind")
+        )
+
+        ip_blacklist = set_from_comma_sep_string(cfg.get("general", "ip.blacklist"))
+        if not ip_blacklist:
+            ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
+
+        ip_whitelist = set_from_comma_sep_string(cfg.get("general", "ip.whitelist"))
+
+        self.ip_blacklist = generate_ip_set(ip_blacklist)
+        self.ip_whitelist = generate_ip_set(ip_whitelist)
+
+
+def set_from_comma_sep_string(rawstr: str) -> Set[str]:
+    """
+    Parse the a comma seperated string into a set
+
+    :param rawstr: the string to be parsed
+    """
+    if rawstr == "":
+        return set()
+    return {x.strip() for x in rawstr.split(",")}
+
+
+def parse_cfg_bool(value: str):
+    """
+    Parse a string config option into a boolean
+    This method ignores capitalisation
+
+    :param value: the string to be parsed
+    """
+    return value.lower() == "true"
