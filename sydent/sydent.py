@@ -288,19 +288,6 @@ class Sydent:
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
 
-        self.default_web_client_location = self.cfg.get(
-            "email", "email.default_web_client_location"
-        )
-        self.username_obfuscate_characters = int(
-            self.cfg.get(
-                "email", "email.third_party_invite_username_obfuscate_characters"
-            )
-        )
-        self.domain_obfuscate_characters = int(
-            self.cfg.get(
-                "email", "email.third_party_invite_domain_obfuscate_characters"
-            )
-        )
         self.template_environment = Environment(
             loader=FileSystemLoader(self.cfg.get("general", "templates.path")),
             autoescape=True,

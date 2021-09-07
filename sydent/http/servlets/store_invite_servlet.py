@@ -138,7 +138,9 @@ class StoreInviteServlet(Resource):
         if substitutions["room_name"] != "":
             substitutions["bracketed_room_name"] = "(%s) " % substitutions["room_name"]
 
-        substitutions["web_client_location"] = self.sydent.default_web_client_location
+        substitutions[
+            "web_client_location"
+        ] = self.sydent.config.email.default_web_client_location
         if "org.matrix.web_client_location" in substitutions:
             substitutions["web_client_location"] = substitutions.pop(
                 "org.matrix.web_client_location"
@@ -214,9 +216,11 @@ class StoreInviteServlet(Resource):
 
         # Obfuscate strings
         redacted_username = self._redact(
-            username, self.sydent.username_obfuscate_characters
+            username, self.sydent.config.email.username_obfuscate_characters
         )
-        redacted_domain = self._redact(domain, self.sydent.domain_obfuscate_characters)
+        redacted_domain = self._redact(
+            domain, self.sydent.config.email.domain_obfuscate_characters
+        )
 
         return redacted_username + "@" + redacted_domain
 

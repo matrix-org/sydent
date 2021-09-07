@@ -34,3 +34,15 @@ class EmailConfig:
         self.invite_template = None
         if cfg.has_option("email", "email.invite_template"):
             self.invite_template = cfg.get("email", "email.invite_template")
+
+        self.default_web_client_location = cfg.get(
+            "email", "email.default_web_client_location"
+        )
+
+        self.username_obfuscate_characters = cfg.getint(
+            "email", "email.third_party_invite_username_obfuscate_characters"
+        )
+
+        self.domain_obfuscate_characters = cfg.getint(
+            "email", "email.third_party_invite_domain_obfuscate_characters"
+        )
