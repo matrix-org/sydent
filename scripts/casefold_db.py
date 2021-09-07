@@ -143,7 +143,7 @@ def update_local_associations(
 
 
 def update_global_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+    sydent: Sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
 ):
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
@@ -153,7 +153,7 @@ def update_global_associations(
     """
 
     # get every row where the local server is origin server and medium is email
-    origin_server = sydent.server_name
+    origin_server = sydent.config.general.server_name
     medium = "email"
 
     cur = db.cursor()
@@ -180,7 +180,7 @@ def update_global_associations(
         sg_assoc["address"] = address.casefold()
         sg_assoc = json.dumps(
             signedjson.sign.sign_json(
-                sg_assoc, sydent.server_name, sydent.keyring.ed25519
+                sg_assoc, sydent.config.general.server_name, sydent.keyring.ed25519
             )
         )
 

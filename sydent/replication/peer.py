@@ -62,7 +62,7 @@ class LocalPeer(Peer):
     """
 
     def __init__(self, sydent: "Sydent") -> None:
-        super().__init__(sydent.server_name, {})
+        super().__init__(sydent.config.general.server_name, {})
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 
@@ -103,7 +103,7 @@ class LocalPeer(Peer):
                     globalAssocStore.addAssociation(
                         assocObj,
                         json.dumps(sgAssocs[localId]),
-                        self.sydent.server_name,
+                        self.sydent.config.general.server_name,
                         localId,
                     )
                 else:

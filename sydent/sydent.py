@@ -220,20 +220,6 @@ class Sydent:
 
         self.db = SqliteDatabase(self).db
 
-        self.server_name = self.cfg.get("general", "server.name")
-        if self.server_name == "":
-            self.server_name = os.uname()[1]
-            logger.warning(
-                (
-                    "You had not specified a server name. I have guessed that this server is called '%s' "
-                    + "and saved this in the config file. If this is incorrect, you should edit server.name in "
-                    + "the config file."
-                )
-                % (self.server_name,)
-            )
-            self.cfg.set("general", "server.name", self.server_name)
-            self.save_config()
-
         if self.cfg.has_option("general", "sentry_dsn"):
             # Only import and start sentry SDK if configured.
             import sentry_sdk
@@ -242,7 +228,7 @@ class Sydent:
                 dsn=self.cfg.get("general", "sentry_dsn"),
             )
             with sentry_sdk.configure_scope() as scope:
-                scope.set_tag("sydent_server_name", self.server_name)
+                scope.set_tag("sydent_server_name", self.config.general.server_name)
 
         if self.cfg.has_option("general", "prometheus_port"):
             import prometheus_client

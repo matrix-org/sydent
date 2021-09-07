@@ -99,7 +99,9 @@ class ThreepidBinder:
                 "token": cast(str, token["token"]),
             }
             token["signed"] = signedjson.sign.sign_json(
-                token["signed"], self.sydent.server_name, self.sydent.keyring.ed25519
+                token["signed"],
+                self.sydent.config.general.server_name,
+                self.sydent.keyring.ed25519,
             )
             invites.append(token)
         if invites:

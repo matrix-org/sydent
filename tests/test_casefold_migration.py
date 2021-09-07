@@ -95,7 +95,7 @@ class MigrationTestCase(unittest.TestCase):
 
         # create some global associations
         associations = []
-        originServer = self.sydent.server_name
+        originServer = self.sydent.config.general.server_name
 
         for i in range(10):
             address = "bob%d@example.com" % i
