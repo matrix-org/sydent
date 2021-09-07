@@ -112,7 +112,8 @@ def sendEmailWithBackoff(
             )
             if not test:
                 print("Sent email to %s" % address)
-                return
+
+            return
         except EmailSendException:
             if not test:
                 print(
