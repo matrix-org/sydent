@@ -158,11 +158,15 @@ class StoreInviteServlet(Resource):
         substitutions["subject_header_value"] = subject_header.encode()
 
         brand = self.sydent.brand_from_request(request)
-        templateFile = self.sydent.get_branded_template(
-            brand,
-            "invite_template.eml",
-            ("email", "email.invite_template"),
-        )
+
+        if self.sydent.config.email.invite_template is None:
+            templateFile = self.sydent.get_branded_template(
+                brand,
+                "invite_template.eml",
+                ("email", "email.invite_template"),
+            )
+        else:
+            templateFile = self.sydent.config.email.invite_template
 
         sendEmail(self.sydent, templateFile, normalised_address, substitutions)
 

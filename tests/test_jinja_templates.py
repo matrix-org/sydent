@@ -54,11 +54,14 @@ class TestTemplate(unittest.TestCase):
             "room_type": "",
         }
 
-        templateFile = self.sydent.get_branded_template(
-            "vector-im",
-            "invite_template.eml",
-            ("email", "email.invite_template"),
-        )
+        if self.sydent.config.email.invite_template is None:
+            templateFile = self.sydent.get_branded_template(
+                "vector-im",
+                "invite_template.eml",
+                ("email", "email.invite_template"),
+            )
+        else:
+            templateFile = self.sydent.config.email.invite_template
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             sendEmail(self.sydent, templateFile, "test@test.com", substitutions)
@@ -117,11 +120,14 @@ class TestTemplate(unittest.TestCase):
             "room_type": "",
         }
 
-        templateFile = self.sydent.get_branded_template(
-            "matrix-org",
-            "invite_template.eml",
-            ("email", "email.invite_template"),
-        )
+        if self.sydent.config.email.invite_template is None:
+            templateFile = self.sydent.get_branded_template(
+                "matrix-org",
+                "invite_template.eml",
+                ("email", "email.invite_template"),
+            )
+        else:
+            templateFile = self.sydent.config.email.invite_template
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             sendEmail(self.sydent, templateFile, "test@test.com", substitutions)

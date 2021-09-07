@@ -40,7 +40,7 @@ def calculate_lookup_hash(sydent, address):
 
 
 def update_local_associations(
-    sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
+    sydent: Sydent, db: sqlite3.Connection, send_email: bool, dry_run: bool
 ):
     """Update the DB table local_threepid_associations so that all stored
     emails are casefolded, and any duplicate mxid's associated with the
@@ -105,11 +105,14 @@ def update_local_associations(
             if mxid in processed_mxids:
                 continue
             else:
-                templateFile = sydent.get_branded_template(
-                    None,
-                    "migration_template.eml",
-                    ("email", "email.template"),
-                )
+                if sydent.config.email.template is None:
+                    templateFile = sydent.get_branded_template(
+                        None,
+                        "migration_template.eml",
+                        ("email", "email.template"),
+                    )
+                else:
+                    templateFile = sydent.config.email.template
 
                 sendEmail(
                     sydent,
