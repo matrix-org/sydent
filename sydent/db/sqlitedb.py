@@ -28,7 +28,7 @@ class SqliteDatabase:
     def __init__(self, syd: "Sydent") -> None:
         self.sydent = syd
 
-        dbFilePath = self.sydent.cfg.get("db", "db.file")
+        dbFilePath = self.sydent.config.database.database_path
         logger.info("Using DB file %s", dbFilePath)
 
         self.db = sqlite3.connect(dbFilePath)

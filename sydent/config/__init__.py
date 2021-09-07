@@ -14,6 +14,8 @@
 
 from configparser import ConfigParser
 
+from sydent.config.database import DatabaseConfig
+
 
 class ConfigError(Exception):
     pass
@@ -26,7 +28,9 @@ class SydentConfig:
     """
 
     def __init__(self):
-        self.config_sections = []
+        self.database = DatabaseConfig()
+
+        self.config_sections = [self.database]
 
     def _parse_config(self, cfg: ConfigParser) -> None:
         """
@@ -37,3 +41,11 @@ class SydentConfig:
         """
         for section in self.config_sections:
             section.parse_config(cfg)
+
+    def parse_from_config_parser(self, cfg: ConfigParser) -> None:
+        """
+        Parse the configuration from a ConfigParser object
+
+        :param cfg: the configuration to be parsed
+        """
+        self._parse_config(cfg)

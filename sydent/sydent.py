@@ -610,5 +610,7 @@ if __name__ == "__main__":
     setup_logging(cfg)
 
     sydent_config = SydentConfig()
+    sydent_config.parse_from_config_parser(cfg)
+
     syd = Sydent(cfg, sydent_config=sydent_config)
     syd.run()

@@ -253,6 +253,7 @@ if __name__ == "__main__":
     config = parse_config_file(args.config_path)
 
     sydent_config = SydentConfig()
+    sydent_config.parse_from_config_parser(config)
 
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(config, sydent_config, reactor, False)

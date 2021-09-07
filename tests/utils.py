@@ -70,11 +70,14 @@ def make_sydent(test_config={}):
 
     reactor = ResolvingMemoryReactorClock()
 
+    cfg = parse_config_dict(test_config)
+
     sydent_config = SydentConfig()
+    sydent_config.parse_from_config_parser(cfg)
 
     return Sydent(
         reactor=reactor,
-        cfg=parse_config_dict(test_config),
+        cfg=cfg,
         sydent_config=sydent_config,
         use_tls_for_federation=False,
     )
