@@ -33,7 +33,7 @@ from tests.utils import ResolvingMemoryReactorClock
 EMAIL_SUBJECT = "No action required: we have changed the way your Matrix account and email address are associated"
 
 # Maximum number of attempts to send an email.
-MAX_ATTEMPTS_FOR_EMAIL = 10
+MAX_ATTEMPTS_FOR_EMAIL = 5
 
 
 @attr.s(auto_attribs=True)
@@ -86,40 +86,44 @@ def sendEmailWithBackoff(
     mxid: str,
     backoff: int,
     test: bool = False,
-    attempts: int = 0,
 ) -> None:
     """Send an email with exponential backoff - that way we don't stop sending halfway
     through if the SMTP server rejects our email (e.g. because of rate limiting).
 
     Setting test to True disables the logging.
+
+    Raises a CantSendEmailException if no email could be sent after MAX_ATTEMPTS_FOR_EMAIL
+    attempts.
     """
-    if attempts == MAX_ATTEMPTS_FOR_EMAIL:
-        raise CantSendEmailException()
-
-    time.sleep(backoff)
-    try:
-        template_file = sydent.get_branded_template(
-            None,
-            "migration_template.eml",
-            ("email", "email.template"),
-        )
-
-        sendEmail(
-            sydent,
-            template_file,
-            address,
-            {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
-            log_send_errors=False,
-        )
-        if not test:
-            print("Sent email to %s" % address)
-    except EmailSendException:
-        if not test:
-            print(
-                "Failed to send email to %s (attempt %d/%d)"
-                % (address, attempts + 1, MAX_ATTEMPTS_FOR_EMAIL)
+    for i in range(MAX_ATTEMPTS_FOR_EMAIL):
+        try:
+            template_file = sydent.get_branded_template(
+                None,
+                "migration_template.eml",
+                ("email", "email.template"),
             )
-        sendEmailWithBackoff(sydent, address, mxid, backoff * 2, test, attempts + 1)
+
+            sendEmail(
+                sydent,
+                template_file,
+                address,
+                {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
+                log_send_errors=False,
+            )
+            if not test:
+                print("Sent email to %s" % address)
+                return
+        except EmailSendException:
+            if not test:
+                print(
+                    "Failed to send email to %s (attempt %d/%d)"
+                    % (address, i + 1, MAX_ATTEMPTS_FOR_EMAIL)
+                )
+
+            time.sleep(backoff)
+            backoff *= 2
+
+    raise CantSendEmailException()
 
 
 def update_local_associations(
@@ -206,13 +210,6 @@ def update_local_associations(
             # Delete each association, and send an email mentioning the affected MXID.
             if delta.to_delete is not None:
                 for to_delete in delta.to_delete:
-                    cur = db.cursor()
-                    if not dry_run:
-                        cur.execute(
-                            "DELETE FROM local_threepid_associations WHERE address = ?",
-                            (to_delete.address,),
-                        )
-
                     if send_email and not dry_run:
                         # If the MXID is one that will still be associated with this
                         # email address after this run, don't send an email for it.
@@ -227,10 +224,13 @@ def update_local_associations(
                             test=test,
                         )
 
-                    # We commit here, so that if we couldn't send the email for some
-                    # reason we don't update the database and have another go at it next
-                    # time we run the script.
-                    db.commit()
+                    if not dry_run:
+                        cur = db.cursor()
+                        cur.execute(
+                            "DELETE FROM local_threepid_associations WHERE address = ?",
+                            (to_delete.address,),
+                        )
+                        db.commit()
 
             # Update the row now that there's no duplicate.
             if not dry_run:
@@ -247,14 +247,12 @@ def update_local_associations(
                 db.commit()
 
         except CantSendEmailException:
-            # If we failed because we couldn't send an email, rollback the current
-            # transaction and move on to the next address to de-duplicate.
+            # If we failed because we couldn't send an email move on to the next address
+            # to de-duplicate.
             # We catch this error here rather than when sending the email because we want
             # to avoid deleting rows we can't warn users about, and we don't want to
-            # proceed with the subsequent deletion because there might still be
-            # duplicates in the database (since we haven't deleted everything we wanted
-            # to delete).
-            db.rollback()
+            # proceed with the subsequent update because there might still be duplicates
+            # in the database (since we haven't deleted everything we wanted to delete).
             continue
 
 
