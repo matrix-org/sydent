@@ -17,6 +17,7 @@ from configparser import ConfigParser
 from sydent.config.crypto import CryptoConfig
 from sydent.config.database import DatabaseConfig
 from sydent.config.email import EmailConfig
+from sydent.config.http import HTTPConfig
 from sydent.config.sms import SMSConfig
 
 
@@ -35,12 +36,14 @@ class SydentConfig:
         self.crypto = CryptoConfig()
         self.sms = SMSConfig()
         self.email = EmailConfig()
+        self.http = HTTPConfig()
 
         self.config_sections = [
             self.database,
             self.crypto,
             self.sms,
             self.email,
+            self.http,
         ]
 
     def _parse_config(self, cfg: ConfigParser) -> None:
