@@ -19,7 +19,7 @@ import os
 import sqlite3
 import sys
 import time
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Optional
 
 import attr
 import signedjson.sign
@@ -60,7 +60,7 @@ class Delta:
     """
 
     to_update: UpdateDelta
-    to_delete: List[DeleteDelta] = []
+    to_delete: Optional[List[DeleteDelta]] = None
 
 
 class CantSendEmailException(Exception):
@@ -168,15 +168,16 @@ def update_local_associations(
     for casefold_address, assoc_tuples in associations.items():
         deltas[casefold_address] = Delta(
             to_update=UpdateDelta(
-                mxid=assoc_tuples[0][0],
-                lookup_hash=assoc_tuples[0][1],
-                address=assoc_tuples[0][2],
+                address=assoc_tuples[0][0],
+                mxid=assoc_tuples[0][1],
+                lookup_hash=assoc_tuples[0][2],
             )
         )
 
         if len(assoc_tuples) > 1:
             # Iterate over all associations except for the first one, since we've already
             # processed it.
+            deltas[casefold_address].to_delete = []
             for address, mxid, _ in assoc_tuples[1:]:
                 deltas[casefold_address].to_delete.append(
                     DeleteDelta(
@@ -191,38 +192,40 @@ def update_local_associations(
     # Apply the deltas
     for casefolded_address, delta in deltas.items():
         if not test:
-            print(
-                f"Updating {casefolded_address} and deleting {len(delta.to_delete)} rows associated with it"
-            )
+            log_msg = f"Updating {casefolded_address}"
+            if delta.to_delete is not None:
+                log_msg += f" and deleting {len(delta.to_delete)} rows associated with it"
+            print(log_msg)
 
         try:
             # Delete each association, and send an email mentioning the affected MXID.
-            for to_delete in delta.to_delete:
-                cur = db.cursor()
-                if not dry_run:
-                    cur.execute(
-                        "DELETE FROM local_threepid_associations WHERE address = ?",
-                        (to_delete.address,),
-                    )
+            if delta.to_delete is not None:
+                for to_delete in delta.to_delete:
+                    cur = db.cursor()
+                    if not dry_run:
+                        cur.execute(
+                            "DELETE FROM local_threepid_associations WHERE address = ?",
+                            (to_delete.address,),
+                        )
 
-                if send_email and not dry_run:
-                    # If the MXID is one that will still be associated with this email address
-                    # after this run, don't send an email for it.
-                    if to_delete.mxid == delta.to_update.mxid:
-                        continue
+                    if send_email and not dry_run:
+                        # If the MXID is one that will still be associated with this
+                        # email address after this run, don't send an email for it.
+                        if to_delete.mxid == delta.to_update.mxid:
+                            continue
 
-                    sendEmailWithBackoff(
-                        sydent,
-                        to_delete.address,
-                        to_delete.mxid,
-                        backoff=1 if not test else 0,
-                        test=test,
-                    )
+                        sendEmailWithBackoff(
+                            sydent,
+                            to_delete.address,
+                            to_delete.mxid,
+                            backoff=1 if not test else 0,
+                            test=test,
+                        )
 
-                # We commit here, so that if we couldn't send the email for some reason we
-                # don't update the database and have another go at it next time we run the
-                # script.
-                db.commit()
+                    # We commit here, so that if we couldn't send the email for some
+                    # reason we don't update the database and have another go at it next
+                    # time we run the script.
+                    db.commit()
 
             # Update the row now that there's no duplicate.
             if not dry_run:
