@@ -26,3 +26,29 @@ class DatabaseConfig:
         :param cfg: the configuration to be parsed
         """
         self.database_path = cfg.get("db", "db.file")
+
+    def generate_config_section(
+        self,
+        db_path: str,
+        **kwargs,
+    ) -> str:
+        """
+        Generate the database config section
+
+        :param db_path: The SQLite Database file for Sydent to use.
+        ...
+        :return: the yaml config section
+        """
+
+        return (
+            """\
+        ## Database ##
+
+        # The path to the SQLite database file for Sydent to use.
+        # It can be set to ':memory:' to use a temporary database
+        # in RAM instead of on disk. Required.
+        #
+        database_path: %(db_path)s
+        """
+            % locals()
+        )
