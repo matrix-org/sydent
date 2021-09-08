@@ -10,7 +10,7 @@ In the past, the Matrix specification would consider email addresses as case-sen
 which could each be associated with a different Matrix user ID.
 
 With [MSC2265](https://github.com/matrix-org/matrix-doc/pull/2265), the Matrix
-specification was updated to consider emails without any case sensitivity (so the two
+specification was updated so that email addresses are considered without any case sensitivity (so the two
 addresses mentioned in the previous paragraph would be considered as being one and the
 same).
 
