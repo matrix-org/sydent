@@ -34,7 +34,7 @@ Arguments:
 ```
 
 If the script finds a duplicate (i.e. an email address with multiple associations), it
-keeps the most recent association and delete the others. If one or more of the Matrix
+keeps the most recent association and deletes the others. If one or more of the Matrix
 user IDs that are being deleted don't match the one being kept, the script also sends an
 email to the address to inform the user of the deletion.
 
