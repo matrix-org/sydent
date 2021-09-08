@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#
+# Update/check the docs/sample_config.yaml
+
+set -e
+
+cd $(dirname $0)/..
+
+SAMPLE_CONFIG="docs/sample_config.yaml"
+
+if [ "$1" == "--check" ]; then
+    diff -u "$SAMPLE_CONFIG" <(./scripts/generate_config --no-secrets) >/dev/null || {
+        echo -e "\033[1m\033[31m$SAMPLE_CONFIG is not up-to-date. Regenerate it with \`scripts-dev/generate_sample_config\`.\033[0m" >&2
+        exit 1
+    }
+else
+    ./scripts/generate_config --no-secrets -o "$SAMPLE_CONFIG"
+fi

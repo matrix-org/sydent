@@ -16,6 +16,7 @@ import copy
 import logging
 import os
 from configparser import DEFAULTSECT, ConfigParser
+from textwrap import dedent
 from typing import Dict
 
 from twisted.python import log
@@ -28,6 +29,18 @@ from sydent.config.http import HTTPConfig
 from sydent.config.sms import SMSConfig
 
 logger = logging.getLogger(__name__)
+
+CONFIG_FILE_HEADER = """\
+# Configuration file for Sydent.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+
+
+"""
 
 CONFIG_DEFAULTS = {
     "general": {
@@ -266,6 +279,44 @@ class SydentConfig:
         # as tests do this themselves
 
         self.parse_from_config_parser(cfg)
+
+    def generate_config(
+        self,
+        template_dir_path: str,
+        server_name: str,
+        pid_file: str,
+        db_path: str,
+        generate_secrets: bool,
+    ) -> str:
+        """
+        Build a default configuration file
+        This is used when the user explicitly asks us to generate a config file
+        (eg with the generate_config script).
+
+        :param template_dir_path: The root path where the template files are kept.
+        :param server_name: The server name. Used to initialise the server_name
+            config param.
+        :param pid_file: The file where the PID of the running Sydent process will
+            be written.
+        :param db_path : The SQLite Database file for Sydent to use.
+        :param generate_secrets: True if we should generate new secrets for things
+            like the sigining key. If False, these parameters will be left unset.
+        ...
+        :return: the yaml config file contents
+        """
+
+        return CONFIG_FILE_HEADER + "\n\n".join(
+            dedent(
+                conf.generate_config_section(
+                    template_dir_path=template_dir_path,
+                    server_name=server_name,
+                    pid_file=pid_file,
+                    db_path=db_path,
+                    generate_secrets=generate_secrets,
+                )
+            )
+            for conf in self.config_sections
+        )
 
 
 def setup_logging(cfg: ConfigParser) -> None:

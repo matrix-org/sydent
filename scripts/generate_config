@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+import argparse
+import sys
+
+from sydent.config import SydentConfig
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--template-dir",
+        default="TEMPLATE_DIR",
+        help="The root path where the template files are kept. Default: %(default)s",
+    )
+
+    parser.add_argument(
+        "--server-name",
+        default="SERVER_NAME",
+        help="The server name. Used to initialise the server_name config param. "
+        "Default: %(default)s",
+    )
+
+    parser.add_argument(
+        "--pid-file",
+        default="sydent.pid",
+        help="The file where the PID of the running Sydent process will be written. "
+        "Default: %(default)s",
+    )
+
+    parser.add_argument(
+        "--db-path",
+        default="sydent.db",
+        help="The SQLite Database file for Sydent to use. Default: %(default)s",
+    )
+
+    parser.add_argument(
+        "--no-secrets",
+        action="store_true",
+        help="Disable the automatic generation of secrets like the signing key",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output-file",
+        type=argparse.FileType("w"),
+        default=sys.stdout,
+        help="File to write the configuration to. Default: stdout",
+    )
+
+    args = parser.parse_args()
+
+    conf = SydentConfig().generate_config(
+        template_dir_path=args.template_dir,
+        server_name=args.server_name,
+        pid_file=args.pid_file,
+        db_path=args.db_path,
+        generate_secrets=(not args.no_secrets),
+    )
+
+    args.output_file.write(conf)

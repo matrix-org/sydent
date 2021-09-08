@@ -11,6 +11,7 @@ _trial_temp.lock
 
 # Runtime files
 /sydent.conf
+/sydent.yaml
 /sydent.db
 /sydent.pid
 /matrix_is_test/sydent.stderr
