@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Tuple
 import signedjson.sign
 
 from sydent.config import SydentConfig
-from sydent.sydent import Sydent, parse_config_file
+from sydent.sydent import Sydent
 from sydent.util import json_decoder
 from sydent.util.emailutils import sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -252,13 +252,11 @@ if __name__ == "__main__":
         print(f"The config file '{args.config_path}' does not exist.")
         sys.exit(1)
 
-    config = parse_config_file(args.config_path)
-
     sydent_config = SydentConfig()
-    sydent_config.parse_from_config_parser(config)
+    sydent_config.parse_config_file(args.config_path)
 
     reactor = ResolvingMemoryReactorClock()
-    sydent = Sydent(config, sydent_config, reactor, False)
+    sydent = Sydent(sydent_config, reactor, False)
 
     update_global_associations(sydent, sydent.db, not args.no_email, args.dry_run)
     update_local_associations(sydent, sydent.db, not args.no_email, args.dry_run)
