@@ -69,3 +69,68 @@ class SMSConfig:
                     )
 
                 self.smsRules[country] = action
+
+    def generate_config_section(
+        self,
+        **kwargs,
+    ) -> str:
+        """
+        Generate the sms config section
+
+        :return: the yaml config section
+        """
+
+        return """\
+        ## SMS ##
+
+        # Settings to do with sending SMS validation texts
+        #
+        sms:
+          # The template to use for SMS validation texts. The string '{token}'
+          # will get replaced with the validation code.
+          # Defaults to 'Your code is {token}'.
+          #
+          #SMS_template: Your validation code is {token}
+
+          # Settings to connect to the OpenMarket SMS sender at
+          # https://smsc.openmarket.com/sms/v4/mt
+          #
+          openmarket_SMS_API:
+            # Username for the service. Defaults to empty.
+            #
+            #username: myusername
+
+            # Password for the service. Defaults to empty.
+            #
+            #password: mypassword
+
+          # Settings for the SMS originators based on country code
+          # An originator should be of the form '<long|short|alpha>:<originator>'
+          # e.g 'alpha:Matrix' or 'short:012345'
+          #
+          sms_originator:
+              # The list of originators to use by country code of the SMS
+              # recipient. The originator is chosend deterministically from
+              # this list so if someone requests multiple codes, they come
+              # from a consistent number. Defaults to empty.
+              #
+              #country_code:
+              #  - 1: # US/Canada
+              #    - long:12125552368
+              #    - long:12125552369
+              #  - 44: # UK
+              #    - short:12345
+
+              # The default originator to use if nothing has been set for
+              # the country code of the SMS recipient. Defaults to 'alpha:Sydent'
+              #
+              #default: alpha:Matrix
+
+          # A blacklist of SMS recipient country codes. Verification texts
+          # to numbers in these countries will not be sent. Default to empty.
+          #
+          #country_code_blacklist:
+          #  - 44 # UK
+          #  - 33 # France
+          #  - 276 # Germany
+        """
