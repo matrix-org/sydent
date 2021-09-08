@@ -63,7 +63,7 @@ class MigrationTestCase(unittest.TestCase):
                     "medium": "email",
                     "address": address,
                     "lookup_hash": calculate_lookup_hash(self.sydent, address),
-                    "mxid": "@BOB%d:example.com" % i,
+                    "mxid": "@otherbob%d:example.com" % i,
                     "ts": (i * 10000),
                     "not_before": 0,
                     "not_after": 99999999999,
@@ -195,7 +195,11 @@ class MigrationTestCase(unittest.TestCase):
     def test_local_db_migration(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_local_associations(
-                self.sydent, self.sydent.db, send_email=True, dry_run=False
+                self.sydent,
+                self.sydent.db,
+                send_email=True,
+                dry_run=False,
+                test=True,
             )
 
         # test 5 emails were sent
@@ -236,7 +240,10 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_global_db_migration(self):
         update_global_associations(
-            self.sydent, self.sydent.db, send_email=True, dry_run=False
+            self.sydent,
+            self.sydent.db,
+            dry_run=False,
+            test=True,
         )
 
         cur = self.sydent.db.cursor()
@@ -262,7 +269,11 @@ class MigrationTestCase(unittest.TestCase):
     def test_local_no_email_does_not_send_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_local_associations(
-                self.sydent, self.sydent.db, send_email=False, dry_run=False
+                self.sydent,
+                self.sydent.db,
+                send_email=False,
+                dry_run=False,
+                test=True,
             )
             smtp = smtplib.SMTP.return_value
 
@@ -281,7 +292,10 @@ class MigrationTestCase(unittest.TestCase):
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_global_associations(
-                self.sydent, self.sydent.db, send_email=True, dry_run=True
+                self.sydent,
+                self.sydent.db,
+                dry_run=True,
+                test=True,
             )
 
         # test no emails were sent
@@ -299,7 +313,11 @@ class MigrationTestCase(unittest.TestCase):
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
             update_local_associations(
-                self.sydent, self.sydent.db, send_email=True, dry_run=True
+                self.sydent,
+                self.sydent.db,
+                send_email=True,
+                dry_run=True,
+                test=True,
             )
 
         # test no emails were sent
