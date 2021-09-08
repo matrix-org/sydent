@@ -40,6 +40,7 @@ ip.whitelist = 127.0.0.1
 [email]
 email.tlsmode = 0
 email.invite.subject = %(sender_display_name)s has invited you to chat
+email.invite.subject_space = %(sender_display_name)s has invited you to a space
 email.smtphost = localhost
 email.from = Sydent Validation <noreply@localhost>
 email.smtpport = 9925
