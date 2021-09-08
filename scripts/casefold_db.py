@@ -30,8 +30,6 @@ from sydent.util.emailutils import EmailSendException, sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
 from tests.utils import ResolvingMemoryReactorClock
 
-EMAIL_SUBJECT = "No action required: we have changed the way your Matrix account and email address are associated"
-
 # Maximum number of attempts to send an email.
 MAX_ATTEMPTS_FOR_EMAIL = 5
 
@@ -84,7 +82,6 @@ def sendEmailWithBackoff(
     sydent: Sydent,
     address: str,
     mxid: str,
-    backoff: int,
     test: bool = False,
 ) -> None:
     """Send an email with exponential backoff - that way we don't stop sending halfway
@@ -95,6 +92,10 @@ def sendEmailWithBackoff(
     Raises a CantSendEmailException if no email could be sent after MAX_ATTEMPTS_FOR_EMAIL
     attempts.
     """
+
+    # Disable backoff if we're running tests.
+    backoff = 1 if not test else 0
+
     for i in range(MAX_ATTEMPTS_FOR_EMAIL):
         try:
             template_file = sydent.get_branded_template(
@@ -107,7 +108,7 @@ def sendEmailWithBackoff(
                 sydent,
                 template_file,
                 address,
-                {"mxid": mxid, "subject_header_value": EMAIL_SUBJECT},
+                {"mxid": mxid},
                 log_send_errors=False,
             )
             if not test:
@@ -223,7 +224,6 @@ def update_local_associations(
                             sydent,
                             to_delete.address,
                             to_delete.mxid,
-                            backoff=1 if not test else 0,
                             test=test,
                         )
 
