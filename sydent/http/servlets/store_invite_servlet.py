@@ -159,7 +159,6 @@ class StoreInviteServlet(Resource):
             templateFile = self.sydent.get_branded_template(
                 brand,
                 "invite_template.eml",
-                ("email", "email.invite_template"),
             )
         else:
             templateFile = self.sydent.config.email.invite_template

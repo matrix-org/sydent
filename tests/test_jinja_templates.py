@@ -58,7 +58,6 @@ class TestTemplate(unittest.TestCase):
             templateFile = self.sydent.get_branded_template(
                 "vector-im",
                 "invite_template.eml",
-                ("email", "email.invite_template"),
             )
         else:
             templateFile = self.sydent.config.email.invite_template
@@ -124,7 +123,6 @@ class TestTemplate(unittest.TestCase):
             templateFile = self.sydent.get_branded_template(
                 "matrix-org",
                 "invite_template.eml",
-                ("email", "email.invite_template"),
             )
         else:
             templateFile = self.sydent.config.email.invite_template
@@ -178,7 +176,6 @@ class TestTemplate(unittest.TestCase):
         templateFile = self.sydent.get_branded_template(
             "matrix-org",
             "verification_template.eml",
-            ("email", "email.verification_template"),
         )
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:
@@ -208,7 +205,6 @@ class TestTemplate(unittest.TestCase):
         templateFile = self.sydent.get_branded_template(
             "vector-im",
             "verification_template.eml",
-            ("email", "email.verification_template"),
         )
 
         with patch("sydent.util.emailutils.smtplib") as smtplib:

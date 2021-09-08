@@ -20,7 +20,7 @@ import gc
 import logging
 import logging.handlers
 import os
-from typing import Set
+from typing import Optional, Set
 
 import twisted.internet.reactor
 from twisted.internet import address, task
@@ -371,30 +371,25 @@ class Sydent:
             return request.args[b"brand"][0].decode("utf-8")
         return None
 
-    def get_branded_template(self, brand, template_name, deprecated_template_name):
+    def get_branded_template(
+        self,
+        brand: Optional[str],
+        template_name: str,
+    ) -> str:
         """
-        Calculate a (maybe) branded template filename to use.
+        Calculate a branded template filename to use.
 
-        If the deprecated email.template setting is defined, always use it.
-        Otherwise, attempt to use the hinted brand from the request if the brand
+        Attempt to use the hinted brand from the request if the brand
         is valid. Otherwise, fallback to the default brand.
 
         :param brand: The hint of which brand to use.
         :type brand: str or None
         :param template_name: The name of the template file to load.
         :type template_name: str
-        :param deprecated_template_name: The deprecated setting to use, if provided.
-        :type deprecated_template_name: Tuple[str]
-
+        ...
         :return: The template filename to use.
         :rtype: str
         """
-
-        # If the deprecated setting is defined, return it.
-        try:
-            return self.cfg.get(*deprecated_template_name)
-        except configparser.NoOptionError:
-            pass
 
         # If a brand hint is provided, attempt to use it if it is valid.
         if brand:

@@ -67,7 +67,6 @@ class EmailValidator:
             templateFile = self.sydent.get_branded_template(
                 brand,
                 "verification_template.eml",
-                ("email", "email.template"),
             )
         else:
             templateFile = self.sydent.config.email.template

@@ -175,7 +175,6 @@ class MigrationTestCase(unittest.TestCase):
                 templateFile = self.sydent.get_branded_template(
                     None,
                     "migration_template.eml",
-                    ("email", "email.template"),
                 )
             else:
                 templateFile = self.sydent.config.email.template

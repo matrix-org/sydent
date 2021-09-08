@@ -125,7 +125,6 @@ class EmailValidateCodeServlet(Resource):
             templateFile = self.sydent.get_branded_template(
                 brand,
                 "verify_response_template.html",
-                ("http", "verify_response_template"),
             )
         else:
             templateFile = self.sydent.config.http.verify_response_template
