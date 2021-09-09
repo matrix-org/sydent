@@ -100,6 +100,144 @@ class GeneralConfig:
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
 
+    def generate_config_section(
+        self,
+        server_name: str,
+        pid_file: str,
+        template_dir_path: str,
+        **kwargs,
+    ) -> str:
+        """
+        Generate the' general' config section
+
+        :return: the yaml config section
+        """
+
+        return (
+            """\
+        ## General ##
+
+        # The name of the server. Required.
+        #
+        server_name: %(server_name)s
+
+        # Settings for configuring logging.
+        #
+        logging:
+          # The path of the file to write the logs to OR 'stderr' to
+          # log to stderr. Defaults to 'stderr'.
+          #
+          #log_path: sydent.log
+
+          # The log level to use. This can be set to any level used by the python
+          # 'logging' module. Note: it should be in all caps. Defaults to 'INFO'
+          #
+          #log_level: DEBUG
+
+        # The file to save Sydent's process ID (PID) to. Required.
+        #
+        pid_file: %(pid_file)s
+
+        # The file where the terms and conditions are configured for Sydent.
+        # Defaults to empty.
+        #
+        #terms_file: terms_and_conditions.yaml
+
+        # The maximum number of addresses that someone can query in a single
+        # /lookup request. Defaults to 10000.
+        #
+        #address_lookup_limit: 100
+
+        # Whether clients and homeservers can register an association using v1
+        # API endpoints. Defaults to 'true'.
+        #
+        #enable_v1_associations: false
+
+        # Whether to delete invite tokens after successful binding has taken
+        # place. Defaults to 'true'.
+        #
+        #delete_tokens_on_bind: false
+
+        # Templating options. Sending a value for 'brand' to some API endpoints
+        # allows for different email and http templates to be used. These
+        # templates should be stored in a file structure like this:
+        #
+        # root_template_dir/
+        #     brand1/
+        #         invite_template.eml
+        #         verification_template.eml
+        #         verify_response_template.html
+        #     brand2/
+        #         invite_template.eml
+        #         verification_template.eml
+        #         verify_response_template.html
+        #
+        templates:
+          # The path of the root directory where template files are kept.
+          # Required.
+          #
+          root_directory: %(template_dir_path)s
+
+          # TThe brand directory to use if no brand (or an invalid brand)
+          # is provided by the request. Defaults to 'matrix-org'.
+          #
+          #default_brand: awesome-brand-name
+
+        # Settings for the prometheus metrics client
+        #
+        prometheus:
+          # Whether or not to enable prometheus. Defaults to 'false'.
+          #
+          #enabled: true
+
+          # The local IPv4 or IPv6 address to which to bind. Empty string
+          # means bind to all. Defaults to empty.
+          #
+          #bind_address: 192.168.0.18
+
+          # The port number on which to listen. Defaults to 8080.
+          #
+          #port: 8079
+
+        # Settings for Sentry integration
+        #
+        sentry:
+          # Whether of not to enable Sentry. Defaults to 'false'.
+          #
+          #enabled: true
+
+          # The Sentry Data Source Name (DSN) to use. Defaults to empty.
+          #
+          #dsn: https://public_key@sentry.example.com/1
+
+        # Settings for filtering outgoing requests based on the destination
+        # IP address.
+        #
+        ip_filtering:
+          # A list of CIDR IP address ranges to block outbound requests to.
+          # Defaults to a list of private IP ranges to prevent DNS rebinding
+          # attacks. This list can be found in 'sydent/util/ip_range.py'.
+          #
+          #blacklist:
+          #  - "::1/128"
+          #  - "fe80::/10"
+          #  - "fc00::/7"
+          #  - "2001:db8::/32"
+          #  - "ff00::/8"
+          #  - "fec0::/10"
+
+          # List of IP address CIDR ranges that should be allowed for outbound
+          # requests. This is useful for specifying exceptions to wide-ranging
+          # blacklisted target IP ranges. This list overrides the blaclist.
+          # Defaults to empty.
+          #
+          #whitelist:
+          #  - 192.168.0.23
+          #  - 202.31.555.2
+        """
+            % locals()
+        )
+
 
 def set_from_comma_sep_string(rawstr: str) -> Set[str]:
     """
