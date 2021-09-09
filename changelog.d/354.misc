@@ -1,1 +1,0 @@
-Update `.gitignore` to only ignore `sydent.conf` and `sydent.db` if they occur in the project's base folder.
