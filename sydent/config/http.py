@@ -71,3 +71,99 @@ class HTTPConfig:
                 if cfg.has_option(section, "base_replication_url"):
                     base_url = cfg.get(section, "base_replication_url")
                     self.base_replication_urls[peer] = base_url
+
+    def generate_config_section(
+        self,
+        server_name: str,
+        **kwargs,
+    ) -> str:
+        """
+        Generate the sms config section
+
+        :return: the yaml config section
+        """
+
+        return (
+            """\
+        ## HTTP ##
+
+        # The base url of Sydent. This should be of the form
+        # `scheme://base.url.com/here`. Required.
+        #
+        server_base_url: https://%(server_name)s
+
+        # Settings for the listening points for the various APIs
+        #
+        http_servers:
+          # Settings for the client API.
+          #
+          client_api:
+            # The local IPv4 or IPv6 address to which to bind. Defaults to '::1'.
+            #
+            #bind_address: 120.243.0.12
+            # The port number on which to listen. Defaults to 8090.
+            #
+            #port: 8089
+
+          # Settings for the replication API.
+          #
+          replication_api:
+            # The local IPv4 or IPv6 address to which to bind.
+            # Defaults to '::1'.
+            #
+            #bind_address: 120.243.0.12
+
+            # The port number on which to listen. Defaults to 4434.
+            #
+            #port: 4433
+
+            # The file path to a certificate and private key.
+            #
+            # This file should contain both the public certificate and the
+            # private key used to generate it. Defaults to empty.
+            #
+            #cert_file: sydent_priv_key_and_cert.pem
+
+            # A file containing root CA certificate. If this is specified then
+            # certificates of other Sydent servers signed by this CA will be
+            # trusted.
+            #
+            # This is useful for testing or when it's not practical to get the
+            # client cert signed by a real root CA but should never be used on
+            # a production server. Defaults to empty.
+            #
+            #ca_cert: my_local_ca.crt
+
+          # Settings for the internal API.
+          #
+          # Enabling this allows for binding and unbinding between identifiers
+          # and matrix IDs without any validation. This is open to abuse, so is
+          # disabled by default, and when it is enabled, is available only on a
+          # separate socket which is bound to `localhost` by default.
+          #
+          internal_api:
+            # Whether or not to enable internal API. Defaults to 'false'.
+            #
+            #enabled: true
+
+            # The local IPv4 or IPv6 address to which to bind.
+            # Defaults to '::1'.
+            #
+            #bind_address: 192.168.0.18
+
+            # The port number on which to listen. Defaults to 9090.
+            #
+            #port: 8091
+
+        # Whether or not Sydent should pay attention to X-Forwarded-For
+        # headers. Defaults to 'true'.
+        #
+        #obey_x_forwarded_for: false
+
+        # Whether or not Sydent should verify the TLS certificates of
+        # homeservers it communicates with. Defaults to 'true'.
+        #
+        #verify_homeserver_certs: false
+        """
+            % locals()
+        )
