@@ -43,3 +43,8 @@ and can be overriden by configuring a custom template directory (by changing the
 `templates.path` configuration setting). The custom template must be named `migration_template.eml.j2`
 (or `migration_template.eml` if not using Jinja 2 syntax), and will be given the Matrix
 user ID being dissociated at render through the variable `mxid`.
+
+This script is safe to run whilst Sydent is running.
+
+If the script is not run, there may be associations in your database that can no
+longer be looked up and duplicate associations may be registered.
