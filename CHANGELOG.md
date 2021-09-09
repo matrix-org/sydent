@@ -1,14 +1,14 @@
 Sydent 2.4.0 (2021-09-09)
 =========================
 
-**Action required when upgrading**: server administrators should run [the case-folding migration script](./docs/casefold_migration.md).
+**Action required when upgrading**: server administrators should run [the e-mail address migration script](./docs/casefold_migration.md).
 
 Features
 --------
 
 - Experimental support for [MSC3288](https://github.com/matrix-org/matrix-doc/pull/3288), receiving `room_type` for 3pid invites over the `/store-invite` API and using it in Jinja templates for Space invites. ([\#375](https://github.com/matrix-org/sydent/issues/375))
-- Add support for using Jinja2 in e-mail templates. Contributed by H. Shay. ([\#376](https://github.com/matrix-org/sydent/issues/376))
-- Case-fold email addresses when binding to MXIDs or performing look-ups. Contributed by H. Shay. ([\#374](https://github.com/matrix-org/sydent/issues/374), [\#378](https://github.com/matrix-org/sydent/issues/378), [\#379](https://github.com/matrix-org/sydent/issues/379), [\#386](https://github.com/matrix-org/sydent/issues/386))
+- Add support for using Jinja2 in e-mail templates. Contributed by @H-Shay. ([\#376](https://github.com/matrix-org/sydent/issues/376))
+- Case-fold email addresses when binding to MXIDs or performing look-ups. Contributed by @H-Shay. ([\#374](https://github.com/matrix-org/sydent/issues/374), [\#378](https://github.com/matrix-org/sydent/issues/378), [\#379](https://github.com/matrix-org/sydent/issues/379), [\#386](https://github.com/matrix-org/sydent/issues/386))
 
 
 Bugfixes
@@ -21,11 +21,11 @@ Bugfixes
 Internal Changes
 ----------------
 
-- Add /_trial_temp.lock and /sydent.pid to .gitignore. ([\#384](https://github.com/matrix-org/sydent/issues/384))
-- Reformat code using Black. Contributed by H. Shay. ([\#344](https://github.com/matrix-org/sydent/issues/344), [\#369](https://github.com/matrix-org/sydent/issues/369))
+- Add `/_trial_temp.lock` and `/sydent.pid` to .gitignore. ([\#384](https://github.com/matrix-org/sydent/issues/384))
+- Reformat code using Black. Contributed by @H-Shay. ([\#344](https://github.com/matrix-org/sydent/issues/344), [\#369](https://github.com/matrix-org/sydent/issues/369))
 - Configure Flake8 and resolve errors. ([\#345](https://github.com/matrix-org/sydent/issues/345), [\#347](https://github.com/matrix-org/sydent/issues/347))
 - Add GitHub Actions for unit tests (Python 3.6 and 3.9), matrix_is_tester tests (Python 3.6 and 3.9), towncrier checks and black and flake8 codestyle checks. ([\#346](https://github.com/matrix-org/sydent/issues/346), [\#348](https://github.com/matrix-org/sydent/issues/348))
-- Remove support for Python < 3.6. ([\#349](https://github.com/matrix-org/sydent/issues/349), [\#356](https://github.com/matrix-org/sydent/issues/356))
+- Remove support for Python < 3.6. Contributed by @sunweaver. ([\#349](https://github.com/matrix-org/sydent/issues/349), [\#356](https://github.com/matrix-org/sydent/issues/356))
 - Bump minimum supported version of Twisted to 18.4.0 and stop calling deprecated APIs. ([\#350](https://github.com/matrix-org/sydent/issues/350))
 - Replace deprecated `logging.warn()` method with `logging.warning()`. ([\#351](https://github.com/matrix-org/sydent/issues/351))
 - Reformat imports using isort. ([\#352](https://github.com/matrix-org/sydent/issues/352), [\#353](https://github.com/matrix-org/sydent/issues/353))
