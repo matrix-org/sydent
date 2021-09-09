@@ -1,7 +1,7 @@
 Sydent 2.4.0 (2021-09-09)
 =========================
-TODO link to docs
-**Action required when upgrading**: server administrators should run [the case-folding migration script](./docs/casefold_migration.md). Sydent does not need to be stopped whilst running this script.
+
+**Action required when upgrading**: server administrators should run [the case-folding migration script](./docs/casefold_migration.md).
 
 Features
 --------
