@@ -1,0 +1,13 @@
+name: Sample Config
+on: [pull_request]
+
+jobs:
+  check-sample_config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+      - run: python -m pip install .
+      - run: scripts/generate_sample_config --check
