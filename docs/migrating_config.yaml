@@ -1,0 +1,144 @@
+# Migrating from old-style config to YAML-style config
+
+# In this document, the line 'aaaaa: bbb.ccc.ddd' means
+# "To configure things as they were before, substitute
+# 'bbb.ccc.ddd' with the value set for bbb.ccc.ddd in the
+# old config"
+
+# Some config options no longer exist:
+#
+# * Three templating options:
+#   - email.invite_template
+#   - email.template
+#   - verify_response_template
+#
+#   To migrate these settings, create the following file structure somewhere:
+#
+#   root_template_dir:
+#      default: 
+#         invite_template.eml 
+#             (the file that 'email.invite_template' pointed to)
+#         verification_template.eml 
+#             (the file that 'email.template' pointed to)
+#         verify_response_template.html 
+#             (the file that 'verify_response_template' pointed to)
+#
+#   Then set 'templates.root_directory' to the path of 'root_template_dir'
+#   and 'templates.default_brand' to 'default'
+#
+# * email.subject 
+#   - Removed because it doesn't get used anywhere in the code
+#   - If it was added in the future it would be 'email.contents.validation_subject'
+
+## General ##
+server_name: server.name
+
+logging:
+  log_path: log.path
+  log_level: log.level
+
+pid_file: pidfile.path
+
+terms_file: terms.path
+
+address_lookup_limit: address_lookup_limit
+
+enable_v1_associations: enable_v1_associations
+
+delete_tokens_on_bind: delete_tokens_on_bind
+
+templates:
+  root_directory: templates.path
+  default_brand: brand.default
+
+prometheus:
+  enabled: [prometheus_port is present]
+  bind_address: prometheus_addr
+  port: prometheus_port
+
+sentry:
+  enabled: [sentry_dsn is present]
+  dsn: sentry_dsn
+
+ip_filtering:
+  blacklist:
+   - AAAAAA   -|
+   - BBBBBB    |- values in ip.blacklist list
+   - CCCCCC   -|
+  whitelist:
+   - AAAAAA   -|
+   - BBBBBB    |- values in ip.whitelist list
+   - CCCCCC   -|
+
+## Database ##
+database_path: db.file
+
+## Crypto ##
+ed25519_signing_key: ed25519.signingkey
+
+## SMS ##
+sms:
+  SMS_template: bodytemplate
+
+  openmarket_SMS_API:
+    username: username
+    password: password
+
+  sms_originator:
+      country_code:
+       - 1: 
+         - AAAAAA   -|
+         - BBBBBB    |- values in originators.1 list
+         - CCCCCC   -|
+       - 44: 
+         - AAAAAA   -|
+         - BBBBBB    |- values in originators.44 list
+         - CCCCCC   -|
+      default: originators.default
+
+  country_code_blacklist:
+    - 44    [smsrule.44 = reject]
+    - 33    [smsrule.33 = reject]
+    - 276   [smsrule.276 = reject] 
+
+## Emails ##
+email:
+  SMTP:
+    server: email.smtphost
+    port: email.smtpport
+    username: email.smtpusername
+    password: email.smtppassword 
+    tls_mode: email.tlsmode
+    host_name: email.hostname
+
+  contents:
+    sender: email.from
+    room_invite_subject: email.invite.subject
+    space_invite_subject: email.invite.subject_space
+    default_matrix_client: email.default_web_client_location
+    obfuscation_amounts:
+      username: email.third_party_invite_username_obfuscate_characters
+      domain: email.third_party_invite_domain_obfuscate_characters
+
+## HTTP ##
+server_base_url: client_http_base
+
+http_servers:
+  client_api:
+    bind_address: clientapi.http.bind_address
+    port: clientapi.http.port
+
+  replication_api:
+    bind_address: replication.https.bind_address
+    port: replication.https.port
+    cert_file: replication.https.certfile
+    ca_cert: replication.https.cacert
+
+  internal_api:
+    enabled: [internalapi.http.port is not empty string]
+    bind_address: internalapi.http.bind_address
+    port: internalapi.http.port
+
+obey_x_forwarded_for: obey_x_forwarded_for
+
+verify_homeserver_certs: federation.verifycerts
