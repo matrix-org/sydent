@@ -52,15 +52,19 @@ setup(
         "attrs>=19.1.0",
         "netaddr>=0.7.0",
         "sortedcontainers>=2.1.0",
-        "pyyaml>=3.11",
-        "flake8==3.9.2",
-        "black==21.6b0",
-        "isort==5.8.0",
-        "mypy>=0.902",
-        "mypy-zope>=0.3.1",
-        "types-PyYAML",
-        "types-mock",
-    ],
+        "pyyaml>=3.11"
+        ],
+    extras_require={
+        'dev': [
+            "flake8==3.9.2",
+            "black==21.6b0",
+            "isort==5.8.0",
+            "mypy>=0.902",
+            "mypy-zope>=0.3.1",
+            "types-PyYAML",
+            "types-mock",
+        ],
+    }
     # make sure we package the sql files
     include_package_data=True,
     long_description=read("README.rst"),
