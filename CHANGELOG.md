@@ -1,3 +1,39 @@
+Sydent 2.4.0 (2021-09-09)
+=========================
+
+Features
+--------
+
+- Experimental support for [MSC3288](https://github.com/matrix-org/matrix-doc/pull/3288), receiving `room_type` for 3pid invites over the `/store-invite` API and using it in Jinja templates for Space invites. ([\#375](https://github.com/matrix-org/sydent/issues/375))
+- Add support for using Jinja2 in e-mail templates. Contributed by H-Shay. ([\#376](https://github.com/matrix-org/sydent/issues/376))
+
+
+Bugfixes
+--------
+
+- Handle CORS for `GetValidated3pidServlet`. Endpoint `/3pid/getValidated3pid` returns valid CORS headers. ([\#342](https://github.com/matrix-org/sydent/issues/342))
+- Use the `web_client_location` parameter in default templates for both text and HTML emails. ([\#380](https://github.com/matrix-org/sydent/issues/380))
+
+
+Internal Changes
+----------------
+
+- Add /_trial_temp.lock and /sydent.pid to .gitignore. ([\#284](https://github.com/matrix-org/sydent/issues/284))
+- Update black to 21.6b0. Contributed by H.Shay. ([\#343](https://github.com/matrix-org/sydent/issues/343), [\#369](https://github.com/matrix-org/sydent/issues/369))
+- Configure Flake8 and resolve errors. ([\#344](https://github.com/matrix-org/sydent/issues/344), [\#347](https://github.com/matrix-org/sydent/issues/347))
+- Add github actions for unittests (python 3.6 and 3.9), matrix_is_tester tests (python 3.6 and 3.9), towncrier checks and black and flake8 codestyle checks. ([\#346](https://github.com/matrix-org/sydent/issues/346), [\#348](https://github.com/matrix-org/sydent/issues/348))
+- Remove support for Python < 3.6. ([\#349](https://github.com/matrix-org/sydent/issues/349), [\#356](https://github.com/matrix-org/sydent/issues/356))
+- Bump minimum supported version of Twisted to 18.4.0 and stop calling deprecated APIs. ([\#350](https://github.com/matrix-org/sydent/issues/350))
+- Replace deprecated `logging.warn()` method with `logging.warning()`. ([\#351](https://github.com/matrix-org/sydent/issues/351))
+- Reformat imports using isort. ([\#352](https://github.com/matrix-org/sydent/issues/352), [\#353](https://github.com/matrix-org/sydent/issues/353))
+- Update `.gitignore` to only ignore `sydent.conf` and `sydent.db` if they occur in the project's base folder. ([\#354](https://github.com/matrix-org/sydent/issues/354))
+- Add type hints and validate with mypy. ([\#355](https://github.com/matrix-org/sydent/issues/355), [\#357](https://github.com/matrix-org/sydent/issues/357), [\#358](https://github.com/matrix-org/sydent/issues/358), [\#360](https://github.com/matrix-org/sydent/issues/360), [\#361](https://github.com/matrix-org/sydent/issues/361), [\#367](https://github.com/matrix-org/sydent/issues/367), [\#371](https://github.com/matrix-org/sydent/issues/371))
+- Convert `inlineCallbacks` to async/await. ([\#364](https://github.com/matrix-org/sydent/issues/364), [\#365](https://github.com/matrix-org/sydent/issues/365), [\#368](https://github.com/matrix-org/sydent/issues/368), [\#372](https://github.com/matrix-org/sydent/issues/372), [\#373](https://github.com/matrix-org/sydent/issues/373))
+- Use `mock` module from the standard library. ([\#370](https://github.com/matrix-org/sydent/issues/370))
+- Case-fold email addresses when binding to MXIDs or performing look-ups. Contributed by H. Shay. ([\#374](https://github.com/matrix-org/sydent/issues/374), [\#378](https://github.com/matrix-org/sydent/issues/378), [\#379](https://github.com/matrix-org/sydent/issues/379), [\#386](https://github.com/matrix-org/sydent/issues/386))
+- Fix email templates to be valid python format strings. ([\#377](https://github.com/matrix-org/sydent/issues/377))
+
+
 Sydent 2.3.0 (2021-04-15)
 =========================
 

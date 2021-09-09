@@ -1,1 +1,0 @@
-Add github actions for unittests (python 3.6 and 3.9), matrix_is_tester tests (python 3.6 and 3.9), towncrier checks and black and flake8 codestyle checks.
