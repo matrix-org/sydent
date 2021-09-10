@@ -1,6 +1,8 @@
 Sydent 2.4.0 (2021-09-09)
 =========================
 
+**This release drops compatibility with Python 3.5 and older. Python 3.6 and later is required to run Sydent from this version onwards.**
+
 **Action required when upgrading**: server administrators should run [the e-mail address migration script](./docs/casefold_migration.md).
 
 Features
