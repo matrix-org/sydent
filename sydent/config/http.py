@@ -31,13 +31,13 @@ class HTTPConfig:
         self.client_port = cfg.getint("http", "clientapi.http.port")
 
         # internal port is allowed to be set to an empty string in the config
-        self.internal_port = cfg.get("http", "internalapi.http.port")
+        internal_api_port = cfg.get("http", "internalapi.http.port")
         self.internal_bind_address = cfg.get(
             "http", "internalapi.http.bind_address", fallback="::1"
         )
-        if self.internal_port != "":
+        if internal_api_port != "":
             self.internal_api_enabled = True
-            self.internal_port = int(self.internal_port)
+            self.internal_port = int(internal_api_port)
         else:
             self.internal_api_enabled = False
             self.internal_port = None
