@@ -1,1 +1,0 @@
-Fix a bug preventing the email migration script from running while Sydent is already running with prometheus metrics enabled.
