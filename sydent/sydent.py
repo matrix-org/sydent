@@ -97,14 +97,6 @@ class Sydent:
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.config.general.server_name)
 
-        if self.config.general.prometheus_enabled:
-            import prometheus_client
-
-            prometheus_client.start_http_server(
-                port=self.config.general.prometheus_port,
-                addr=self.config.general.prometheus_addr,
-            )
-
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
         # 3PID hashes may come in before we've completed generating them
@@ -201,6 +193,7 @@ class Sydent:
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
+        self.maybe_start_prometheus_server()
 
         if self.config.http.internal_api_enabled:
             internalport = self.config.http.internal_port
@@ -214,6 +207,15 @@ class Sydent:
                 pidfile.write(str(os.getpid()) + "\n")
 
         self.reactor.run()
+
+    def maybe_start_prometheus_server(self):
+        if self.config.general.prometheus_enabled:
+            import prometheus_client
+
+            prometheus_client.start_http_server(
+                port=self.config.general.prometheus_port,
+                addr=self.config.general.prometheus_addr,
+            )
 
     def ip_from_request(self, request):
         if self.config.http.obey_x_forwarded_for and request.requestHeaders.hasHeader(

@@ -71,9 +71,11 @@ class GeneralConfig:
 
         self.address_lookup_limit = cfg.getint("general", "address_lookup_limit")
 
-        self.prometheus_enabled = cfg.has_option("general", "prometheus_port")
         self.prometheus_port = cfg.getint("general", "prometheus_port", fallback=None)
         self.prometheus_addr = cfg.get("general", "prometheus_addr", fallback=None)
+        self.prometheus_enabled = (
+            self.prometheus_port is not None and self.prometheus_addr is not None
+        )
 
         self.sentry_enabled = cfg.has_option("general", "sentry_dsn")
         self.sentry_dsn = self.sentry_dsn = cfg.get(
