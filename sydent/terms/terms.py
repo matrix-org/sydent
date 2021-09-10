@@ -136,7 +136,5 @@ def get_terms(sydent: "Sydent") -> Optional[Terms]:
 
         return Terms(termsYaml)
     except Exception:
-        logger.exception(
-            "Couldn't read terms file '%s'", termsPath
-        )
+        logger.exception("Couldn't read terms file '%s'", termsPath)
         return None

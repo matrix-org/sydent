@@ -119,7 +119,7 @@ class TestTemplate(unittest.TestCase):
             "web_client_location": "https://matrix.org",
             "room_type": "",
         }
-        
+
         # self.sydent.config.email.invite_template is deprecated
         if self.sydent.config.email.invite_template is None:
             templateFile = self.sydent.get_branded_template(

@@ -76,7 +76,9 @@ class GeneralConfig:
         self.prometheus_addr = cfg.get("general", "prometheus_addr", fallback=None)
 
         self.sentry_enabled = cfg.has_option("general", "sentry_dsn")
-        self.sentry_dsn = self.sentry_dsn = cfg.get("general", "sentry_dsn", fallback=None)
+        self.sentry_dsn = self.sentry_dsn = cfg.get(
+            "general", "sentry_dsn", fallback=None
+        )
 
         self.enable_v1_associations = parse_cfg_bool(
             cfg.get("general", "enable_v1_associations")
