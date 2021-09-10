@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class Account:
     def __init__(self, user_id: str, creation_ts: int, consent_version: str) -> None:
         """

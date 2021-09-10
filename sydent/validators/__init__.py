@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class ValidationSession:
     # how long a user can wait before validating a session after starting it
     THREEPID_SESSION_VALIDATION_TIMEOUT_MS = 24 * 60 * 60 * 1000
