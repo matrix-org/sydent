@@ -239,13 +239,11 @@ class Sydent:
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.server_name)
 
+        self.prometheus_addr = None
+        self.prometheus_port = None
         if self.cfg.has_option("general", "prometheus_port"):
-            import prometheus_client
-
-            prometheus_client.start_http_server(
-                port=self.cfg.getint("general", "prometheus_port"),
-                addr=self.cfg.get("general", "prometheus_addr"),
-            )
+            self.prometheus_addr = self.cfg.get("general", "prometheus_addr")
+            self.prometheus_port = self.cfg.getint("general", "prometheus_port")
 
         if self.cfg.has_option("general", "templates.path"):
             # Get the possible brands by looking at directories under the
@@ -402,6 +400,7 @@ class Sydent:
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
+        self.maybe_start_prometheus_server()
 
         internalport = self.cfg.get("http", "internalapi.http.port")
         if internalport:
@@ -417,6 +416,17 @@ class Sydent:
                 pidfile.write(str(os.getpid()) + "\n")
 
         self.reactor.run()
+
+    def maybe_start_prometheus_server(self):
+        if self.prometheus_addr is None or self.prometheus_port is None:
+            return
+
+        import prometheus_client
+
+        prometheus_client.start_http_server(
+            addr=self.prometheus_addr,
+            port=self.prometheus_port,
+        )
 
     def ip_from_request(self, request):
         if self.cfg.get(
