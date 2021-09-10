@@ -14,7 +14,7 @@
 #   1: the newsfragment is wrong in some way
 #   9: the script has not been invoked properly
 
-echo -e "+++ \033[32mChecking newsfragment\033[m"
+echo -e "+++ \e[32mChecking newsfragment\e[m"
 
 set -e
 
@@ -23,12 +23,11 @@ if [ -z "$1" ]; then
   exit 9
 fi
 
-
 pull_request_number="$1"
 
 # Print a link to the contributing guide if the user makes a mistake
 CONTRIBUTING_GUIDE_TEXT="!! Please see the contributing guide for help writing your changelog entry:
-https://github.com/matrix-org/sygnal/blob/main/CONTRIBUTING.md#changelog"
+https://github.com/matrix-org/sydent/blob/main/CONTRIBUTING.md#changelog"
 
 # If towncrier returns a non-zero exit code, print the contributing guide link and exit
 python -m towncrier.check --compare-with="origin/main" || (echo -e "$CONTRIBUTING_GUIDE_TEXT" >&2 && exit 1)
