@@ -4,7 +4,7 @@ Sydent 2.4.1 (2021-09-10)
 Bugfixes
 --------
 
-- Fix a bug preventing the email migration script from running while Sydent is already running with prometheus metrics enabled. ([\#391](https://github.com/matrix-org/sydent/issues/391))
+- Fix a bug preventing the email migration script from running while Sydent is already running with Prometheus metrics enabled. ([\#391](https://github.com/matrix-org/sydent/issues/391))
 
 
 Sydent 2.4.0 (2021-09-09)
