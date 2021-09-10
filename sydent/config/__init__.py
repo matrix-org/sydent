@@ -209,7 +209,7 @@ class SydentConfig:
     def parse_config_file(self, config_file: str) -> None:
         """
         Parse the given config from a filepath, populating missing items and
-        sections
+        sections. NOTE: this method also sets up logging.
 
         :param config_file: the file to be parsed
         """
