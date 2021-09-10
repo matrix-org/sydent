@@ -20,13 +20,14 @@ from typing import Set
 from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
 
+from sydent.config._base import BaseConfig
 from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 
 logger = logging.getLogger(__name__)
 
 
-class GeneralConfig:
-    def parse_config(self, cfg: "ConfigParser") -> None:
+class GeneralConfig(BaseConfig):
+    def parse_config(self, cfg: "ConfigParser") -> bool:
         """
         Parse the 'general' section of the config
 
@@ -78,9 +79,7 @@ class GeneralConfig:
         )
 
         self.sentry_enabled = cfg.has_option("general", "sentry_dsn")
-        self.sentry_dsn = self.sentry_dsn = cfg.get(
-            "general", "sentry_dsn", fallback=None
-        )
+        self.sentry_dsn = cfg.get("general", "sentry_dsn", fallback=None)
 
         self.enable_v1_associations = parse_cfg_bool(
             cfg.get("general", "enable_v1_associations")
@@ -98,6 +97,8 @@ class GeneralConfig:
 
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
+
+        return False
 
 
 def set_from_comma_sep_string(rawstr: str) -> Set[str]:

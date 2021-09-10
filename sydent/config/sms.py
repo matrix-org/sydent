@@ -15,8 +15,10 @@
 from configparser import ConfigParser
 from typing import Dict, List
 
+from sydent.config._base import BaseConfig
 
-class SMSConfig:
+
+class SMSConfig(BaseConfig):
     def parse_config(self, cfg: "ConfigParser") -> None:
         """
         Parse the sms section of the config
@@ -67,3 +69,5 @@ class SMSConfig:
                     )
 
                 self.smsRules[country] = action
+
+        return False

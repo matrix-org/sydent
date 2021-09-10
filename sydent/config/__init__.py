@@ -1,4 +1,4 @@
-# Copyright 2021 New Vector Ltd
+# Copyright 2019-2021 The Matrix.org Foundation C.I.C.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,15 +181,23 @@ class SydentConfig:
             self.http,
         ]
 
-    def _parse_config(self, cfg: ConfigParser) -> None:
+    def _parse_config(self, cfg: ConfigParser) -> bool:
         """
         Run the parse_config method on each of the objects in
         self.config_sections
 
         :param cfg: the configuration to be parsed
+
+        :return: whether or not cfg has been altered. This method CAN
+            return True, but it *shouldn't* as this leads to altering the
+            config file.
         """
+        needs_saving = False
         for section in self.config_sections:
-            section.parse_config(cfg)
+            if section.parse_config(cfg):
+                needs_saving = True
+
+        return needs_saving
 
     def parse_from_config_parser(self, cfg: ConfigParser) -> bool:
         """
@@ -197,14 +205,11 @@ class SydentConfig:
 
         :param cfg: the configuration to be parsed
 
-        :return: Whether or not cfg has been changed and needs saving
+        :return: whether or not cfg has been altered. This method CAN
+            return True, but it *shouldn't* as this leads to altering the
+            config file.
         """
-        self._parse_config(cfg)
-
-        # TODO: Don't alter config file when starting Sydent unless
-        #       user has asked for this specifially (e.g. on first
-        #       run only, or when specify --generate-config)
-        return self.crypto.save_key
+        return self._parse_config(cfg)
 
     def parse_config_file(self, config_file: str) -> None:
         """
@@ -233,6 +238,9 @@ class SydentConfig:
         # Logging is configured in cfg, but these options must be parsed first
         # so that we can log while parsing the rest
         setup_logging(cfg)
+
+        # TODO: Don't alter config file when starting Sydent so that
+        #       it can be set to read-only
 
         needs_saving = self.parse_from_config_parser(cfg)
 

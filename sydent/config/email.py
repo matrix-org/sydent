@@ -15,9 +15,11 @@
 import socket
 from configparser import ConfigParser
 
+from sydent.config._base import BaseConfig
 
-class EmailConfig:
-    def parse_config(self, cfg: "ConfigParser") -> None:
+
+class EmailConfig(BaseConfig):
+    def parse_config(self, cfg: "ConfigParser") -> bool:
         """
         Parse the email section of the config
 
@@ -63,3 +65,5 @@ class EmailConfig:
         self.domain_obfuscate_characters = cfg.getint(
             "email", "email.third_party_invite_domain_obfuscate_characters"
         )
+
+        return False

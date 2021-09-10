@@ -14,8 +14,10 @@
 
 from configparser import ConfigParser
 
+from sydent.config._base import BaseConfig
 
-class HTTPConfig:
+
+class HTTPConfig(BaseConfig):
     def parse_config(self, cfg: "ConfigParser") -> None:
         """
         Parse the http section of the config
@@ -65,3 +67,5 @@ class HTTPConfig:
                 if cfg.has_option(section, "base_replication_url"):
                     base_url = cfg.get(section, "base_replication_url")
                     self.base_replication_urls[peer] = base_url
+
+        return False

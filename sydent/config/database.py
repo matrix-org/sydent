@@ -14,8 +14,10 @@
 
 from configparser import ConfigParser
 
+from sydent.config._base import BaseConfig
 
-class DatabaseConfig:
+
+class DatabaseConfig(BaseConfig):
     def parse_config(self, cfg: "ConfigParser") -> None:
         """
         Parse the database section of the config
