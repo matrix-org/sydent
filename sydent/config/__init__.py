@@ -209,7 +209,7 @@ class SydentConfig:
         Parse the configuration from a ConfigParser object
 
         :param cfg: the configuration to be parsed
-        ...
+
         :return: Whether or not cfg has been changed and needs saving
         """
         self._parse_config(cfg)
@@ -301,7 +301,7 @@ class SydentConfig:
         :param db_path : The SQLite Database file for Sydent to use.
         :param generate_secrets: True if we should generate new secrets for things
             like the sigining key. If False, these parameters will be left unset.
-        ...
+
         :return: the yaml config file contents
         """
 

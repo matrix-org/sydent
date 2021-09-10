@@ -80,7 +80,7 @@ class CryptoConfig:
 
         :param generate_secrets: True if we should generate new secrets for things
             like the sigining key. If False, these parameters will be left unset.
-        ...
+
         :return: the yaml config section
         """
 

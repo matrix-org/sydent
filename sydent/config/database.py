@@ -36,7 +36,7 @@ class DatabaseConfig:
         Generate the database config section
 
         :param db_path: The SQLite Database file for Sydent to use.
-        ...
+
         :return: the yaml config section
         """
 
