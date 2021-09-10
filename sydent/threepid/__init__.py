@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 def threePidAssocFromDict(d):
     """
     Instantiates a ThreepidAssociation from the given dict.
