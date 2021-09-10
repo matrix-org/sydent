@@ -171,6 +171,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def test_migration_email(self):
         with patch("sydent.util.emailutils.smtplib") as smtplib:
+            # self.sydent.config.email.template is deprecated
             if self.sydent.config.email.template is None:
                 templateFile = self.sydent.get_branded_template(
                     None,

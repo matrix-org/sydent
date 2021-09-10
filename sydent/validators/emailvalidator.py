@@ -63,6 +63,7 @@ class EmailValidator:
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
+        # self.sydent.config.email.template is deprecated
         if self.sydent.config.email.template is None:
             templateFile = self.sydent.get_branded_template(
                 brand,

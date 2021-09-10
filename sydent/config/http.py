@@ -12,11 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from configparser import NoOptionError
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from configparser import ConfigParser
+from configparser import ConfigParser
 
 
 class HTTPConfig:
@@ -27,29 +23,27 @@ class HTTPConfig:
         :param cfg: the configuration to be parsed
         """
         # This option is deprecated
-        self.verify_response_template = None
-        if cfg.has_option("http", "verify_response_template"):
-            self.verify_response_template = cfg.get("http", "verify_response_template")
+        self.verify_response_template = cfg.get(
+            "http", "verify_response_template", fallback=None
+        )
 
         self.client_bind_address = cfg.get("http", "clientapi.http.bind_address")
         self.client_port = cfg.getint("http", "clientapi.http.port")
 
         # internal port is allowed to be set to an empty string in the config
         self.internal_port = cfg.get("http", "internalapi.http.port")
-        if self.internal_port:
+        self.internal_bind_address = cfg.get(
+            "http", "internalapi.http.bind_address", fallback="::1"
+        )
+        if self.internal_port != "":
             self.internal_api_enabled = True
             self.internal_port = int(self.internal_port)
-            try:
-                self.internal_bind_address = cfg.get(
-                    "http", "internalapi.http.bind_address"
-                )
-            except NoOptionError:
-                self.internal_bind_address = "::1"
         else:
             self.internal_api_enabled = False
+            self.internal_port = None
 
         self.cert_file = cfg.get("http", "replication.https.certfile")
-        self.ca_cert_File = cfg.get("http", "replication.https.cacert")
+        self.ca_cert_file = cfg.get("http", "replication.https.cacert")
 
         self.replication_bind_address = cfg.get(
             "http", "replication.https.bind_address"

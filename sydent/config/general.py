@@ -12,18 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
 import os
-from typing import TYPE_CHECKING, Set
+from configparser import ConfigParser
+from typing import Set
 
 from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
 
 from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
-
-if TYPE_CHECKING:
-    from configparser import ConfigParser
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +36,7 @@ class GeneralConfig:
         if self.server_name == "":
             self.server_name = os.uname()[1]
             logger.warning(
-                "You have not specified a server name. I have guessed that this server is called '%s' ."
+                "You have not specified a server name. I have guessed that this server is called '%s'. "
                 "If this is incorrect, you should edit 'general.server.name' in the config file."
                 % (self.server_name,)
             )
@@ -55,7 +52,7 @@ class GeneralConfig:
             }
         else:
             logging.warning(
-                "The path specified by 'general.templates.path' does not exist."
+                f"The path specified by 'general.templates.path' ({self.templates_path}) does not exist."
             )
             # This is a legacy code-path and assumes that verify_response_template,
             # email.template, and email.invite_template are defined.
@@ -75,13 +72,11 @@ class GeneralConfig:
         self.address_lookup_limit = cfg.getint("general", "address_lookup_limit")
 
         self.prometheus_enabled = cfg.has_option("general", "prometheus_port")
-        if self.prometheus_enabled:
-            self.prometheus_port = cfg.getint("general", "prometheus_port")
-            self.prometheus_addr = cfg.get("general", "prometheus_addr")
+        self.prometheus_port = cfg.getint("general", "prometheus_port", fallback=None)
+        self.prometheus_addr = cfg.get("general", "prometheus_addr", fallback=None)
 
         self.sentry_enabled = cfg.has_option("general", "sentry_dsn")
-        if self.sentry_enabled:
-            self.sentry_dsn = cfg.get("general", "sentry_dsn")
+        self.sentry_dsn = self.sentry_dsn = cfg.get("general", "sentry_dsn", fallback=None)
 
         self.enable_v1_associations = parse_cfg_bool(
             cfg.get("general", "enable_v1_associations")

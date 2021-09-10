@@ -255,7 +255,7 @@ class Sydent:
         :type brand: str or None
         :param template_name: The name of the template file to load.
         :type template_name: str
-        ...
+
         :return: The template filename to use.
         :rtype: str
         """

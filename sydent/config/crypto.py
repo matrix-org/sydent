@@ -14,13 +14,10 @@
 
 
 import logging
-from typing import TYPE_CHECKING
+from configparser import ConfigParser
 
 import nacl
 import signedjson.key
-
-if TYPE_CHECKING:
-    from configparser import ConfigParser
 
 logger = logging.getLogger(__name__)
 

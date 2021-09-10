@@ -144,6 +144,8 @@ class MsisdnValidateCodeServlet(Resource):
                 msg = "Verification failed: you may need to request another verification text"
 
         brand = self.sydent.brand_from_request(request)
+
+        # self.sydent.config.http.verify_response_template is deprecated
         if self.sydent.config.http.verify_response_template is None:
             templateFile = self.sydent.get_branded_template(
                 brand,

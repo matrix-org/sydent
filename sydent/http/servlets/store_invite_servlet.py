@@ -155,6 +155,7 @@ class StoreInviteServlet(Resource):
 
         brand = self.sydent.brand_from_request(request)
 
+        # self.sydent.config.email.invite_template is deprecated
         if self.sydent.config.email.invite_template is None:
             templateFile = self.sydent.get_branded_template(
                 brand,

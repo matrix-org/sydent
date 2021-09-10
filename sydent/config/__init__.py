@@ -1,4 +1,4 @@
-# Copyright 2019 New Vector Ltd
+# Copyright 2021 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -196,7 +196,7 @@ class SydentConfig:
         Parse the configuration from a ConfigParser object
 
         :param cfg: the configuration to be parsed
-        ...
+
         :return: Whether or not cfg has been changed and needs saving
         """
         self._parse_config(cfg)

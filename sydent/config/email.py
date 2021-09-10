@@ -13,10 +13,7 @@
 # limitations under the License.
 
 import socket
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from configparser import ConfigParser
+from configparser import ConfigParser
 
 
 class EmailConfig:
@@ -28,13 +25,9 @@ class EmailConfig:
         """
 
         # These two options are deprecated
-        self.template = None
-        if cfg.has_option("email", "email.template"):
-            self.template = cfg.get("email", "email.template")
+        self.template = self.template = cfg.get("email", "email.template", fallback=None)
 
-        self.invite_template = None
-        if cfg.has_option("email", "email.invite_template"):
-            self.invite_template = cfg.get("email", "email.invite_template")
+        self.invite_template = cfg.get("email", "email.invite_template", fallback=None)
 
         # This isn't used anywhere...
         self.validation_subject = cfg.get("email", "email.subject")

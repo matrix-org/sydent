@@ -103,11 +103,13 @@ def get_terms(sydent: "Sydent") -> Optional[Terms]:
 
     :returns Terms
     """
+    # TODO - move some of this to parse_config
+
+    termsPath = sydent.config.general.terms_path
+
     try:
         termsYaml = None
 
-        # TODO - move some of this to parse_config
-        termsPath = sydent.config.general.terms_path
         if termsPath == "":
             return Terms(None)
 
@@ -135,6 +137,6 @@ def get_terms(sydent: "Sydent") -> Optional[Terms]:
         return Terms(termsYaml)
     except Exception:
         logger.exception(
-            "Couldn't read terms file '%s'", sydent.config.general.terms_path
+            "Couldn't read terms file '%s'", termsPath
         )
         return None
