@@ -349,16 +349,21 @@ def update_global_associations(
             for address, mxid, _, _ in assoc_tuples[1:]:
                 to_delete.append((address,))
 
-    logger.info(f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations")
+    logger.info(
+        f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
+    )
     if not dry_run:
         cur = db.cursor()
 
         if len(to_delete) > 0:
             cur.executemany(
-                "DELETE FROM global_threepid_associations WHERE medium = 'email' AND address = ?", to_delete
+                "DELETE FROM global_threepid_associations WHERE medium = 'email' AND address = ?",
+                to_delete,
             )
 
-            logger.info(f"{len(to_delete)} rows deleted from global_threepid_associations")
+            logger.info(
+                f"{len(to_delete)} rows deleted from global_threepid_associations"
+            )
 
         if len(db_update_args) > 0:
             cur.executemany(
@@ -366,7 +371,9 @@ def update_global_associations(
                 db_update_args,
             )
 
-            logger.info(f"{len(db_update_args)} rows updated in global_threepid_associations")
+            logger.info(
+                f"{len(db_update_args)} rows updated in global_threepid_associations"
+            )
 
         db.commit()
 
