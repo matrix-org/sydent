@@ -18,10 +18,12 @@ from sydent.config._base import BaseConfig
 
 
 class DatabaseConfig(BaseConfig):
-    def parse_config(self, cfg: "ConfigParser") -> None:
+    def parse_config(self, cfg: "ConfigParser") -> bool:
         """
         Parse the database section of the config
 
         :param cfg: the configuration to be parsed
         """
         self.database_path = cfg.get("db", "db.file")
+
+        return False

@@ -14,6 +14,7 @@
 
 import copy
 import logging
+import logging.handlers
 import os
 from configparser import DEFAULTSECT, ConfigParser
 from typing import Dict
@@ -287,7 +288,7 @@ def setup_logging(cfg: ConfigParser) -> None:
 
     logPath = cfg.get("general", "log.path")
     if logPath != "":
-        handler = logging.handlers.TimedRotatingFileHandler(
+        handler: logging.StreamHandler = logging.handlers.TimedRotatingFileHandler(
             logPath, when="midnight", backupCount=365
         )
         handler.setFormatter(formatter)

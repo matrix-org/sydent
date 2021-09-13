@@ -13,12 +13,13 @@
 # limitations under the License.
 
 from configparser import ConfigParser
+from typing import Optional
 
 from sydent.config._base import BaseConfig
 
 
 class HTTPConfig(BaseConfig):
-    def parse_config(self, cfg: "ConfigParser") -> None:
+    def parse_config(self, cfg: "ConfigParser") -> bool:
         """
         Parse the http section of the config
 
@@ -39,7 +40,7 @@ class HTTPConfig(BaseConfig):
         )
         if internal_api_port != "":
             self.internal_api_enabled = True
-            self.internal_port = int(internal_api_port)
+            self.internal_port: Optional[int] = int(internal_api_port)
         else:
             self.internal_api_enabled = False
             self.internal_port = None

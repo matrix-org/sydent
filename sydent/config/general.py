@@ -15,7 +15,7 @@
 import logging
 import os
 from configparser import ConfigParser
-from typing import Set
+from typing import List
 
 from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
@@ -89,11 +89,11 @@ class GeneralConfig(BaseConfig):
             cfg.get("general", "delete_tokens_on_bind")
         )
 
-        ip_blacklist = set_from_comma_sep_string(cfg.get("general", "ip.blacklist"))
+        ip_blacklist = list_from_comma_sep_string(cfg.get("general", "ip.blacklist"))
         if not ip_blacklist:
             ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
 
-        ip_whitelist = set_from_comma_sep_string(cfg.get("general", "ip.whitelist"))
+        ip_whitelist = list_from_comma_sep_string(cfg.get("general", "ip.whitelist"))
 
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
@@ -101,15 +101,15 @@ class GeneralConfig(BaseConfig):
         return False
 
 
-def set_from_comma_sep_string(rawstr: str) -> Set[str]:
+def list_from_comma_sep_string(rawstr: str) -> List[str]:
     """
-    Parse the a comma seperated string into a set
+    Parse the a comma seperated string into a list
 
     :param rawstr: the string to be parsed
     """
     if rawstr == "":
-        return set()
-    return {x.strip() for x in rawstr.split(",")}
+        return []
+    return [x.strip() for x in rawstr.split(",")]
 
 
 def parse_cfg_bool(value: str):

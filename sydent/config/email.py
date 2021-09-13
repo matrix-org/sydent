@@ -14,6 +14,7 @@
 
 import socket
 from configparser import ConfigParser
+from typing import Optional
 
 from sydent.config._base import BaseConfig
 
@@ -27,9 +28,7 @@ class EmailConfig(BaseConfig):
         """
 
         # These two options are deprecated
-        self.template = self.template = cfg.get(
-            "email", "email.template", fallback=None
-        )
+        self.template: Optional[str] = cfg.get("email", "email.template", fallback=None)
 
         self.invite_template = cfg.get("email", "email.invite_template", fallback=None)
 

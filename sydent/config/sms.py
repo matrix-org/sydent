@@ -19,7 +19,7 @@ from sydent.config._base import BaseConfig
 
 
 class SMSConfig(BaseConfig):
-    def parse_config(self, cfg: "ConfigParser") -> None:
+    def parse_config(self, cfg: "ConfigParser") -> bool:
         """
         Parse the sms section of the config
 
