@@ -1,3 +1,19 @@
+Sydent 2.4.2 (2021-09-13)
+=========================
+
+Bugfixes
+--------
+
+- Fix a bug causing the email address migration script to take a lot of time to run due to inefficient database queries. ([\#396](https://github.com/matrix-org/sydent/issues/396))
+
+
+Internal Changes
+----------------
+
+- Move dev tools from install_requires to extras_require. ([\#389](https://github.com/matrix-org/sydent/issues/389))
+- Run background jobs in `run` rather than in Sydent's constructor. ([\#394](https://github.com/matrix-org/sydent/issues/394))
+
+
 Sydent 2.4.1 (2021-09-10)
 =========================
 

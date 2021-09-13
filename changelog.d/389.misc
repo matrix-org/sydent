@@ -1,1 +1,0 @@
-Move dev tools from install_requires to extras_require.
