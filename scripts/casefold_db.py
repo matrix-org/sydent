@@ -24,7 +24,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import attr
 import signedjson.sign
 
-from sydent.sydent import Sydent, parse_config_file
+from sydent.config import SydentConfig
+from sydent.sydent import Sydent
 from sydent.util import json_decoder
 from sydent.util.emailutils import EmailSendException, sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -101,7 +102,6 @@ def sendEmailWithBackoff(
             template_file = sydent.get_branded_template(
                 None,
                 "migration_template.eml",
-                ("email", "email.template"),
             )
 
             sendEmail(
@@ -129,7 +129,7 @@ def sendEmailWithBackoff(
 
 
 def update_local_associations(
-    sydent,
+    sydent: Sydent,
     db: sqlite3.Connection,
     send_email: bool,
     dry_run: bool,
@@ -260,7 +260,7 @@ def update_local_associations(
 
 
 def update_global_associations(
-    sydent,
+    sydent: Sydent,
     db: sqlite3.Connection,
     dry_run: bool,
     test: bool = False,
@@ -278,7 +278,7 @@ def update_global_associations(
     """
 
     # get every row where the local server is origin server and medium is email
-    origin_server = sydent.server_name
+    origin_server = sydent.config.general.server_name
     medium = "email"
 
     cur = db.cursor()
@@ -305,7 +305,7 @@ def update_global_associations(
         sg_assoc["address"] = address.casefold()
         sg_assoc = json.dumps(
             signedjson.sign.sign_json(
-                sg_assoc, sydent.server_name, sydent.keyring.ed25519
+                sg_assoc, sydent.config.general.server_name, sydent.keyring.ed25519
             )
         )
 
@@ -384,10 +384,11 @@ if __name__ == "__main__":
         print(f"The config file '{args.config_path}' does not exist.")
         sys.exit(1)
 
-    config = parse_config_file(args.config_path)
+    sydent_config = SydentConfig()
+    sydent_config.parse_config_file(args.config_path)
 
     reactor = ResolvingMemoryReactorClock()
-    sydent = Sydent(config, reactor, False)
+    sydent = Sydent(sydent_config, reactor, False)
 
     update_global_associations(sydent, sydent.db, dry_run=args.dry_run)
     update_local_associations(

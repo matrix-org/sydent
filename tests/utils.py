@@ -23,7 +23,8 @@ from twisted.web.http_headers import Headers
 from twisted.web.server import Request, Site
 from zope.interface import implementer
 
-from sydent.sydent import Sydent, parse_config_dict
+from sydent.config import SydentConfig
+from sydent.sydent import Sydent
 
 # Expires on Jan 11 2030 at 17:53:40 GMT
 FAKE_SERVER_CERT_PEM = """
@@ -68,9 +69,13 @@ def make_sydent(test_config={}):
         test_config["db"].setdefault("db.file", ":memory:")
 
     reactor = ResolvingMemoryReactorClock()
+
+    sydent_config = SydentConfig()
+    sydent_config.parse_config_dict(test_config)
+
     return Sydent(
         reactor=reactor,
-        cfg=parse_config_dict(test_config),
+        sydent_config=sydent_config,
         use_tls_for_federation=False,
     )
 

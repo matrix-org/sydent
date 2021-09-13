@@ -89,8 +89,7 @@ class ClientTLSOptionsFactory:
     """Factory for Twisted ClientTLSOptions that are used to make connections
     to remote servers for federation."""
 
-    def __init__(self, config):
-        verify_requests = config.getboolean("http", "federation.verifycerts")
+    def __init__(self, verify_requests: bool):
         if verify_requests:
             self._options = ssl.CertificateOptions(trustRoot=ssl.platformTrust())
         else:

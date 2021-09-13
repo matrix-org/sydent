@@ -49,8 +49,8 @@ class BlacklistingAgentTest(TestCase):
             self.reactor.lookups[domain.decode()] = ip.decode()
             self.reactor.lookups[ip.decode()] = ip.decode()
 
-        self.ip_whitelist = self.sydent.ip_whitelist
-        self.ip_blacklist = self.sydent.ip_blacklist
+        self.ip_whitelist = self.sydent.config.general.ip_whitelist
+        self.ip_blacklist = self.sydent.config.general.ip_blacklist
 
     def test_reactor(self):
         """Apply the blacklisting reactor and ensure it properly blocks

@@ -36,7 +36,7 @@ class BlindlySignStuffServlet(Resource):
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
-        self.server_name = syd.server_name
+        self.server_name = syd.config.general.server_name
         self.tokenStore = JoinTokenStore(syd)
         self.require_auth = require_auth
 

@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 import yaml
+
+if TYPE_CHECKING:
+    from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
 
@@ -95,14 +98,18 @@ class Terms:
         return agreed == required
 
 
-def get_terms(sydent) -> Optional[Terms]:
+def get_terms(sydent: "Sydent") -> Optional[Terms]:
     """Read and parse terms as specified in the config.
 
     :returns Terms
     """
+    # TODO - move some of this to parse_config
+
+    termsPath = sydent.config.general.terms_path
+
     try:
         termsYaml = None
-        termsPath = sydent.cfg.get("general", "terms.path")
+
         if termsPath == "":
             return Terms(None)
 
@@ -129,7 +136,5 @@ def get_terms(sydent) -> Optional[Terms]:
 
         return Terms(termsYaml)
     except Exception:
-        logger.exception(
-            "Couldn't read terms file '%s'", sydent.cfg.get("general", "terms.path")
-        )
+        logger.exception("Couldn't read terms file '%s'", termsPath)
         return None

@@ -121,11 +121,15 @@ class EmailValidateCodeServlet(Resource):
             msg = "Verification failed: you may need to request another verification email"
 
         brand = self.sydent.brand_from_request(request)
-        templateFile = self.sydent.get_branded_template(
-            brand,
-            "verify_response_template.html",
-            ("http", "verify_response_template"),
-        )
+
+        # self.sydent.config.http.verify_response_template is deprecated
+        if self.sydent.config.http.verify_response_template is None:
+            templateFile = self.sydent.get_branded_template(
+                brand,
+                "verify_response_template.html",
+            )
+        else:
+            templateFile = self.sydent.config.http.verify_response_template
 
         request.setHeader("Content-Type", "text/html")
         res = open(templateFile).read() % {"message": msg}

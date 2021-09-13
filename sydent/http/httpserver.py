@@ -93,7 +93,7 @@ class ClientApiHttpServer:
 
         threepid_v1.putChild(b"getValidated3pid", self.sydent.servlets.getValidated3pid)
         threepid_v1.putChild(b"unbind", unbind)
-        if self.sydent.enable_v1_associations:
+        if self.sydent.config.general.enable_v1_associations:
             threepid_v1.putChild(b"bind", self.sydent.servlets.threepidBind)
 
         v1.putChild(b"3pid", threepid_v1)
@@ -139,8 +139,9 @@ class ClientApiHttpServer:
         self.factory.displayTracebacks = False
 
     def setup(self):
-        httpPort = int(self.sydent.cfg.get("http", "clientapi.http.port"))
-        interface = self.sydent.cfg.get("http", "clientapi.http.bind_address")
+        httpPort = self.sydent.config.http.client_port
+        interface = self.sydent.config.http.client_bind_address
+
         logger.info("Starting Client API HTTP server on %s:%d", interface, httpPort)
         self.sydent.reactor.listenTCP(
             httpPort,
@@ -199,8 +200,8 @@ class ReplicationHttpsServer:
         self.factory.displayTracebacks = False
 
     def setup(self):
-        httpPort = int(self.sydent.cfg.get("http", "replication.https.port"))
-        interface = self.sydent.cfg.get("http", "replication.https.bind_address")
+        httpPort = self.sydent.config.http.replication_port
+        interface = self.sydent.config.http.replication_bind_address
 
         if self.sydent.sslComponents.myPrivateCertificate:
             # We will already have logged a warn if this is absent, so don't do it again
