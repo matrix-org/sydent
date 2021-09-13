@@ -124,7 +124,7 @@ class ThreepidBinder:
         """
 
         # ensure we are casefolding email addresses
-        threepid["address"] = normalise_address(threepid["address"], threepid["email"])
+        threepid["address"] = normalise_address(threepid["address"], threepid["medium"])
 
         localAssocStore = LocalAssociationStore(self.sydent)
         localAssocStore.removeAssociation(threepid, mxid)
