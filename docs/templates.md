@@ -2,7 +2,7 @@
 
 Sydent uses parametrised templates to generate the content of emails it
 sends and webpages it shows to users. Example templates can be found in
-the [res](https://github.com/matrix-org/sydent/tree/main/res) folder
+the [res](https://github.com/matrix-org/sydent/tree/main/res) folder.
 
 ## Branding
 
@@ -49,7 +49,7 @@ Files ending in ".eml" can use python `%(variable)s` string substitution.
 Appending "_forurl" or "_forhtml" to any of the variable names listed below
 returns their values encoded suitably for URLs or HTML respectively.
 
-e.g. ">" in the HTML encoded version would be replaced with "&gt"
+e.g. ">" in the HTML encoded version would be replaced with "&gt".
 
 ### `.eml.j2` files
 
@@ -68,7 +68,7 @@ for instructions on how to write these templates.
 
 Invitation emails are sent when someone is invited to a room by their
 email address. They should contain a link for the user to click on
-that takes them to a matrix client
+that takes them to a matrix client.
 
 Invite template files should have the name `invite_template.eml` or
 `invite_template.eml.j2`.
