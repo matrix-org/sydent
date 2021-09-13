@@ -1,0 +1,1 @@
+Fix a bug causing the email address migration script to take a lot of time to run due to inefficient database queries.
