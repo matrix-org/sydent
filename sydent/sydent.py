@@ -397,8 +397,8 @@ class Sydent:
         self.maybe_start_prometheus_server()
 
         # A dedicated validation session store just to clean up old sessions every N minutes
-        self.cleanupValSession = ThreePidValSessionStore(self)
-        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(cleanupValSession.deleteOldSessions)
         cb.clock = self.reactor
         cb.start(10 * 60.0)
 
