@@ -10,7 +10,7 @@ Bugfixes
 Internal Changes
 ----------------
 
-- Move dev tools from install_requires to extras_require. ([\#389](https://github.com/matrix-org/sydent/issues/389))
+- Move dev tools from `install_requires` to `extras_require`. ([\#389](https://github.com/matrix-org/sydent/issues/389))
 - Run background jobs in `run` rather than in Sydent's constructor. ([\#394](https://github.com/matrix-org/sydent/issues/394))
 
 
