@@ -97,6 +97,13 @@ class Sydent:
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.config.general.server_name)
 
+            # workaround for https://github.com/getsentry/sentry-python/issues/803: we
+            # disable automatic GC and run it periodically instead.
+            gc.disable()
+            cb = task.LoopingCall(run_gc)
+            cb.clock = self.reactor
+            cb.start(1.0)
+
         # See if a pepper already exists in the database
         # Note: This MUST be run before we start serving requests, otherwise lookups for
         # 3PID hashes may come in before we've completed generating them
@@ -176,24 +183,17 @@ class Sydent:
 
         self.pusher = Pusher(self)
 
-        # A dedicated validation session store just to clean up old sessions every N minutes
-        self.cleanupValSession = ThreePidValSessionStore(self)
-        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
-        cb.clock = self.reactor
-        cb.start(10 * 60.0)
-
-        # workaround for https://github.com/getsentry/sentry-python/issues/803: we
-        # disable automatic GC and run it periodically instead.
-        gc.disable()
-        cb = task.LoopingCall(run_gc)
-        cb.clock = self.reactor
-        cb.start(1.0)
-
     def run(self):
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
         self.maybe_start_prometheus_server()
+
+        # A dedicated validation session store just to clean up old sessions every N minutes
+        self.cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
+        cb.clock = self.reactor
+        cb.start(10 * 60.0)
 
         if self.config.http.internal_api_enabled:
             internalport = self.config.http.internal_port
