@@ -1,7 +1,8 @@
 # Templates
 
 Sydent uses parametrised templates to generate the content of emails it
-sends and webpages it shows to users.
+sends and webpages it shows to users. Example templates can be found in
+the [res](https://github.com/matrix-org/sydent/tree/main/res) folder
 
 ## Branding
 
@@ -21,6 +22,23 @@ The config option `templates.root_directory` should be set to the path
 of `root_template_dir` and `templates.default_brand` should be set to
 the sub directory to use if no `brand` (or an invalid `brand`) is provided
 by the request.
+
+Here are the requests that can contain a value for `brand` and what
+template the brand value is used to select:
+
+Invite email templates:
+ - `POST /_matrix/identity/v2/validate/msisdn/requestToken`
+
+Verification email templates:
+ - `POST /_matrix/identity/v2/validate/email/requestToken`
+
+Verification SMS templates - BRAND CURRENTLY IGNORED:
+ - `POST /_matrix/identity/v2/validate/msisdn/requestToken`
+
+Verification response templates:
+ - `GET /_matrix/identity/v2/validate/email/submitToken`
+ - `GET /_matrix/identity/v2/validate/msisdn/submitToken`
+
 
 ## Template formats
 
@@ -144,3 +162,14 @@ Variable                | Contents
 `multipart_boundary`    | Randomized multipart boundary to use in multipart emails
 `mxid`                  | The user ID that has been disassociated from the destination email address
 `to`                    | The destination email address 
+
+
+## Verification response http templates
+
+Verification response templates should have the name `verify_response_template.http`.
+
+### All substitutions
+
+Variable                | Contents 
+-----------             | -------- 
+`message`               | The verification success or failure message from the server
