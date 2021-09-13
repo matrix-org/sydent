@@ -230,7 +230,7 @@ def update_local_associations(
                     if not dry_run:
                         cur = db.cursor()
                         cur.execute(
-                            "DELETE FROM local_threepid_associations WHERE address = ?",
+                            "DELETE FROM local_threepid_associations WHERE medium = 'email' AND address = ?",
                             (to_delete.address,),
                         )
                         db.commit()
@@ -239,7 +239,7 @@ def update_local_associations(
             if not dry_run:
                 cur = db.cursor()
                 cur.execute(
-                    "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
+                    "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
                     (
                         casefolded_address,
                         delta.to_update.lookup_hash,
@@ -281,8 +281,7 @@ def update_global_associations(
     origin_server = sydent.server_name
     medium = "email"
 
-    cur = db.cursor()
-    res = cur.execute(
+    res = db.execute(
         "SELECT address, mxid, sgAssoc FROM global_threepid_associations WHERE medium = ?"
         "AND originServer = ? ORDER BY ts DESC",
         (medium, origin_server),
@@ -350,14 +349,16 @@ def update_global_associations(
         )
 
     if not dry_run:
+        cur = db.cursor()
+
         if len(to_delete) > 0:
             cur.executemany(
-                "DELETE FROM global_threepid_associations WHERE address = ?", to_delete
+                "DELETE FROM global_threepid_associations WHERE medium = 'email' AND address = ?", to_delete
             )
 
         if len(db_update_args) > 0:
             cur.executemany(
-                "UPDATE global_threepid_associations SET address = ?, lookup_hash = ?, sgAssoc = ? WHERE address = ? AND mxid = ?",
+                "UPDATE global_threepid_associations SET address = ?, lookup_hash = ?, sgAssoc = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
                 db_update_args,
             )
 
