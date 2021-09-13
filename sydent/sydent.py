@@ -239,6 +239,13 @@ class Sydent:
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.server_name)
 
+            # workaround for https://github.com/getsentry/sentry-python/issues/803: we
+            # disable automatic GC and run it periodically instead.
+            gc.disable()
+            cb = task.LoopingCall(run_gc)
+            cb.clock = self.reactor
+            cb.start(1.0)
+
         self.prometheus_addr = None
         self.prometheus_port = None
         if self.cfg.has_option("general", "prometheus_port"):
@@ -378,19 +385,6 @@ class Sydent:
 
         self.pusher = Pusher(self)
 
-        # A dedicated validation session store just to clean up old sessions every N minutes
-        self.cleanupValSession = ThreePidValSessionStore(self)
-        cb = task.LoopingCall(self.cleanupValSession.deleteOldSessions)
-        cb.clock = self.reactor
-        cb.start(10 * 60.0)
-
-        # workaround for https://github.com/getsentry/sentry-python/issues/803: we
-        # disable automatic GC and run it periodically instead.
-        gc.disable()
-        cb = task.LoopingCall(run_gc)
-        cb.clock = self.reactor
-        cb.start(1.0)
-
     def save_config(self):
         fp = open(self.config_file, "w")
         self.cfg.write(fp)
@@ -401,6 +395,12 @@ class Sydent:
         self.replicationHttpsServer.setup()
         self.pusher.setup()
         self.maybe_start_prometheus_server()
+
+        # A dedicated validation session store just to clean up old sessions every N minutes
+        cleanupValSession = ThreePidValSessionStore(self)
+        cb = task.LoopingCall(cleanupValSession.deleteOldSessions)
+        cb.clock = self.reactor
+        cb.start(10 * 60.0)
 
         internalport = self.cfg.get("http", "internalapi.http.port")
         if internalport:
