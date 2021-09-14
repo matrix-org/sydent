@@ -1,3 +1,12 @@
+Sydent 2.4.3 (2021-09-14)
+=========================
+
+Bugfixes
+--------
+
+- Fix a bug introduced in v2.4.0 that caused association unbindings to fail with an Internal Server Error. ([\#397](https://github.com/matrix-org/sydent/issues/397))
+
+
 Sydent 2.4.2 (2021-09-13)
 =========================
 
