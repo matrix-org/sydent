@@ -58,6 +58,9 @@ Files ending in ".eml.j2" are Jinja templates.
 Using the `urlencode` Jinja filter encodes the contents for URLs suitably.
 All variables are automatically made safe for HTML.
 
+(If needed the `safe` filter can be used to prevent the HTML encoding, i.e.
+declare the variable's contents "safe")
+
 See the Jinja [documentation](https://jinja.palletsprojects.com/en/3.0.x/templates/#variables)
 for instructions on how to write these templates.
 
