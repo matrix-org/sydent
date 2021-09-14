@@ -112,7 +112,7 @@ class Pusher:
             )
             result = await p.pushUpdates(assocs)
 
-            await self.peerStore.setLastSentVersionAndPokeSucceeded(
+            self.peerStore.setLastSentVersionAndPokeSucceeded(
                 p.servername, latest_assoc_id, time_msec()
             )
 

@@ -1,0 +1,1 @@
+Fix an issue which could cause new local associations to be replicated multiple times to peers.
