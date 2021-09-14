@@ -25,10 +25,9 @@ To correct this, Sydent 2.4.0 introduces a [script](https://github.com/matrix-or
 that inspects an identity server's database and fixes it to be compatible with this change:
 
 ```
-Usage: /path/to/sydent/scripts/casefold_db.py --config_path=/path/to/sydent.conf [--no-email] [--dry-run]
+Usage: /path/to/sydent/scripts/casefold_db.py [--no-email] [--dry-run] /path/to/sydent.conf
 
 Arguments:
-    * --config_path: path to Sydent's sydent.conf config file
     * --no-email: don't send out emails when deleting associations due to duplicates
     * --dry-run: don't update database rows and don't send out emails
 ```
