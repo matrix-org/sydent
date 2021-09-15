@@ -42,15 +42,6 @@ Verification response templates:
 
 ## Template formats
 
-### `.eml` template files
-
-Files ending in ".eml" can use python `%(variable)s` string substitution.
-
-Appending "_forurl" or "_forhtml" to any of the variable names listed below
-returns their values encoded suitably for URLs or HTML respectively.
-
-e.g. ">" in the HTML encoded version would be replaced with "&gt".
-
 ### `.eml.j2` files
 
 Files ending in ".eml.j2" are Jinja templates. 
@@ -62,7 +53,16 @@ All variables are automatically made safe for HTML.
 declare the variable's contents "safe")
 
 See the Jinja [documentation](https://jinja.palletsprojects.com/en/3.0.x/templates/#variables)
-for instructions on how to write these templates.
+for more instructions on how to write these templates.
+
+### DEPRECATED `.eml` template files 
+
+Files ending in ".eml" can use python `%(variable)s` string substitution.
+
+Appending "_forurl" or "_forhtml" to any of the variable names listed below
+returns their values encoded suitably for URLs or HTML respectively.
+
+For example ">" in the HTML encoded version would be replaced with "&gt".
 
 ---
 
@@ -73,8 +73,7 @@ Invitation emails are sent when someone is invited to a room by their
 email address. They should contain a link for the user to click on
 that takes them to a matrix client.
 
-Invite template files should have the name `invite_template.eml` or
-`invite_template.eml.j2`.
+Invite template files should have the name `invite_template.eml.j2`.
 
 ### Substitutions from Sydent
 
@@ -103,8 +102,8 @@ Variable                | Contents
 `bracketed_room_name`   | The string stored in `room_name` with brackets around it
 `bracketed_verified_sender`      | The string stored in `sender` with brackets around it
 `medium`                | The string "email"
-`org.matrix.msc3288.room_type`   | The same as `room_type`
-`org.matrix.web_client_location` | The same as `web_client_location`
+`org.matrix.msc3288.room_type`   | **UNSTABLE.** The same as `room_type`
+`org.matrix.web_client_location` | **UNSTABLE.** The same as `web_client_location`
 `room_alias`            | An alias for the room (probably more readable than `room_id`)
 `room_avatar_url`       | The URL of the room's avatar
 `room_id`               | The ID of the room to which the user is invited
@@ -120,8 +119,7 @@ Version when table last updated: Synapse v1.42.0
 
 ## Verification email templates
 
-Verification template files should have the name `verification_template.eml` or
-`verification_template.eml.j2`.
+Verification template files should have the name `verification_template.eml.j2`.
 
 ### All substitutions
 
@@ -152,8 +150,7 @@ Variable    | Contents
 
 ## Migration email templates
 
-Migration template files should have the name `migration_template.eml` or
-`migration_template.eml.j2`.
+Migration template files should have the name `migration_template.eml.j2`.
 
 ### All substitutions
 
