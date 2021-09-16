@@ -12,33 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from configparser import ConfigParser
 from typing import Dict, List
 
-from sydent.config._base import BaseConfig
+from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig
 
 
 class SMSConfig(BaseConfig):
-    def parse_config(self, cfg: "ConfigParser") -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
         """
         Parse the sms section of the config
 
         :param cfg: the configuration to be parsed
         """
-        self.body_template = cfg.get("sms", "bodyTemplate")
+        config = cfg.get("sms")
+
+        self.body_template = config.get("bodyTemplate")
 
         # Make sure username and password are bytes otherwise we can't use them with
         # b64encode.
-        self.api_username = cfg.get("sms", "username").encode("UTF-8")
-        self.api_password = cfg.get("sms", "password").encode("UTF-8")
+        self.api_username = config.get("username").encode("UTF-8")
+        self.api_password = config.get("password").encode("UTF-8")
 
         self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
 
-        for opt in cfg.options("sms"):
+        for opt in config.keys():
             if opt.startswith("originators."):
                 country = opt.split(".")[1]
-                rawVal = cfg.get("sms", opt)
+                rawVal = config.get(opt)
                 rawList = [i.strip() for i in rawVal.split(",")]
 
                 self.originators[country] = []
@@ -60,7 +61,7 @@ class SMSConfig(BaseConfig):
                     )
             elif opt.startswith("smsrule."):
                 country = opt.split(".")[1]
-                action = cfg.get("sms", opt)
+                action = config.get(opt)
 
                 if action not in ["allow", "reject"]:
                     raise Exception(

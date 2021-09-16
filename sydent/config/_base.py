@@ -13,12 +13,15 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from configparser import ConfigParser
+from typing import Dict
+
+# The type of dict that the SydentConfigParser object get's converted into
+CONFIG_PARSER_DICT = Dict[str, Dict[str, str]]
 
 
 class BaseConfig(ABC):
     @abstractmethod
-    def parse_config(self, cfg: ConfigParser) -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
         """
         Parse the a section of the config
 

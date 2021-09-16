@@ -21,6 +21,8 @@ from typing import Dict
 
 from twisted.python import log
 
+from sydent.config._base import CONFIG_PARSER_DICT
+from sydent.config._configparser import SydentConfigParser
 from sydent.config.crypto import CryptoConfig
 from sydent.config.database import DatabaseConfig
 from sydent.config.email import EmailConfig
@@ -182,7 +184,7 @@ class SydentConfig:
             self.http,
         ]
 
-    def _parse_config(self, cfg: ConfigParser) -> bool:
+    def _parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
         """
         Run the parse_config method on each of the objects in
         self.config_sections
@@ -201,9 +203,9 @@ class SydentConfig:
 
         return needs_saving
 
-    def _parse_from_config_parser(self, cfg: ConfigParser) -> bool:
+    def _parse_from_dict(self, cfg: CONFIG_PARSER_DICT) -> bool:
         """
-        Parse the configuration from a ConfigParser object
+        Parse the configuration from a dict
 
         :param cfg: the configuration to be parsed
 
@@ -213,6 +215,30 @@ class SydentConfig:
             of generating config files.
         """
         return self._parse_config(cfg)
+
+    def _parse_from_sydent_config_parser(self, cfg: SydentConfigParser) -> bool:
+        """
+        Parse the configuration from a SydentConfigParser object
+
+        :param cfg: the configuration to be parsed
+
+        :return: whether or not the config file needs updating. This method CAN
+            return True, but it *shouldn't*. Instead a ConfigError exception
+            should be raised. This is left in for the soon to be deprecated way
+            of generating config files.
+        """
+        config_dict: CONFIG_PARSER_DICT = {}
+        for section in cfg.sections():
+            config_dict[section] = {}
+            # Copy in any values that are in the DEFAULT section
+            # This must be done first as they might be overwritten
+            for key, val in cfg.items(DEFAULTSECT):
+                config_dict[section][key] = val
+            # Copy in the values set in this section
+            for key, val in cfg.items(section):
+                config_dict[section][key] = val
+
+        return self._parse_from_dict(config_dict)
 
     def parse_config_file(
         self, config_file: str, skip_logging_setup: bool = False
@@ -224,15 +250,14 @@ class SydentConfig:
         :param config_file: the file to be parsed
         """
         # If the config file doesn't exist, prepopulate the config object
-        # with the defaults, in the DEFAULT section.
+        # with the defaults.
         new_config_file = not os.path.exists(config_file)
 
-        cfg = ConfigParser()
+        cfg = SydentConfigParser()
         for sect, entries in CONFIG_DEFAULTS.items():
             cfg.add_section(sect)
             for k, v in entries.items():
-                cfg.set(DEFAULTSECT if new_config_file else sect, k, v)
-
+                cfg.set(sect, k, v)
         cfg.read(config_file)
 
         # Logging is configured in cfg, but these options must be parsed first
@@ -240,7 +265,7 @@ class SydentConfig:
         if not skip_logging_setup:
             setup_logging(cfg)
 
-        needs_updating = self._parse_from_config_parser(cfg)
+        needs_updating = self._parse_from_sydent_config_parser(cfg)
 
         # Don't edit config file when starting Sydent unless it's the first run
         if new_config_file:
@@ -268,17 +293,10 @@ class SydentConfig:
             for option in section_dict.keys():
                 config[section][option] = config_dict[section][option]
 
-        # Build a ConfigParser from the merged dictionary
-        cfg = ConfigParser()
-        for section, section_dict in config.items():
-            cfg.add_section(section)
-            for option, value in section_dict.items():
-                cfg.set(section, option, value)
-
         # This is only ever called by tests so don't configure logging
         # as tests do this themselves
 
-        self._parse_from_config_parser(cfg)
+        self._parse_from_dict(config)
 
 
 def setup_logging(cfg: ConfigParser) -> None:
