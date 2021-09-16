@@ -32,3 +32,13 @@ class BaseConfig(ABC):
             config file.
         """
         pass
+
+
+def parse_cfg_bool(value: str):
+    """
+    Parse a string config option into a boolean
+    This method ignores capitalisation
+
+    :param value: the string to be parsed
+    """
+    return value.lower() == "true"

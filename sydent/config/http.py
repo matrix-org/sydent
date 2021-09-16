@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig
+
+from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig, parse_cfg_bool
 
 
 class HTTPConfig(BaseConfig):
@@ -50,7 +51,9 @@ class HTTPConfig(BaseConfig):
 
         self.obey_x_forwarded_for = cfg.getboolean("http", "obey_x_forwarded_for")
 
-        self.verify_federation_certs = bool(config.get("federation.verifycerts"))
+        self.verify_federation_certs = parse_cfg_bool(
+            config.get("federation.verifycerts")
+        )
 
         self.server_http_url_base = config.get("client_http_base")
 

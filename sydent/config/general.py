@@ -19,7 +19,7 @@ from typing import List
 from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
 
-from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig
+from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig, parse_cfg_bool
 from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
 
 logger = logging.getLogger(__name__)
@@ -114,13 +114,3 @@ def list_from_comma_sep_string(rawstr: str) -> List[str]:
     if rawstr == "":
         return []
     return [x.strip() for x in rawstr.split(",")]
-
-
-def parse_cfg_bool(value: str):
-    """
-    Parse a string config option into a boolean
-    This method ignores capitalisation
-
-    :param value: the string to be parsed
-    """
-    return value.lower() == "true"
