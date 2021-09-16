@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+
+# Example run
+# ```
+# $ ./scripts/update-key b251d15e720672cbbe73626447a8458ffa1ab1413925cd51ef990e652d48318A
+# Update your sydent config file with the following:
+#
+# [crypto]
+# ed25519.signingkey = ed25519 0 slHRXnIGcsu+c2JkR6hFj/oasUE5Jc1R75kOZS1IMYo
+#
+# For reference, the public (verificiation) key is 53eNltXamSKdvxIgL3Tq4KMrwgR/sQA18xvwvxEYc4o
+# ````
+
+# Use this to update the signing key used in sydent configurations. This doesn't
+# change the key, only the way that it's encoded in the config file.
+
+import sys
+
+import nacl
+import signedjson.key
+
+if len(sys.argv) != 2:
+    print("Usage: updated-key [hex encoded key]")
+else:
+    signing_key_hex = sys.argv[1]
+
+    signing_key = nacl.signing.SigningKey(
+        signing_key_hex, encoder=nacl.encoding.HexEncoder
+    )
+    signing_key.version = "0"
+    signing_key.alg = signedjson.key.NACL_ED25519
+
+    signing_key_str = "%s %s %s" % (
+        signing_key.alg,
+        signing_key.version,
+        signedjson.key.encode_signing_key_base64(signing_key),
+    )
+
+    verify_key_str = signedjson.key.encode_verify_key_base64(signing_key.verify_key)
+
+    print(
+        "Update your sydent config file with the following: \n"
+        "\n"
+        "[crypto]\n"
+        f"ed25519.signingkey = {signing_key_str}\n"
+        "\n"
+        f"For reference, the public (verificiation) key is {verify_key_str}\n"
+    )
