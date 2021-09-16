@@ -1,0 +1,1 @@
+Convert ConfigParser object to dict and prevent sydent from creating DEFAULT section in config file (#287).
