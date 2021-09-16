@@ -1,0 +1,1 @@
+Don't update existing config files anymore. The generate-key script must now be run to create new keys.
