@@ -189,9 +189,10 @@ class SydentConfig:
 
         :param cfg: the configuration to be parsed
 
-        :return: whether or not cfg has been altered. This method CAN
-            return True, but it *shouldn't* as this leads to altering the
-            config file.
+        :return: whether or not the config file needs updating. This method CAN
+            return True, but it *shouldn't*. Instead a ConfigError exception
+            should be raised. This is left in for the soon to be deprecated way
+            of generating config files.
         """
         needs_saving = False
         for section in self.config_sections:
@@ -200,15 +201,16 @@ class SydentConfig:
 
         return needs_saving
 
-    def parse_from_config_parser(self, cfg: ConfigParser) -> bool:
+    def _parse_from_config_parser(self, cfg: ConfigParser) -> bool:
         """
         Parse the configuration from a ConfigParser object
 
         :param cfg: the configuration to be parsed
 
-        :return: whether or not cfg has been altered. This method CAN
-            return True, but it *shouldn't* as this leads to altering the
-            config file.
+        :return: whether or not the config file needs updating. This method CAN
+            return True, but it *shouldn't*. Instead a ConfigError exception
+            should be raised. This is left in for the soon to be deprecated way
+            of generating config files.
         """
         return self._parse_config(cfg)
 
@@ -220,19 +222,14 @@ class SydentConfig:
         :param config_file: the file to be parsed
         """
         # If the config file doesn't exist, prepopulate the config object
-        # with the defaults, in the right section.
-        #
-        # Otherwise, we have to put the defaults in the DEFAULT section,
-        # to ensure that they don't override anyone's settings which are
-        # in their config file in the default section (which is likely,
-        # because sydent used to be braindead).
-        use_defaults = not os.path.exists(config_file)
+        # with the defaults, in the DEFAULT section.
+        new_config_file = not os.path.exists(config_file)
 
         cfg = ConfigParser()
         for sect, entries in CONFIG_DEFAULTS.items():
             cfg.add_section(sect)
             for k, v in entries.items():
-                cfg.set(DEFAULTSECT if use_defaults else sect, k, v)
+                cfg.set(DEFAULTSECT if new_config_file else sect, k, v)
 
         cfg.read(config_file)
 
@@ -240,15 +237,19 @@ class SydentConfig:
         # so that we can log while parsing the rest
         setup_logging(cfg)
 
-        # TODO: Don't alter config file when starting Sydent so that
-        #       it can be set to read-only
+        needs_updating = self._parse_from_config_parser(cfg)
 
-        needs_saving = self.parse_from_config_parser(cfg)
-
-        if needs_saving:
+        # Don't edit config file when starting Sydent unless it's the first run
+        if new_config_file:
             fp = open(config_file, "w")
             cfg.write(fp)
             fp.close()
+            exit(0)
+
+        if needs_updating:
+            # A more specific log message should have been given earlier
+            logger.error("The config file needs updating")
+            exit(1)
 
     def parse_config_dict(self, config_dict: Dict) -> None:
         """
@@ -274,7 +275,7 @@ class SydentConfig:
         # This is only ever called by tests so don't configure logging
         # as tests do this themselves
 
-        self.parse_from_config_parser(cfg)
+        self._parse_from_config_parser(cfg)
 
 
 def setup_logging(cfg: ConfigParser) -> None:

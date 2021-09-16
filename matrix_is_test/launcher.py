@@ -45,6 +45,9 @@ email.smtphost = localhost
 email.from = Sydent Validation <noreply@localhost>
 email.smtpport = 9925
 email.subject = Your Validation Token
+
+[crypto]
+ed25519.signingkey = ed25519 0 broXDusfghcDAamylh2RmOEHfPJCi4snha7NNCJKOao
 """
 
 

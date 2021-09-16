@@ -52,6 +52,8 @@ tWVEpHfT+G7AjA8=
 -----END CERTIFICATE-----
 """
 
+DEFAULT_SIGNING_KEY = "ed25519 0 broXDusfghcDAamylh2RmOEHfPJCi4snha7NNCJKOao"
+
 
 def make_sydent(test_config={}):
     """Create a new sydent
@@ -67,6 +69,12 @@ def make_sydent(test_config={}):
         test_config["db"] = {"db.file": ":memory:"}
     else:
         test_config["db"].setdefault("db.file", ":memory:")
+
+    # Set a value for the signingkey if it hasn't been set by the test
+    if "db" not in test_config:
+        test_config["crypto"] = {"ed25519.signingkey": DEFAULT_SIGNING_KEY}
+    elif "ed25519.signingkey" not in test_config["db"]:
+        test_config["crypto"] = {"ed25519.signingkey": DEFAULT_SIGNING_KEY}
 
     reactor = ResolvingMemoryReactorClock()
 
