@@ -58,3 +58,5 @@ class CryptoConfig(BaseConfig):
             self.signing_key = signedjson.key.decode_signing_key_base64(
                 signing_key_parts[0], signing_key_parts[1], signing_key_parts[2]
             )
+        
+        return False
