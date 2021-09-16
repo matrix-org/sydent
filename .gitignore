@@ -14,3 +14,4 @@ _trial_temp.lock
 /sydent.db
 /sydent.pid
 /matrix_is_test/sydent.stderr
+/matrix_is_test/sydent.log
