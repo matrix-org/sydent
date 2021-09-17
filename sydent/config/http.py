@@ -43,7 +43,7 @@ class HTTPConfig(BaseConfig):
         internal_api_port = config.get("internalapi.http.port") or None
         self.internal_bind_address = config.get("internalapi.http.bind_address", "::1")
 
-        if internal_api_port != "":
+        if internal_api_port is not None:
             self.internal_api_enabled = True
             self.internal_port = int(internal_api_port)
         else:
