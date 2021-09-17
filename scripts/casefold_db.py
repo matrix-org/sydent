@@ -15,6 +15,7 @@
 
 import argparse
 import json
+import logging
 import os
 import sqlite3
 import sys
@@ -30,6 +31,8 @@ from sydent.util import json_decoder
 from sydent.util.emailutils import EmailSendException, sendEmail
 from sydent.util.hash import sha256_and_url_safe_base64
 from tests.utils import ResolvingMemoryReactorClock
+
+logger = logging.getLogger("casefold_db")
 
 # Maximum number of attempts to send an email.
 MAX_ATTEMPTS_FOR_EMAIL = 5
@@ -88,7 +91,7 @@ def sendEmailWithBackoff(
     """Send an email with exponential backoff - that way we don't stop sending halfway
     through if the SMTP server rejects our email (e.g. because of rate limiting).
 
-    Setting test to True disables the logging.
+    Setting test to True disables the backoff.
 
     Raises a CantSendEmailException if no email could be sent after MAX_ATTEMPTS_FOR_EMAIL
     attempts.
@@ -111,16 +114,14 @@ def sendEmailWithBackoff(
                 {"mxid": mxid},
                 log_send_errors=False,
             )
-            if not test:
-                print("Sent email to %s" % address)
+            logger.info("Sent email to %s" % address)
 
             return
         except EmailSendException:
-            if not test:
-                print(
-                    "Failed to send email to %s (attempt %d/%d)"
-                    % (address, i + 1, MAX_ATTEMPTS_FOR_EMAIL)
-                )
+            logger.info(
+                "Failed to send email to %s (attempt %d/%d)"
+                % (address, i + 1, MAX_ATTEMPTS_FOR_EMAIL)
+            )
 
             time.sleep(backoff)
             backoff *= 2
@@ -142,10 +143,13 @@ def update_local_associations(
     Setting dry_run to True means that the script is being run in dry-run mode
     by the user, i.e. it will run but will not send any email nor update the database.
     Setting test to True means that the function is being called as part of an automated
-    test, and therefore we should neither backoff when sending emails or log.
+    test, and therefore we shouldn't backoff when sending emails.
 
     :return: None
     """
+
+    logger.info("Processing rows in local_threepid_associations")
+
     res = db.execute(
         "SELECT address, mxid FROM local_threepid_associations WHERE medium = 'email'"
         "ORDER BY ts DESC"
@@ -153,6 +157,8 @@ def update_local_associations(
 
     # a dict that associates an email address with correspoinding mxids and lookup hashes
     associations: Dict[str, List[Tuple[str, str, str]]] = {}
+
+    logger.info("Computing new hashes and signatures for local_threepid_associations")
 
     # iterate through selected associations, casefold email, rehash it, and add to
     # associations dict
@@ -197,8 +203,7 @@ def update_local_associations(
                     )
                 )
 
-    if not test:
-        print(f"{len(deltas)} rows to update in local_threepid_associations")
+    logger.info(f"{len(deltas)} rows to update in local_threepid_associations")
 
     # Apply the deltas
     for casefolded_address, delta in deltas.items():
@@ -208,7 +213,7 @@ def update_local_associations(
                 log_msg += (
                     f" and deleting {len(delta.to_delete)} rows associated with it"
                 )
-            print(log_msg)
+            logger.info(log_msg)
 
         try:
             # Delete each association, and send an email mentioning the affected MXID.
@@ -230,7 +235,7 @@ def update_local_associations(
                     if not dry_run:
                         cur = db.cursor()
                         cur.execute(
-                            "DELETE FROM local_threepid_associations WHERE address = ?",
+                            "DELETE FROM local_threepid_associations WHERE medium = 'email' AND address = ?",
                             (to_delete.address,),
                         )
                         db.commit()
@@ -239,7 +244,7 @@ def update_local_associations(
             if not dry_run:
                 cur = db.cursor()
                 cur.execute(
-                    "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE address = ? AND mxid = ?",
+                    "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
                     (
                         casefolded_address,
                         delta.to_update.lookup_hash,
@@ -263,7 +268,6 @@ def update_global_associations(
     sydent: Sydent,
     db: sqlite3.Connection,
     dry_run: bool,
-    test: bool = False,
 ) -> None:
     """Update the DB table global_threepid_associations so that all stored
     emails are casefolded, the signed association is re-signed and any duplicate
@@ -271,18 +275,17 @@ def update_global_associations(
 
     Setting dry_run to True means that the script is being run in dry-run mode
     by the user, i.e. it will run but will not send any email nor update the database.
-    Setting test to True means that the function is being called as part of an automated
-    test, and therefore we should suppress logs.
 
     :return: None
     """
+
+    logger.info("Processing rows in global_threepid_associations")
 
     # get every row where the local server is origin server and medium is email
     origin_server = sydent.config.general.server_name
     medium = "email"
 
-    cur = db.cursor()
-    res = cur.execute(
+    res = db.execute(
         "SELECT address, mxid, sgAssoc FROM global_threepid_associations WHERE medium = ?"
         "AND originServer = ? ORDER BY ts DESC",
         (medium, origin_server),
@@ -291,6 +294,8 @@ def update_global_associations(
     # dict that stores email address with mxid, email address, lookup hash, and
     # signed association
     associations: Dict[str, List[Tuple[str, str, str, str]]] = {}
+
+    logger.info("Computing new hashes and signatures for global_threepid_associations")
 
     # iterate through selected associations, casefold email, rehash it, re-sign the
     # associations and add to associations dict
@@ -344,21 +349,30 @@ def update_global_associations(
             for address, mxid, _, _ in assoc_tuples[1:]:
                 to_delete.append((address,))
 
-    if not test:
-        print(
-            f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
-        )
-
+    logger.info(
+        f"{len(to_delete)} rows to delete, {len(db_update_args)} rows to update in global_threepid_associations"
+    )
     if not dry_run:
+        cur = db.cursor()
+
         if len(to_delete) > 0:
             cur.executemany(
-                "DELETE FROM global_threepid_associations WHERE address = ?", to_delete
+                "DELETE FROM global_threepid_associations WHERE medium = 'email' AND address = ?",
+                to_delete,
+            )
+
+            logger.info(
+                f"{len(to_delete)} rows deleted from global_threepid_associations"
             )
 
         if len(db_update_args) > 0:
             cur.executemany(
-                "UPDATE global_threepid_associations SET address = ?, lookup_hash = ?, sgAssoc = ? WHERE address = ? AND mxid = ?",
+                "UPDATE global_threepid_associations SET address = ?, lookup_hash = ?, sgAssoc = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
                 db_update_args,
+            )
+
+            logger.info(
+                f"{len(db_update_args)} rows updated in global_threepid_associations"
             )
 
         db.commit()
@@ -379,9 +393,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Set up logging.
+    log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
+    formatter = logging.Formatter(log_format)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+
     # if the path the user gives us doesn't work, find it for them
     if not os.path.exists(args.config_path):
-        print(f"The config file '{args.config_path}' does not exist.")
+        logger.error(f"The config file '{args.config_path}' does not exist.")
         sys.exit(1)
 
     sydent_config = SydentConfig()

@@ -247,7 +247,6 @@ class MigrationTestCase(unittest.TestCase):
             self.sydent,
             self.sydent.db,
             dry_run=False,
-            test=True,
         )
 
         cur = self.sydent.db.cursor()
@@ -299,7 +298,6 @@ class MigrationTestCase(unittest.TestCase):
                 self.sydent,
                 self.sydent.db,
                 dry_run=True,
-                test=True,
             )
 
         # test no emails were sent
