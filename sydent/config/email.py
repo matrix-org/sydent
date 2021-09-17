@@ -45,7 +45,7 @@ class EmailConfig(BaseConfig):
         self.tls_mode = config.get("email.tlsmode")
 
         # This is the fully qualified domain name for SMTP HELO/EHLO
-        self.host_name = config.get("email.hostname", socket.getfqdn())
+        self.host_name = config.get("email.hostname") or socket.getfqdn()
 
         self.sender = config.get("email.from")
 
