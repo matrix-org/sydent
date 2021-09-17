@@ -27,16 +27,22 @@ Here are the requests that can contain a value for `brand` and what
 template the brand value is used to select:
 
 Invite email templates:
- - `POST /_matrix/identity/v2/validate/msisdn/requestToken`
+ - ` POST /_matrix/identity/v1/store-invite`
+ - ` POST /_matrix/identity/v2/store-invite`
 
 Verification email templates:
+ - `POST /_matrix/identity/v1/validate/email/requestToken`
  - `POST /_matrix/identity/v2/validate/email/requestToken`
 
 Verification SMS templates - BRAND CURRENTLY IGNORED:
+ - `POST /_matrix/identity/v1/validate/msisdn/requestToken`
  - `POST /_matrix/identity/v2/validate/msisdn/requestToken`
 
 Verification response templates:
+ - `GET /_matrix/identity/v1/validate/email/submitToken`
  - `GET /_matrix/identity/v2/validate/email/submitToken`
+
+ - `GET /_matrix/identity/v1/validate/msisdn/submitToken`
  - `GET /_matrix/identity/v2/validate/msisdn/submitToken`
 
 
@@ -49,8 +55,8 @@ Files ending in ".eml.j2" are Jinja templates.
 Using the `urlencode` Jinja filter encodes the contents for URLs suitably.
 All variables are automatically made safe for HTML.
 
-(If needed the `safe` filter can be used to prevent the HTML encoding, i.e.
-declare the variable's contents "safe")
+If needed the `safe` filter can be used to prevent the HTML encoding, this is
+useful for email headers and for including a plaintext portion of an email.
 
 See the Jinja [documentation](https://jinja.palletsprojects.com/en/3.0.x/templates/#variables)
 for more instructions on how to write these templates.
@@ -63,6 +69,8 @@ Appending "_forurl" or "_forhtml" to any of the variable names listed below
 returns their values encoded suitably for URLs or HTML respectively.
 
 For example ">" in the HTML encoded version would be replaced with "&gt".
+
+Note: "&&" when HTML encoded is displayed as "&".
 
 ---
 
@@ -83,7 +91,7 @@ Variable                | Contents
 `ephemeral_private_key` | The ephemeral private key being used for this invite
 `from`                  | The sending email address as configured in `email.from`
 `messageid`             | The unique ID for this email 
-`multipart_boundary`    | Randomized multipart boundary to use in multipart emails
+`multipart_boundary`    | Randomized multipart boundary to use in multipart emails. **NOTE: has no `_forurl` or `_forhtml` variants**
 `subject_header_value`  | The invite subject line. As configured in `email.invite.subject` (for a room invite) and `email.invite. subject_space` (for a space invite)
 `to`                    | The destination email address 
 `token`                 | A randomly generated token 
@@ -129,7 +137,7 @@ Variable                | Contents
 `from`                  | The sending email address as configured in `email.from`
 `ipaddress`             | The IP address that the verification request came from. If the IP address is unknown then this is the string "an unknown location"
 `messageid`             | The unique ID for this email 
-`multipart_boundary`    | Randomized multipart boundary to use in multipart emails
+`multipart_boundary`    | Randomized multipart boundary to use in multipart emails. **NOTE: has no `_forurl` or `_forhtml` variants**
 `to`                    | The destination email address 
 `token`                 | A randomly generated token that some clients might need
 
@@ -151,6 +159,7 @@ Variable    | Contents
 ## Migration email templates
 
 Migration template files should have the name `migration_template.eml.j2`.
+The deprecated `.eml` template version is not supported.
 
 ### All substitutions
 
@@ -159,7 +168,7 @@ Variable                | Contents
 `date`                  | The time and date of sending as defined in RFC 2822 (e.g. "Fri, 09 Nov 2001 01:08:47 -0000") 
 `from`                  | The sending email address as configured in `email.from`
 `messageid`             | The unique ID for this email 
-`multipart_boundary`    | Randomized multipart boundary to use in multipart emails
+`multipart_boundary`    | Randomized multipart boundary to use in multipart emails. **NOTE: has no `_forurl` or `_forhtml` variants**
 `mxid`                  | The user ID that has been disassociated from the destination email address
 `to`                    | The destination email address 
 
