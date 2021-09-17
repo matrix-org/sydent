@@ -44,18 +44,18 @@ With the virtualenv activated, you can run Sydent using::
 
     python -m sydent.sydent
 
-If this is the first time Sydent is run, then it will generate a configuration file in
-``sydent.conf`` with some defaults and then stop. You must run the generate-key script
-and update the config with this key before Sydent will start.
+Before you run Sydent for the first time, you must run the generate-config script.
 
 You should not write anything in the ``[DEFAULT]`` section. If a
 setting is defined in both the ``[DEFAULT]`` section and another section in the configuration
 file, then the value in the other section is used.
 
 You'll most likely want to change the server name (``server.name``) and specify an email server
-(look for the settings starting with ``email.``).
+(look for the settings starting with ``email.``). 
 
-By default, Sydent will listen on ``0.0.0.0:8090``. This can be changed by changing the values for
+See `<docs/configuration.md>` for more information on how to configure Sydent.
+
+By default, Sydent will listen on ``[::]:8090``. This can be changed by changing the values for
 the configuration settings ``clientapi.http.bind_address`` and ``clientapi.http.port``.
 
 Sydent uses SQLite as its database backend. By default, it will create the database as ``sydent.db``
@@ -109,7 +109,7 @@ However, you then have to pay attention to the file permissions.
 Environment variables
 ---------------------
 
-.. warning:: These variables are only taken into account at first start and are written to the configuration file.
+.. warning:: These variables are only taken into account if they are not overridden by the configuration file.
 
 +--------------------+-----------------+-----------------------+
 | Variable Name      | Sydent default  | Dockerfile default    |
