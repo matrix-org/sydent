@@ -19,6 +19,10 @@ from typing import Dict
 CONFIG_PARSER_DICT = Dict[str, Dict[str, str]]
 
 
+class ConfigError(Exception):
+    pass
+
+
 class BaseConfig(ABC):
     @abstractmethod
     def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:

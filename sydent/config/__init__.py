@@ -153,10 +153,6 @@ CONFIG_DEFAULTS = {
 }
 
 
-class ConfigError(Exception):
-    pass
-
-
 class SydentConfig:
     """This is the class in charge of handling Sydent's configuration.
     Handling of each individual section is delegated to other classes

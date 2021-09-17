@@ -26,7 +26,6 @@ from twisted.web.client import readBody
 from twisted.web.iweb import IResponse
 from unpaddedbase64 import decode_base64
 
-from sydent.config import ConfigError
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
@@ -170,7 +169,7 @@ class RemotePeer(Peer):
             try:
                 pubkey_decoded = decode_base64(pubkey)
             except Exception as e:
-                raise ConfigError(
+                raise RuntimeError(
                     "Unable to decode public key for peer %s: %s" % (server_name, e),
                 )
 
