@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+
+# Generates a config file for Sydent to use
+
+
+import argparse
+import os
+from configparser import ConfigParser
+
+import signedjson.key
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--server-name", help="The server domain name.")
+
+    parser.add_argument(
+        "--pid-file",
+        help="The file where the PID of the running Sydent process will be written.",
+    )
+
+    parser.add_argument("--db-path", help="The SQLite Database file for Sydent to use.")
+
+    parser.add_argument(
+        "-o",
+        "--output-file",
+        default="sydent.conf",
+        help="The file to write the configuration to. Default: %(default)s",
+    )
+
+    args = parser.parse_args()
+
+    signing_key = signedjson.key.generate_signing_key(0)
+    sk_str = "%s %s %s" % (
+        signing_key.alg,
+        signing_key.version,
+        signedjson.key.encode_signing_key_base64(signing_key),
+    )
+
+    cfg = ConfigParser()
+
+    # [general]
+    cfg.add_section("general")
+
+    if args.server_name is not None:
+        cfg.set("general", "server.name", args.server_name)
+
+    if args.pid_file is not None:
+        cfg.set("general", "pidfile.path", args.pid_file)
+
+    # [db]
+    cfg.add_section("db")
+
+    if args.db_path is not None:
+        cfg.set("db", "db.file", args.db_path)
+
+    # [http]
+    cfg.add_section("http")
+
+    # [email]
+    cfg.add_section("email")
+
+    # [sms]
+    cfg.add_section("sms")
+
+    # [crypto]
+    cfg.add_section("crypto")
+
+    cfg.set("crypto", "ed25519.signingkey", sk_str)
+
+    if not os.path.exists(args.output_file):
+        with open(args.output_file, "w") as configfile:
+            cfg.write(configfile)
+    else:
+        print(f"ERROR: Cannot overwrite existing file {args.output_file}")
