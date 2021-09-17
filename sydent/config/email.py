@@ -28,9 +28,9 @@ class EmailConfig(BaseConfig):
         config = cfg.get("email")
 
         # These two options are deprecated
-        self.template: Optional[str] = config.get("email.template") or None
+        self.template: Optional[str] = config.get("email.template", None)
 
-        self.invite_template = config.get("email.invite_template") or None
+        self.invite_template = config.get("email.invite_template", None)
 
         # This isn't used anywhere...
         self.validation_subject = config.get("email.subject")
@@ -45,7 +45,7 @@ class EmailConfig(BaseConfig):
         self.tls_mode = config.get("email.tlsmode")
 
         # This is the fully qualified domain name for SMTP HELO/EHLO
-        self.host_name = config.get("email.hostname") or socket.getfqdn()
+        self.host_name = config.get("email.hostname", socket.getfqdn())
 
         self.sender = config.get("email.from")
 

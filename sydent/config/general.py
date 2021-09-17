@@ -73,8 +73,8 @@ class GeneralConfig(BaseConfig):
 
         self.address_lookup_limit = int(config.get("address_lookup_limit"))
 
-        self.prometheus_port = config.get("prometheus_port") or None
-        self.prometheus_addr = config.get("prometheus_addr") or None
+        self.prometheus_port = config.get("prometheus_port", None)
+        self.prometheus_addr = config.get("prometheus_addr", None)
 
         if self.prometheus_port is not None and self.prometheus_addr is not None:
             self.prometheus_enabled = True
@@ -82,22 +82,20 @@ class GeneralConfig(BaseConfig):
         else:
             self.prometheus_enabled = False
 
-        self.sentry_dsn = config.get("sentry_dsn") or None
+        self.sentry_dsn = config.get("sentry_dsn", None)
         self.sentry_enabled = self.sentry_dsn is not None
 
         self.enable_v1_associations = parse_cfg_bool(
-            config.get("enable_v1_associations") or ""
+            config.get("enable_v1_associations")
         )
 
-        self.delete_tokens_on_bind = parse_cfg_bool(
-            config.get("delete_tokens_on_bind") or ""
-        )
+        self.delete_tokens_on_bind = parse_cfg_bool(config.get("delete_tokens_on_bind"))
 
-        ip_blacklist = list_from_comma_sep_string(config.get("ip.blacklist") or "")
+        ip_blacklist = list_from_comma_sep_string(config.get("ip.blacklist"))
         if not ip_blacklist:
             ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
 
-        ip_whitelist = list_from_comma_sep_string(config.get("ip.whitelist") or "")
+        ip_whitelist = list_from_comma_sep_string(config.get("ip.whitelist"))
 
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)

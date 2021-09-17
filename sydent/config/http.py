@@ -26,18 +26,16 @@ class HTTPConfig(BaseConfig):
         config = cfg.get("http")
 
         # This option is deprecated
-        self.verify_response_template = config.get("verify_response_template") or None
+        self.verify_response_template = config.get("verify_response_template", None)
 
         self.client_bind_address = config.get("clientapi.http.bind_address")
         self.client_port = int(config.get("clientapi.http.port"))
 
         # internal port is allowed to be set to an empty string in the config
-        internal_api_port = config.get("internalapi.http.port") or None
-        self.internal_bind_address = (
-            config.get("internalapi.http.bind_address") or "::1"
-        )
+        internal_api_port = config.get("internalapi.http.port")
+        self.internal_bind_address = config.get("internalapi.http.bind_address", "::1")
 
-        if internal_api_port is not None:
+        if internal_api_port != "":
             self.internal_api_enabled = True
             self.internal_port = int(internal_api_port)
         else:
