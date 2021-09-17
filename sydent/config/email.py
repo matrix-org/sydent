@@ -49,9 +49,7 @@ class EmailConfig(BaseConfig):
         self.validation_subject = config.get("email.subject")
 
         if self.invite_template is not None:
-            logger.warning(
-                "'email.subject' is no longer a supported option."
-            )
+            logger.warning("'email.subject' is no longer a supported option.")
 
         # Interpolation is turned off for these two options
         # This allows them to use %(variable)s substitution without raising errors
