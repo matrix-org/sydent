@@ -25,15 +25,11 @@ class ConfigError(Exception):
 
 class BaseConfig(ABC):
     @abstractmethod
-    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> None:
         """
         Parse the a section of the config
 
         :param cfg: the configuration to be parsed
-
-        :return: whether or not cfg has been altered. This method CAN
-            return True, but it *shouldn't* as this leads to altering the
-            config file.
         """
         pass
 

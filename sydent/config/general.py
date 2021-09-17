@@ -26,26 +26,26 @@ logger = logging.getLogger(__name__)
 
 
 class GeneralConfig(BaseConfig):
-    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> None:
         """
         Parse the 'general' section of the config
 
         :param cfg: the configuration to be parsed
         """
-        config = cfg.get("general")
+        config = cfg.get("general", {})
 
         self.server_name = config.get("server.name") or None
         if self.server_name is None:
             self.server_name = os.uname()[1]
             logger.warning(
-                "You have not specified a server name. I have guessed that this server is called '%s'. "
-                "If this is incorrect, you should edit 'general.server.name' in the config file."
+                "'server.name' should not be blank. Please enter a value for it in the config."
+                " For this run, I have guessed that this server is called '%s'."
                 % (self.server_name,)
             )
 
         # Get the possible brands by looking at directories under the
         # templates.path directory.
-        self.templates_path = config.get("templates.path")
+        self.templates_path = config.get("templates.path", "res")
         if os.path.exists(self.templates_path):
             self.valid_brands = {
                 p
@@ -65,13 +65,15 @@ class GeneralConfig(BaseConfig):
             autoescape=True,
         )
 
-        self.default_brand = config.get("brand.default")
+        self.default_brand = config.get("brand.default", "matrix-org")
 
-        self.pidfile = config.get("pidfile.path")
+        self.pidfile = config.get(
+            "pidfile.path", os.environ.get("SYDENT_PID_FILE", "sydent.pid")
+        )
 
-        self.terms_path = config.get("terms.path")
+        self.terms_path = config.get("terms.path") or None
 
-        self.address_lookup_limit = int(config.get("address_lookup_limit"))
+        self.address_lookup_limit = int(config.get("address_lookup_limit", "10000"))
 
         self.prometheus_port = config.get("prometheus_port", None)
         self.prometheus_addr = config.get("prometheus_addr", None)
@@ -86,21 +88,21 @@ class GeneralConfig(BaseConfig):
         self.sentry_enabled = self.sentry_dsn is not None
 
         self.enable_v1_associations = parse_cfg_bool(
-            config.get("enable_v1_associations")
+            config.get("enable_v1_associations", "true")
         )
 
-        self.delete_tokens_on_bind = parse_cfg_bool(config.get("delete_tokens_on_bind"))
+        self.delete_tokens_on_bind = parse_cfg_bool(
+            config.get("delete_tokens_on_bind", "true")
+        )
 
-        ip_blacklist = list_from_comma_sep_string(config.get("ip.blacklist"))
+        ip_blacklist = list_from_comma_sep_string(config.get("ip.blacklist", ""))
         if not ip_blacklist:
             ip_blacklist = DEFAULT_IP_RANGE_BLACKLIST
 
-        ip_whitelist = list_from_comma_sep_string(config.get("ip.whitelist"))
+        ip_whitelist = list_from_comma_sep_string(config.get("ip.whitelist", ""))
 
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
-
-        return False
 
 
 def list_from_comma_sep_string(rawstr: str) -> List[str]:
