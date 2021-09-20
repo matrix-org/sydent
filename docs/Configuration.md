@@ -61,7 +61,7 @@ An example minimal config file can be found in
 Your config file need only contain entries for things you are overwriting from the 
 default. 
 
-The DEFAULT section should be empty and is a deprecated way of configuring SYDENT.
+The DEFAULT section should be empty and is a deprecated way of configuring Sydent.
 
 You can generate a new config file by running the [generate-config script](https://github.com/matrix-org/sydent/blob/main/scripts/generate-config)
 
@@ -101,11 +101,11 @@ Name                    | Description
 `log.path`              | The path of the file to write the logs to. Leaving this empty prints logs to stderr. DEFAULTS TO EMPTY
 `pidfile.path`          | The file to save Sydent's process ID (PID) to. DEFAULTS TO the value stored in `SYDENT_PID_FILE` environment variable, or `sydent.pid` if that is unset.
 `prometheus_addr`       | The local IPv4 or IPv6 address for Prometheus to bind to. This must be set to enable the Prometheus client. DEFAULTS TO UNSET
-`prometheus_port`       | The port for Prometheus to bind to. This must be set to enable Prometheus. DEFAULTS TO UNSET
+`prometheus_port`       | The port for Prometheus to bind to. This must be set to enable the Prometheus client. DEFAULTS TO UNSET
 `server.name`           | The domain name of the server. DEFAULTS TO value returned by `os.uname()[1]`
 `sentry.dsn`            | The Data Source Name (DSN) for Sentry to use. This must be set to enable Sentry. DEFAULTS TO UNSET
 `templates.path`        | The path to the root template directory. See [docs/templates.md](https://github.com/matrix-org/sydent/blob/main/docs/templates.md) for more information. DEFAULTS TO `res`
-`terms.path`            | The path to the file where the terms and conditions are configured, or empty if no terms are being used. DEFAULTS TO EMPTY.
+`terms.path`            | The path to the file where the terms and conditions are configured, or empty if no terms are being used. DEFAULTS TO EMPTY
 
 
 ### [db]
@@ -120,13 +120,13 @@ Name        | Description
 Name                            | Description
 ---------                       | -------
 `client_http_base`              | The base url of Sydent. This should be of the form `scheme://base.url.com/here`. DEFAULTS TO EMPTY
-`clientapi.http.bind_address`   | The local IPv4 or IPv6 for the Identity Server API to bind to. DEFAULTS TO `::` (i.e. bind to all)
+`clientapi.http.bind_address`   | The local IPv4 or IPv6 address for the Identity Server API to bind to. DEFAULTS TO `::` (i.e. bind to all)
 `clientapi.http.port`           | The port for the Identity Server API to bind to. DEFAULTS TO `8090`
 `federation.verifycerts`        | Whether or not Sydent should verify the TLS certificates of homeservers it communicates with. DEFAULTS TO `true`
-`internalapi.http.bind_address` | The local IPv4 or IPv6 for the Internal Testing API to bind to. DEFAULTS TO `::1`
-`internalapi.http.port`         | The port for the Internal Testing API to bind to. This must be non-empty to enable the Internal Testing API. Enabling this allows for binding and unbinding between identifiers and matrix IDs without any 
+`internalapi.http.bind_address` | The local IPv4 or IPv6 address for the Internal Testing API to bind to. DEFAULTS TO `::1`
+`internalapi.http.port`         | The port for the Internal Testing API to bind to. This must be non-empty to enable the Internal Testing API. Enabling this allows for binding and unbinding between identifiers and matrix IDs without any authentication. DEFAULTS TO EMPTY
 `obey_x_forwarded_for`          | Whether or not Sydent should pay attention to X-Forwarded-For headers. DEFAULTS TO `false`
-`replication.https.bind_address`| The local IPv4 or IPv6 for the Replication API to bind to. DEFAULTS TO `::` (i.e. bind to all)
+`replication.https.bind_address`| The local IPv4 or IPv6 address for the Replication API to bind to. DEFAULTS TO `::` (i.e. bind to all)
 `replication.https.cacert`      | The file path to a root CA certificate. If this is SET then certificates of other Sydent servers signed by this CA will be trusted. This is useful for testing or when it's not practical to get the client cert signed by a real root CA but should never be used on a production server. DEFAULTS TO UNSET
 `replication.https.certfile`    | The file path to a TLS certificate and private key. This file should contain **both** the public certificate and the private key used to generate it. This must be non-empty to enable the Replication API. DEFAULTS TO UNSET
 `replication.https.port`        | The port for the Replication API to bind to. DEFAULTS TO `4434`
@@ -158,7 +158,7 @@ Name                    | Description
 `username`              | The username to use when connecting to the SMS sender at https://smsc.openmarket.com/sms/v4/mt. DEFAULTS TO EMPTY
 `password`              | The password to use when connecting to the SMS sender at https://smsc.openmarket.com/sms/v4/mt. DEFAULTS TO EMPTY
 `originators.XYZ`       | The list of originators to use when sending an SMS to a number with country code `XYZ`. The originator is chosen deterministically from this list so if someone requests multiple codes, they come from a consistent number. The originators must be in form: `long:<number>`, `short:<number>` or `alpha:<text>`, separated by commas. DEFAULTS TO UNSET
-`originators.default`   | The default originaor to use when sending an SMS. This must be of the form `long:<number>`, `short:<number>` or `alpha:<text>`. DEFAULTS TO UNSET
+`originators.default`   | The default originator to use when sending an SMS. This must be of the form `long:<number>`, `short:<number>` or `alpha:<text>`. DEFAULTS TO UNSET
 `smsrule.XYZ`           | Whether or not to allow verification texts to numbers with country code `XYZ`. If this option is set to `reject` then that country is blacklisted, otherwise it is allowed. DEFAULTS TO UNSET
 
 ### [crypto]
