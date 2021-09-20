@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig
 
 
 class DatabaseConfig(BaseConfig):
-    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> None:
         """
         Parse the database section of the config
 
         :param cfg: the configuration to be parsed
         """
-        config = cfg.get("db")
+        config = cfg.get("db", {})
 
-        self.database_path = config.get("db.file")
-
-        return False
+        self.database_path = config.get(
+            "db.file", os.environ.get("SYDENT_DB_PATH", "sydent.db")
+        )

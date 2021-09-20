@@ -18,20 +18,20 @@ from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig
 
 
 class SMSConfig(BaseConfig):
-    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> None:
         """
         Parse the sms section of the config
 
         :param cfg: the configuration to be parsed
         """
-        config = cfg.get("sms")
+        config = cfg.get("sms", {})
 
-        self.body_template = config.get("bodyTemplate")
+        self.body_template = config.get("bodyTemplate", "Your code is {token}")
 
         # Make sure username and password are bytes otherwise we can't use them with
         # b64encode.
-        self.api_username = config.get("username").encode("UTF-8")
-        self.api_password = config.get("password").encode("UTF-8")
+        self.api_username = config.get("username", "").encode("UTF-8")
+        self.api_password = config.get("password", "").encode("UTF-8")
 
         self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
@@ -70,5 +70,3 @@ class SMSConfig(BaseConfig):
                     )
 
                 self.smsRules[country] = action
-
-        return False

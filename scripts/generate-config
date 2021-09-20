@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+# Generates a config file for Sydent to use
+
+
+import argparse
+import os
+from configparser import ConfigParser
+
+import signedjson.key
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--server-name", help="The server domain name. The value in SYDENT_SERVER_NAME takes precedence.")
+
+    parser.add_argument(
+        "--pid-file",
+        default="sydent.pid",
+        help="The file where the PID of the running Sydent process will be written. The value in SYDENT_PID_FILE takes precedence. Default: %(default)s",
+    )
+
+    parser.add_argument(
+        "--db-path",
+        default="sydent.db",
+        help="The SQLite Database file for Sydent to use. The value in SYDENT_DB_PATH takes precedence. Default: %(default)s",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output-file",
+        default="sydent.conf",
+        help="The file to write the configuration to. The value in SYDENT_CONF takes precedence. Default: %(default)s",
+    )
+
+    args = parser.parse_args()
+
+    signing_key = signedjson.key.generate_signing_key(0)
+    sk_str = "%s %s %s" % (
+        signing_key.alg,
+        signing_key.version,
+        signedjson.key.encode_signing_key_base64(signing_key),
+    )
+
+    cfg = ConfigParser()
+
+    # [general]
+    cfg.add_section("general")
+
+    name = os.environ.get("SYDENT_SERVER_NAME", args.server_name)
+    if name is not None:
+        cfg.set("general", "server.name", name)
+
+    pidfile = os.environ.get("SYDENT_PID_FILE", args.pid_file)
+    cfg.set("general", "pidfile.path", pidfile)
+
+    # [db]
+    cfg.add_section("db")
+
+    dbpath = os.environ.get("SYDENT_DB_PATH", args.db_path)
+    cfg.set("db", "db.file", dbpath)
+
+    # [http]
+    cfg.add_section("http")
+
+    # [email]
+    cfg.add_section("email")
+
+    # [sms]
+    cfg.add_section("sms")
+
+    # [crypto]
+    cfg.add_section("crypto")
+
+    cfg.set("crypto", "ed25519.signingkey", sk_str)
+
+    outputfile = os.environ.get("SYDENT_CONF", args.output_file)
+    if not os.path.exists(outputfile):
+        with open(outputfile, "w") as configfile:
+            cfg.write(configfile)
+    else:
+        print(f"ERROR: Cannot overwrite existing file {outputfile}")

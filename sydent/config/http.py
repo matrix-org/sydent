@@ -13,47 +13,59 @@
 # limitations under the License.
 
 
+import logging
+
 from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig, parse_cfg_bool
+
+logger = logging.getLogger(__name__)
 
 
 class HTTPConfig(BaseConfig):
-    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> None:
         """
         Parse the http section of the config
 
         :param cfg: the configuration to be parsed
         """
-        config = cfg.get("http")
+        config = cfg.get("http", {})
 
         # This option is deprecated
         self.verify_response_template = config.get("verify_response_template", None)
+        if self.verify_response_template is not None:
+            logger.warning(
+                "'verify_response_template' is a deprecated option."
+                " Please use 'templates.path' and 'brand.default' instead."
+            )
 
-        self.client_bind_address = config.get("clientapi.http.bind_address")
-        self.client_port = int(config.get("clientapi.http.port"))
+        self.client_bind_address = config.get("clientapi.http.bind_address", "::")
+        self.client_port = int(config.get("clientapi.http.port", 8090))
 
-        # internal port is allowed to be set to an empty string in the config
-        internal_api_port = config.get("internalapi.http.port")
+        internal_api_port = config.get("internalapi.http.port") or None
         self.internal_bind_address = config.get("internalapi.http.bind_address", "::1")
 
-        if internal_api_port != "":
+        if internal_api_port is not None:
             self.internal_api_enabled = True
             self.internal_port = int(internal_api_port)
         else:
             self.internal_api_enabled = False
 
-        self.cert_file = config.get("replication.https.certfile")
-        self.ca_cert_file = config.get("replication.https.cacert")
+        self.cert_file = config.get("replication.https.certfile") or None
+        self.ca_cert_file = config.get("replication.https.cacert") or None
 
-        self.replication_bind_address = config.get("replication.https.bind_address")
-        self.replication_port = int(config.get("replication.https.port"))
+        self.replication_bind_address = config.get(
+            "replication.https.bind_address", "::"
+        )
+        self.replication_port = int(config.get("replication.https.port", 4434))
 
-        self.obey_x_forwarded_for = parse_cfg_bool(config.get("obey_x_forwarded_for"))
-
-        self.verify_federation_certs = parse_cfg_bool(
-            config.get("federation.verifycerts")
+        self.obey_x_forwarded_for = parse_cfg_bool(
+            config.get("obey_x_forwarded_for", "false")
         )
 
-        self.server_http_url_base = config.get("client_http_base")
+        self.verify_federation_certs = parse_cfg_bool(
+            config.get("federation.verifycerts", "true")
+        )
+
+        self.server_http_url_base = config.get("client_http_base", "")
 
         self.base_replication_urls = {}
 
@@ -65,5 +77,3 @@ class HTTPConfig(BaseConfig):
                 if "base_replication_url" in peer_config.keys():
                     base_url = peer_config.get("base_replication_url")
                     self.base_replication_urls[peer] = base_url
-
-        return False

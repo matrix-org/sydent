@@ -50,7 +50,7 @@ WORKDIR /sydent
 USER sydent:sydent
 VOLUME ["/data"]
 
-RUN python3 /sydent/scripts/generate-key >> /data/sydent.conf
+RUN python3 /sydent/scripts/generate-config
 
 EXPOSE 8090/tcp
 CMD [ "python", "-m", "sydent.sydent" ]

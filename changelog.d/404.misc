@@ -1,0 +1,1 @@
+Replace the CONFIG_DEFAULTS dict with a generate-config script and documentation on all the config options.

@@ -106,12 +106,11 @@ def get_terms(sydent: "Sydent") -> Optional[Terms]:
     # TODO - move some of this to parse_config
 
     termsPath = sydent.config.general.terms_path
+    if termsPath is None:
+        return Terms(None)
 
     try:
         termsYaml = None
-
-        if termsPath == "":
-            return Terms(None)
 
         with open(termsPath) as fp:
             termsYaml = yaml.safe_load(fp)
