@@ -35,6 +35,8 @@ class EmailConfig(BaseConfig):
         # This isn't used anywhere...
         self.validation_subject = config.get("email.subject")
 
+        # Interpolation is turned off for these two options
+        # This allows them to use %(variable)s substitution without raising errors
         self.invite_subject = config.get("email.invite.subject")
         self.invite_subject_space = config.get("email.invite.subject_space")
 
