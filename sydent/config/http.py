@@ -47,7 +47,9 @@ class HTTPConfig(BaseConfig):
         self.replication_bind_address = config.get("replication.https.bind_address")
         self.replication_port = int(config.get("replication.https.port"))
 
-        self.obey_x_forwarded_for = cfg.getboolean("http", "obey_x_forwarded_for")
+        self.obey_x_forwarded_for = parse_cfg_bool(
+            config.get("http", "obey_x_forwarded_for")
+        )
 
         self.verify_federation_certs = parse_cfg_bool(
             config.get("federation.verifycerts")
