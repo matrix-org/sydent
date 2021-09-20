@@ -46,7 +46,7 @@ class EmailConfig(BaseConfig):
             )
 
         # This isn't used anywhere...
-        self.validation_subject = config.get("email.subject")
+        self.validation_subject = config.get("email.subject", "Your Validation Token")
 
         if self.invite_template is not None:
             logger.warning("'email.subject' is no longer a supported option.")
