@@ -48,7 +48,7 @@ If this is the first time Sydent is run, then it will generate a configuration f
 ``sydent.conf`` with some defaults and then stop. You must run the generate-key script
 and update the config with this key before Sydent will start.
 
-You should not write anything in the ``[DEFAULT]`` section as this will be ignored. If a
+You should not write anything in the ``[DEFAULT]`` section. If a
 setting is defined in both the ``[DEFAULT]`` section and another section in the configuration
 file, then the value in the other section is used.
 
