@@ -308,7 +308,7 @@ def run_gc():
 
 if __name__ == "__main__":
     sydent_config = SydentConfig()
-    sydent_config.parse_config_file(get_config_file_path())
+    sydent_config.parse_config_file(get_config_file_path(), skip_logging_setup=False)
 
     syd = Sydent(sydent_config)
     syd.run()
