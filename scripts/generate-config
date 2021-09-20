@@ -12,14 +12,19 @@ import signedjson.key
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--server-name", help="The server domain name.")
+    parser.add_argument("--server-name", help="The server domain name. The value in SYDENT_SERVER_NAME takes precedence.")
 
     parser.add_argument(
         "--pid-file",
-        help="The file where the PID of the running Sydent process will be written.",
+        default="sydent.pid",
+        help="The file where the PID of the running Sydent process will be written. The value in SYDENT_PID_FILE takes precedence. Default: %(default)s",
     )
 
-    parser.add_argument("--db-path", help="The SQLite Database file for Sydent to use.")
+    parser.add_argument(
+        "--db-path",
+        default="sydent.db",
+        help="The SQLite Database file for Sydent to use. The value in SYDENT_DB_PATH takes precedence. Default: %(default)s",
+    )
 
     parser.add_argument(
         "-o",
@@ -42,17 +47,18 @@ if __name__ == "__main__":
     # [general]
     cfg.add_section("general")
 
-    if args.server_name is not None:
-        cfg.set("general", "server.name", args.server_name)
+    name = os.environ.get("SYDENT_SERVER_NAME", args.server_name)
+    if name is not None:
+        cfg.set("general", "server.name", name)
 
-    if args.pid_file is not None:
-        cfg.set("general", "pidfile.path", args.pid_file)
+    pidfile = os.environ.get("SYDENT_PID_FILE", args.pid_file)
+    cfg.set("general", "pidfile.path", pidfile)
 
     # [db]
     cfg.add_section("db")
 
-    if args.db_path is not None:
-        cfg.set("db", "db.file", args.db_path)
+    dbpath = os.environ.get("SYDENT_DB_PATH", args.db_path)
+    cfg.set("db", "db.file", dbpath)
 
     # [http]
     cfg.add_section("http")

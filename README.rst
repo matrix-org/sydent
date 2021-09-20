@@ -109,7 +109,9 @@ However, you then have to pay attention to the file permissions.
 Environment variables
 ---------------------
 
-.. warning:: These variables are only taken into account if they are not overridden by the configuration file.
+.. warning:: These variables are taken into account when generate-config is run and
+are written to the config file. They are only used by Sydent if they are not
+overridden by the config file.
 
 +--------------------+-----------------+-----------------------+
 | Variable Name      | Sydent default  | Dockerfile default    |
