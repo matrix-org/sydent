@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "-o",
         "--output-file",
         default="sydent.conf",
-        help="The file to write the configuration to. Default: %(default)s",
+        help="The file to write the configuration to. The value in SYDENT_CONF takes precedence. Default: %(default)s",
     )
 
     args = parser.parse_args()
@@ -74,8 +74,9 @@ if __name__ == "__main__":
 
     cfg.set("crypto", "ed25519.signingkey", sk_str)
 
-    if not os.path.exists(args.output_file):
-        with open(args.output_file, "w") as configfile:
+    outputfile = os.environ.get("SYDENT_CONF", args.output_file)
+    if not os.path.exists(outputfile):
+        with open(outputfile, "w") as configfile:
             cfg.write(configfile)
     else:
-        print(f"ERROR: Cannot overwrite existing file {args.output_file}")
+        print(f"ERROR: Cannot overwrite existing file {outputfile}")
