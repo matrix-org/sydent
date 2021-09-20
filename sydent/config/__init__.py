@@ -212,7 +212,9 @@ class SydentConfig:
         """
         return self._parse_config(cfg)
 
-    def parse_config_file(self, config_file: str, skip_logging_setup: bool = False) -> None:
+    def parse_config_file(
+        self, config_file: str, skip_logging_setup: bool = False
+    ) -> None:
         """
         Parse the given config from a filepath, populating missing items and
         sections. NOTE: this method also sets up logging.
