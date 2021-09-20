@@ -19,10 +19,10 @@ sk_str = "%s %s %s" % (
 pk_str = signedjson.key.encode_verify_key_base64(signing_key.verify_key)
 
 print(
-    "A new key has been generated. To use it, update your sydent config file with the following: \n"
+    "# A new key has been generated. To use it, update your sydent config file with the following: \n"
     "\n"
     "[crypto]\n"
     f"ed25519.signingkey = {sk_str}\n"
     "\n"
-    f"For reference, the public (verificiation) key is {pk_str}\n"
+    f"# For reference, the public (verificiation) key is {pk_str}\n"
 )

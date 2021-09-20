@@ -49,5 +49,8 @@ ENV SYDENT_DB_PATH=/data/sydent.db
 WORKDIR /sydent
 USER sydent:sydent
 VOLUME ["/data"]
+
+RUN python3 /sydent/scripts/generate-key >> /data/sydent.conf
+
 EXPOSE 8090/tcp
 CMD [ "python", "-m", "sydent.sydent" ]
