@@ -33,19 +33,19 @@ class SydentInterpolation(Interpolation):
             )
 
     def before_set(self, parser, section, option, value):
-        if (section, option) in self.BLACLIST:
+        if option in self.BLACLIST:
             return value
         else:
             return self._basic_interpolation.before_set(parser, section, option, value)
 
     def before_read(self, parser, section, option, value):
-        if (section, option) in self.BLACLIST:
+        if option in self.BLACLIST:
             return value
         else:
             return self._basic_interpolation.before_read(parser, section, option, value)
 
     def before_write(self, parser, section, option, value):
-        if (section, option) in self.BLACLIST:
+        if option in self.BLACLIST:
             return value
         else:
             return self._basic_interpolation.before_write(
