@@ -70,7 +70,7 @@ returns their values encoded suitably for URLs or HTML respectively.
 
 For example ">" in the `_forhtml` version would be replaced with "&gt".
 
-Note: Note: "&&" must be used to get a raw `&` character.
+Note: "&&" must be used to get a raw `&` character.
 
 ---
 
