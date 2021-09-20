@@ -68,9 +68,9 @@ Files ending in ".eml" can use python `%(variable)s` string substitution.
 Appending "_forurl" or "_forhtml" to any of the variable names listed below
 returns their values encoded suitably for URLs or HTML respectively.
 
-For example ">" in the HTML encoded version would be replaced with "&gt".
+For example ">" in the `_forhtml` version would be replaced with "&gt".
 
-Note: "&&" when HTML encoded is displayed as "&".
+Note: Note: "&&" must be used to get a raw `&` character.
 
 ---
 
