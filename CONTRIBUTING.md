@@ -34,29 +34,28 @@ Sydent. Activating the venv ensures that any Python commands you run (`pip`,
 When you're done, you can close your terminal or run `deactivate` to disable
 the virtualenv.
 
-<!-- TODO
 ### Run the tests
 
 To make sure everything is working as expected, run the unit tests:
 
 ```bash
-tox -e py
+trial tests
 ```
 
 If you see a message like:
 
 ```
 -------------------------------------------------------------------------------
-Ran 46 tests in 0.209s
+Ran 25 tests in 0.324s
 
-PASSED (successes=46)
-___________________________________ summary ___________________________________
-  py: commands succeeded
-  congratulations :)
+PASSED (successes=25)
 ```
 
 Then all is well and you're ready to work!
--->
+
+If `trial tests` fails but `python -m twisted.trial tests` succeeds, try ensuring
+your venv is activated and re-installing using `pip install -e '.[dev]'`, making
+sure to remember the `-e` flag.
 
 ## How to contribute
 
