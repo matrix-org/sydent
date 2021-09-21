@@ -46,7 +46,7 @@ class CryptoConfig(BaseConfig):
             # old format key
             logger.warning(
                 "Updating signing key format for this run. Please run the"
-                " 'update-key' script to speedup the next startup"
+                " 'update-key' script to speedup the next startup."
             )
 
             self.signing_key = nacl.signing.SigningKey(
