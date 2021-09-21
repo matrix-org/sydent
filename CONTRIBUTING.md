@@ -4,6 +4,8 @@ Everyone is welcome to contribute code to Sydent, provided you are willing to
 license your contributions under the same license as the project itself. In
 this case, the [Apache Software License v2](LICENSE).
 
+## Set up your development environment
+
 ### Create a virtualenv
 
 To contribute to Sydent, ensure you have Python 3.7 or newer and then run:
@@ -34,7 +36,7 @@ Sydent. Activating the venv ensures that any Python commands you run (`pip`,
 When you're done, you can close your terminal or run `deactivate` to disable
 the virtualenv.
 
-### Run the tests
+### Run the unit tests
 
 To make sure everything is working as expected, run the unit tests:
 
@@ -56,6 +58,40 @@ Then all is well and you're ready to work!
 If `trial tests` fails but `python -m twisted.trial tests` succeeds, try ensuring
 your venv is activated and re-installing using `pip install -e '.[dev]'`, making
 sure to remember the `-e` flag.
+
+### Run the black-box tests
+
+Sydent uses [matrix-is-tester](https://github.com/matrix-org/matrix-is-tester/) to provide
+black-box testing of compliance with the [Matrix Identity Service API](https://matrix.org/docs/spec/identity_service/latest).
+(Features that are Sydent-specific belong in unit tests rather than the black-box test suite.)
+
+If you have set up a venv using the steps above, you can install `matrix-is-tester` as follows:
+```
+pip install git+https://github.com/matrix-org/matrix-is-tester.git
+```
+
+Now, to run `matrix-is-tester`, execute:
+```
+trial matrix_is_tester
+```
+
+If this doesn't work, ensure that you have first activated your venv and installed Sydent with the editable (`-e`) flag:
+`pip install -e '.[dev]'`.
+
+
+#### Advanced
+
+The steps above are sufficient and describe a clean way to run the black-box tests.
+However, in the event that you need more control, this subsection provides more information.
+
+The `SYDENT_PYTHON` enviroment variable can be set to launch Sydent with a specific python binary:
+
+```
+SYDENT_PYTHON=/path/to/python trial matrix_is_tester
+```
+
+The `matrix_is_test` directory contains Sydent's launcher for `matrix_is_tester`: this means
+that Sydent's directory needs to be on the Python path (e.g. `PYTHONPATH=$PYTHONPATH:/path/to/sydent`).
 
 ## How to contribute
 
