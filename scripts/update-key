@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Run this script to convert the signing key used in a sydent configuration.
+# This doesn't change the key, only the way that it's encoded in the config
+# file.
+
 # Example run
 # ```
 # $ ./scripts/update-key b251d15e720672cbbe73626447a8458ffa1ab1413925cd51ef990e652d48318A
@@ -24,10 +28,6 @@
 #
 # For reference, the public (verificiation) key is 53eNltXamSKdvxIgL3Tq4KMrwgR/sQA18xvwvxEYc4o
 # ````
-
-# Run this script to convert the signing key used in a sydent configuration.
-# This doesn't change the key, only the way that it's encoded in the config
-# file.
 
 import sys
 
