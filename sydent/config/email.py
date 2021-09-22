@@ -13,56 +13,54 @@
 # limitations under the License.
 
 import socket
-from configparser import ConfigParser
 from typing import Optional
 
-from sydent.config._base import BaseConfig
+from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig
 
 
 class EmailConfig(BaseConfig):
-    def parse_config(self, cfg: "ConfigParser") -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
         """
         Parse the email section of the config
 
         :param cfg: the configuration to be parsed
         """
+        config = cfg.get("email")
 
         # These two options are deprecated
-        self.template: Optional[str] = cfg.get("email", "email.template", fallback=None)
+        self.template: Optional[str] = config.get("email.template", None)
 
-        self.invite_template = cfg.get("email", "email.invite_template", fallback=None)
+        self.invite_template = config.get("email.invite_template", None)
 
         # This isn't used anywhere...
-        self.validation_subject = cfg.get("email", "email.subject")
+        self.validation_subject = config.get("email.subject")
 
-        self.invite_subject = cfg.get("email", "email.invite.subject", raw=True)
-        self.invite_subject_space = cfg.get(
-            "email", "email.invite.subject_space", raw=True
-        )
+        # Interpolation is turned off for these two options
+        # This allows them to use %(variable)s substitution without raising errors
+        self.invite_subject = config.get("email.invite.subject")
+        self.invite_subject_space = config.get("email.invite.subject_space")
 
-        self.smtp_server = cfg.get("email", "email.smtphost")
-        self.smtp_port = cfg.get("email", "email.smtpport")
-        self.smtp_username = cfg.get("email", "email.smtpusername")
-        self.smtp_password = cfg.get("email", "email.smtppassword")
-        self.tls_mode = cfg.get("email", "email.tlsmode")
+        self.smtp_server = config.get("email.smtphost")
+        self.smtp_port = config.get("email.smtpport")
+        self.smtp_username = config.get("email.smtpusername")
+        self.smtp_password = config.get("email.smtppassword")
+        self.tls_mode = config.get("email.tlsmode")
 
         # This is the fully qualified domain name for SMTP HELO/EHLO
-        self.host_name = cfg.get("email", "email.hostname")
-        if self.host_name == "":
-            self.host_name = socket.getfqdn()
+        self.host_name = config.get("email.hostname") or socket.getfqdn()
 
-        self.sender = cfg.get("email", "email.from")
+        self.sender = config.get("email.from")
 
-        self.default_web_client_location = cfg.get(
-            "email", "email.default_web_client_location"
+        self.default_web_client_location = config.get(
+            "email.default_web_client_location"
         )
 
-        self.username_obfuscate_characters = cfg.getint(
-            "email", "email.third_party_invite_username_obfuscate_characters"
+        self.username_obfuscate_characters = int(
+            config.get("email.third_party_invite_username_obfuscate_characters")
         )
 
-        self.domain_obfuscate_characters = cfg.getint(
-            "email", "email.third_party_invite_domain_obfuscate_characters"
+        self.domain_obfuscate_characters = int(
+            config.get("email.third_party_invite_domain_obfuscate_characters")
         )
 
         return False

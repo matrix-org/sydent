@@ -13,27 +13,26 @@
 # limitations under the License.
 
 import logging
-from configparser import ConfigParser
 
 import nacl
 import signedjson.key
 
-from sydent.config._base import BaseConfig
+from sydent.config._base import CONFIG_PARSER_DICT, BaseConfig
 
 logger = logging.getLogger(__name__)
 
 
 class CryptoConfig(BaseConfig):
-    def parse_config(self, cfg: "ConfigParser") -> bool:
+    def parse_config(self, cfg: CONFIG_PARSER_DICT) -> bool:
         """
         Parse the crypto section of the config
         :param cfg: the configuration to be parsed
         """
+        config = cfg.get("crypto")
 
-        signing_key_str = cfg.get("crypto", "ed25519.signingkey")
-        signing_key_parts = signing_key_str.split(" ")
+        signing_key_str = config.get("ed25519.signingkey") or None
 
-        if signing_key_str == "":
+        if signing_key_str is None:
             logger.warning(
                 "'ed25519.signingkey' cannot be blank. Please generate a new"
                 " signing key with the 'generate-key' script."
@@ -42,7 +41,10 @@ class CryptoConfig(BaseConfig):
             self.signing_key = signedjson.key.generate_signing_key("0")
 
             return True
-        elif len(signing_key_parts) == 1:
+
+        signing_key_parts = signing_key_str.split(" ")
+
+        if len(signing_key_parts) == 1:
             # old format key
             logger.warning(
                 "Updating signing key format for this run. Please run the"

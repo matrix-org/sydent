@@ -33,6 +33,7 @@ server.name = test.local
 terms.path = {terms_path}
 templates.path = {testsubject_path}/res
 brand.default = is-test
+log.path = {testsubject_path}/sydent.log
 
 
 ip.whitelist = 127.0.0.1
@@ -89,18 +90,15 @@ class MatrixIsTestLauncher:
             }
         )
 
-        stderr_fp = open(os.path.join(testsubject_path, "sydent.stderr"), "w")
-
         pybin = os.getenv("SYDENT_PYTHON", "python")
 
         self.process = Popen(
             args=[pybin, "-m", "sydent.sydent"],
             cwd=self.tmpdir,
             env=newEnv,
-            stderr=stderr_fp,
         )
         # XXX: wait for startup in a sensible way
-        time.sleep(2)
+        time.sleep(10)
 
         self._baseUrl = "http://localhost:%d" % (port,)
 
