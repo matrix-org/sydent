@@ -123,29 +123,6 @@ Environment variables
 | SYDENT_DB_PATH     | ``sydent.db``   | ``/data/sydent.db``   |
 +--------------------+-----------------+-----------------------+
 
-Testing
-=======
-
-Sydent uses matrix-is-tester (https://github.com/matrix-org/matrix-is-tester/) to provide
-black-box testing of compliance with the `Matrix Identity Service API <https://matrix.org/docs/spec/identity_service/latest>`_.
-This can be run as follows::
-
-    pip install git+https://github.com/matrix-org/matrix-is-tester.git
-    trial matrix_is_tester
-
-The ``SYDENT_PYTHON`` enviroment variable can be set to launch Sydent with a specific python binary::
-
-    SYDENT_PYTHON=/path/to/python trial matrix_is_tester
-
-The ``matrix_is_test`` directory contains Sydent's launcher for ``matrix_is_tester``: this means
-that Sydent's directory needs to be on the Python path (e.g. ``PYTHONPATH=$PYTHONPATH:/path/to/sydent``).
-
-Sydent also has some unit tests to ensure some of its features that aren't part of the Matrix
-specification (e.g. replication) keep on working. To run these tests, run the following with Sydent's
-virtualenv activated from the root of the Sydent repository::
-
-     trial tests
-
 
 Internal bind and unbind API
 ============================
