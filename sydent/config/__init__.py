@@ -271,8 +271,7 @@ class SydentConfig:
 
 def setup_logging_from_file(config_file: str) -> None:
     """
-    Parse the given config from a filepath, populating missing items and
-    sections. NOTE: this method also sets up logging.
+    Setup logging using the settings from a config file.
 
     :param config_file: the file to be parsed
     """
