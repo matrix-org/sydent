@@ -9,6 +9,7 @@
 # The signing key is generally used in "ed25519.signingkey" in the sydent config
 
 import signedjson.key
+import sys
 
 signing_key = signedjson.key.generate_signing_key(0)
 sk_str = "%s %s %s" % (
@@ -18,11 +19,17 @@ sk_str = "%s %s %s" % (
     )
 pk_str = signedjson.key.encode_verify_key_base64(signing_key.verify_key)
 
-print(
-    "# A new key has been generated. To use it, update your sydent config file with the following: \n"
-    "\n"
-    "[crypto]\n"
-    f"ed25519.signingkey = {sk_str}\n"
-    "\n"
-    f"# For reference, the public (verificiation) key is {pk_str}\n"
-)
+if len(sys.argv) != 2 or sys.argv[1] != "--quiet":
+    print(f"""
+A new key has been generated. To use it, update your sydent config file with the following:
+
+[crypto]
+ed25519.signingkey = {sk_str}
+
+For reference, the public (verification) key is {pk_str}
+""")
+else:
+    print(f"""
+[crypto]
+ed25519.signingkey = {sk_str}
+""")

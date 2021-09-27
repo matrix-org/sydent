@@ -53,11 +53,11 @@ else:
 
     verify_key_str = signedjson.key.encode_verify_key_base64(signing_key.verify_key)
 
-    print(
-        "Update your sydent config file with the following: \n"
-        "\n"
-        "[crypto]\n"
-        f"ed25519.signingkey = {signing_key_str}\n"
-        "\n"
-        f"For reference, the public (verificiation) key is {verify_key_str}\n"
-    )
+    print(f"""\
+Update your sydent config file with the following:
+
+[crypto]
+    ed25519.signingkey = {signing_key_str}
+
+For reference, the public (verification) key is {verify_key_str}.
+""")
