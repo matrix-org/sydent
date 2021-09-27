@@ -212,12 +212,10 @@ class SydentConfig:
         """
         return self._parse_config(cfg)
 
-    def parse_config_file(
-        self, config_file: str, skip_logging_setup: bool = False
-    ) -> None:
+    def parse_config_file(self, config_file: str) -> None:
         """
         Parse the given config from a filepath, populating missing items and
-        sections. NOTE: this method also sets up logging.
+        sections.
 
         :param config_file: the file to be parsed
         """
@@ -238,14 +236,8 @@ class SydentConfig:
 
         cfg.read(config_file)
 
-        # Logging is configured in cfg, but these options must be parsed first
-        # so that we can log while parsing the rest
-        if not skip_logging_setup:
-            setup_logging(cfg)
-
         # TODO: Don't alter config file when starting Sydent so that
         #       it can be set to read-only
-
         needs_saving = self.parse_from_config_parser(cfg)
 
         if needs_saving:
@@ -274,13 +266,31 @@ class SydentConfig:
             for option, value in section_dict.items():
                 cfg.set(section, option, value)
 
-        # This is only ever called by tests so don't configure logging
-        # as tests do this themselves
-
         self.parse_from_config_parser(cfg)
 
 
-def setup_logging(cfg: ConfigParser) -> None:
+def setup_logging_from_file(config_file: str) -> None:
+    """
+    Parse the given config from a filepath, populating missing items and
+    sections. NOTE: this method also sets up logging.
+
+    :param config_file: the file to be parsed
+    """
+    cfg = ConfigParser()
+    if os.path.exists(config_file):
+        cfg.read(config_file)
+
+    path = cfg.get(
+        "general", "log.path", fallback=CONFIG_DEFAULTS.get("general").get("log.path")
+    )
+    level = cfg.get(
+        "general", "log.level", fallback=CONFIG_DEFAULTS.get("general").get("log.level")
+    )
+
+    _setup_logging(path, level)
+
+
+def _setup_logging(log_path: str, log_level: str) -> None:
     """
     Setup logging using the options selected in the config
 
@@ -289,10 +299,9 @@ def setup_logging(cfg: ConfigParser) -> None:
     log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
     formatter = logging.Formatter(log_format)
 
-    logPath = cfg.get("general", "log.path")
-    if logPath != "":
+    if log_path != "":
         handler: logging.StreamHandler = logging.handlers.TimedRotatingFileHandler(
-            logPath, when="midnight", backupCount=365
+            log_path, when="midnight", backupCount=365
         )
         handler.setFormatter(formatter)
 
@@ -306,7 +315,7 @@ def setup_logging(cfg: ConfigParser) -> None:
 
     handler.setFormatter(formatter)
     rootLogger = logging.getLogger("")
-    rootLogger.setLevel(cfg.get("general", "log.level"))
+    rootLogger.setLevel(log_level)
     rootLogger.addHandler(handler)
 
     observer = log.PythonLoggingObserver()

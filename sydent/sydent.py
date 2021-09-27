@@ -23,7 +23,7 @@ from typing import Optional
 import twisted.internet.reactor
 from twisted.internet import address, task
 
-from sydent.config import SydentConfig
+from sydent.config import SydentConfig, setup_logging_from_file
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.sqlitedb import SqliteDatabase
 from sydent.db.valsession import ThreePidValSessionStore
@@ -307,8 +307,11 @@ def run_gc():
 
 
 if __name__ == "__main__":
+    config_file = get_config_file_path()
+    setup_logging_from_file(config_file)
+
     sydent_config = SydentConfig()
-    sydent_config.parse_config_file(get_config_file_path(), skip_logging_setup=False)
+    sydent_config.parse_config_file(config_file)
 
     syd = Sydent(sydent_config)
     syd.run()

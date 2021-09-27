@@ -407,7 +407,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     sydent_config = SydentConfig()
-    sydent_config.parse_config_file(args.config_path, skip_logging_setup=True)
+    sydent_config.parse_config_file(args.config_path)
 
     reactor = ResolvingMemoryReactorClock()
     sydent = Sydent(sydent_config, reactor, False)
