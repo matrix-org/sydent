@@ -126,7 +126,7 @@ class StoreInviteServlet(Resource):
             substitutions.setdefault(k, "")
 
         # MSC3288
-        substitutions["room_type"] = substitutions.pop(
+        substitutions["room_type"] = substitutions.get(
             "org.matrix.msc3288.room_type", ""
         )
 
@@ -142,7 +142,7 @@ class StoreInviteServlet(Resource):
             "web_client_location"
         ] = self.sydent.config.email.default_web_client_location
         if "org.matrix.web_client_location" in substitutions:
-            substitutions["web_client_location"] = substitutions.pop(
+            substitutions["web_client_location"] = substitutions.get(
                 "org.matrix.web_client_location"
             )
 
