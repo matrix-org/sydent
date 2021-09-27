@@ -8,8 +8,9 @@
 
 # The signing key is generally used in "ed25519.signingkey" in the sydent config
 
-import signedjson.key
 import sys
+
+import signedjson.key
 
 signing_key = signedjson.key.generate_signing_key(0)
 sk_str = "%s %s %s" % (
