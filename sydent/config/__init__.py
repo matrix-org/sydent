@@ -19,8 +19,6 @@ import os
 from configparser import DEFAULTSECT, ConfigParser
 from typing import Dict
 
-from twisted.python import log
-
 from sydent.config.crypto import CryptoConfig
 from sydent.config.database import DatabaseConfig
 from sydent.config.email import EmailConfig
@@ -267,55 +265,3 @@ class SydentConfig:
                 cfg.set(section, option, value)
 
         self.parse_from_config_parser(cfg)
-
-
-def setup_logging_from_file(config_file: str) -> None:
-    """
-    Setup logging using the settings from a config file.
-
-    :param config_file: the file to be parsed
-    """
-    cfg = ConfigParser()
-    if os.path.exists(config_file):
-        cfg.read(config_file)
-
-    path = cfg.get(
-        "general", "log.path", fallback=CONFIG_DEFAULTS.get("general").get("log.path")
-    )
-    level = cfg.get(
-        "general", "log.level", fallback=CONFIG_DEFAULTS.get("general").get("log.level")
-    )
-
-    _setup_logging(path, level)
-
-
-def _setup_logging(log_path: str, log_level: str) -> None:
-    """
-    Setup logging using the options selected in the config
-
-    :param cfg: the configuration
-    """
-    log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
-    formatter = logging.Formatter(log_format)
-
-    if log_path != "":
-        handler: logging.StreamHandler = logging.handlers.TimedRotatingFileHandler(
-            log_path, when="midnight", backupCount=365
-        )
-        handler.setFormatter(formatter)
-
-        def sighup(signum, stack):
-            logger.info("Closing log file due to SIGHUP")
-            handler.doRollover()
-            logger.info("Opened new log file due to SIGHUP")
-
-    else:
-        handler = logging.StreamHandler()
-
-    handler.setFormatter(formatter)
-    rootLogger = logging.getLogger("")
-    rootLogger.setLevel(log_level)
-    rootLogger.addHandler(handler)
-
-    observer = log.PythonLoggingObserver()
-    observer.start()

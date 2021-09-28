@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import os
 from configparser import ConfigParser
 from typing import List
@@ -22,8 +21,6 @@ from jinja2.loaders import FileSystemLoader
 
 from sydent.config._base import BaseConfig
 from sydent.util.ip_range import DEFAULT_IP_RANGE_BLACKLIST, generate_ip_set
-
-logger = logging.getLogger(__name__)
 
 
 class GeneralConfig(BaseConfig):
@@ -36,11 +33,14 @@ class GeneralConfig(BaseConfig):
         self.server_name = cfg.get("general", "server.name")
         if self.server_name == "":
             self.server_name = os.uname()[1]
-            logger.warning(
-                "You have not specified a server name. I have guessed that this server is called '%s'. "
-                "If this is incorrect, you should edit 'general.server.name' in the config file."
-                % (self.server_name,)
+            print(
+                "WARNING: You have not specified a server name. I have guessed that this "
+                f" server is called '{self.server_name}'. If this is incorrect, you should "
+                "edit 'general.server.name' in the config file."
             )
+
+        self.log_level = cfg.get("general", "log.level")
+        self.log_path = cfg.get("general", "log.path")
 
         # Get the possible brands by looking at directories under the
         # templates.path directory.
@@ -52,8 +52,9 @@ class GeneralConfig(BaseConfig):
                 if os.path.isdir(os.path.join(self.templates_path, p))
             }
         else:
-            logging.warning(
-                f"The path specified by 'general.templates.path' ({self.templates_path}) does not exist."
+            print(
+                f"WARNING: The path specified by 'general.templates.path' ({self.templates_path}) "
+                "does not exist."
             )
             # This is a legacy code-path and assumes that verify_response_template,
             # email.template, and email.invite_template are defined.

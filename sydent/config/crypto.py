@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from configparser import ConfigParser
 
 import nacl
 import signedjson.key
 
 from sydent.config._base import BaseConfig
-
-logger = logging.getLogger(__name__)
 
 
 class CryptoConfig(BaseConfig):
@@ -36,8 +33,8 @@ class CryptoConfig(BaseConfig):
         save_key = False
 
         if signing_key_str == "":
-            logger.info(
-                "This server does not yet have an ed25519 signing key. "
+            print(
+                "INFO: This server does not yet have an ed25519 signing key. "
                 "Creating one and saving it in the config file."
             )
 
@@ -46,7 +43,7 @@ class CryptoConfig(BaseConfig):
             save_key = True
         elif len(signing_key_parts) == 1:
             # old format key
-            logger.info("Updating signing key format: brace yourselves")
+            print("INFO: Updating signing key format: brace yourselves")
 
             self.signing_key = nacl.signing.SigningKey(
                 signing_key_str, encoder=nacl.encoding.HexEncoder
