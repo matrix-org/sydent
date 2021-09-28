@@ -268,4 +268,4 @@ class SydentConfig:
             for option, value in section_dict.items():
                 cfg.set(section, option, value)
 
-        self.parse_from_config_parser(cfg)
+        self._parse_from_config_parser(cfg)
