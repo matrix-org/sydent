@@ -22,6 +22,7 @@ from typing import Optional
 
 import twisted.internet.reactor
 from twisted.internet import address, task
+from twisted.python import log
 
 from sydent.config import SydentConfig
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -306,9 +307,40 @@ def run_gc():
             gc.collect(i)
 
 
+def setup_logging(config: SydentConfig) -> None:
+    """
+    Setup logging using the options specified in the config
+
+    :param config: the configuration to use
+    """
+    log_path = config.general.log_path
+    log_level = config.general.log_level
+
+    log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
+    formatter = logging.Formatter(log_format)
+
+    if log_path != "":
+        handler: logging.StreamHandler = logging.handlers.TimedRotatingFileHandler(
+            log_path, when="midnight", backupCount=365
+        )
+        handler.setFormatter(formatter)
+
+    else:
+        handler = logging.StreamHandler()
+
+    handler.setFormatter(formatter)
+    rootLogger = logging.getLogger("")
+    rootLogger.setLevel(log_level)
+    rootLogger.addHandler(handler)
+
+    observer = log.PythonLoggingObserver()
+    observer.start()
+
+
 if __name__ == "__main__":
     sydent_config = SydentConfig()
-    sydent_config.parse_config_file(get_config_file_path(), skip_logging_setup=False)
+    sydent_config.parse_config_file(get_config_file_path())
+    setup_logging(sydent_config)
 
     syd = Sydent(sydent_config)
     syd.run()

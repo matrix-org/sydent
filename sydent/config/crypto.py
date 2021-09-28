@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from configparser import ConfigParser
 
 import nacl
 import signedjson.key
 
 from sydent.config._base import BaseConfig
-
-logger = logging.getLogger(__name__)
 
 
 class CryptoConfig(BaseConfig):
@@ -34,8 +31,8 @@ class CryptoConfig(BaseConfig):
         signing_key_parts = signing_key_str.split(" ")
 
         if signing_key_str == "":
-            logger.warning(
-                "'ed25519.signingkey' cannot be blank. Please generate a new"
+            print(
+                "WARNING: 'ed25519.signingkey' cannot be blank. Please generate a new"
                 " signing key with the 'generate-key' script."
             )
 
@@ -44,8 +41,8 @@ class CryptoConfig(BaseConfig):
             return True
         elif len(signing_key_parts) == 1:
             # old format key
-            logger.warning(
-                "Updating signing key format for this run. Please run the"
+            print(
+                "WARNING: Updating signing key format for this run. Please run the"
                 " 'update-key' script to speedup the next startup."
             )
 

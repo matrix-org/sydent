@@ -19,8 +19,6 @@ import os
 from configparser import DEFAULTSECT, ConfigParser
 from typing import Dict
 
-from twisted.python import log
-
 from sydent.config.crypto import CryptoConfig
 from sydent.config.database import DatabaseConfig
 from sydent.config.email import EmailConfig
@@ -219,7 +217,7 @@ class SydentConfig:
     ) -> None:
         """
         Parse the given config from a filepath, populating missing items and
-        sections. NOTE: this method also sets up logging.
+        sections.
 
         :param config_file: the file to be parsed
         """
@@ -234,11 +232,6 @@ class SydentConfig:
                 cfg.set(DEFAULTSECT if new_config_file else sect, k, v)
 
         cfg.read(config_file)
-
-        # Logging is configured in cfg, but these options must be parsed first
-        # so that we can log while parsing the rest
-        if not skip_logging_setup:
-            setup_logging(cfg)
 
         needs_updating = self._parse_from_config_parser(cfg)
 
@@ -275,40 +268,4 @@ class SydentConfig:
             for option, value in section_dict.items():
                 cfg.set(section, option, value)
 
-        # This is only ever called by tests so don't configure logging
-        # as tests do this themselves
-
-        self._parse_from_config_parser(cfg)
-
-
-def setup_logging(cfg: ConfigParser) -> None:
-    """
-    Setup logging using the options selected in the config
-
-    :param cfg: the configuration
-    """
-    log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
-    formatter = logging.Formatter(log_format)
-
-    logPath = cfg.get("general", "log.path")
-    if logPath != "":
-        handler: logging.StreamHandler = logging.handlers.TimedRotatingFileHandler(
-            logPath, when="midnight", backupCount=365
-        )
-        handler.setFormatter(formatter)
-
-        def sighup(signum, stack):
-            logger.info("Closing log file due to SIGHUP")
-            handler.doRollover()
-            logger.info("Opened new log file due to SIGHUP")
-
-    else:
-        handler = logging.StreamHandler()
-
-    handler.setFormatter(formatter)
-    rootLogger = logging.getLogger("")
-    rootLogger.setLevel(cfg.get("general", "log.level"))
-    rootLogger.addHandler(handler)
-
-    observer = log.PythonLoggingObserver()
-    observer.start()
+        self.parse_from_config_parser(cfg)
