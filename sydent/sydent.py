@@ -325,11 +325,6 @@ def setup_logging(config: SydentConfig) -> None:
         )
         handler.setFormatter(formatter)
 
-        def sighup(signum, stack):
-            logger.info("Closing log file due to SIGHUP")
-            handler.doRollover()
-            logger.info("Opened new log file due to SIGHUP")
-
     else:
         handler = logging.StreamHandler()
 
