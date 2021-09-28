@@ -35,7 +35,7 @@ class GeneralConfig(BaseConfig):
             self.server_name = os.uname()[1]
             print(
                 "WARNING: You have not specified a server name. I have guessed that this "
-                f" server is called '{self.server_name}'. If this is incorrect, you should "
+                f"server is called '{self.server_name}'. If this is incorrect, you should "
                 "edit 'general.server.name' in the config file."
             )
 
