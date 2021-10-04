@@ -17,6 +17,7 @@
 from twisted.web.resource import Resource
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets.threepidunbindservlet import check_req_params
 
 
 class AuthenticatedUnbindThreePidServlet(Resource):
@@ -31,13 +32,20 @@ class AuthenticatedUnbindThreePidServlet(Resource):
     @jsonwrap
     def render_POST(self, request):
         send_cors(request)
-        args = get_args(request, ('medium', 'address', 'mxid'))
-
-        threepid = {'medium': args['medium'], 'address': args['address']}
         
-        return self.sydent.threepidBinder.removeBinding(
-            threepid, args['mxid'],
-        )
+        if not check_req_params(request):
+            return
+
+        try:
+            self.sydent.threepidBinder.removeBinding(threepid, mxid)
+
+            request.write(dict_to_json_bytes({}))
+            request.finish()
+        except Exception as ex:
+            logger.exception("Exception whilst handling unbind")
+            request.setResponseCode(500)
+            request.write(dict_to_json_bytes({'errcode': 'M_UNKNOWN', 'error': str(ex)}))
+            request.finish()
 
     def render_OPTIONS(self, request):
         send_cors(request)
