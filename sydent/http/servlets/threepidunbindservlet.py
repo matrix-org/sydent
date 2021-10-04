@@ -39,6 +39,46 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def check_req_params(request):
+    try:
+        # json.loads doesn't allow bytes in Python 3.5
+        body = json_decoder.decode(request.content.read().decode("UTF-8"))
+    except ValueError:
+        request.setResponseCode(400)
+        request.write(
+            dict_to_json_bytes(
+                {"errcode": "M_BAD_JSON", "error": "Malformed JSON"}
+            )
+        )
+        request.finish()
+        return False
+
+    missing = [k for k in ("threepid", "mxid") if k not in body]
+    if len(missing) > 0:
+        request.setResponseCode(400)
+        msg = "Missing parameters: " + (",".join(missing))
+        request.write(
+            dict_to_json_bytes({"errcode": "M_MISSING_PARAMS", "error": msg})
+        )
+        request.finish()
+        return False
+
+    if "medium" not in threepid or "address" not in threepid:
+        request.setResponseCode(400)
+        request.write(
+            dict_to_json_bytes(
+                {
+                    "errcode": "M_MISSING_PARAMS",
+                    "error": "Threepid lacks medium / address",
+                }
+            )
+        )
+        request.finish()
+        return False
+
+    return True
+
+
 class ThreePidUnbindServlet(Resource):
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
@@ -51,44 +91,11 @@ class ThreePidUnbindServlet(Resource):
 
     async def _async_render_POST(self, request):
         try:
-            try:
-                # json.loads doesn't allow bytes in Python 3.5
-                body = json_decoder.decode(request.content.read().decode("UTF-8"))
-            except ValueError:
-                request.setResponseCode(400)
-                request.write(
-                    dict_to_json_bytes(
-                        {"errcode": "M_BAD_JSON", "error": "Malformed JSON"}
-                    )
-                )
-                request.finish()
-                return
-
-            missing = [k for k in ("threepid", "mxid") if k not in body]
-            if len(missing) > 0:
-                request.setResponseCode(400)
-                msg = "Missing parameters: " + (",".join(missing))
-                request.write(
-                    dict_to_json_bytes({"errcode": "M_MISSING_PARAMS", "error": msg})
-                )
-                request.finish()
+            if not check_req_params(request):
                 return
 
             threepid = body["threepid"]
             mxid = body["mxid"]
-
-            if "medium" not in threepid or "address" not in threepid:
-                request.setResponseCode(400)
-                request.write(
-                    dict_to_json_bytes(
-                        {
-                            "errcode": "M_MISSING_PARAMS",
-                            "error": "Threepid lacks medium / address",
-                        }
-                    )
-                )
-                request.finish()
-                return
 
             # We now check for authentication in two different ways, depending
             # on the contents of the request. If the user has supplied "sid"
