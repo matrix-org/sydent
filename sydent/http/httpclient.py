@@ -15,7 +15,7 @@
 import json
 import logging
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
@@ -68,7 +68,7 @@ class HTTPClient:
     async def post_json_get_nothing(
         self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
     ) -> IResponse:
-        """Make a POST request to an endpoint returning JSON and parse result
+        """Make a POST request to an endpoint returning nothing
 
         :param uri: The URI to make a POST request to.
 
@@ -79,6 +79,32 @@ class HTTPClient:
             is supported.
 
         :return: a response from the remote server.
+        """
+        resp, _ = await self.post_json_maybe_get_json(uri, post_json, opts)
+        return resp
+
+    async def post_json_maybe_get_json(
+        self,
+        uri: str,
+        post_json: Dict[Any, Any],
+        opts: Dict[str, Any],
+        max_size: Optional[int] = None,
+    ) -> Tuple[IResponse, Optional[JsonDict]]:
+        """Make a POST request to an endpoint that might be returning JSON and parse
+        result
+
+        :param uri: The URI to make a POST request to.
+
+        :param post_json: A Python object that will be converted to a JSON
+            string and POSTed to the given URI.
+
+        :param opts: A dictionary of request options. Currently only opts.headers
+            is supported.
+
+        :param max_size: The maximum size (in bytes) to allow as a response.
+
+        :return: a response from the remote server, and its decoded JSON body if any (None
+            otherwise).
         """
         json_bytes = json.dumps(post_json).encode("utf8")
 
@@ -103,13 +129,17 @@ class HTTPClient:
         # Ensure the body object is read otherwise we'll leak HTTP connections
         # as per
         # https://twistedmatrix.com/documents/current/web/howto/client.html
+        json_body = None
         try:
             # TODO Will this cause the server to think the request was a failure?
-            await read_body_with_max_size(response, 0)
-        except BodyExceededMaxSize:
+            body = await read_body_with_max_size(response, max_size)
+            json_body = json_decoder.decode(body.decode("UTF-8"))
+        except Exception:
+            # We might get an exception here because the body exceeds the max_size, or it
+            # isn't valid JSON. In both cases, we don't care about it.
             pass
 
-        return response
+        return response, json_body
 
 
 class SimpleHttpClient(HTTPClient):
