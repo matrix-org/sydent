@@ -124,5 +124,6 @@ class OpenMarketSMS:
         logger.info(
             "Successfully sent SMS (ticket ID: %s), OpenMarket API responded with"
             " code %d",
-            parts[-1], resp.code,
+            parts[-1],
+            resp.code,
         )
