@@ -127,9 +127,14 @@ class OpenMarketSMS:
                 "Got response from sending SMS with malformed location header"
             )
 
+        request_id = None
+        if "X-Request-Id" in headers:
+            request_id = headers["X-Request-Id"][0]
+
         logger.info(
-            "Successfully sent SMS (ticket ID: %s), OpenMarket API responded with"
-            " code %d",
+            "Successfully sent SMS (ticket ID: %s, request ID %s), OpenMarket API"
+            " responded with code %d",
             parts[-1],
+            request_id,
             resp.code,
         )
