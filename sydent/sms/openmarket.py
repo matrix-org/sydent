@@ -97,6 +97,18 @@ class OpenMarketSMS:
         resp = await self.http_cli.post_json_get_nothing(
             API_BASE_URL, send_body, {"headers": req_headers}
         )
+
+        # Catch errors from the API. The documentation says a success code should be 202
+        # Accepted, but let's be broad here just in case and accept all 2xx response
+        # codes.
+        #
+        # Relevant OpenMarket API documentation:
+        # https://www.openmarket.com/docs/Content/apis/v4http/send-json.htm
+        if resp.code < 200 or resp.code >= 300:
+            raise Exception(
+                "OpenMarket API responded with code %d" % resp.code,
+            )
+
         headers = dict(resp.headers.getAllRawHeaders())
 
         if "Location" not in headers:
@@ -108,3 +120,9 @@ class OpenMarketSMS:
             raise Exception(
                 "Got response from sending SMS with malformed location header"
             )
+
+        logger.info(
+            "Successfully sent SMS (ticket ID: %s), OpenMarket API responded with"
+            " code %d",
+            parts[-1], resp.code,
+        )
