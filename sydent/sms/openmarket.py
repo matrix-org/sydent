@@ -94,7 +94,7 @@ class OpenMarketSMS:
             }
         )
 
-        resp = await self.http_cli.post_json_get_nothing(
+        resp, body = await self.http_cli.post_json_maybe_get_json(
             API_BASE_URL, send_body, {"headers": req_headers}
         )
 
@@ -105,8 +105,14 @@ class OpenMarketSMS:
         # Relevant OpenMarket API documentation:
         # https://www.openmarket.com/docs/Content/apis/v4http/send-json.htm
         if resp.code < 200 or resp.code >= 300:
+            if body is None or "error" not in body:
+                raise Exception(
+                    "OpenMarket API responded with status %d" % resp.code,
+                )
+
+            error = body["error"]
             raise Exception(
-                "OpenMarket API responded with code %d" % resp.code,
+                "OpenMarket API responded with status %d (%s)" % (resp.code, error),
             )
 
         headers = dict(resp.headers.getAllRawHeaders())
