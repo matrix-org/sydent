@@ -1,0 +1,1 @@
+Fix a bug which could cause SMS sending to fail silently.
