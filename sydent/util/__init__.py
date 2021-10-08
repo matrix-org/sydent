@@ -14,9 +14,10 @@
 
 import json
 import time
+from typing import NoReturn
 
 
-def time_msec():
+def time_msec() -> int:
     """
     Get the current time in milliseconds.
 
@@ -26,7 +27,7 @@ def time_msec():
     return int(time.time() * 1000)
 
 
-def _reject_invalid_json(val):
+def _reject_invalid_json(val: str) -> NoReturn:
     """Do not allow Infinity, -Infinity, or NaN values in JSON."""
     raise ValueError("Invalid JSON value: '%s'" % val)
 
