@@ -44,6 +44,14 @@ target-version = ['py36']
 plugins = "mypy_zope:plugin"
 show_error_codes = true
 namespace_packages = true
+files = [
+    "sydent",
+    # TODO the rest of CI checks these---mypy ought to too.
+    # "tests",
+    # "matrix_is_test",
+    # "scripts",
+    # "setup.py",
+]
 
 [[tool.mypy.overrides]]
 module = [
