@@ -1,1 +1,1 @@
-Fix a long-lasting bug in asynchronous code that could cause SMS messages not to be correctly sent.
+Fix a long-standing bug in asynchronous code that could cause SMS messages not to be correctly sent.
