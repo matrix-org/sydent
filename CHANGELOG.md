@@ -1,3 +1,12 @@
+Sydent 2.4.5 (2021-10-08)
+=========================
+
+Bugfixes
+--------
+
+- Fix a long-standing bug in asynchronous code that could cause SMS messages not to be correctly sent. ([\#413](https://github.com/matrix-org/sydent/issues/413))
+
+
 Sydent 2.4.4 (2021-10-08)
 =========================
 
