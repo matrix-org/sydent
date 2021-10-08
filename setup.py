@@ -61,6 +61,8 @@ setup(
             "isort==5.8.0",
             "mypy>=0.902",
             "mypy-zope>=0.3.1",
+            "types-Jinja2",
+            "types-PyOpenSSL",
             "types-PyYAML",
             "types-mock",
         ],
