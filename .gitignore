@@ -8,6 +8,8 @@ _trial_temp.lock
 *.egg
 *.egg-info
 .python-version
+.mypy_cache
+/env
 
 # Runtime files
 /sydent.conf
