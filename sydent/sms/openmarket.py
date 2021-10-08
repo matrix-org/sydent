@@ -137,7 +137,8 @@ class OpenMarketSMS:
             logger.error("Got response from sending SMS with no location header")
             # Nominally we should parse the URL, but we can just split on '/' since
             # we only care about the last part.
-            parts = headers[b"Location"][0].split("/")
+            value = headers[b"Location"][0].decode("UTF-8")
+            parts = value.split("/")
             if len(parts) < 2:
                 logger.error(
                     "Got response from sending SMS with malformed location header"
