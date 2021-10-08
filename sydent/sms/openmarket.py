@@ -103,8 +103,8 @@ class OpenMarketSMS:
         headers = dict(resp.headers.getAllRawHeaders())
 
         request_id = None
-        if "X-Request-Id" in headers:
-            request_id = headers["X-Request-Id"][0]
+        if b"X-Request-Id" in headers:
+            request_id = headers[b"X-Request-Id"][0].decode("UTF-8")
 
         # Catch errors from the API. The documentation says a success code should be 202
         # Accepted, but let's be broad here just in case and accept all 2xx response
@@ -132,20 +132,26 @@ class OpenMarketSMS:
                 ),
             )
 
-        if "Location" not in headers:
-            raise Exception("Got response from sending SMS with no location header")
-        # Nominally we should parse the URL, but we can just split on '/' since
-        # we only care about the last part.
-        parts = headers["Location"][0].split("/")
-        if len(parts) < 2:
-            raise Exception(
-                "Got response from sending SMS with malformed location header"
-            )
+        ticket_id = None
+        if b"Location" not in headers:
+            logger.error("Got response from sending SMS with no location header")
+        else:
+            # Nominally we should parse the URL, but we can just split on '/' since
+            # we only care about the last part.
+            value = headers[b"Location"][0].decode("UTF-8")
+            parts = value.split("/")
+            if len(parts) < 2:
+                logger.error(
+                    "Got response from sending SMS with malformed location header: %s",
+                    value,
+                )
+            else:
+                ticket_id = parts[-1]
 
         logger.info(
             "Successfully sent SMS (ticket ID: %s, request ID %s), OpenMarket API"
             " responded with code %d",
-            parts[-1],
+            ticket_id,
             request_id,
             resp.code,
         )
