@@ -1,3 +1,12 @@
+Sydent 2.4.6 (2021-10-08)
+=========================
+
+Bugfixes
+--------
+
+- Fix a long-standing bug with error handling around missing headers when dealing with the OpenMarket API, which could cause the wrong assumption that sending a SMS failed when it didn't. ([\#415](https://github.com/matrix-org/sydent/issues/415))
+
+
 Sydent 2.4.5 (2021-10-08)
 =========================
 

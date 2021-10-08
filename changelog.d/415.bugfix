@@ -1,1 +1,0 @@
-Fix a long-standing bug with error handling around missing headers when dealing with the OpenMarket API, which could cause the wrong assumption that sending a SMS failed when it didn't.
