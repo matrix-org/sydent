@@ -16,9 +16,9 @@
 import collections
 import logging
 import math
-from typing import TYPE_CHECKING, Any, Dict, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Union
 
-import signedjson.sign  # type: ignore
+import signedjson.sign
 from twisted.internet import defer
 
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -70,8 +70,10 @@ class ThreepidBinder:
 
         # Hash the medium + address and store that hash for the purposes of
         # later lookups
+        lookup_pepper = self.hashing_store.get_lookup_pepper()
+        assert lookup_pepper is not None
         str_to_hash = " ".join(
-            [normalised_address, medium, self.hashing_store.get_lookup_pepper()],
+            [normalised_address, medium, lookup_pepper],
         )
         lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 
@@ -92,14 +94,13 @@ class ThreepidBinder:
         joinTokenStore = JoinTokenStore(self.sydent)
         pendingJoinTokens = joinTokenStore.getTokens(medium, normalised_address)
         invites = []
+        # Widen the value type to Any: we're going to set the signed key
+        # to point to a dict, but pendingJoinTokens yields Dict[str, str]
+        token: Dict[str, Any]
         for token in pendingJoinTokens:
             token["mxid"] = mxid
-            token["signed"] = {
-                "mxid": mxid,
-                "token": cast(str, token["token"]),
-            }
             token["signed"] = signedjson.sign.sign_json(
-                token["signed"],
+                {"mxid": mxid},
                 self.sydent.config.general.server_name,
                 self.sydent.keyring.ed25519,
             )
