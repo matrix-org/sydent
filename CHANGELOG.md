@@ -1,3 +1,12 @@
+Sydent 2.4.4 (2021-10-08)
+=========================
+
+Bugfixes
+--------
+
+- Fix a bug which could cause SMS sending to fail silently. ([\#412](https://github.com/matrix-org/sydent/issues/412))
+
+
 Sydent 2.4.3 (2021-09-14)
 =========================
 
