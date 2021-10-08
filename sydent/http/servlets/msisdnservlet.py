@@ -21,7 +21,7 @@ from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import asyncjsonwrap, get_args, jsonwrap, send_cors
 from sydent.types import JsonDict
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
@@ -45,8 +45,8 @@ class MsisdnRequestCodeServlet(Resource):
         self.sydent = syd
         self.require_auth = require_auth
 
-    @jsonwrap
-    def render_POST(self, request: Request) -> JsonDict:
+    @asyncjsonwrap
+    async def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
         if self.require_auth:
@@ -90,7 +90,7 @@ class MsisdnRequestCodeServlet(Resource):
 
         brand = self.sydent.brand_from_request(request)
         try:
-            sid = self.sydent.validators.msisdn.requestToken(
+            sid = await self.sydent.validators.msisdn.requestToken(
                 phone_number_object, clientSecret, sendAttempt, brand
             )
             resp = {

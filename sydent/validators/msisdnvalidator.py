@@ -72,7 +72,7 @@ class MsisdnValidator:
 
                 self.smsRules[country] = action
 
-    def requestToken(
+    async def requestToken(
         self,
         phoneNumber: phonenumbers.PhoneNumber,
         clientSecret: str,
@@ -128,7 +128,7 @@ class MsisdnValidator:
 
         smsBody = smsBodyTemplate.format(token=valSession.token)
 
-        self.omSms.sendTextSMS(smsBody, msisdn, originator)
+        await self.omSms.sendTextSMS(smsBody, msisdn, originator)
 
         valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
 
