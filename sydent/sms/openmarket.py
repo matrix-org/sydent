@@ -135,6 +135,7 @@ class OpenMarketSMS:
         ticket_id = None
         if b"Location" not in headers:
             logger.error("Got response from sending SMS with no location header")
+        else:
             # Nominally we should parse the URL, but we can just split on '/' since
             # we only care about the last part.
             value = headers[b"Location"][0].decode("UTF-8")
