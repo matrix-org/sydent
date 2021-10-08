@@ -104,7 +104,7 @@ class OpenMarketSMS:
 
         request_id = None
         if b"X-Request-Id" in headers:
-            request_id = headers[b"X-Request-Id"][0]
+            request_id = headers[b"X-Request-Id"][0].decode("UTF-8")
 
         # Catch errors from the API. The documentation says a success code should be 202
         # Accepted, but let's be broad here just in case and accept all 2xx response
@@ -142,7 +142,8 @@ class OpenMarketSMS:
             parts = value.split("/")
             if len(parts) < 2:
                 logger.error(
-                    "Got response from sending SMS with malformed location header"
+                    "Got response from sending SMS with malformed location header: %s",
+                    value,
                 )
             else:
                 ticket_id = parts[-1]
