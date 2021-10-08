@@ -61,9 +61,10 @@ module = [
     "OpenSSL",
     "prometheus_client",
     "phonenumbers",
+    "sentry_sdk",
     "signedjson.*",
     "sortedcontainers",
-    "unpaddedbase64"
+    "unpaddedbase64",
 ]
 ignore_missing_imports = true
 
