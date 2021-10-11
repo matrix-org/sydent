@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sydent.replication.peer import RemotePeer
 
@@ -39,11 +39,16 @@ class PeerStore:
             (name,),
         )
 
-        serverName = None
-        port = None
-        lastSentVer = None
-        pubkeys = {}
+        # Type safety: if the query returns no rows, we'll pubkeys will be empty
+        # and we'll return None before using serverName. Otherwise, we'll read
+        # at least one row and assign serverName a string value, because the
+        # `name` column is declared `not null` in the DB.
+        serverName: str = None  # type: ignore[assignment]
+        port: Optional[int] = None
+        lastSentVer: Optional[int] = None
+        pubkeys: Dict[str, str] = {}
 
+        row: Tuple[str, Optional[int], Optional[int], str, str]
         for row in res.fetchall():
             serverName = row[0]
             port = row[1]

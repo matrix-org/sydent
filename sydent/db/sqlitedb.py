@@ -16,7 +16,7 @@
 import logging
 import os
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -42,7 +42,7 @@ class SqliteDatabase:
             self._createSchema()
         self._upgradeSchema()
 
-    def _createSchema(self):
+    def _createSchema(self) -> None:
         logger.info("Running schema files...")
         schemaDir = os.path.dirname(__file__)
 
@@ -64,7 +64,7 @@ class SqliteDatabase:
         c.close()
         self.db.commit()
 
-    def _upgradeSchema(self):
+    def _upgradeSchema(self) -> None:
         curVer = self._getSchemaVersion()
 
         if curVer < 1:
@@ -212,13 +212,13 @@ class SqliteDatabase:
             logger.info("v4 -> v5 schema migration complete")
             self._setSchemaVersion(5)
 
-    def _getSchemaVersion(self):
+    def _getSchemaVersion(self) -> int:
         cur = self.db.cursor()
         cur.execute("PRAGMA user_version")
-        row = cur.fetchone()
+        row: Tuple[int] = cur.fetchone()
         return row[0]
 
-    def _setSchemaVersion(self, ver):
+    def _setSchemaVersion(self, ver: int) -> None:
         cur = self.db.cursor()
         # NB. pragma doesn't support variable substitution so we
         # do it in python (as a decimal so we don't risk SQL injection)

@@ -122,7 +122,7 @@ class RemotePeer(Peer):
         server_name: str,
         port: Optional[int],
         pubkeys: Dict[str, str],
-        lastSentVersion: int,
+        lastSentVersion: Optional[int],
     ) -> None:
         """
         :param sydent: The current Sydent instance.

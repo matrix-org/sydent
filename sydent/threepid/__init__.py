@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
 
 def threePidAssocFromDict(d):
@@ -36,7 +37,16 @@ def threePidAssocFromDict(d):
 
 
 class ThreepidAssociation:
-    def __init__(self, medium, address, lookup_hash, mxid, ts, not_before, not_after):
+    def __init__(
+        self,
+        medium: str,
+        address: str,
+        lookup_hash: Optional[str],
+        mxid: str,
+        ts: int,
+        not_before: int,
+        not_after: int,
+    ):
         """
         :param medium: The medium of the 3pid (eg. email)
         :param address: The identifier (eg. email address)
