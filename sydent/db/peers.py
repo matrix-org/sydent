@@ -76,11 +76,23 @@ class PeerStore:
 
         peers = []
 
-        peername = None
+        # Safety: we need to convince ourselves that `peername` will be not None
+        # when passed to `RemotePeer`.
+        #
+        # If `res` is empty, then `pubkeys` will start empty and never be written to.
+        # So we will never create a `RemotePeer`. That's fine.
+        #
+        # Otherwise we process at least one row. The first row we process will
+        # satisfy `row[0] is not None` because `name` is nonnull in the schema.
+        # `pubkeys` will be empty, so we skip the innermost `if` and assign peername
+        # to be a string. There are no further assignments of `None` to `peername`;
+        # it will be a string whenever we use it.
+        peername: str = None  # type: ignore[assignment]
         port = None
         lastSentVer = None
         pubkeys: Dict[str, str] = {}
 
+        row: Tuple[str, Optional[int], Optional[int], str, str]
         for row in res.fetchall():
             if row[0] != peername:
                 if len(pubkeys) > 0:
