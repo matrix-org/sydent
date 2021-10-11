@@ -13,4 +13,3 @@ jobs:
           python-version: '3.6'
       - run: python -m pip install -e .[dev]
       - run: mypy
-        continue-on-error: true
