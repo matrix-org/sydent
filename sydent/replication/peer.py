@@ -146,7 +146,7 @@ class RemotePeer(Peer):
         if replication_url[-1:] != "/":
             replication_url += "/"
 
-        # Capture the interesting bit of the url for loggin
+        # Capture the interesting bit of the url for logging.
         self.replication_url_origin = replication_url
         replication_url += "_matrix/identity/replicate/v1/push"
         self.replication_url = replication_url
