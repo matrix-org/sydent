@@ -16,7 +16,7 @@
 import binascii
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import signedjson.key
 import signedjson.sign
@@ -120,20 +120,19 @@ class RemotePeer(Peer):
         self,
         sydent: "Sydent",
         server_name: str,
-        port: int,
+        port: Optional[int],
         pubkeys: Dict[str, str],
         lastSentVersion: int,
     ) -> None:
         """
         :param sydent: The current Sydent instance.
         :param server_name: The peer's server name.
-        :param port: The peer's port.
+        :param port: The peer's port. Only used if no replication url is configured.
         :param pubkeys: The peer's public keys in a dict[key_id, key_b64]
         :param lastSentVersion: The ID of the last association sent to the peer.
         """
         super().__init__(server_name, pubkeys)
         self.sydent = sydent
-        self.port = port
         self.lastSentVersion = lastSentVersion
 
         # look up or build the replication URL
@@ -147,6 +146,8 @@ class RemotePeer(Peer):
         if replication_url[-1:] != "/":
             replication_url += "/"
 
+        # Capture the interesting bit of the url for logging.
+        self.replication_url_origin = replication_url
         replication_url += "_matrix/identity/replicate/v1/push"
         self.replication_url = replication_url
 
