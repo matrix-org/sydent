@@ -120,7 +120,6 @@ class Pusher:
 
             logger.info(
                 "Pushed updates to %s with result %d %s",
-                p.servername,
                 p.replication_url_origin,
                 result.code,
                 result.phrase,
