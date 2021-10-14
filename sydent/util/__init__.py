@@ -22,7 +22,6 @@ def time_msec() -> int:
     Get the current time in milliseconds.
 
     :return: The current time in milliseconds.
-    :rtype: int
     """
     return int(time.time() * 1000)
 
