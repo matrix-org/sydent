@@ -44,8 +44,12 @@ target-version = ['py36']
 plugins = "mypy_zope:plugin"
 show_error_codes = true
 namespace_packages = true
+strict = true
+
 files = [
-    "sydent",
+    # Find files that pass with
+    #     find sydent tests -type d -not -name __pycache__ -exec bash -c "mypy --strict '{}' > /dev/null"  \; -print
+    "sydent/users",
     # TODO the rest of CI checks these---mypy ought to too.
     # "tests",
     # "matrix_is_test",
