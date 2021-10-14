@@ -69,7 +69,6 @@ module = [
     "sentry_sdk",
     "signedjson.*",
     "sortedcontainers",
-    "unpaddedbase64",
 ]
 ignore_missing_imports = true
 
