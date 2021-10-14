@@ -132,10 +132,6 @@ class RemotePeer(Peer):
         :param lastSentVersion: The ID of the last association sent to the peer.
         """
         super().__init__(server_name, pubkeys)
-
-        if port is None:
-            port = 1001
-
         self.sydent = sydent
         self.lastSentVersion = lastSentVersion
 
@@ -143,6 +139,8 @@ class RemotePeer(Peer):
         replication_url = self.sydent.config.http.base_replication_urls.get(server_name)
 
         if replication_url is None:
+            if not port:
+                port = 1001
             replication_url = "https://%s:%i" % (server_name, port)
 
         if replication_url[-1:] != "/":
