@@ -50,25 +50,25 @@ files = [
     # Find files that pass with
     #     find sydent tests -type d -not -name __pycache__ -exec bash -c "mypy --strict '{}' > /dev/null"  \; -print
     "sydent/users",
+    "sydent/util",
     # TODO the rest of CI checks these---mypy ought to too.
     # "tests",
     # "matrix_is_test",
     # "scripts",
     # "setup.py",
 ]
+mypy_path = "stubs"
 
 [[tool.mypy.overrides]]
 module = [
     "idna",
     "nacl.*",
     "netaddr",
-    "OpenSSL",
     "prometheus_client",
     "phonenumbers",
     "sentry_sdk",
     "signedjson.*",
     "sortedcontainers",
-    "unpaddedbase64",
 ]
 ignore_missing_imports = true
 

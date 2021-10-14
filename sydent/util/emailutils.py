@@ -93,7 +93,7 @@ def sendEmail(
         raise EmailAddressException()
 
     mailServer = sydent.config.email.smtp_server
-    mailPort = sydent.config.email.smtp_port
+    mailPort = int(sydent.config.email.smtp_port)
     mailUsername = sydent.config.email.smtp_username
     mailPassword = sydent.config.email.smtp_password
     mailTLSMode = sydent.config.email.tls_mode

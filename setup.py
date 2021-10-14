@@ -43,7 +43,7 @@ setup(
     install_requires=[
         "jinja2>=3.0.0",
         "signedjson==1.1.1",
-        "unpaddedbase64==1.1.0",
+        "unpaddedbase64>=1.1.0",
         "Twisted>=18.4.0",
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
@@ -61,6 +61,8 @@ setup(
             "isort==5.8.0",
             "mypy>=0.902",
             "mypy-zope>=0.3.1",
+            "types-Jinja2",
+            "types-PyOpenSSL",
             "types-PyYAML",
             "types-mock",
         ],

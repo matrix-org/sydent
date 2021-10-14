@@ -14,7 +14,7 @@
 
 import hashlib
 
-import unpaddedbase64  # type: ignore
+import unpaddedbase64
 
 
 def sha256_and_url_safe_base64(input_text: str) -> str:
