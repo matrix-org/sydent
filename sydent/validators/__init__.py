@@ -32,13 +32,7 @@ class ValidationSession:
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class ValidationSessionWithTokenAuth:
-    id: int
-    medium: str
-    address: str
-    clientSecret: str
-    validated: bool
-    mtime: int
+class TokenInfo:
     token: str
     sendAttemptNumber: int
 

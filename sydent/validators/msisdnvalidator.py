@@ -67,17 +67,17 @@ class MsisdnValidator:
             phoneNumber, phonenumbers.PhoneNumberFormat.E164
         )[1:]
 
-        valSession = valSessionStore.getOrCreateTokenSession(
+        valSession, token_info = valSessionStore.getOrCreateTokenSession(
             medium="msisdn", address=msisdn, clientSecret=clientSecret
         )
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
-        if int(valSession.sendAttemptNumber) >= int(sendAttempt):
+        if int(token_info.sendAttemptNumber) >= int(sendAttempt):
             logger.info(
                 "Not texting code because current send attempt (%d) is not less than given send attempt (%s)",
                 int(sendAttempt),
-                int(valSession.sendAttemptNumber),
+                int(token_info.sendAttemptNumber),
             )
             return valSession.id
 
@@ -86,13 +86,13 @@ class MsisdnValidator:
 
         logger.info(
             "Attempting to text code %s to %s (country %d) with originator %s",
-            valSession.token,
+            token_info.token,
             msisdn,
             phoneNumber.country_code,
             originator,
         )
 
-        smsBody = smsBodyTemplate.format(token=valSession.token)
+        smsBody = smsBodyTemplate.format(token=token_info.token)
 
         self.omSms.sendTextSMS(smsBody, msisdn, originator)
 

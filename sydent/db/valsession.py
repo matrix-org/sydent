@@ -23,8 +23,8 @@ from sydent.validators import (
     InvalidSessionIdException,
     SessionExpiredException,
     SessionNotValidatedException,
+    TokenInfo,
     ValidationSession,
-    ValidationSessionWithTokenAuth,
 )
 
 if TYPE_CHECKING:
@@ -38,7 +38,7 @@ class ThreePidValSessionStore:
 
     def getOrCreateTokenSession(
         self, medium: str, address: str, clientSecret: str
-    ) -> ValidationSessionWithTokenAuth:
+    ) -> Tuple[ValidationSession, TokenInfo]:
         """
         Retrieves the validation session for a given medium, address and client secret,
         or creates one if none was found.
@@ -63,10 +63,11 @@ class ThreePidValSessionStore:
         ] = cur.fetchone()
 
         if row:
-            s = ValidationSessionWithTokenAuth(
-                row[0], row[1], row[2], row[3], bool(row[4]), row[5], row[6], row[7]
+            session = ValidationSession(
+                row[0], row[1], row[2], row[3], bool(row[4]), row[5]
             )
-            return s
+            token_info = TokenInfo(row[6], row[7])
+            return session, token_info
 
         sid = self.addValSession(
             medium, address, clientSecret, time_msec(), commit=False
@@ -80,10 +81,16 @@ class ThreePidValSessionStore:
         )
         self.sydent.db.commit()
 
-        s = ValidationSessionWithTokenAuth(
-            sid, medium, address, clientSecret, False, time_msec(), tokenString, -1
+        session = ValidationSession(
+            sid,
+            medium,
+            address,
+            clientSecret,
+            False,
+            time_msec(),
         )
-        return s
+        token_info = TokenInfo(tokenString, -1)
+        return session, token_info
 
     def addValSession(
         self,
@@ -196,7 +203,9 @@ class ThreePidValSessionStore:
             row[5],
         )
 
-    def getTokenSessionById(self, sid: int) -> Optional[ValidationSessionWithTokenAuth]:
+    def getTokenSessionById(
+        self, sid: int
+    ) -> Optional[Tuple[ValidationSession, TokenInfo]]:
         """
         Retrieves a validation session using the session's ID.
 
@@ -216,10 +225,9 @@ class ThreePidValSessionStore:
         row = cur.fetchone()
 
         if row:
-            s = ValidationSessionWithTokenAuth(
-                row[0], row[1], row[2], row[3], bool(row[4]), row[5], row[6], row[7]
-            )
-            return s
+            s = ValidationSession(row[0], row[1], row[2], row[3], bool(row[4]), row[5])
+            t = TokenInfo(row[6], row[7])
+            return s, t
 
         return None
 
