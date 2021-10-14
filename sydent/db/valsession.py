@@ -13,16 +13,18 @@
 # limitations under the License.
 
 from random import SystemRandom
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import sydent.util.tokenutils
 from sydent.util import time_msec
 from sydent.validators import (
+    THREEPID_SESSION_VALID_LIFETIME_MS,
     IncorrectClientSecretException,
     InvalidSessionIdException,
     SessionExpiredException,
     SessionNotValidatedException,
     ValidationSession,
+    ValidationSessionWithTokenAuth,
 )
 
 if TYPE_CHECKING:
@@ -36,7 +38,7 @@ class ThreePidValSessionStore:
 
     def getOrCreateTokenSession(
         self, medium: str, address: str, clientSecret: str
-    ) -> ValidationSession:
+    ) -> ValidationSessionWithTokenAuth:
         """
         Retrieves the validation session for a given medium, address and client secret,
         or creates one if none was found.
@@ -56,11 +58,13 @@ class ThreePidValSessionStore:
             "where s.medium = ? and s.address = ? and s.clientSecret = ? and t.validationSession = s.id",
             (medium, address, clientSecret),
         )
-        row = cur.fetchone()
+        row: Optional[
+            Tuple[int, str, str, str, Optional[int], int, str, int]
+        ] = cur.fetchone()
 
         if row:
-            s = ValidationSession(
-                row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+            s = ValidationSessionWithTokenAuth(
+                row[0], row[1], row[2], row[3], bool(row[4]), row[5], row[6], row[7]
             )
             return s
 
@@ -76,7 +80,7 @@ class ThreePidValSessionStore:
         )
         self.sydent.db.commit()
 
-        s = ValidationSession(
+        s = ValidationSessionWithTokenAuth(
             sid, medium, address, clientSecret, False, time_msec(), tokenString, -1
         )
         return s
@@ -178,16 +182,21 @@ class ThreePidValSessionStore:
             + "threepid_validation_sessions where id = ?",
             (sid,),
         )
-        row = cur.fetchone()
+        row: Optional[Tuple[int, str, str, str, bool, int]] = cur.fetchone()
 
         if not row:
             return None
 
         return ValidationSession(
-            row[0], row[1], row[2], row[3], row[4], row[5], None, None
+            row[0],
+            row[1],
+            row[2],
+            row[3],
+            row[4],
+            row[5],
         )
 
-    def getTokenSessionById(self, sid: int) -> Optional[ValidationSession]:
+    def getTokenSessionById(self, sid: int) -> Optional[ValidationSessionWithTokenAuth]:
         """
         Retrieves a validation session using the session's ID.
 
@@ -203,11 +212,12 @@ class ThreePidValSessionStore:
             "where s.id = ? and t.validationSession = s.id",
             (sid,),
         )
+        row: Optional[Tuple[int, str, str, str, Optional[int], int, str, int]]
         row = cur.fetchone()
 
         if row:
-            s = ValidationSession(
-                row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]
+            s = ValidationSessionWithTokenAuth(
+                row[0], row[1], row[2], row[3], bool(row[4]), row[5], row[6], row[7]
             )
             return s
 
@@ -239,7 +249,7 @@ class ThreePidValSessionStore:
         if not s.clientSecret == clientSecret:
             raise IncorrectClientSecretException()
 
-        if s.mtime + ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS < time_msec():
+        if s.mtime + THREEPID_SESSION_VALID_LIFETIME_MS < time_msec():
             raise SessionExpiredException()
 
         if not s.validated:
@@ -252,9 +262,7 @@ class ThreePidValSessionStore:
 
         cur = self.sydent.db.cursor()
 
-        delete_before_ts = (
-            time_msec() - 5 * ValidationSession.THREEPID_SESSION_VALID_LIFETIME_MS
-        )
+        delete_before_ts = time_msec() - 5 * THREEPID_SESSION_VALID_LIFETIME_MS
 
         sql = """
             DELETE FROM threepid_validation_sessions

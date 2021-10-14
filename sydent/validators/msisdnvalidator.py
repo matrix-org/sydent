@@ -16,7 +16,7 @@
 import logging
 from typing import TYPE_CHECKING, Dict, Optional
 
-import phonenumbers  # type: ignore
+import phonenumbers
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.sms.openmarket import OpenMarketSMS

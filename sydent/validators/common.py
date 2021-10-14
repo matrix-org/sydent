@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, Dict
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util import time_msec
 from sydent.validators import (
+    THREEPID_SESSION_VALIDATION_TIMEOUT_MS,
     IncorrectClientSecretException,
     IncorrectSessionTokenException,
     InvalidSessionIdException,
     SessionExpiredException,
-    ValidationSession,
 )
 
 if TYPE_CHECKING:
@@ -48,7 +48,7 @@ def validateSessionWithToken(
         logger.info("Incorrect client secret", sid)
         raise IncorrectClientSecretException()
 
-    if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
+    if s.mtime + THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
         logger.info("Session expired")
         raise SessionExpiredException()
 

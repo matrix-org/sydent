@@ -23,7 +23,7 @@ from sydent.validators import common
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
-    from sydent.validators import ValidationSession
+    from sydent.validators import ValidationSessionWithTokenAuth
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +100,10 @@ class EmailValidator:
         return valSession.id
 
     def makeValidateLink(
-        self, valSession: "ValidationSession", clientSecret: str, nextLink: str
+        self,
+        valSession: "ValidationSessionWithTokenAuth",
+        clientSecret: str,
+        nextLink: str,
     ) -> str:
         """
         Creates a validation link that can be sent via email to the user.

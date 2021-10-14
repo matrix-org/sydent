@@ -52,6 +52,7 @@ files = [
     "sydent/db",
     "sydent/users",
     "sydent/util",
+    "sydent/validators",
     # TODO the rest of CI checks these---mypy ought to too.
     # "tests",
     # "matrix_is_test",
