@@ -39,7 +39,7 @@ class PeerStore:
             (name,),
         )
 
-        # Type safety: if the query returns no rows, we'll pubkeys will be empty
+        # Type safety: if the query returns no rows, pubkeys will be empty
         # and we'll return None before using serverName. Otherwise, we'll read
         # at least one row and assign serverName a string value, because the
         # `name` column is declared `not null` in the DB.
