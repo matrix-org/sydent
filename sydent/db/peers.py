@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from sydent.replication.peer import RemotePeer
 
@@ -39,11 +39,16 @@ class PeerStore:
             (name,),
         )
 
-        serverName = None
-        port = None
-        lastSentVer = None
-        pubkeys = {}
+        # Type safety: if the query returns no rows, pubkeys will be empty
+        # and we'll return None before using serverName. Otherwise, we'll read
+        # at least one row and assign serverName a string value, because the
+        # `name` column is declared `not null` in the DB.
+        serverName: str = None  # type: ignore[assignment]
+        port: Optional[int] = None
+        lastSentVer: Optional[int] = None
+        pubkeys: Dict[str, str] = {}
 
+        row: Tuple[str, Optional[int], Optional[int], str, str]
         for row in res.fetchall():
             serverName = row[0]
             port = row[1]
@@ -71,11 +76,23 @@ class PeerStore:
 
         peers = []
 
-        peername = None
+        # Safety: we need to convince ourselves that `peername` will be not None
+        # when passed to `RemotePeer`.
+        #
+        # If `res` is empty, then `pubkeys` will start empty and never be written to.
+        # So we will never create a `RemotePeer`. That's fine.
+        #
+        # Otherwise we process at least one row. The first row we process will
+        # satisfy `row[0] is not None` because `name` is nonnull in the schema.
+        # `pubkeys` will be empty, so we skip the innermost `if` and assign peername
+        # to be a string. There are no further assignments of `None` to `peername`;
+        # it will be a string whenever we use it.
+        peername: str = None  # type: ignore[assignment]
         port = None
         lastSentVer = None
         pubkeys: Dict[str, str] = {}
 
+        row: Tuple[str, Optional[int], Optional[int], str, str]
         for row in res.fetchall():
             if row[0] != peername:
                 if len(pubkeys) > 0:

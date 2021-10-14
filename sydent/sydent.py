@@ -18,6 +18,7 @@ import gc
 import logging
 import logging.handlers
 import os
+import sqlite3
 from typing import Optional
 
 import twisted.internet.reactor
@@ -89,7 +90,7 @@ class Sydent:
 
         logger.info("Starting Sydent server")
 
-        self.db = SqliteDatabase(self).db
+        self.db: sqlite3.Connection = SqliteDatabase(self).db
 
         if self.config.general.sentry_enabled:
             import sentry_sdk

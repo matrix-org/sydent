@@ -205,7 +205,7 @@ class GlobalAssociationStore:
             (medium, address, time_msec(), time_msec()),
         )
 
-        row = res.fetchone()
+        row: Optional[Tuple[str]] = res.fetchone()
 
         if not row:
             return None
@@ -233,7 +233,7 @@ class GlobalAssociationStore:
             (medium, normalised_address, time_msec(), time_msec()),
         )
 
-        row = res.fetchone()
+        row: Tuple[str] = res.fetchone()
 
         if not row:
             return None
@@ -352,7 +352,7 @@ class GlobalAssociationStore:
             "where originServer = ?",
             (server,),
         )
-        row = res.fetchone()
+        row: Tuple[int, int] = res.fetchone()
 
         if row[1] == 0:
             return None

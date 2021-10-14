@@ -15,7 +15,7 @@
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
 from sqlite3 import Cursor
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -33,7 +33,13 @@ class HashingMetadataStore:
         """
         cur = self.sydent.db.cursor()
         res = cur.execute("select lookup_pepper from hashing_metadata")
-        row = res.fetchone()
+        # Annotation safety: lookup_pepper is marked as varchar(256) in the
+        # schema, so could be null. I.e. `row` should strictly be
+        # Optional[Tuple[Optional[str]].
+        # But I think the application code is such that either
+        #  - hashing_metadata contains no rows
+        #  - or it contains exactly one row with a nonnull lookup_pepper.
+        row: Optional[Tuple[str]] = res.fetchone()
 
         if not row:
             return None

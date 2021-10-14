@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
 
 class ValidationSession:
@@ -22,14 +23,14 @@ class ValidationSession:
 
     def __init__(
         self,
-        _id,
-        _medium,
-        _address,
-        _clientSecret,
-        _validated,
-        _mtime,
-        _token,
-        _sendAttemptNumber,
+        _id: int,
+        _medium: str,
+        _address: str,
+        _clientSecret: str,
+        _validated: int,  # bool, but sqlite has no bool type
+        _mtime: int,
+        _token: Optional[str],
+        _sendAttemptNumber: Optional[int],
     ):
         self.id = _id
         self.medium = _medium
