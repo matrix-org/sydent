@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, Dict
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.util import time_msec
 from sydent.validators import (
+    THREEPID_SESSION_VALIDATION_TIMEOUT_MS,
     IncorrectClientSecretException,
     IncorrectSessionTokenException,
     InvalidSessionIdException,
     SessionExpiredException,
-    ValidationSession,
 )
 
 if TYPE_CHECKING:
@@ -39,16 +39,18 @@ def validateSessionWithToken(
     :raise IncorrectSessionTokenException: The provided token is incorrect
     """
     valSessionStore = ThreePidValSessionStore(sydent)
-    s = valSessionStore.getTokenSessionById(sid)
-    if not s:
+    result = valSessionStore.getTokenSessionById(sid)
+    if not result:
         logger.info("Session ID %s not found", sid)
         raise InvalidSessionIdException()
 
-    if not clientSecret == s.clientSecret:
+    session, token_info = result
+
+    if not clientSecret == session.client_secret:
         logger.info("Incorrect client secret", sid)
         raise IncorrectClientSecretException()
 
-    if s.mtime + ValidationSession.THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
+    if session.mtime + THREEPID_SESSION_VALIDATION_TIMEOUT_MS < time_msec():
         logger.info("Session expired")
         raise SessionExpiredException()
 
@@ -56,9 +58,9 @@ def validateSessionWithToken(
     # if tokenObj.validated and clientSecret == tokenObj.clientSecret:
     #    return True
 
-    if s.token == token:
-        logger.info("Setting session %s as validated", s.id)
-        valSessionStore.setValidated(s.id, True)
+    if token_info.token == token:
+        logger.info("Setting session %s as validated", session.id)
+        valSessionStore.setValidated(session.id, True)
 
         return {"success": True}
     else:

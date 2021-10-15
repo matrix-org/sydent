@@ -23,7 +23,6 @@ from sydent.validators import common
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
-    from sydent.validators import ValidationSession
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ class EmailValidator:
         """
         valSessionStore = ThreePidValSessionStore(self.sydent)
 
-        valSession = valSessionStore.getOrCreateTokenSession(
+        valSession, token_info = valSessionStore.getOrCreateTokenSession(
             medium="email", address=emailAddress, clientSecret=clientSecret
         )
 
@@ -72,11 +71,11 @@ class EmailValidator:
         else:
             templateFile = self.sydent.config.email.template
 
-        if int(valSession.sendAttemptNumber) >= int(sendAttempt):
+        if token_info.send_attempt_number >= sendAttempt:
             logger.info(
                 "Not mailing code because current send attempt (%d) is not less than given send attempt (%s)",
-                int(sendAttempt),
-                int(valSession.sendAttemptNumber),
+                sendAttempt,
+                token_info.send_attempt_number,
             )
             return valSession.id
 
@@ -84,12 +83,14 @@ class EmailValidator:
 
         substitutions = {
             "ipaddress": ipstring,
-            "link": self.makeValidateLink(valSession, clientSecret, nextLink),
-            "token": valSession.token,
+            "link": self.makeValidateLink(
+                valSession.id, token_info.token, clientSecret, nextLink
+            ),
+            "token": token_info.token,
         }
         logger.info(
             "Attempting to mail code %s (nextLink: %s) to %s",
-            valSession.token,
+            token_info.token,
             nextLink,
             emailAddress,
         )
@@ -100,12 +101,17 @@ class EmailValidator:
         return valSession.id
 
     def makeValidateLink(
-        self, valSession: "ValidationSession", clientSecret: str, nextLink: str
+        self,
+        session_id: int,
+        token: str,
+        clientSecret: str,
+        nextLink: str,
     ) -> str:
         """
         Creates a validation link that can be sent via email to the user.
 
-        :param valSession: The current validation session.
+        :param session_id: The current validation session's ID.
+        :param token: The token to make a link for.
         :param clientSecret: The client secret to include in the link.
         :param nextLink: The link to redirect the user to once they have completed the
             validation.
@@ -115,9 +121,9 @@ class EmailValidator:
         base = self.sydent.config.http.server_http_url_base
         link = "%s/_matrix/identity/api/v1/validate/email/submitToken?token=%s&client_secret=%s&sid=%d" % (
             base,
-            urllib.parse.quote(valSession.token),
+            urllib.parse.quote(token),
             urllib.parse.quote(clientSecret),
-            valSession.id,
+            session_id,
         )
         if nextLink:
             # manipulate the nextLink to add the sid, because
@@ -127,7 +133,7 @@ class EmailValidator:
                 nextLink += "&"
             else:
                 nextLink += "?"
-            nextLink += "sid=" + urllib.parse.quote(str(valSession.id))
+            nextLink += "sid=" + urllib.parse.quote(str(session_id))
 
             link += "&nextLink=%s" % (urllib.parse.quote(nextLink))
         return link

@@ -16,7 +16,7 @@
 import logging
 from typing import TYPE_CHECKING, Dict, Optional
 
-import phonenumbers  # type: ignore
+import phonenumbers
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.sms.openmarket import OpenMarketSMS
@@ -42,7 +42,7 @@ class MsisdnValidator:
         self,
         phoneNumber: phonenumbers.PhoneNumber,
         clientSecret: str,
-        sendAttempt: int,
+        send_attempt: int,
         brand: Optional[str] = None,
     ) -> int:
         """
@@ -51,7 +51,7 @@ class MsisdnValidator:
 
         :param phoneNumber: The phone number to send the email to.
         :param clientSecret: The client secret to use.
-        :param sendAttempt: The current send attempt.
+        :param send_attempt: The current send attempt.
         :param brand: A hint at a brand from the request.
 
         :return: The ID of the session created (or of the existing one if any)
@@ -67,17 +67,17 @@ class MsisdnValidator:
             phoneNumber, phonenumbers.PhoneNumberFormat.E164
         )[1:]
 
-        valSession = valSessionStore.getOrCreateTokenSession(
+        valSession, token_info = valSessionStore.getOrCreateTokenSession(
             medium="msisdn", address=msisdn, clientSecret=clientSecret
         )
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
-        if int(valSession.sendAttemptNumber) >= int(sendAttempt):
+        if token_info.send_attempt_number >= send_attempt:
             logger.info(
                 "Not texting code because current send attempt (%d) is not less than given send attempt (%s)",
-                int(sendAttempt),
-                int(valSession.sendAttemptNumber),
+                send_attempt,
+                token_info.send_attempt_number,
             )
             return valSession.id
 
@@ -86,17 +86,17 @@ class MsisdnValidator:
 
         logger.info(
             "Attempting to text code %s to %s (country %d) with originator %s",
-            valSession.token,
+            token_info.token,
             msisdn,
             phoneNumber.country_code,
             originator,
         )
 
-        smsBody = smsBodyTemplate.format(token=valSession.token)
+        smsBody = smsBodyTemplate.format(token=token_info.token)
 
         self.omSms.sendTextSMS(smsBody, msisdn, originator)
 
-        valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
+        valSessionStore.setSendAttemptNumber(valSession.id, send_attempt)
 
         return valSession.id
 
