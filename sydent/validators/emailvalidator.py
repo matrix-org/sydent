@@ -71,11 +71,11 @@ class EmailValidator:
         else:
             templateFile = self.sydent.config.email.template
 
-        if int(token_info.send_attempt_number) >= int(sendAttempt):
+        if token_info.send_attempt_number >= sendAttempt:
             logger.info(
                 "Not mailing code because current send attempt (%d) is not less than given send attempt (%s)",
-                int(sendAttempt),
-                int(token_info.send_attempt_number),
+                sendAttempt,
+                token_info.send_attempt_number,
             )
             return valSession.id
 

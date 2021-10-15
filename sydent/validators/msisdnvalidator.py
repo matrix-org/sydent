@@ -73,11 +73,11 @@ class MsisdnValidator:
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
-        if int(token_info.send_attempt_number) >= int(send_attempt):
+        if token_info.send_attempt_number >= send_attempt:
             logger.info(
                 "Not texting code because current send attempt (%d) is not less than given send attempt (%s)",
-                int(send_attempt),
-                int(token_info.send_attempt_number),
+                send_attempt,
+                token_info.send_attempt_number,
             )
             return valSession.id
 
