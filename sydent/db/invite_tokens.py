@@ -14,8 +14,18 @@
 import time
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
+from typing_extensions import TypedDict
+
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
+
+
+class PendingInviteTokens(TypedDict):
+    medium: str
+    address: str
+    room_id: str
+    sender: str
+    token: str
 
 
 class JoinTokenStore:
@@ -46,9 +56,7 @@ class JoinTokenStore:
         )
         self.sydent.db.commit()
 
-    def getTokens(
-        self, medium: str, address: str
-    ) -> List[Dict[str, Union[str, Dict[str, str]]]]:
+    def getTokens(self, medium: str, address: str) -> List[PendingInviteTokens]:
         """
         Retrieves the pending invites tokens for this 3PID that haven't been delivered
         yet.
@@ -69,9 +77,9 @@ class JoinTokenStore:
                 address,
             ),
         )
-        rows = res.fetchall()
+        rows: List[Tuple[str, str, str, str, str]] = res.fetchall()
 
-        ret = []
+        ret: List[PendingInviteTokens] = []
 
         for row in rows:
             medium, address, roomId, sender, token = row
