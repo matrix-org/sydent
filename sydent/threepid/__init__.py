@@ -30,7 +30,7 @@ def threePidAssocFromDict(d: Dict[str, Any]) -> "ThreepidAssociation":
     return assoc
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(slots=True, auto_attribs=True)
 class ThreepidAssociation:
     """
     medium: The medium of the 3pid (eg. email)
