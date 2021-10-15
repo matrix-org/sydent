@@ -14,11 +14,12 @@
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 
 from twisted.web.http_headers import Headers
 
 from sydent.http.httpclient import SimpleHttpClient
+from sydent.sms.types import SendSMSBody, ToN
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -33,14 +34,14 @@ API_BASE_URL = "https://smsc.openmarket.com/sms/v4/mt"
 # API_BASE_URL = "http://smsc-cie.openmarket.com/sms/v4/mt"
 
 # The TON (ie. Type of Number) codes by type used in our config file
-TONS = {
+TONS: Dict[str, ToN] = {
     "long": 1,
     "short": 3,
     "alpha": 5,
 }
 
 
-def tonFromType(t: str) -> int:
+def tonFromType(t: str) -> ToN:
     """
     Get the type of number from the originator's type.
 
@@ -69,7 +70,7 @@ class OpenMarketSMS:
         :param body: The message to send.
         :param dest: The destination MSISDN to send the text message to.
         """
-        send_body = {
+        send_body: SendSMSBody = {
             "mobileTerminate": {
                 "message": {"content": body, "type": "text"},
                 "destination": {
@@ -94,8 +95,8 @@ class OpenMarketSMS:
             }
         )
 
-        resp, body = await self.http_cli.post_json_maybe_get_json(
-            API_BASE_URL, send_body, {"headers": req_headers}
+        resp, response_body = await self.http_cli.post_json_maybe_get_json(
+            API_BASE_URL, cast(Dict[str, Any], send_body), {"headers": req_headers}
         )
 
         headers = dict(resp.headers.getAllRawHeaders())
@@ -111,7 +112,7 @@ class OpenMarketSMS:
         # Relevant OpenMarket API documentation:
         # https://www.openmarket.com/docs/Content/apis/v4http/send-json.htm
         if resp.code < 200 or resp.code >= 300:
-            if body is None or "error" not in body:
+            if response_body is None or "error" not in response_body:
                 raise Exception(
                     "OpenMarket API responded with status %d (request ID: %s)"
                     % (
@@ -120,7 +121,7 @@ class OpenMarketSMS:
                     ),
                 )
 
-            error = body["error"]
+            error = response_body["error"]
             raise Exception(
                 "OpenMarket API responded with status %d (request ID: %s): %s"
                 % (
