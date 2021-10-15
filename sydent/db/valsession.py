@@ -189,19 +189,12 @@ class ThreePidValSessionStore:
             + "threepid_validation_sessions where id = ?",
             (sid,),
         )
-        row: Optional[Tuple[int, str, str, str, bool, int]] = cur.fetchone()
+        row: Optional[Tuple[int, str, str, str, Optional[int], int]] = cur.fetchone()
 
         if not row:
             return None
 
-        return ValidationSession(
-            row[0],
-            row[1],
-            row[2],
-            row[3],
-            row[4],
-            row[5],
-        )
+        return ValidationSession(row[0], row[1], row[2], row[3], bool(row[4]), row[5])
 
     def getTokenSessionById(
         self, sid: int
