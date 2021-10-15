@@ -26,7 +26,7 @@ class ValidationSession:
     id: int
     medium: str
     address: str
-    clientSecret: str
+    client_secret: str
     validated: bool
     mtime: int
 
@@ -34,7 +34,7 @@ class ValidationSession:
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class TokenInfo:
     token: str
-    sendAttemptNumber: int
+    send_attempt_number: int
 
 
 class IncorrectClientSecretException(Exception):

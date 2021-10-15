@@ -46,7 +46,7 @@ def validateSessionWithToken(
 
     session, token_info = result
 
-    if not clientSecret == session.clientSecret:
+    if not clientSecret == session.client_secret:
         logger.info("Incorrect client secret", sid)
         raise IncorrectClientSecretException()
 

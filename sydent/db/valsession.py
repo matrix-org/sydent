@@ -231,13 +231,13 @@ class ThreePidValSessionStore:
 
         return None
 
-    def getValidatedSession(self, sid: int, clientSecret: str) -> ValidationSession:
+    def getValidatedSession(self, sid: int, client_secret: str) -> ValidationSession:
         """
         Retrieve a validated and still-valid session whose client secret matches the
         one passed in.
 
         :param sid: The ID of the session to retrieve.
-        :param clientSecret: A client secret to check against the one retrieved from
+        :param client_secret: A client secret to check against the one retrieved from
             the database.
 
         :return: The retrieved session.
@@ -254,7 +254,7 @@ class ThreePidValSessionStore:
         if not s:
             raise InvalidSessionIdException()
 
-        if not s.clientSecret == clientSecret:
+        if not s.client_secret == client_secret:
             raise IncorrectClientSecretException()
 
         if s.mtime + THREEPID_SESSION_VALID_LIFETIME_MS < time_msec():

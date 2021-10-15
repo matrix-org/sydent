@@ -42,7 +42,7 @@ class MsisdnValidator:
         self,
         phoneNumber: phonenumbers.PhoneNumber,
         clientSecret: str,
-        sendAttempt: int,
+        send_attempt: int,
         brand: Optional[str] = None,
     ) -> int:
         """
@@ -51,7 +51,7 @@ class MsisdnValidator:
 
         :param phoneNumber: The phone number to send the email to.
         :param clientSecret: The client secret to use.
-        :param sendAttempt: The current send attempt.
+        :param send_attempt: The current send attempt.
         :param brand: A hint at a brand from the request.
 
         :return: The ID of the session created (or of the existing one if any)
@@ -73,11 +73,11 @@ class MsisdnValidator:
 
         valSessionStore.setMtime(valSession.id, time_msec())
 
-        if int(token_info.sendAttemptNumber) >= int(sendAttempt):
+        if int(token_info.send_attempt_number) >= int(send_attempt):
             logger.info(
                 "Not texting code because current send attempt (%d) is not less than given send attempt (%s)",
-                int(sendAttempt),
-                int(token_info.sendAttemptNumber),
+                int(send_attempt),
+                int(token_info.send_attempt_number),
             )
             return valSession.id
 
@@ -96,7 +96,7 @@ class MsisdnValidator:
 
         self.omSms.sendTextSMS(smsBody, msisdn, originator)
 
-        valSessionStore.setSendAttemptNumber(valSession.id, sendAttempt)
+        valSessionStore.setSendAttemptNumber(valSession.id, send_attempt)
 
         return valSession.id
 
