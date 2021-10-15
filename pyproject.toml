@@ -50,6 +50,7 @@ files = [
     # Find files that pass with
     #     find sydent tests -type d -not -name __pycache__ -exec bash -c "mypy --strict '{}' > /dev/null"  \; -print
     "sydent/db",
+    "sydent/terms",
     "sydent/users",
     "sydent/util",
     "sydent/validators",
