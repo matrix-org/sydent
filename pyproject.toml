@@ -67,7 +67,6 @@ module = [
     "nacl.*",
     "netaddr",
     "prometheus_client",
-    "phonenumbers",
     "sentry_sdk",
     "signedjson.*",
     "sortedcontainers",

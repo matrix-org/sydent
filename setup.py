@@ -47,7 +47,7 @@ setup(
         "Twisted>=18.4.0",
         # twisted warns about about the absence of this
         "service_identity>=1.0.0",
-        "phonenumbers",
+        "phonenumbers>=8.12.32",
         "pyopenssl",
         "attrs>=19.1.0",
         "netaddr>=0.7.0",
