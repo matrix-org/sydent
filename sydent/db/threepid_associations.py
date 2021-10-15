@@ -147,7 +147,7 @@ class LocalAssociationStore:
             "WHERE medium = ? AND address = ? AND mxid = ?",
             (threepid["medium"], threepid["address"], mxid),
         )
-        row = cur.fetchone()
+        row: Tuple[int] = cur.fetchone()
         if row[0] > 0:
             ts = time_msec()
             cur.execute(

@@ -112,8 +112,8 @@ class HashingMetadataStore:
         # Medium/address combos are marked as UNIQUE in the database
         sql = "SELECT COUNT(*) FROM %s" % table
         res = cur.execute(sql)
-        row_count = res.fetchone()
-        row_count = row_count[0]
+        row: Tuple[int] = res.fetchone()
+        row_count = row[0]
 
         # Iterate through each medium, address combo, hash it,
         # and store in the db
