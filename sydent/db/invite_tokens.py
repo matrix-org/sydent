@@ -83,19 +83,6 @@ class JoinTokenStore:
 
         for row in rows:
             medium, address, roomId, sender, token = row
-
-            # Ensure we're dealing with unicode.
-            if isinstance(medium, bytes):
-                medium = medium.decode("UTF-8")
-            if isinstance(address, bytes):
-                address = address.decode("UTF-8")
-            if isinstance(roomId, bytes):
-                roomId = roomId.decode("UTF-8")
-            if isinstance(sender, bytes):
-                sender = sender.decode("UTF-8")
-            if isinstance(token, bytes):
-                token = token.decode("UTF-8")
-
             ret.append(
                 {
                     "medium": medium,
