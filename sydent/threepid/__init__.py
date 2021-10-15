@@ -42,10 +42,12 @@ class ThreepidAssociation:
         medium: str,
         address: str,
         lookup_hash: Optional[str],
-        mxid: str,
-        ts: int,
-        not_before: int,
-        not_after: int,
+        # Note: the next four fields were made optional in schema version 2.
+        # See sydent.db.sqlitedb.SqliteDatabase._upgradeSchema
+        mxid: Optional[str],
+        ts: Optional[int],
+        not_before: Optional[int],
+        not_after: Optional[int],
     ):
         """
         :param medium: The medium of the 3pid (eg. email)

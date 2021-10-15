@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, Optional, Tuple, cast
 
 from sydent.users.accounts import Account
 
@@ -39,7 +39,7 @@ class AccountStore:
             (token,),
         )
 
-        row = res.fetchone()
+        row: Optional[Tuple[str, int, Optional[str]]] = res.fetchone()
         if row is None:
             return None
 

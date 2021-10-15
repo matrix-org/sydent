@@ -11,10 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
 
 class Account:
-    def __init__(self, user_id: str, creation_ts: int, consent_version: str) -> None:
+    def __init__(
+        self, user_id: str, creation_ts: int, consent_version: Optional[str]
+    ) -> None:
         """
         :param user_id: The Matrix user ID for the account.
         :param creation_ts: The timestamp in milliseconds of the account's creation.

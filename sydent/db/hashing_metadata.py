@@ -15,7 +15,9 @@
 # Actions on the hashing_metadata table which is defined in the migration process in
 # sqlitedb.py
 from sqlite3 import Cursor
-from typing import TYPE_CHECKING, Callable, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
+
+from typing_extensions import Literal
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -87,7 +89,7 @@ class HashingMetadataStore:
         cur: Cursor,
         hashing_function: Callable[[str], str],
         pepper: str,
-        table: str,
+        table: Literal["local_threepid_associations", "global_threepid_associations"],
     ) -> None:
         """Rehash 3PIDs of a given table using a given hashing_function and pepper
 
@@ -96,24 +98,17 @@ class HashingMetadataStore:
         the made changes to the database.
 
         :param cur: Database cursor
-        :type cur:
-
         :param hashing_function: A function with single input and output strings
-        :type hashing_function func(str) -> str
-
         :param pepper: A pepper to append to the end of the 3PID (after a space) before hashing
-        :type pepper: str
-
         :param table: The database table to perform the rehashing on
-        :type table: str
         """
 
         # Get count of all 3PID records
         # Medium/address combos are marked as UNIQUE in the database
         sql = "SELECT COUNT(*) FROM %s" % table
         res = cur.execute(sql)
-        row_count = res.fetchone()
-        row_count = row_count[0]
+        row: Tuple[int] = res.fetchone()
+        row_count = row[0]
 
         # Iterate through each medium, address combo, hash it,
         # and store in the db
@@ -126,7 +121,7 @@ class HashingMetadataStore:
                 count,
             )
             res = cur.execute(sql)
-            rows = res.fetchall()
+            rows: List[Tuple[str, str]] = res.fetchall()
 
             for medium, address in rows:
                 # Skip broken db entry
