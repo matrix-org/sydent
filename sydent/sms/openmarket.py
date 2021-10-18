@@ -14,12 +14,13 @@
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Any, Dict, Optional, cast
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 from twisted.web.http_headers import Headers
 
 from sydent.http.httpclient import SimpleHttpClient
 from sydent.sms.types import SendSMSBody, TypeOfNumber
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -95,8 +96,14 @@ class OpenMarketSMS:
             }
         )
 
+        # Type safety: The case from a TypedDict to a regular Dict is required
+        # because the two are deliberately not compatible. See
+        #    https://github.com/python/mypy/issues/4976
+        # for details, but in a nutshell: Dicts can have keys added or removed,
+        # and that would break the invariants that a TypedDict is there to check.
+        # The case below is safe because we never use send_body afterwards.
         resp, response_body = await self.http_cli.post_json_maybe_get_json(
-            API_BASE_URL, cast(Dict[str, Any], send_body), {"headers": req_headers}
+            API_BASE_URL, cast(JsonDict, send_body), {"headers": req_headers}
         )
 
         headers = dict(resp.headers.getAllRawHeaders())
