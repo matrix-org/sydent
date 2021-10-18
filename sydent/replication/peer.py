@@ -16,14 +16,17 @@
 import binascii
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from abc import abstractmethod
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence
 
 import signedjson.key
 import signedjson.sign
 from twisted.internet import defer
 from twisted.internet.defer import Deferred
+from twisted.python.failure import Failure
 from twisted.web.client import readBody
 from twisted.web.iweb import IResponse
+from typing_extensions import Literal
 from unpaddedbase64 import decode_base64
 
 from sydent.config import ConfigError
@@ -43,17 +46,22 @@ SIGNING_KEY_ALGORITHM = "ed25519"
 
 
 class Peer:
-    def __init__(self, servername, pubkeys):
+    def __init__(self, servername: str, pubkeys: Dict[str, str]):
+        """
+        :param server_name: The peer's server name.
+        :param pubkeys: The peer's public keys in a Dict[key_id, key_b64]
+        """
         self.servername = servername
         self.pubkeys = pubkeys
         self.is_being_pushed_to = False
 
-    def pushUpdates(self, sgAssocs) -> "Deferred":
+    @abstractmethod
+    def pushUpdates(self, sgAssocs) -> "Deferred[object]":
         """
         :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
                         sgAssoc is the json object of the signed association
         """
-        pass
+        ...
 
 
 class LocalPeer(Peer):
@@ -70,7 +78,7 @@ class LocalPeer(Peer):
         lastId = globalAssocStore.lastIdFromServer(self.servername)
         self.lastId = lastId if lastId is not None else -1
 
-    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred":
+    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred[Literal[True]]":
         """
         Saves the given associations in the global associations store. Only stores an
         association if its ID is greater than the last seen ID.
@@ -198,15 +206,16 @@ class RemotePeer(Peer):
             or len(key_ids) == 0
             or not key_ids[0].startswith(SIGNING_KEY_ALGORITHM + ":")
         ):
-            e = NoMatchingSignatureException()
-            e.foundSigs = assoc["signatures"].keys()
-            e.requiredServername = self.servername
+            e = NoMatchingSignatureException(
+                foundSigs=assoc["signatures"].keys(),
+                requiredServername=self.servername,
+            )
             raise e
 
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
-    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred":
+    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred[object]":
         """
         Pushes the given associations to the peer.
 
@@ -225,7 +234,7 @@ class RemotePeer(Peer):
         # (ie. remove the record we kept in order to propagate the deletion to
         # other peers).
 
-        updateDeferred = defer.Deferred()
+        updateDeferred: "Deferred[object]" = defer.Deferred()
 
         reqDeferred.addCallback(self._pushSuccess, updateDeferred=updateDeferred)
         reqDeferred.addErrback(self._pushFailed, updateDeferred=updateDeferred)
@@ -235,7 +244,7 @@ class RemotePeer(Peer):
     def _pushSuccess(
         self,
         result: "IResponse",
-        updateDeferred: "Deferred",
+        updateDeferred: "Deferred[object]",
     ) -> None:
         """
         Processes a successful push request. If the request resulted in a status code
@@ -252,7 +261,7 @@ class RemotePeer(Peer):
             d.addCallback(self._failedPushBodyRead, updateDeferred=updateDeferred)
             d.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
-    def _failedPushBodyRead(self, body: bytes, updateDeferred: "Deferred") -> None:
+    def _failedPushBodyRead(self, body: bytes, updateDeferred: "Deferred[object]") -> None:
         """
         Processes a response body from a failed push request, then calls the error
         callback of the provided deferred.
@@ -261,21 +270,20 @@ class RemotePeer(Peer):
         :param updateDeferred: The deferred to call the error callback of.
         """
         errObj = json_decoder.decode(body.decode("utf8"))
-        e = RemotePeerError()
-        e.errorDict = errObj
+        e = RemotePeerError(errObj)
         updateDeferred.errback(e)
 
     def _pushFailed(
         self,
-        failure,
-        updateDeferred: "Deferred",
+        failure: Failure,
+        updateDeferred: "Deferred[object]",
     ) -> None:
         """
         Processes a failed push request, by calling the error callback of the given
         deferred with it.
 
         :param failure: The failure to process.
-        :type failure: twisted.python.failure.Failure
+        :type failure:
         :param updateDeferred: The deferred to call the error callback of.
         """
         updateDeferred.errback(failure)
@@ -287,7 +295,11 @@ class NoSignaturesException(Exception):
 
 
 class NoMatchingSignatureException(Exception):
-    def __str__(self):
+    def __init__(self, foundSigs: Sequence[str], requiredServername: str):
+        self.foundSigs = foundSigs
+        self.requiredServername = requiredServername
+
+    def __str__(self) -> str:
         return "Found signatures: %s, required server name: %s" % (
             self.foundSigs,
             self.requiredServername,
@@ -295,5 +307,8 @@ class NoMatchingSignatureException(Exception):
 
 
 class RemotePeerError(Exception):
-    def __str__(self):
+    def __init__(self, errorDict: Dict[Any, Any]):
+        self.errorDict = errorDict
+
+    def __str__(self) -> str:
         return repr(self.errorDict)
