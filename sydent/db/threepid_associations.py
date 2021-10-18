@@ -308,7 +308,7 @@ class GlobalAssociationStore:
     def addAssociation(
         self,
         assoc: ThreepidAssociation,
-        rawSgAssoc: Dict[str, Any],
+        rawSgAssoc: str,
         originServer: str,
         originId: int,
         commit: bool = True,
@@ -319,7 +319,7 @@ class GlobalAssociationStore:
         this function.
 
         :param assoc: The association to add as a high level object.
-        :param rawSgAssoc: The original raw bytes of the signed association.
+        :param rawSgAssoc: The original raw text of the signed association.
         :param originServer: The name of the server the association was created on.
         :param originId: The ID of the association on the server the association was
             created on.

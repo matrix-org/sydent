@@ -17,7 +17,7 @@ import binascii
 import json
 import logging
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Union
 
 import signedjson.key
 import signedjson.sign
@@ -26,7 +26,6 @@ from twisted.internet.defer import Deferred
 from twisted.python.failure import Failure
 from twisted.web.client import readBody
 from twisted.web.iweb import IResponse
-from typing_extensions import Literal
 from unpaddedbase64 import decode_base64
 
 from sydent.config import ConfigError
@@ -43,6 +42,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 SIGNING_KEY_ALGORITHM = "ed25519"
+SignedAssociations = Dict[int, Dict[str, Any]]
 
 
 class Peer:
@@ -56,10 +56,15 @@ class Peer:
         self.is_being_pushed_to = False
 
     @abstractmethod
-    def pushUpdates(self, sgAssocs) -> "Deferred[object]":
+    def pushUpdates(self, sgAssocs: SignedAssociations) -> "Deferred[Any]":
+        # Having to go for `Deferred[Any]` feels a bit icky here. But the two
+        # implementations return Deferred[bool] and Deferred[IResponse].
+        # I couldn't get this to work with writing Deferred[Union[bool, IResponse]].
+        # Bit confused here.
         """
-        :param sgAssocs: Sequence of (originId, sgAssoc) tuples where originId is the id on the creating server and
-                        sgAssoc is the json object of the signed association
+        :param sgAssocs: Map from originId to sgAssoc,  where originId is the id
+                         on the creating server and sgAssoc is the json object
+                         of the signed association
         """
         ...
 
@@ -78,14 +83,14 @@ class LocalPeer(Peer):
         lastId = globalAssocStore.lastIdFromServer(self.servername)
         self.lastId = lastId if lastId is not None else -1
 
-    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred[Literal[True]]":
+    def pushUpdates(self, sgAssocs: SignedAssociations) -> "Deferred[bool]":
         """
         Saves the given associations in the global associations store. Only stores an
         association if its ID is greater than the last seen ID.
 
         :param sgAssocs: The associations to save.
 
-        :return: True
+        :return: A deferred that succeeds with the value `True`.
         """
         globalAssocStore = GlobalAssociationStore(self.sydent)
         for localId in sgAssocs:
@@ -97,11 +102,14 @@ class LocalPeer(Peer):
 
                 if assocObj.mxid is not None:
                     # Assign a lookup_hash to this association
+                    pepper = self.hashing_store.get_lookup_pepper()
+                    if not pepper:
+                        raise RuntimeError("No lookup_pepper in the database.")
                     str_to_hash = " ".join(
                         [
                             assocObj.address,
                             assocObj.medium,
-                            self.hashing_store.get_lookup_pepper(),
+                            pepper,
                         ],
                     )
                     assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
@@ -215,7 +223,7 @@ class RemotePeer(Peer):
         # Verify the JSON
         signedjson.sign.verify_signed_json(assoc, self.servername, self.verify_key)
 
-    def pushUpdates(self, sgAssocs: Dict[int, Dict[str, Any]]) -> "Deferred[object]":
+    def pushUpdates(self, sgAssocs: SignedAssociations) -> "Deferred[IResponse]":
         """
         Pushes the given associations to the peer.
 
@@ -228,13 +236,15 @@ class RemotePeer(Peer):
         reqDeferred = self.sydent.replicationHttpsClient.postJson(
             self.replication_url, body
         )
+        if reqDeferred is None:
+            raise RuntimeError(f"Unable to push sgAssocs to {self.replication_url}")
 
         # XXX: We'll also need to prune the deleted associations out of the
         # local associations table once they've been replicated to all peers
         # (ie. remove the record we kept in order to propagate the deletion to
         # other peers).
 
-        updateDeferred: "Deferred[object]" = defer.Deferred()
+        updateDeferred: "Deferred[IResponse]" = defer.Deferred()
 
         reqDeferred.addCallback(self._pushSuccess, updateDeferred=updateDeferred)
         reqDeferred.addErrback(self._pushFailed, updateDeferred=updateDeferred)
@@ -244,7 +254,7 @@ class RemotePeer(Peer):
     def _pushSuccess(
         self,
         result: "IResponse",
-        updateDeferred: "Deferred[object]",
+        updateDeferred: "Deferred[IResponse]",
     ) -> None:
         """
         Processes a successful push request. If the request resulted in a status code
@@ -261,7 +271,9 @@ class RemotePeer(Peer):
             d.addCallback(self._failedPushBodyRead, updateDeferred=updateDeferred)
             d.addErrback(self._pushFailed, updateDeferred=updateDeferred)
 
-    def _failedPushBodyRead(self, body: bytes, updateDeferred: "Deferred[object]") -> None:
+    def _failedPushBodyRead(
+        self, body: bytes, updateDeferred: "Deferred[IResponse]"
+    ) -> None:
         """
         Processes a response body from a failed push request, then calls the error
         callback of the provided deferred.
