@@ -18,7 +18,7 @@ class MobileTerminateRequired(TypedDict):
 class MobileTerminate(MobileTerminateRequired, total=False):
     # And these are all optional.
     interaction: Literal["one-way", "two-way"]
-    promotional: bool  # Ignored, unless you're sending to India
+    promotional: bool  # Ignored, unless we're sending to India
     options: "Options"
     source: "Source"
     delivery: "Delivery"
