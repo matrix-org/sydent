@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 from twisted.web.http_headers import Headers
 
 from sydent.http.httpclient import SimpleHttpClient
-from sydent.sms.types import SendSMSBody, ToN
+from sydent.sms.types import SendSMSBody, TypeOfNumber
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -34,14 +34,14 @@ API_BASE_URL = "https://smsc.openmarket.com/sms/v4/mt"
 # API_BASE_URL = "http://smsc-cie.openmarket.com/sms/v4/mt"
 
 # The TON (ie. Type of Number) codes by type used in our config file
-TONS: Dict[str, ToN] = {
+TONS: Dict[str, TypeOfNumber] = {
     "long": 1,
     "short": 3,
     "alpha": 5,
 }
 
 
-def tonFromType(t: str) -> ToN:
+def tonFromType(t: str) -> TypeOfNumber:
     """
     Get the type of number from the originator's type.
 

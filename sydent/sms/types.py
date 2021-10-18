@@ -2,7 +2,7 @@
 # https://www.openmarket.com/docs/Content/apis/v4http/send-json.htm
 from typing_extensions import Literal, TypedDict
 
-ToN = Literal[1, 3, 5]
+TypeOfNumber = Literal[1, 3, 5]
 
 
 class SendSMSBody(TypedDict):
@@ -50,7 +50,7 @@ class SourceRequired(TypedDict):
 
 
 class Source(SourceRequired, total=False):
-    ton: ToN
+    ton: TypeOfNumber
 
 
 # We don't use either of these, so I'm going to be lazy and not specify the members.
