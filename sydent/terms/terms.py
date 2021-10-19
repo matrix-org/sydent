@@ -133,6 +133,10 @@ def get_terms(sydent: "Sydent") -> Optional[Terms]:
         # TODO use something like jsonschema instead of this handwritten code.
         if "master_version" not in termsYaml:
             raise Exception("No master version")
+        elif not isinstance(termsYaml["master_version"], str):
+            raise TypeError(
+                f"master_version should be a string, not {termsYaml['master_version']!r}"
+            )
         if "docs" not in termsYaml:
             raise Exception("No 'docs' key in terms")
         for docName, doc in termsYaml["docs"].items():
