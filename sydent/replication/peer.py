@@ -30,7 +30,7 @@ from unpaddedbase64 import decode_base64
 
 from sydent.config import ConfigError
 from sydent.db.hashing_metadata import HashingMetadataStore
-from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.db.threepid_associations import GlobalAssociationStore, SignedAssociations
 from sydent.threepid import threePidAssocFromDict
 from sydent.types import JsonDict
 from sydent.util import json_decoder
@@ -43,7 +43,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 SIGNING_KEY_ALGORITHM = "ed25519"
-SignedAssociations = Dict[int, Dict[str, Any]]
 
 
 class Peer:
