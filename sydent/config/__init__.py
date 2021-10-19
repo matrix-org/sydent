@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import copy
-import logging
 import logging.handlers
 import os
 from configparser import DEFAULTSECT, ConfigParser
-from typing import Dict, Any
+from typing import Dict
 
 from sydent.config.crypto import CryptoConfig
 from sydent.config.database import DatabaseConfig
