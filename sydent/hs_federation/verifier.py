@@ -222,25 +222,32 @@ class Verifier:
 def parse_auth_header(header_str: str) -> Tuple[str, str, str]:
     """
     Extracts a server name, signing key and payload signature from an
-    authentication header.
+    "Authorization: X-Matrix ..." header.
 
-    :param header_str: The content of the header
+    :param header_str: The content of the header, Starting at "X-Matrix".
+        For example, `X-Matrix origin=origin.example.com,key="ed25519:key1",sig="ABCDEF..."`
+        taken from
+            https://spec.matrix.org/unstable/server-server-api/#request-authentication .
+        TODO Is there a more authoritative reference for the X-Matrix scheme?
 
     :return: The server name, the signing key, and the payload signature.
+
+    :raises SignatureVerifyException: if the header did not meet the expected format.
     """
     try:
+        # Strip off "X-Matrix " and break up into key-value pairs.
         params = header_str.split(" ")[1].split(",")
-        param_dict = dict(kv.split("=") for kv in params)
+        param_dict: Dict[str, str] = dict(
+            # Cast safety: the split() call will either return a 1- or 2- tuple.
+            # If it returns a 1-tuple, dict() will complain with a ValueError
+            # so we'll spot the bad header.
+            cast(Tuple[str, str], kv.split("=", maxsplit=1))
+            for kv in params
+        )
 
-        def strip_quotes(value):
-            if value.startswith('"'):
-                return value[1:-1]
-            else:
-                return value
-
-        origin = strip_quotes(param_dict["origin"])
-        key = strip_quotes(param_dict["key"])
-        sig = strip_quotes(param_dict["sig"])
+        origin = param_dict["origin"].strip('"')
+        key = param_dict["key"].strip('"')
+        sig = param_dict["sig"].strip('"')
         return origin, key, sig
     except Exception:
         raise SignatureVerifyException("Malformed Authorization header")
