@@ -99,8 +99,12 @@ class ThreepidBinder:
         token: Dict[str, Any]
         for token in pendingJoinTokens:
             token["mxid"] = mxid
+            presigned = {
+                "mxid": mxid,
+                "token": token["token"],
+            }
             token["signed"] = signedjson.sign.sign_json(
-                {"mxid": mxid},
+                presigned,
                 self.sydent.config.general.server_name,
                 self.sydent.keyring.ed25519,
             )
