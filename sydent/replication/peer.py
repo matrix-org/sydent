@@ -17,7 +17,7 @@ import binascii
 import json
 import logging
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Generic, TypeVar
 
 import signedjson.key
 import signedjson.sign
@@ -37,6 +37,8 @@ from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.stringutils import normalise_address
 
+PushUpdateReturn = TypeVar("PushUpdateReturn")
+
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
@@ -45,7 +47,7 @@ logger = logging.getLogger(__name__)
 SIGNING_KEY_ALGORITHM = "ed25519"
 
 
-class Peer:
+class Peer(Generic[PushUpdateReturn]):
     def __init__(self, servername: str, pubkeys: Dict[str, str]):
         """
         :param server_name: The peer's server name.
@@ -56,7 +58,7 @@ class Peer:
         self.is_being_pushed_to = False
 
     @abstractmethod
-    def pushUpdates(self, sgAssocs: SignedAssociations) -> "Deferred[Any]":
+    def pushUpdates(self, sgAssocs: SignedAssociations) -> "Deferred[PushUpdateReturn]":
         # Having to go for `Deferred[Any]` feels a bit icky here. But the two
         # implementations return Deferred[bool] and Deferred[IResponse].
         # I couldn't get this to work with writing Deferred[Union[bool, IResponse]].
@@ -69,7 +71,7 @@ class Peer:
         ...
 
 
-class LocalPeer(Peer):
+class LocalPeer(Peer[bool]):
     """
     The local peer (ourselves: essentially copying from the local associations table to the global one)
     """
@@ -131,7 +133,7 @@ class LocalPeer(Peer):
         return d
 
 
-class RemotePeer(Peer):
+class RemotePeer(Peer[IResponse]):
     def __init__(
         self,
         sydent: "Sydent",
