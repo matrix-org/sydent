@@ -66,7 +66,7 @@ class HTTPClient:
         return json_body
 
     async def post_json_get_nothing(
-        self, uri: str, post_json: Dict[Any, Any], opts: Dict[str, Any]
+        self, uri: str, post_json: JsonDict, opts: Dict[str, Any]
     ) -> IResponse:
         """Make a POST request to an endpoint returning nothing
 
