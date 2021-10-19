@@ -193,33 +193,6 @@ class Verifier:
             json_request["content"] = content
 
         origin = None
-
-        def parse_auth_header(header_str: str) -> Tuple[str, str, str]:
-            """
-            Extracts a server name, signing key and payload signature from an
-            authentication header.
-
-            :param header_str: The content of the header
-
-            :return: The server name, the signing key, and the payload signature.
-            """
-            try:
-                params = header_str.split(" ")[1].split(",")
-                param_dict = dict(kv.split("=") for kv in params)
-
-                def strip_quotes(value):
-                    if value.startswith('"'):
-                        return value[1:-1]
-                    else:
-                        return value
-
-                origin = strip_quotes(param_dict["origin"])
-                key = strip_quotes(param_dict["key"])
-                sig = strip_quotes(param_dict["sig"])
-                return origin, key, sig
-            except Exception:
-                raise SignatureVerifyException("Malformed Authorization header")
-
         auth_headers = request.requestHeaders.getRawHeaders("Authorization")
 
         if not auth_headers:
@@ -244,3 +217,30 @@ class Verifier:
         logger.info("Verified request from HS %s", origin)
 
         return origin
+
+
+def parse_auth_header(header_str: str) -> Tuple[str, str, str]:
+    """
+    Extracts a server name, signing key and payload signature from an
+    authentication header.
+
+    :param header_str: The content of the header
+
+    :return: The server name, the signing key, and the payload signature.
+    """
+    try:
+        params = header_str.split(" ")[1].split(",")
+        param_dict = dict(kv.split("=") for kv in params)
+
+        def strip_quotes(value):
+            if value.startswith('"'):
+                return value[1:-1]
+            else:
+                return value
+
+        origin = strip_quotes(param_dict["origin"])
+        key = strip_quotes(param_dict["key"])
+        sig = strip_quotes(param_dict["sig"])
+        return origin, key, sig
+    except Exception:
+        raise SignatureVerifyException("Malformed Authorization header")
