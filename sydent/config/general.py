@@ -113,7 +113,7 @@ def list_from_comma_sep_string(rawstr: str) -> List[str]:
     return [x.strip() for x in rawstr.split(",")]
 
 
-def parse_cfg_bool(value: str):
+def parse_cfg_bool(value: str) -> bool:
     """
     Parse a string config option into a boolean
     This method ignores capitalisation

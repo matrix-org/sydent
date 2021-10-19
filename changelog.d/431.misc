@@ -1,0 +1,1 @@
+Make `sydent.config` pass `mypy --strict`.
