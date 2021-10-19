@@ -14,7 +14,7 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, cast
 
 import signedjson.key
 import signedjson.sign
@@ -22,6 +22,7 @@ from signedjson.sign import SignatureVerifyException
 from twisted.web.server import Request
 from unpaddedbase64 import decode_base64
 
+from sydent.hs_federation.types import GetKeyResponse, VerifyKeys
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name
 
@@ -58,11 +59,11 @@ class Verifier:
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
         # in the result.
-        self.cache: Dict[str, Any] = {
+        self.cache: Dict[str, GetKeyResponse] = {
             # server_name: <result from keys query>,
         }
 
-    async def _getKeysForServer(self, server_name: str) -> Dict[str, Dict[str, str]]:
+    async def _getKeysForServer(self, server_name: str) -> VerifyKeys:
         """Get the signing key data from a homeserver.
 
         :param server_name: The name of the server to request the keys from.
@@ -77,8 +78,18 @@ class Verifier:
                 return self.cache[server_name]["verify_keys"]
 
         client = FederationHttpClient(self.sydent)
-        result = await client.get_json(
-            "matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50
+        # Cast safety: we have validation logic below which checks that
+        # - `verify_keys` is present
+        # - `valid_until_ts` is an integer if present
+        # - cached entries always have a `valid_until_ts` key
+        # and we don't use any of the other fields on GetKeyResponse.
+        # The only use of the cache is in this function, and only to read
+        # the two fields mentioned above.
+        result: GetKeyResponse = cast(
+            GetKeyResponse,
+            await client.get_json(
+                "matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50
+            ),
         )
 
         if "verify_keys" not in result:
