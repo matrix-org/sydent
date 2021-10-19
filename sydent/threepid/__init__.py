@@ -11,19 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
+from typing import Any, Dict, Optional
+
+import attr
 
 
-def threePidAssocFromDict(d):
-    """
-    Instantiates a ThreepidAssociation from the given dict.
-
-    :param d: The dict to use when instantiating the ThreepidAssociation.
-    :type d: dict[str, any]
-
-    :return: The instantiated ThreepidAssociation.
-    :rtype: ThreepidAssociation
-    """
+def threePidAssocFromDict(d: Dict[str, Any]) -> "ThreepidAssociation":
+    """Instantiates a ThreepidAssociation from the given dict."""
     assoc = ThreepidAssociation(
         d["medium"],
         d["address"],
@@ -36,33 +30,25 @@ def threePidAssocFromDict(d):
     return assoc
 
 
+@attr.s(slots=True, auto_attribs=True)
 class ThreepidAssociation:
-    def __init__(
-        self,
-        medium: str,
-        address: str,
-        lookup_hash: Optional[str],
-        # Note: the next four fields were made optional in schema version 2.
-        # See sydent.db.sqlitedb.SqliteDatabase._upgradeSchema
-        mxid: Optional[str],
-        ts: Optional[int],
-        not_before: Optional[int],
-        not_after: Optional[int],
-    ):
-        """
-        :param medium: The medium of the 3pid (eg. email)
-        :param address: The identifier (eg. email address)
-        :param lookup_hash: A hash digest of the 3pid. Can be a str or None
-        :param mxid: The matrix ID the 3pid is associated with
-        :param ts: The creation timestamp of this association, ms
-        :param not_before: The timestamp, in ms, at which this association becomes valid
-        :param not_after: The timestamp, in ms, at which this association ceases to be valid
-        """
-        self.medium = medium
-        self.address = address
-        self.lookup_hash = lookup_hash
-        self.mxid = mxid
-        self.ts = ts
-        self.not_before = not_before
-        self.not_after = not_after
-        self.extra_fields = {}
+    """
+    medium: The medium of the 3pid (eg. email)
+    address: The identifier (eg. email address)
+    lookup_hash: A hash digest of the 3pid. Can be a str or None
+    mxid: The matrix ID the 3pid is associated with
+    ts: The creation timestamp of this association, ms
+    not_before: The timestamp, in ms, at which this association becomes valid
+    not_after: The timestamp, in ms, at which this association ceases to be valid
+    """
+
+    medium: str
+    address: str
+    lookup_hash: Optional[str]
+    # Note: the next four fields were made optional in schema version 2.
+    # See sydent.db.sqlitedb.SqliteDatabase._upgradeSchema
+    mxid: Optional[str]
+    ts: Optional[int]
+    not_before: Optional[int]
+    not_after: Optional[int]
+    extra_fields: Dict[str, Any] = {}
