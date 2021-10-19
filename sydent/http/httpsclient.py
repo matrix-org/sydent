@@ -15,7 +15,7 @@
 import json
 import logging
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Optional
 
 from twisted.internet.defer import Deferred
 from twisted.internet.ssl import optionsForClientTLS
@@ -23,6 +23,8 @@ from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IPolicyForHTTPS
 from zope.interface import implementer
+
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -49,7 +51,7 @@ class ReplicationHttpsClient:
             #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
             self.agent = Agent(self.sydent.reactor, SydentPolicyForHTTPS(self.sydent))
 
-    def postJson(self, uri: str, jsonObject: Dict[Any, Any]) -> Optional[Deferred]:
+    def postJson(self, uri: str, jsonObject: JsonDict) -> Optional[Deferred]:
         """
         Sends an POST request over HTTPS.
 

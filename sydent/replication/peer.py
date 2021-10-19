@@ -30,6 +30,7 @@ from sydent.config import ConfigError
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.threepid import threePidAssocFromDict
+from sydent.types import JsonDict
 from sydent.util import json_decoder
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.stringutils import normalise_address
@@ -183,7 +184,7 @@ class RemotePeer(Peer):
         self.verify_key.alg = SIGNING_KEY_ALGORITHM
         self.verify_key.version = 0
 
-    def verifySignedAssociation(self, assoc: Dict[Any, Any]) -> None:
+    def verifySignedAssociation(self, assoc: JsonDict) -> None:
         """Verifies a signature on a signed association. Raises an exception if the
         signature is incorrect or couldn't be verified.
 
