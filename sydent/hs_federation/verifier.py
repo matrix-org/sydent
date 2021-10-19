@@ -14,7 +14,7 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, cast
 
 import signedjson.key
 import signedjson.sign
@@ -22,7 +22,7 @@ from signedjson.sign import SignatureVerifyException
 from twisted.web.server import Request
 from unpaddedbase64 import decode_base64
 
-from sydent.hs_federation.types import GetKeyResponse, VerifyKeys
+from sydent.hs_federation.types import GetKeyResponse, SignedMatrixRequest, VerifyKeys
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name
 
@@ -115,7 +115,7 @@ class Verifier:
 
     async def verifyServerSignedJson(
         self,
-        signed_json: Dict[str, Any],
+        signed_json: SignedMatrixRequest,
         acceptable_server_names: Optional[List[str]] = None,
     ) -> Tuple[str, str]:
         """Given a signed json object, try to verify any one
@@ -182,35 +182,34 @@ class Verifier:
 
         :return: The origin of the server whose signature was validated
         """
-        json_request = {
-            "method": request.method,
-            "uri": request.uri,
-            "destination_is": self.sydent.config.general.server_name,
-            "signatures": {},
-        }
-
-        if content is not None:
-            json_request["content"] = content
-
-        origin = None
         auth_headers = request.requestHeaders.getRawHeaders("Authorization")
-
         if not auth_headers:
             raise NoAuthenticationError("Missing Authorization headers")
 
+        # Retrieve an origin and signatures from the authorization header.
+        origin = None
+        signatures: Dict[str, Dict[str, str]] = {}
         for auth in auth_headers:
             if auth.startswith("X-Matrix"):
                 (origin, key, sig) = parse_auth_header(auth)
-                json_request["origin"] = origin
-                json_request["signatures"].setdefault(origin, {})[key] = sig
+                signatures.setdefault(origin, {})[key] = sig
 
-        if not json_request["signatures"]:
+        if origin is None:
             raise NoAuthenticationError("Missing X-Matrix Authorization header")
-
-        if not is_valid_matrix_server_name(json_request["origin"]):
+        if not is_valid_matrix_server_name(origin):
             raise InvalidServerName(
                 "X-Matrix header's origin parameter must be a valid Matrix server name"
             )
+
+        json_request: SignedMatrixRequest = {
+            "method": request.method,
+            "uri": request.uri,
+            "destination_is": self.sydent.config.general.server_name,
+            "signatures": signatures,
+            "origin": origin,
+        }
+        if content is not None:
+            json_request["content"] = content
 
         await self.verifyServerSignedJson(json_request, [origin])
 

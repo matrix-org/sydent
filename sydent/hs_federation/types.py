@@ -31,3 +31,15 @@ class OldVerifyKey(TypedDict):
 # key: "signing key identifier"; value: signature encoded as unpadded base 64
 # See https://spec.matrix.org/unstable/appendices/#signing-details
 Signature = Dict[str, str]
+
+
+class SignedMatrixRequestRequired(TypedDict):
+    method: bytes
+    uri: bytes
+    destination_is: str
+    signatures: Dict[str, Signature]
+    origin: str
+
+
+class SignedMatrixRequest(SignedMatrixRequestRequired, total=False):
+    content: bytes
