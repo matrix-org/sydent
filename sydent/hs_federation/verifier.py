@@ -23,6 +23,10 @@ from twisted.web.server import Request
 from unpaddedbase64 import decode_base64
 
 from sydent.hs_federation.types import GetKeyResponse, SignedMatrixRequest, VerifyKeys
+from sydent.hs_federation.types import (
+    CachedVerificationKeys,
+    VerifyKeys,
+)
 from sydent.http.httpclient import FederationHttpClient
 from sydent.util.stringutils import is_valid_matrix_server_name
 
@@ -59,7 +63,7 @@ class Verifier:
         self.sydent = sydent
         # Cache of server keys. These are cached until the 'valid_until_ts' time
         # in the result.
-        self.cache: Dict[str, GetKeyResponse] = {
+        self.cache: Dict[str, CachedVerificationKeys] = {
             # server_name: <result from keys query>,
         }
 
@@ -74,8 +78,8 @@ class Verifier:
         if server_name in self.cache:
             cached = self.cache[server_name]
             now = int(time.time() * 1000)
-            if cached["valid_until_ts"] > now:
-                return self.cache[server_name]["verify_keys"]
+            if cached.valid_until_ts > now:
+                return cached.verify_keys
 
         client = FederationHttpClient(self.sydent)
         # Cast safety: we have validation logic below which checks that
@@ -85,15 +89,32 @@ class Verifier:
         # and we don't use any of the other fields on GetKeyResponse.
         # The only use of the cache is in this function, and only to read
         # the two fields mentioned above.
-        result: GetKeyResponse = cast(
-            GetKeyResponse,
-            await client.get_json(
-                "matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50
-            ),
+        result = await client.get_json(
+            "matrix://%s/_matrix/key/v2/server/" % server_name, 1024 * 50
         )
-
         if "verify_keys" not in result:
             raise SignatureVerifyException("No key found in response")
+
+        if not isinstance(result["verify_keys"], dict):
+            raise SignatureVerifyException(
+                f"Invalid type for verify_keys: expected dict, got {result['verify_keys']}"
+            )
+
+        keys_to_remove = []
+        for key_name, key_dict in result["verify_keys"].items():
+            if "key" not in key_dict:
+                logger.warning("Ignoring key %s with no 'key'", key_name)
+                keys_to_remove.append(key_name)
+            elif not isinstance(key_dict["key"], str):
+                raise SignatureVerifyException(
+                    f"Invalid type for verify_keys/{key_name}/key: "
+                    f"expected str, got {key_dict['key']}"
+                )
+        for key_name in keys_to_remove:
+            del result["verify_keys"][key_name]
+
+        # We've now verified that verify_keys has the correct type.
+        verify_keys: VerifyKeys = result["verify_keys"]
 
         if "valid_until_ts" in result:
             if not isinstance(result["valid_until_ts"], int):
@@ -109,9 +130,11 @@ class Verifier:
                 server_name,
                 result["valid_until_ts"],
             )
-            self.cache[server_name] = result
+            self.cache[server_name] = CachedVerificationKeys(
+                verify_keys, result["valid_until_ts"]
+            )
 
-        return result["verify_keys"]
+        return verify_keys
 
     async def verifyServerSignedJson(
         self,
