@@ -19,10 +19,9 @@ class MobileTerminate(MobileTerminateRequired, total=False):
     # And these are all optional.
     interaction: Literal["one-way", "two-way"]
     promotional: bool  # Ignored, unless we're sending to India
-    options: "Options"
     source: "Source"
-    delivery: "Delivery"
-
+    # The API also offers optional "options" and "delivery" keys,
+    # which we don't use
 
 class MessageRequired(TypedDict):
     type: Literal["text", "hexEncodedText", "binary", "wapPush"]
@@ -51,12 +50,3 @@ class SourceRequired(TypedDict):
 
 class Source(SourceRequired, total=False):
     ton: TypeOfNumber
-
-
-# We don't use either of these, so I'm going to be lazy and not specify the members.
-class Options(TypedDict):
-    pass
-
-
-class Delivery(TypedDict):
-    pass
