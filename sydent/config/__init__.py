@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import copy
-import logging
 import logging.handlers
 import os
 from configparser import DEFAULTSECT, ConfigParser
@@ -163,7 +162,7 @@ class SydentConfig:
     Sydent object that uses it.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.general = GeneralConfig()
         self.database = DatabaseConfig()
         self.crypto = CryptoConfig()
@@ -243,7 +242,7 @@ class SydentConfig:
             cfg.write(fp)
             fp.close()
 
-    def parse_config_dict(self, config_dict: Dict) -> None:
+    def parse_config_dict(self, config_dict: Dict[str, Dict[str, str]]) -> None:
         """
         Parse the given config from a dictionary, populating missing items and sections
 

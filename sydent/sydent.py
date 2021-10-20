@@ -21,7 +21,9 @@ import os
 import sqlite3
 from typing import Optional
 
+import attr
 import twisted.internet.reactor
+from signedjson.types import SigningKey
 from twisted.internet import address, task
 from twisted.python import log
 
@@ -124,8 +126,7 @@ class Sydent:
         self.validators.email = EmailValidator(self)
         self.validators.msisdn = MsisdnValidator(self)
 
-        self.keyring = Keyring()
-        self.keyring.ed25519 = self.config.crypto.signing_key
+        self.keyring: Keyring = Keyring(self.config.crypto.signing_key)
         self.keyring.ed25519.alg = "ed25519"
 
         self.sig_verifier = Verifier(self)
@@ -183,7 +184,7 @@ class Sydent:
         self.replicationHttpsServer = ReplicationHttpsServer(self)
         self.replicationHttpsClient = ReplicationHttpsClient(self)
 
-        self.pusher = Pusher(self)
+        self.pusher: Pusher = Pusher(self)
 
     def run(self):
         self.clientApiHttpServer.setup()
@@ -292,8 +293,9 @@ class Servlets:
     pass
 
 
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class Keyring:
-    pass
+    ed25519: SigningKey
 
 
 def get_config_file_path():

@@ -1,0 +1,1 @@
+Make `sydent.threepid` pass `mypy --strict`.
