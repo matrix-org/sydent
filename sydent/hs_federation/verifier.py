@@ -244,9 +244,15 @@ def parse_auth_header(header_str: str) -> Tuple[str, str, str]:
             for kv in params
         )
 
-        origin = param_dict["origin"].strip('"')
-        key = param_dict["key"].strip('"')
-        sig = param_dict["sig"].strip('"')
+        def strip_quotes(value: str) -> str:
+            if value.startswith('"'):
+                return value[1:-1]
+            else:
+                return value
+
+        origin = strip_quotes(param_dict["origin"])
+        key = strip_quotes(param_dict["key"])
+        sig = strip_quotes(param_dict["sig"])
         return origin, key, sig
     except Exception:
         raise SignatureVerifyException("Malformed Authorization header")
