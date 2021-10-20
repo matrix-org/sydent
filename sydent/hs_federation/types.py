@@ -3,7 +3,7 @@ from typing import Dict
 from typing_extensions import TypedDict
 
 
-class GetKeyResponseRequired(TypedDict):
+class _GetKeyResponseRequired(TypedDict):
     """See https://spec.matrix.org/unstable/server-server-api/#get_matrixkeyv2serverkeyid"""
 
     server_name: str
@@ -13,7 +13,7 @@ class GetKeyResponseRequired(TypedDict):
 VerifyKeys = Dict[str, "VerifyKey"]
 
 
-class GetKeyResponse(GetKeyResponseRequired, total=False):
+class GetKeyResponse(_GetKeyResponseRequired, total=False):
     old_verify_keys: Dict[str, "OldVerifyKey"]
     signatures: Dict[str, "Signature"]
     valid_until_ts: int
@@ -33,7 +33,7 @@ class OldVerifyKey(TypedDict):
 Signature = Dict[str, str]
 
 
-class SignedMatrixRequestRequired(TypedDict):
+class _SignedMatrixRequestRequired(TypedDict):
     method: bytes
     uri: bytes
     destination_is: str
@@ -41,5 +41,5 @@ class SignedMatrixRequestRequired(TypedDict):
     origin: str
 
 
-class SignedMatrixRequest(SignedMatrixRequestRequired, total=False):
+class SignedMatrixRequest(_SignedMatrixRequestRequired, total=False):
     content: bytes
