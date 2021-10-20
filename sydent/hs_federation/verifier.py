@@ -241,9 +241,7 @@ def parse_auth_header(header_str: str) -> Tuple[str, str, str]:
 
     :param header_str: The content of the header, Starting at "X-Matrix".
         For example, `X-Matrix origin=origin.example.com,key="ed25519:key1",sig="ABCDEF..."`
-        taken from
-            https://spec.matrix.org/unstable/server-server-api/#request-authentication .
-        TODO Is there a more authoritative reference for the X-Matrix scheme?
+        See https://matrix.org/docs/spec/server_server/r0.1.4#request-authentication
 
     :return: The server name, the signing key, and the payload signature.
 
