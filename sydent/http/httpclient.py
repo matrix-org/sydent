@@ -86,7 +86,7 @@ class HTTPClient:
     async def post_json_maybe_get_json(
         self,
         uri: str,
-        post_json: Dict[Any, Any],
+        post_json: Dict[str, Any],
         opts: Dict[str, Any],
         max_size: Optional[int] = None,
     ) -> Tuple[IResponse, Optional[JsonDict]]:

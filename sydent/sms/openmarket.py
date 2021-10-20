@@ -14,11 +14,13 @@
 
 import logging
 from base64 import b64encode
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 from twisted.web.http_headers import Headers
 
 from sydent.http.httpclient import SimpleHttpClient
+from sydent.sms.types import SendSMSBody, TypeOfNumber
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -33,14 +35,14 @@ API_BASE_URL = "https://smsc.openmarket.com/sms/v4/mt"
 # API_BASE_URL = "http://smsc-cie.openmarket.com/sms/v4/mt"
 
 # The TON (ie. Type of Number) codes by type used in our config file
-TONS = {
+TONS: Dict[str, TypeOfNumber] = {
     "long": 1,
     "short": 3,
     "alpha": 5,
 }
 
 
-def tonFromType(t: str) -> int:
+def tonFromType(t: str) -> TypeOfNumber:
     """
     Get the type of number from the originator's type.
 
@@ -69,7 +71,7 @@ class OpenMarketSMS:
         :param body: The message to send.
         :param dest: The destination MSISDN to send the text message to.
         """
-        send_body = {
+        send_body: SendSMSBody = {
             "mobileTerminate": {
                 "message": {"content": body, "type": "text"},
                 "destination": {
@@ -94,8 +96,14 @@ class OpenMarketSMS:
             }
         )
 
-        resp, body = await self.http_cli.post_json_maybe_get_json(
-            API_BASE_URL, send_body, {"headers": req_headers}
+        # Type safety: The case from a TypedDict to a regular Dict is required
+        # because the two are deliberately not compatible. See
+        #    https://github.com/python/mypy/issues/4976
+        # for details, but in a nutshell: Dicts can have keys added or removed,
+        # and that would break the invariants that a TypedDict is there to check.
+        # The case below is safe because we never use send_body afterwards.
+        resp, response_body = await self.http_cli.post_json_maybe_get_json(
+            API_BASE_URL, cast(JsonDict, send_body), {"headers": req_headers}
         )
 
         headers = dict(resp.headers.getAllRawHeaders())
@@ -111,7 +119,7 @@ class OpenMarketSMS:
         # Relevant OpenMarket API documentation:
         # https://www.openmarket.com/docs/Content/apis/v4http/send-json.htm
         if resp.code < 200 or resp.code >= 300:
-            if body is None or "error" not in body:
+            if response_body is None or "error" not in response_body:
                 raise Exception(
                     "OpenMarket API responded with status %d (request ID: %s)"
                     % (
@@ -120,7 +128,7 @@ class OpenMarketSMS:
                     ),
                 )
 
-            error = body["error"]
+            error = response_body["error"]
             raise Exception(
                 "OpenMarket API responded with status %d (request ID: %s): %s"
                 % (
