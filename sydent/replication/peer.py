@@ -59,10 +59,6 @@ class Peer(Generic[PushUpdateReturn]):
 
     @abstractmethod
     def pushUpdates(self, sgAssocs: SignedAssociations) -> "Deferred[PushUpdateReturn]":
-        # Having to go for `Deferred[Any]` feels a bit icky here. But the two
-        # implementations return Deferred[bool] and Deferred[IResponse].
-        # I couldn't get this to work with writing Deferred[Union[bool, IResponse]].
-        # Bit confused here.
         """
         :param sgAssocs: Map from originId to sgAssoc,  where originId is the id
                          on the creating server and sgAssoc is the json object
