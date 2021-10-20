@@ -5,25 +5,6 @@ from typing_extensions import Literal, TypedDict
 TypeOfNumber = Literal[1, 3, 5]
 
 
-class SendSMSBody(TypedDict):
-    mobileTerminate: "MobileTerminate"
-
-
-class _MobileTerminateRequired(TypedDict):
-    # OpenMarket says these are required fields
-    destination: "Destination"
-    message: "Message"
-
-
-class MobileTerminate(_MobileTerminateRequired, total=False):
-    # And these are all optional.
-    interaction: Literal["one-way", "two-way"]
-    promotional: bool  # Ignored, unless we're sending to India
-    source: "Source"
-    # The API also offers optional "options" and "delivery" keys,
-    # which we don't use
-
-
 class _MessageRequired(TypedDict):
     type: Literal["text", "hexEncodedText", "binary", "wapPush"]
     content: str
@@ -51,3 +32,22 @@ class _SourceRequired(TypedDict):
 
 class Source(_SourceRequired, total=False):
     ton: TypeOfNumber
+
+
+class _MobileTerminateRequired(TypedDict):
+    # OpenMarket says these are required fields
+    destination: Destination
+    message: Message
+
+
+class MobileTerminate(_MobileTerminateRequired, total=False):
+    # And these are all optional.
+    interaction: Literal["one-way", "two-way"]
+    promotional: bool  # Ignored, unless we're sending to India
+    source: Source
+    # The API also offers optional "options" and "delivery" keys,
+    # which we don't use
+
+
+class SendSMSBody(TypedDict):
+    mobileTerminate: MobileTerminate
