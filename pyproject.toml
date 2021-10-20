@@ -52,6 +52,7 @@ files = [
     "sydent/config",
     "sydent/db",
     "sydent/hs_federation",
+    "sydent/terms",
     "sydent/threepid",
     "sydent/users",
     "sydent/util",
