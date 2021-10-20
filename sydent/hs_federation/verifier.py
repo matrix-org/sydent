@@ -16,18 +16,20 @@ import logging
 import time
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, cast
 
+import attr
 import signedjson.key
 import signedjson.sign
 from signedjson.sign import SignatureVerifyException
 from twisted.web.server import Request
 from unpaddedbase64 import decode_base64
 
-from sydent.hs_federation.types import GetKeyResponse, SignedMatrixRequest, VerifyKeys
 from sydent.hs_federation.types import (
     CachedVerificationKeys,
+    SignedMatrixRequest,
     VerifyKeys,
 )
 from sydent.http.httpclient import FederationHttpClient
+from sydent.types import JsonDict
 from sydent.util.stringutils import is_valid_matrix_server_name
 
 if TYPE_CHECKING:
@@ -157,9 +159,7 @@ class Verifier:
 
         :raise SignatureVerifyException: The json cannot be verified.
         """
-        if "signatures" not in signed_json:
-            raise SignatureVerifyException("Signature missing")
-        for server_name, sigs in signed_json["signatures"].items():
+        for server_name, sigs in signed_json.signatures.items():
             if acceptable_server_names is not None:
                 if server_name not in acceptable_server_names:
                     continue
@@ -167,36 +167,31 @@ class Verifier:
             server_keys = await self._getKeysForServer(server_name)
             for key_name, sig in sigs.items():
                 if key_name in server_keys:
-                    if "key" not in server_keys[key_name]:
-                        logger.warning("Ignoring key %s with no 'key'")
-                        continue
+
                     key_bytes = decode_base64(server_keys[key_name]["key"])
                     verify_key = signedjson.key.decode_verify_key_bytes(
                         key_name, key_bytes
                     )
                     logger.info("verifying sig from key %r", key_name)
-                    signedjson.sign.verify_signed_json(
-                        signed_json, server_name, verify_key
-                    )
+                    payload = attr.asdict(signed_json)
+                    signedjson.sign.verify_signed_json(payload, server_name, verify_key)
                     logger.info(
                         "Verified signature with key %s from %s", key_name, server_name
                     )
                     return (server_name, key_name)
             logger.warning(
                 "No matching key found for signature block %r in server keys %r",
-                signed_json["signatures"],
+                signed_json.signatures,
                 server_keys,
             )
         logger.warning(
             "Unable to verify any signatures from block %r. Acceptable server names: %r",
-            signed_json["signatures"],
+            signed_json.signatures,
             acceptable_server_names,
         )
         raise SignatureVerifyException("No matching signature found")
 
-    async def authenticate_request(
-        self, request: "Request", content: Optional[bytes]
-    ) -> str:
+    async def authenticate_request(self, request: "Request", content: JsonDict) -> str:
         """Authenticates a Matrix federation request based on the X-Matrix header
         XXX: Copied largely from synapse
 
@@ -224,16 +219,14 @@ class Verifier:
                 "X-Matrix header's origin parameter must be a valid Matrix server name"
             )
 
-        json_request: SignedMatrixRequest = {
-            "method": request.method,
-            "uri": request.uri,
-            "destination_is": self.sydent.config.general.server_name,
-            "signatures": signatures,
-            "origin": origin,
-        }
-        if content is not None:
-            json_request["content"] = content
-
+        json_request = SignedMatrixRequest(
+            method=request.method,
+            uri=request.uri,
+            destination_is=self.sydent.config.general.server_name,
+            signatures=signatures,
+            origin=origin,
+            content=content,
+        )
         await self.verifyServerSignedJson(json_request, [origin])
 
         logger.info("Verified request from HS %s", origin)

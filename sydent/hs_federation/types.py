@@ -1,7 +1,9 @@
 from typing import Dict
 
-from typing_extensions import TypedDict
 import attr
+from typing_extensions import TypedDict
+
+from sydent.types import JsonDict
 
 
 class VerifyKey(TypedDict):
@@ -22,13 +24,11 @@ class CachedVerificationKeys:
 Signature = Dict[str, str]
 
 
-class _SignedMatrixRequestRequired(TypedDict):
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class SignedMatrixRequest:
     method: bytes
     uri: bytes
     destination_is: str
     signatures: Dict[str, Signature]
     origin: str
-
-
-class SignedMatrixRequest(_SignedMatrixRequestRequired, total=False):
-    content: bytes
+    content: JsonDict
