@@ -23,6 +23,7 @@ class MobileTerminate(MobileTerminateRequired, total=False):
     # The API also offers optional "options" and "delivery" keys,
     # which we don't use
 
+
 class MessageRequired(TypedDict):
     type: Literal["text", "hexEncodedText", "binary", "wapPush"]
     content: str
