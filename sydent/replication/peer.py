@@ -17,7 +17,7 @@ import binascii
 import json
 import logging
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Sequence, TypeVar
+from typing import TYPE_CHECKING, Dict, Generic, Optional, Sequence, TypeVar
 
 import signedjson.key
 import signedjson.sign
