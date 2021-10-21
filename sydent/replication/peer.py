@@ -316,7 +316,7 @@ class NoMatchingSignatureException(Exception):
 
 
 class RemotePeerError(Exception):
-    def __init__(self, errorDict: Dict[Any, Any]):
+    def __init__(self, errorDict: JsonDict):
         self.errorDict = errorDict
 
     def __str__(self) -> str:
