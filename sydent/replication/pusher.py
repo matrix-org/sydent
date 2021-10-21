@@ -67,7 +67,6 @@ class Pusher:
 
         :returns a deferred.DeferredList of defers, one per peer we're pushing to that will
         resolve when pushing to that peer has completed, successfully or otherwise
-        :rtype deferred.DeferredList
         """
         peers = self.peerStore.getAllPeers()
 
