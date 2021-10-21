@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 SERVER_CACHE: Dict[bytes, List["Server"]] = {}
 
 
-@attr.s
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class Server:
     """
     Our record of an individual server which can be tried to reach a destination.
@@ -42,11 +42,11 @@ class Server:
             the epoch
     """
 
-    host = attr.ib()
-    port = attr.ib()
-    priority = attr.ib(default=0)
-    weight = attr.ib(default=0)
-    expires = attr.ib(default=0)
+    host: bytes
+    port: int
+    priority: int = 0
+    weight: int = 0
+    expires: int = 0
 
 
 def pick_server_from_list(server_list: List[Server]) -> Tuple[bytes, int]:
@@ -93,7 +93,7 @@ class SrvResolver:
 
     def __init__(
         self,
-        dns_client: "IResolver" = client,
+        dns_client: IResolver = client.getResolver(),
         cache: Dict[bytes, List[Server]] = SERVER_CACHE,
         get_time: Callable[[], SupportsInt] = time.time,
     ) -> None:
@@ -106,13 +106,9 @@ class SrvResolver:
 
         :param service_name: The record to look up.
 
-
         :returns a list of the SRV records, or an empty list if none found.
         """
         now = int(self._get_time())
-
-        if not isinstance(service_name, bytes):
-            raise TypeError("%r is not a byte string" % (service_name,))
 
         cache_entry = self._cache.get(service_name, None)
         if cache_entry:
@@ -121,7 +117,18 @@ class SrvResolver:
                 return servers
 
         try:
-            answers, _, _ = await self._dns_client.lookupService(service_name)
+            answers, _, _ = await self._dns_client.lookupService(
+                service_name.decode(),
+                # We used to use self._dns_client = twisted.names.client --- the
+                # actual module. This quacks a lot like an IResolver, but it isn't.
+                # twisted.names.client.lookupService has an optional `timeout`;
+                # IResolver.lookupService doesn't.
+                # I think the least invasive change here is to use the timeout
+                # we'd fall back to if we called client.lookupService. I chased
+                # it through to twisted.names.root.Resolver._lookup and got these
+                # values---see its docstring for justification.
+                timeout=(1, 3, 11, 45),
+            )
         except DNSNameError:
             # TODO: cache this. We can get the SOA out of the exception, and use
             # the negative-TTL value.
@@ -144,7 +151,7 @@ class SrvResolver:
             and answers[0].payload
             and answers[0].payload.target == dns.Name(b".")
         ):
-            raise ConnectError("Service %s unavailable" % service_name)
+            raise ConnectError("Service %s unavailable" % service_name.decode())
 
         servers = []
 
