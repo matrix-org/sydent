@@ -293,7 +293,6 @@ class RemotePeer(Peer[IResponse]):
         deferred with it.
 
         :param failure: The failure to process.
-        :type failure:
         :param updateDeferred: The deferred to call the error callback of.
         """
         updateDeferred.errback(failure)
