@@ -148,12 +148,8 @@ def get_terms(sydent: "Sydent") -> Terms:
             raise Exception("'%s' has no langs" % (docName,))
         for langKey, lang in doc["langs"].items():
             if "name" not in lang:
-                raise Exception(
-                    "lang '%s' of doc %s has no name" % (langKey, docName)
-                )
+                raise Exception("lang '%s' of doc %s has no name" % (langKey, docName))
             if "url" not in lang:
-                raise Exception(
-                    "lang '%s' of doc %s has no url" % (langKey, docName)
-                )
+                raise Exception("lang '%s' of doc %s has no url" % (langKey, docName))
 
     return Terms(termsYaml)
