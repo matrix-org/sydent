@@ -62,7 +62,7 @@ class Pusher:
 
         localPeer.pushUpdates(signedAssocs)
 
-    def scheduledPush(self) -> "defer.Deferred[List[Tuple[bool, object]]]":
+    def scheduledPush(self) -> "defer.Deferred[List[Tuple[bool, None]]]":
         """Push pending updates to all known remote peers. To be called regularly.
 
         :returns a deferred.DeferredList of defers, one per peer we're pushing to that will
