@@ -51,6 +51,8 @@ files = [
     #     find sydent tests -type d -not -name __pycache__ -exec bash -c "mypy --strict '{}' > /dev/null"  \; -print
     "sydent/config",
     "sydent/db",
+    "sydent/http/blacklisting_reactor.py",
+    "sydent/http/federation_tls_options.py",
     "sydent/hs_federation",
     "sydent/sms",
     "sydent/terms",
