@@ -78,7 +78,6 @@ def authV2(
 
     if requireTermsAgreed:
         terms = get_terms(sydent)
-        assert terms is not None
         if (
             terms.getMasterVersion() is not None
             and account.consentVersion != terms.getMasterVersion()
