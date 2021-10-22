@@ -16,12 +16,12 @@
 import logging
 import random
 import time
-from typing import Callable, Dict, List, SupportsInt, Tuple
+from typing import Callable, Dict, List, SupportsInt, Tuple, Awaitable
 
 import attr
 from twisted.internet.error import ConnectError
-from twisted.internet.interfaces import IResolver
 from twisted.names import client, dns
+from twisted.names.dns import RRHeader, Record_SRV
 from twisted.names.error import DNSNameError, DomainError
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,26 @@ def pick_server_from_list(server_list: List[Server]) -> Tuple[bytes, int]:
     )
 
 
+# The signature of twisted.names.client.lookupService, if you omit the timeout
+# argument. This is unannotated, but we can deduce the signature as follows:
+# 1. Return type is the return type of
+#    twisted.internet.interfaces.IResolver.lookupService. Its type annotation
+#    is incorrect; its docstring says that tuple entries are a _list_ of RRHeaders,
+#    but the annotation says the entries are individual RRHeaders.
+# 2. Because we're looking up SRV records, we know that the payload of the RRHeaders
+#    will be Record_SRVs. I made RRHeader's stub generic over the type of its
+#    payload to reflect this. But that's a lie compared to Twisted's actual
+#    RRHeader Type, so we need to enclose these in strings.
+LookupService = Callable[
+    [str],
+    Awaitable[Tuple[
+        List["RRHeader[Record_SRV]"],
+        List["RRHeader[object]"],
+        List["RRHeader[object]"],
+    ]],
+]
+
+
 class SrvResolver:
     """Interface to the dns client to do SRV lookups, with result caching.
     The default resolver in twisted.names doesn't do any caching (it has a CacheResolver,
@@ -93,11 +113,11 @@ class SrvResolver:
 
     def __init__(
         self,
-        dns_client: IResolver = client.getResolver(),
+        lookup_service: LookupService = client.lookupService,
         cache: Dict[bytes, List[Server]] = SERVER_CACHE,
         get_time: Callable[[], SupportsInt] = time.time,
     ) -> None:
-        self._dns_client = dns_client
+        self._lookup_service = lookup_service
         self._cache = cache
         self._get_time = get_time
 
@@ -117,18 +137,7 @@ class SrvResolver:
                 return servers
 
         try:
-            answers, _, _ = await self._dns_client.lookupService(
-                service_name.decode(),
-                # We used to use self._dns_client = twisted.names.client --- the
-                # actual module. This quacks a lot like an IResolver, but it isn't.
-                # twisted.names.client.lookupService has an optional `timeout`;
-                # IResolver.lookupService doesn't.
-                # I think the least invasive change here is to use the timeout
-                # we'd fall back to if we called client.lookupService. I chased
-                # it through to twisted.names.root.Resolver._lookup and got these
-                # values---see its docstring for justification.
-                timeout=(1, 3, 11, 45),
-            )
+            answers, _, _ = await self._lookup_service(service_name.decode())
         except DNSNameError:
             # TODO: cache this. We can get the SOA out of the exception, and use
             # the negative-TTL value.
