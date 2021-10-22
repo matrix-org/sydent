@@ -24,7 +24,7 @@ from zope.interface import implementer
 
 logger = logging.getLogger(__name__)
 
-F = TypeVar("F", bound=Callable[[SSL.Connection, int, int], None])
+F = Callable[[SSL.Connection, int, int], None]
 
 
 def _tolerateErrors(wrapped: F) -> F:
