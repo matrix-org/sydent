@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Tuple
 
 import twisted.internet.reactor
 import twisted.internet.task
@@ -41,7 +41,7 @@ class Pusher:
         self.peerStore = PeerStore(self.sydent)
         self.local_assoc_store = LocalAssociationStore(self.sydent)
 
-    def setup(self):
+    def setup(self) -> None:
         cb = twisted.internet.task.LoopingCall(Pusher.scheduledPush, self)
         cb.clock = self.sydent.reactor
         cb.start(10.0)
@@ -62,12 +62,11 @@ class Pusher:
 
         localPeer.pushUpdates(signedAssocs)
 
-    def scheduledPush(self):
+    def scheduledPush(self) -> "defer.Deferred[List[Tuple[bool, None]]]":
         """Push pending updates to all known remote peers. To be called regularly.
 
         :returns a deferred.DeferredList of defers, one per peer we're pushing to that will
         resolve when pushing to that peer has completed, successfully or otherwise
-        :rtype deferred.DeferredList
         """
         peers = self.peerStore.getAllPeers()
 
