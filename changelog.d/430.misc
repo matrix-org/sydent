@@ -1,0 +1,1 @@
+Make `sydent.replication` pass `mypy --strict`.
