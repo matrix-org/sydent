@@ -22,6 +22,11 @@ from sydent.util import time_msec
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
+# Key: id from associations db table
+# Value: an association dict. Roughly speaking, a signed
+# version of sydent.db.TheepidAssociation.
+SignedAssociations = Dict[int, Dict[str, Any]]
+
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +116,7 @@ class LocalAssociationStore:
 
     def getSignedAssociationsAfterId(
         self, afterId: Optional[int], limit: Optional[int] = None
-    ) -> Tuple[Dict[int, Dict[str, Any]], Optional[int]]:
+    ) -> Tuple[SignedAssociations, Optional[int]]:
         """Get associations after a given ID, and sign them before returning
 
         :param afterId: The ID to return results after (not inclusive)
@@ -308,7 +313,7 @@ class GlobalAssociationStore:
     def addAssociation(
         self,
         assoc: ThreepidAssociation,
-        rawSgAssoc: Dict[str, Any],
+        rawSgAssoc: str,
         originServer: str,
         originId: int,
         commit: bool = True,
@@ -319,7 +324,7 @@ class GlobalAssociationStore:
         this function.
 
         :param assoc: The association to add as a high level object.
-        :param rawSgAssoc: The original raw bytes of the signed association.
+        :param rawSgAssoc: The original raw text of the signed association.
         :param originServer: The name of the server the association was created on.
         :param originId: The ID of the association on the server the association was
             created on.

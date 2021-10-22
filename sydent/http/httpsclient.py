@@ -21,7 +21,7 @@ from twisted.internet.defer import Deferred
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IPolicyForHTTPS
+from twisted.web.iweb import IPolicyForHTTPS, IResponse
 from zope.interface import implementer
 
 from sydent.types import JsonDict
@@ -51,7 +51,9 @@ class ReplicationHttpsClient:
             #                                                      trustRoot=self.sydent.sslComponents.trustRoot)
             self.agent = Agent(self.sydent.reactor, SydentPolicyForHTTPS(self.sydent))
 
-    def postJson(self, uri: str, jsonObject: JsonDict) -> Optional[Deferred]:
+    def postJson(
+        self, uri: str, jsonObject: JsonDict
+    ) -> Optional["Deferred[IResponse]"]:
         """
         Sends an POST request over HTTPS.
 

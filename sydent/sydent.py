@@ -182,7 +182,9 @@ class Sydent:
 
         self.clientApiHttpServer = ClientApiHttpServer(self)
         self.replicationHttpsServer = ReplicationHttpsServer(self)
-        self.replicationHttpsClient = ReplicationHttpsClient(self)
+        self.replicationHttpsClient: ReplicationHttpsClient = ReplicationHttpsClient(
+            self
+        )
 
         self.pusher: Pusher = Pusher(self)
 
