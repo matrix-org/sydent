@@ -22,13 +22,13 @@ from sydent.http.servlets import MatrixRestError, get_args
 from sydent.terms.terms import get_terms
 
 if TYPE_CHECKING:
-    from sydent.db.accounts import Account
     from sydent.sydent import Sydent
+    from sydent.users.accounts import Account
 
 logger = logging.getLogger(__name__)
 
 
-def tokenFromRequest(request: "Request") -> Optional[str]:
+def tokenFromRequest(request: Request) -> Optional[str]:
     """Extract token from header of query parameter.
 
     :param request: The request to look for an access token in.
@@ -46,16 +46,12 @@ def tokenFromRequest(request: "Request") -> Optional[str]:
         args = get_args(request, ("access_token",), required=False)
         token = args.get("access_token")
 
-    # Ensure we're dealing with unicode.
-    if token and isinstance(token, bytes):
-        token = token.decode("UTF-8")
-
     return token
 
 
 def authV2(
     sydent: "Sydent",
-    request: "Request",
+    request: Request,
     requireTermsAgreed: bool = True,
 ) -> "Account":
     """For v2 APIs check that the request has a valid access token associated with it

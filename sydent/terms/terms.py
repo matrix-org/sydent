@@ -117,44 +117,39 @@ class Terms:
             return agreed == required
 
 
-def get_terms(sydent: "Sydent") -> Optional[Terms]:
-    """Read and parse terms as specified in the config."""
+def get_terms(sydent: "Sydent") -> Terms:
+    """Read and parse terms as specified in the config.
+
+    Errors in reading, parsing and validating the config
+    are raised as exceptions."""
     # TODO - move some of this to parse_config
 
     termsPath = sydent.config.general.terms_path
 
-    try:
-        if termsPath == "":
-            return Terms(None)
+    if termsPath == "":
+        return Terms(None)
 
-        with open(termsPath) as fp:
-            termsYaml = yaml.safe_load(fp)
+    with open(termsPath) as fp:
+        termsYaml = yaml.safe_load(fp)
 
-        # TODO use something like jsonschema instead of this handwritten code.
-        if "master_version" not in termsYaml:
-            raise Exception("No master version")
-        elif not isinstance(termsYaml["master_version"], str):
-            raise TypeError(
-                f"master_version should be a string, not {termsYaml['master_version']!r}"
-            )
-        if "docs" not in termsYaml:
-            raise Exception("No 'docs' key in terms")
-        for docName, doc in termsYaml["docs"].items():
-            if "version" not in doc:
-                raise Exception("'%s' has no version" % (docName,))
-            if "langs" not in doc:
-                raise Exception("'%s' has no langs" % (docName,))
-            for langKey, lang in doc["langs"].items():
-                if "name" not in lang:
-                    raise Exception(
-                        "lang '%s' of doc %s has no name" % (langKey, docName)
-                    )
-                if "url" not in lang:
-                    raise Exception(
-                        "lang '%s' of doc %s has no url" % (langKey, docName)
-                    )
+    # TODO use something like jsonschema instead of this handwritten code.
+    if "master_version" not in termsYaml:
+        raise Exception("No master version")
+    elif not isinstance(termsYaml["master_version"], str):
+        raise TypeError(
+            f"master_version should be a string, not {termsYaml['master_version']!r}"
+        )
+    if "docs" not in termsYaml:
+        raise Exception("No 'docs' key in terms")
+    for docName, doc in termsYaml["docs"].items():
+        if "version" not in doc:
+            raise Exception("'%s' has no version" % (docName,))
+        if "langs" not in doc:
+            raise Exception("'%s' has no langs" % (docName,))
+        for langKey, lang in doc["langs"].items():
+            if "name" not in lang:
+                raise Exception("lang '%s' of doc %s has no name" % (langKey, docName))
+            if "url" not in lang:
+                raise Exception("lang '%s' of doc %s has no url" % (langKey, docName))
 
-        return Terms(termsYaml)
-    except Exception:
-        logger.exception("Couldn't read terms file '%s'", termsPath)
-        return None
+    return Terms(termsYaml)

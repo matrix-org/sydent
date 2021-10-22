@@ -35,7 +35,7 @@ class MatrixRestError(Exception):
     wrapper should catch this exception themselves.
     """
 
-    def __init__(self, httpStatus, errcode, error):
+    def __init__(self, httpStatus: int, errcode: str, error: str):
         super(Exception, self).__init__(error)
         self.httpStatus = httpStatus
         self.errcode = errcode
