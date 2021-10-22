@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Callable, TypeVar, cast
+from typing import Callable
 
 from OpenSSL import SSL
 from twisted.internet import ssl
@@ -43,7 +43,7 @@ def _tolerateErrors(wrapped: F) -> F:
             logger.exception("Error during info_callback")
             connection.get_app_data().failVerification(f)
 
-    return cast(F, infoCallback)
+    return infoCallback
 
 
 def _idnaBytes(text: str) -> bytes:
