@@ -16,12 +16,12 @@
 import logging
 import random
 import time
-from typing import Callable, Dict, List, SupportsInt, Tuple, Awaitable
+from typing import Awaitable, Callable, Dict, List, SupportsInt, Tuple
 
 import attr
 from twisted.internet.error import ConnectError
 from twisted.names import client, dns
-from twisted.names.dns import RRHeader, Record_SRV
+from twisted.names.dns import Record_SRV, RRHeader
 from twisted.names.error import DNSNameError, DomainError
 
 logger = logging.getLogger(__name__)
@@ -91,11 +91,13 @@ def pick_server_from_list(server_list: List[Server]) -> Tuple[bytes, int]:
 #    RRHeader Type, so we need to enclose these in strings.
 LookupService = Callable[
     [str],
-    Awaitable[Tuple[
-        List["RRHeader[Record_SRV]"],
-        List["RRHeader[object]"],
-        List["RRHeader[object]"],
-    ]],
+    Awaitable[
+        Tuple[
+            List["RRHeader[Record_SRV]"],
+            List["RRHeader[object]"],
+            List["RRHeader[object]"],
+        ]
+    ],
 ]
 
 
