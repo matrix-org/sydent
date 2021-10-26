@@ -22,7 +22,7 @@ from twisted.internet.protocol import connectionDone
 from twisted.web import server
 from twisted.web._newclient import ResponseDone
 from twisted.web.http import PotentialDataLoss
-from twisted.web.iweb import UNKNOWN_LENGTH
+from twisted.web.iweb import UNKNOWN_LENGTH, IResponse
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -154,7 +154,9 @@ class _ReadBodyWithMaxSizeProtocol(protocol.Protocol):
             self.deferred.errback(reason)
 
 
-def read_body_with_max_size(response, max_size):
+def read_body_with_max_size(
+    response: IResponse, max_size: Optional[int]
+) -> "defer.Deferred[bytes]":
     """
     Read a HTTP response body to a file-object. Optionally enforcing a maximum file size.
 

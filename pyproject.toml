@@ -54,6 +54,7 @@ files = [
     "sydent/http/auth.py",
     "sydent/http/blacklisting_reactor.py",
     "sydent/http/federation_tls_options.py",
+    "sydent/http/httpclient.py",
     "sydent/http/srvresolver.py",
     "sydent/hs_federation",
     "sydent/replication",
