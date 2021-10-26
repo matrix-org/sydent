@@ -178,7 +178,7 @@ class Sydent:
 
         self.threepidBinder = ThreepidBinder(self)
 
-        self.sslComponents = SslComponents(self)
+        self.sslComponents: SslComponents = SslComponents(self)
 
         self.clientApiHttpServer = ClientApiHttpServer(self)
         self.replicationHttpsServer = ReplicationHttpsServer(self)

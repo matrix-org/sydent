@@ -18,6 +18,7 @@ from io import BytesIO
 from typing import TYPE_CHECKING, Optional
 
 from twisted.internet.defer import Deferred
+from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
@@ -85,7 +86,9 @@ class SydentPolicyForHTTPS:
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
-    def creatorForNetloc(self, hostname, port):
+    def creatorForNetloc(
+        self, hostname: bytes, port: int
+    ) -> IOpenSSLClientConnectionCreator:
         return optionsForClientTLS(
             hostname.decode("ascii"),
             trustRoot=self.sydent.sslComponents.trustRoot,
