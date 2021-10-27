@@ -1,0 +1,1 @@
+Make `sydent.http.{httpclient, httpsclient, httpcommon}` pass `mypy --strict`.

@@ -1,5 +1,7 @@
 from types import TracebackType
-from typing import Type, Optional
+from typing import Type, Optional, Union, TypeVar, overload
+
+E = TypeVar("E")
 
 
 class Failure(BaseException):
@@ -12,3 +14,8 @@ class Failure(BaseException):
         captureVars: bool = False,
     ):
         ...
+
+    @overload
+    def check(self, singleErrorType: Type[E]) -> Optional[E]: ...
+    @overload
+    def check(self, *errorTypes: Union[str, Type[Exception]]) -> Optional[Exception]: ...

@@ -15,11 +15,10 @@
 import json
 import logging
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Tuple, TypeVar, cast
 
-from twisted.web.client import Agent, FileBodyProducer
+from twisted.web.client import Agent, FileBodyProducer, Response
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent, IResponse
 
 from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
@@ -34,12 +33,15 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class HTTPClient:
+AgentType = TypeVar("AgentType", Agent, MatrixFederationAgent)
+
+
+class HTTPClient(Generic[AgentType]):
     """A base HTTP class that contains methods for making GET and POST HTTP
     requests.
     """
 
-    agent: IAgent
+    agent: AgentType
 
     async def get_json(self, uri: str, max_size: Optional[int] = None) -> JsonDict:
         """Make a GET request to an endpoint returning JSON and parse result
@@ -52,7 +54,7 @@ class HTTPClient:
         """
         logger.debug("HTTP GET %s", uri)
 
-        response = await self.agent.request(
+        response: Response = await self.agent.request(
             b"GET",
             uri.encode("utf8"),
         )
@@ -63,11 +65,15 @@ class HTTPClient:
         except Exception:
             logger.exception("Error parsing JSON from %s", uri)
             raise
-        return json_body
+        if not isinstance(json_body, dict):
+            raise TypeError
+        # Cast safety: json only permits strings as object keys, so `json_body`
+        # must be Dict[str, Any] rather than Dict[Any, Any].
+        return cast(JsonDict, json_body)
 
     async def post_json_get_nothing(
         self, uri: str, post_json: JsonDict, opts: Dict[str, Any]
-    ) -> IResponse:
+    ) -> Response:
         """Make a POST request to an endpoint returning nothing
 
         :param uri: The URI to make a POST request to.
@@ -89,7 +95,7 @@ class HTTPClient:
         post_json: Dict[str, Any],
         opts: Dict[str, Any],
         max_size: Optional[int] = None,
-    ) -> Tuple[IResponse, Optional[JsonDict]]:
+    ) -> Tuple[Response, Optional[JsonDict]]:
         """Make a POST request to an endpoint that might be returning JSON and parse
         result
 
@@ -119,7 +125,7 @@ class HTTPClient:
 
         logger.debug("HTTP POST %s -> %s", json_bytes, uri)
 
-        response = await self.agent.request(
+        response: Response = await self.agent.request(
             b"POST",
             uri.encode("utf8"),
             headers,
@@ -142,7 +148,7 @@ class HTTPClient:
         return response, json_body
 
 
-class SimpleHttpClient(HTTPClient):
+class SimpleHttpClient(HTTPClient[Agent]):
     """A simple, no-frills HTTP client based on the class of the same name
     from Synapse.
     """
@@ -162,7 +168,7 @@ class SimpleHttpClient(HTTPClient):
         )
 
 
-class FederationHttpClient(HTTPClient):
+class FederationHttpClient(HTTPClient[MatrixFederationAgent]):
     """HTTP client for federation requests to homeservers. Uses a
     MatrixFederationAgent.
     """
