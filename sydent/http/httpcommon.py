@@ -82,11 +82,11 @@ class SslComponents:
                 logger.warning("Failed to open CA cert file %s", caCertFilename)
                 raise
             logger.warning("Using custom CA cert file: %s", caCertFilename)
-            # I'm not going to add a stub for the _sslverify module.
-            # I've already taken on too much stubbing as it is!
-            return twisted.internet._sslverify.OpenSSLCertificateAuthorities(
+            # Type ignore: I'm not going to add a stub for the semiprivate
+            # _sslverify module. I've already taken on too much stubbing as it is!
+            return twisted.internet._sslverify.OpenSSLCertificateAuthorities(  # type: ignore
                 [caCert.original]
-            )  # type: ignore
+            )
         else:
             return twisted.internet.ssl.OpenSSLDefaultPaths()
 
