@@ -4,7 +4,7 @@ import OpenSSL.SSL
 
 # I don't like importing from _sslverify, but IOpenSSLTrustRoot isn't re-exported
 # anywhere else in twisted.
-from twisted.internet._sslverify import IOpenSSLTrustRoot
+from twisted.internet._sslverify import IOpenSSLTrustRoot, KeyPair
 from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
 from zope.interface import implementer
 
@@ -17,7 +17,9 @@ class Certificate:
 
 def platformTrust() -> IOpenSSLTrustRoot: ...
 
-class PrivateCertificate(Certificate): ...
+class PrivateCertificate(Certificate):
+    # PrivateKey is not set until you call _setPrivateKey, e.g. via load()
+    privateKey: KeyPair
 
 class CertificateOptions:
     def __init__(
