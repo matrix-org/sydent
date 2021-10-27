@@ -1,13 +1,10 @@
-from typing import ClassVar, Generic, TypeVar, Optional
-
+from typing import ClassVar, Generic, Optional, TypeVar
 
 class Name:
     name: bytes
-
     def __init__(self, name: bytes = b""): ...
 
 SRV: int
-
 
 class Record_SRV:
     priority: int
@@ -16,8 +13,8 @@ class Record_SRV:
     target: Name
     ttl: int
 
-
 Payload = TypeVar("Payload")  # should be bound to IEncodableRecord
+
 class RRHeader(Generic[Payload]):
     fmt: ClassVar[str]
     name: Name

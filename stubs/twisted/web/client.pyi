@@ -1,16 +1,15 @@
-from typing import BinaryIO, Any, Optional
+from typing import Any, BinaryIO, Optional
 
 import twisted.internet
 from twisted.internet.defer import Deferred
 from twisted.internet.interfaces import (
-    IOpenSSLClientConnectionCreator,
     IConsumer,
+    IOpenSSLClientConnectionCreator,
     IProtocol,
 )
 from twisted.internet.task import Cooperator
 from twisted.web.http_headers import Headers
-
-from twisted.web.iweb import IResponse, IAgent, IBodyProducer, IPolicyForHTTPS
+from twisted.web.iweb import IAgent, IBodyProducer, IPolicyForHTTPS, IResponse
 from zope.interface import implementer
 
 @implementer(IPolicyForHTTPS)
