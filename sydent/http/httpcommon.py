@@ -181,7 +181,10 @@ def read_body_with_max_size(
 
     # If the Content-Length header gives a size larger than the maximum allowed
     # size, do not bother downloading the body.
+    # Type safety: twisted guarantees that response.length is either the
+    # "opaque" object UNKNOWN_LENGTH, or else an int.
     if max_size is not None and response.length != UNKNOWN_LENGTH:
+        response.length = cast(int, response.length)
         if response.length > max_size:
             response.deliverBody(_DiscardBodyWithMaxSizeProtocol(d))
             return d
