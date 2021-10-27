@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 import twisted.internet.ssl
 from twisted.internet import defer, protocol
+from twisted.internet.interfaces import ITCPTransport
 from twisted.internet.protocol import connectionDone
 from twisted.web import server
 from twisted.web.client import Response, ResponseDone
@@ -93,7 +94,9 @@ class BodyExceededMaxSize(Exception):
 class _DiscardBodyWithMaxSizeProtocol(protocol.Protocol):
     """A protocol which immediately errors upon receiving data."""
 
-    def __init__(self, deferred):
+    transport: ITCPTransport
+
+    def __init__(self, deferred: "defer.Deferred[bytes]") -> None:
         self.deferred = deferred
 
     def _maybe_fail(self):
@@ -116,7 +119,11 @@ class _DiscardBodyWithMaxSizeProtocol(protocol.Protocol):
 class _ReadBodyWithMaxSizeProtocol(protocol.Protocol):
     """A protocol which reads body to a stream, erroring if the body exceeds a maximum size."""
 
-    def __init__(self, deferred, max_size):
+    transport: ITCPTransport
+
+    def __init__(
+        self, deferred: "defer.Deferred[bytes]", max_size: Optional[int]
+    ) -> None:
         self.stream = BytesIO()
         self.deferred = deferred
         self.length = 0
@@ -190,6 +197,7 @@ class SizeLimitingRequest(server.Request):
                 "Aborting connection from %s because the request exceeds maximum size",
                 self.client.host,
             )
+            assert self.transport is not None
             self.transport.abortConnection()
             return
 
