@@ -20,9 +20,9 @@ from typing import TYPE_CHECKING, Optional
 from twisted.internet.defer import Deferred
 from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
 from twisted.internet.ssl import optionsForClientTLS
-from twisted.web.client import Agent, FileBodyProducer
+from twisted.web.client import Agent, FileBodyProducer, Response
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IPolicyForHTTPS, IResponse
+from twisted.web.iweb import IPolicyForHTTPS
 from zope.interface import implementer
 
 from sydent.types import JsonDict
@@ -54,7 +54,7 @@ class ReplicationHttpsClient:
 
     def postJson(
         self, uri: str, jsonObject: JsonDict
-    ) -> Optional["Deferred[IResponse]"]:
+    ) -> Optional["Deferred[Response]"]:
         """
         Sends an POST request over HTTPS.
 
@@ -62,7 +62,6 @@ class ReplicationHttpsClient:
         :param jsonObject: The request's body.
 
         :return: The request's response.
-        :rtype: twisted.internet.defer.Deferred[twisted.web.iweb.IResponse]
         """
         logger.debug("POSTing request to %s", uri)
         if not self.agent:

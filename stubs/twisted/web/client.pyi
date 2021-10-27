@@ -27,13 +27,16 @@ class Agent:
         bindAddress: Optional[bytes] = None,
         pool: Optional[HTTPConnectionPool] = None,
     ): ...
-    def request(
+    # Type safety: IAgent says this returns a Deferred[IResponse].
+    # I'm narrowing it here (but that's not strictly allowed because Deferred[T]
+    # is _contra_variant in T. It's all muddling.
+    def request(  # type: ignore[override]
         self,
         method: bytes,
         uri: bytes,
         headers: Optional[Headers] = None,
         bodyProducer: Optional[IBodyProducer] = None,
-    ) -> Deferred[IResponse]: ...
+    ) -> Deferred[Response]: ...
 
 @implementer(IBodyProducer)
 class FileBodyProducer:
@@ -54,3 +57,12 @@ class FileBodyProducer:
     def resumeProducing(self) -> None: ...
 
 def readBody(response: IResponse) -> Deferred[bytes]: ...
+
+class Response:
+    code: int
+    headers: Headers
+    # Length is either `int` or the opaque object UNKNOWN_LENGTH.
+    length: int | object
+    def deliverBody(self, protocol: IProtocol) -> None: ...
+
+class ResponseDone: ...

@@ -22,10 +22,10 @@ from netaddr import IPAddress  # type: ignore
 from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
-from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
+from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent, Response
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent, IBodyProducer, IResponse
+from twisted.web.iweb import IAgent, IBodyProducer
 from zope.interface import implementer
 
 from sydent.http.httpcommon import read_body_with_max_size
@@ -121,7 +121,7 @@ class MatrixFederationAgent:
         uri: bytes,
         headers: Optional["Headers"] = None,
         bodyProducer: Optional["IBodyProducer"] = None,
-    ) -> IResponse:
+    ) -> Response:
         """
         :param method: HTTP method (GET/POST/etc).
 
