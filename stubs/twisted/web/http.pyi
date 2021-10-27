@@ -5,9 +5,12 @@ from twisted.internet.defer import Deferred
 from twisted.internet.interfaces import IAddress, ITCPTransport
 from twisted.logger import Logger
 from twisted.web.http_headers import Headers
+from twisted.web.iweb import IRequest
+from zope.interface import implementer
 
 class HTTPChannel: ...
 
+@implementer(IRequest)  # type: ignore[misc]
 class Request:
     # Instance attributes mentioned in the docstring
     method: bytes

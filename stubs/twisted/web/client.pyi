@@ -1,4 +1,4 @@
-from typing import Any, BinaryIO, Optional
+from typing import Any, BinaryIO, Optional, Type, TypeVar
 
 import twisted.internet
 from twisted.internet.defer import Deferred
@@ -11,6 +11,8 @@ from twisted.internet.task import Cooperator
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent, IBodyProducer, IPolicyForHTTPS, IResponse
 from zope.interface import implementer
+
+C = TypeVar("C")
 
 @implementer(IPolicyForHTTPS)
 class BrowserLikePolicyForHTTPS:
@@ -61,7 +63,7 @@ class FileBodyProducer:
     def resumeProducing(self) -> None: ...
 
 def readBody(response: IResponse) -> Deferred[bytes]: ...
-
+@implementer(IResponse)  # type: ignore[misc]
 class Response:
     code: int
     headers: Headers
@@ -70,3 +72,26 @@ class Response:
     def deliverBody(self, protocol: IProtocol) -> None: ...
 
 class ResponseDone: ...
+
+class URI:
+    scheme: bytes
+    netloc: bytes
+    host: bytes
+    port: int
+    path: bytes
+    params: bytes
+    query: bytes
+    fragment: bytes
+    def __init__(
+        self,
+        scheme: bytes,
+        netloc: bytes,
+        host: bytes,
+        port: int,
+        path: bytes,
+        params: bytes,
+        query: bytes,
+        fragment: bytes,
+    ): ...
+    @classmethod
+    def fromBytes(cls: Type[C], uri: bytes, defaultPort: Optional[int] = None) -> C: ...
