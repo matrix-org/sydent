@@ -1,4 +1,4 @@
-from typing import Optional, Any, List, Dict, AnyStr, TypeVar, Type
+from typing import Any, AnyStr, Dict, List, Optional, Type, TypeVar
 
 import OpenSSL.SSL
 
@@ -6,7 +6,6 @@ import OpenSSL.SSL
 # anywhere else in twisted.
 from twisted.internet._sslverify import IOpenSSLTrustRoot
 from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
-
 from zope.interface import implementer
 
 C = TypeVar("C")
@@ -36,7 +35,6 @@ def optionsForClientTLS(
     # "any time you need to pass an option here that is a bug in this interface."
     extraCertificateOptions: Optional[Dict[Any, Any]] = None,
 ) -> IOpenSSLClientConnectionCreator: ...
-
 
 # Type safety: I don't want to respecify the methods on the interface that we
 # don't use.

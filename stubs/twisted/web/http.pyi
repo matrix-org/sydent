@@ -1,8 +1,8 @@
 import typing
-from typing import AnyStr, Optional, Dict, List
+from typing import AnyStr, Dict, List, Optional
 
 from twisted.internet.defer import Deferred
-from twisted.internet.interfaces import ITCPTransport, IAddress
+from twisted.internet.interfaces import IAddress, ITCPTransport
 from twisted.logger import Logger
 from twisted.web.http_headers import Headers
 
@@ -39,10 +39,7 @@ class Request:
     # - we use `self.transport.abortConnection`, which belongs to that interface
     # - twisted does too! in its implementation of HTTPChannel.forceAbortClient
     transport: Optional[ITCPTransport]
-
-
     def getHeader(self, key: AnyStr) -> Optional[AnyStr]: ...
-
     def handleContentChunk(self, data: bytes) -> None: ...
 
 class PotentialDataLoss(Exception): ...
