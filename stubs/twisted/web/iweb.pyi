@@ -1,4 +1,4 @@
-from typing import Any, AnyStr, BinaryIO, Dict, List, Literal, Mapping, Optional, Tuple
+from typing import Any, AnyStr, BinaryIO, Dict, List, Mapping, Optional, Tuple
 
 from twisted.cred.credentials import IUsernameDigestHash as IUsernameDigestHash
 from twisted.internet.defer import Deferred
@@ -13,6 +13,7 @@ from twisted.internet.interfaces import (
 from twisted.python.urlpath import URLPath
 from twisted.web.client import URI
 from twisted.web.http_headers import Headers
+from typing_extensions import Literal
 from zope.interface import Interface
 
 class IClientRequest(Interface):
