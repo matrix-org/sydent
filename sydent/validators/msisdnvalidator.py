@@ -38,7 +38,7 @@ class MsisdnValidator:
         self.originators = self.sydent.config.sms.originators
         self.smsRules = self.sydent.config.sms.smsRules
 
-    def requestToken(
+    async def requestToken(
         self,
         phoneNumber: phonenumbers.PhoneNumber,
         clientSecret: str,
@@ -94,7 +94,7 @@ class MsisdnValidator:
 
         smsBody = smsBodyTemplate.format(token=token_info.token)
 
-        self.omSms.sendTextSMS(smsBody, msisdn, originator)
+        await self.omSms.sendTextSMS(smsBody, msisdn, originator)
 
         valSessionStore.setSendAttemptNumber(valSession.id, send_attempt)
 
