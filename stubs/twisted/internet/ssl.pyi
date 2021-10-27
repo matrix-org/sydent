@@ -1,14 +1,24 @@
-from typing import Optional, Any, List, Dict
+from typing import Optional, Any, List, Dict, AnyStr, TypeVar, Type
 
 import OpenSSL.SSL
 
 # I don't like importing from _sslverify, but IOpenSSLTrustRoot isn't re-exported
-# anywhere else in twisted. PrivateCertificate is reexported in
-# twisted.internet.ssl, but that's the module we're stubbing!
-from twisted.internet._sslverify import IOpenSSLTrustRoot, PrivateCertificate
+# anywhere else in twisted.
+from twisted.internet._sslverify import IOpenSSLTrustRoot
 from twisted.internet.interfaces import IOpenSSLClientConnectionCreator
 
+from zope.interface import implementer
+
+C = TypeVar("C")
+
+class Certificate:
+    original: OpenSSL.crypto.X509
+    @classmethod
+    def loadPEM(cls: Type[C], data: AnyStr) -> C: ...
+
 def platformTrust() -> IOpenSSLTrustRoot: ...
+
+class PrivateCertificate(Certificate): ...
 
 class CertificateOptions:
     def __init__(
@@ -26,3 +36,9 @@ def optionsForClientTLS(
     # "any time you need to pass an option here that is a bug in this interface."
     extraCertificateOptions: Optional[Dict[Any, Any]] = None,
 ) -> IOpenSSLClientConnectionCreator: ...
+
+
+# Type safety: I don't want to respecify the methods on the interface that we
+# don't use.
+@implementer(IOpenSSLTrustRoot)  # type: ignore[misc]
+class OpenSSLDefaultPaths: ...

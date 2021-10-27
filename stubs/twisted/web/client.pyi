@@ -2,7 +2,11 @@ from typing import BinaryIO, Any, Optional
 
 import twisted.internet
 from twisted.internet.defer import Deferred
-from twisted.internet.interfaces import IOpenSSLClientConnectionCreator, IConsumer
+from twisted.internet.interfaces import (
+    IOpenSSLClientConnectionCreator,
+    IConsumer,
+    IProtocol,
+)
 from twisted.internet.task import Cooperator
 from twisted.web.http_headers import Headers
 

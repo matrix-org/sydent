@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-AgentType = TypeVar("AgentType", bound=IAgent)
+AgentType = TypeVar("AgentType", Agent, MatrixFederationAgent)
 
 
 class HTTPClient(Generic[AgentType]):

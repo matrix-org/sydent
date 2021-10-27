@@ -42,7 +42,7 @@ class ReplicationHttpsClient:
 
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
-        self.agent = None
+        self.agent: Optional[Agent] = None
 
         if self.sydent.sslComponents.myPrivateCertificate:
             # We will already have logged a warn if this is absent, so don't do it again
