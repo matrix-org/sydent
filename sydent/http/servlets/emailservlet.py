@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -67,7 +67,7 @@ class EmailRequestCodeServlet(Resource):
         ipaddress = self.sydent.ip_from_request(request)
         brand = self.sydent.brand_from_request(request)
 
-        nextLink = None
+        nextLink: Optional[str] = None
         if "next_link" in args and not args["next_link"].startswith("file:///"):
             nextLink = args["next_link"]
 

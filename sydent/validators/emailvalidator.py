@@ -36,7 +36,7 @@ class EmailValidator:
         emailAddress: str,
         clientSecret: str,
         sendAttempt: int,
-        nextLink: str,
+        nextLink: Optional[str],
         ipaddress: Optional[str] = None,
         brand: Optional[str] = None,
     ) -> int:
@@ -105,7 +105,7 @@ class EmailValidator:
         session_id: int,
         token: str,
         clientSecret: str,
-        nextLink: str,
+        nextLink: Optional[str],
     ) -> str:
         """
         Creates a validation link that can be sent via email to the user.
