@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Type, Union
+from typing import Callable, Optional
 
 from twisted.web import http
 from twisted.web.resource import IResource
@@ -9,8 +9,7 @@ class Request(http.Request): ...
 # and creates L{Request} instances.".
 RequestFactory = Callable[[http.HTTPChannel], Request]
 
-# should really inherit from http.HTTPFactory
-class Site:
+class Site(http.HTTPFactory):
     displayTracebacks: bool
     def __init__(
         self,

@@ -25,8 +25,16 @@ import attr
 import twisted.internet.reactor
 from signedjson.types import SigningKey
 from twisted.internet import address, task
+from twisted.internet.interfaces import (
+    IReactorCore,
+    IReactorPluggableNameResolver,
+    IReactorSSL,
+    IReactorTCP,
+    IReactorTime,
+)
 from twisted.python import log
 from twisted.web.http import Request
+from zope.interface import Interface
 
 from sydent.config import SydentConfig
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -79,11 +87,22 @@ from sydent.validators.msisdnvalidator import MsisdnValidator
 logger = logging.getLogger(__name__)
 
 
+class SydentReactor(
+    IReactorCore,
+    IReactorTCP,
+    IReactorSSL,
+    IReactorTime,
+    IReactorPluggableNameResolver,
+    Interface,
+):
+    pass
+
+
 class Sydent:
     def __init__(
         self,
         sydent_config: SydentConfig,
-        reactor=twisted.internet.reactor,
+        reactor: SydentReactor = twisted.internet.reactor,  # type: ignore[assignment]
         use_tls_for_federation: bool = True,
     ):
         self.config = sydent_config
