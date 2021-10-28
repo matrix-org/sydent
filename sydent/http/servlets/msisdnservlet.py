@@ -128,20 +128,19 @@ class MsisdnValidateCodeServlet(Resource):
     def render_GET(self, request: Request) -> str:
         send_cors(request)
 
-        err, args = get_args(request, ("token", "sid", "client_secret"))
-        if err:
-            msg = "Verification failed: Your request was invalid."
+        args = get_args(request, ("token", "sid", "client_secret"))
+        resp = self.do_validate_request(request)
+        if "success" in resp and resp["success"]:
+            msg = "Verification successful! Please return to your Matrix client to continue."
+            if "next_link" in args:
+                next_link = args["next_link"]
+                request.setResponseCode(302)
+                request.setHeader("Location", next_link)
         else:
-            resp = self.do_validate_request(args)
-            if "success" in resp and resp["success"]:
-                msg = "Verification successful! Please return to your Matrix client to continue."
-                if "next_link" in args:
-                    next_link = args["next_link"]
-                    request.setResponseCode(302)
-                    request.setHeader("Location", next_link)
-            else:
-                request.setResponseCode(400)
-                msg = "Verification failed: you may need to request another verification text"
+            request.setResponseCode(400)
+            msg = (
+                "Verification failed: you may need to request another verification text"
+            )
 
         brand = self.sydent.brand_from_request(request)
 
