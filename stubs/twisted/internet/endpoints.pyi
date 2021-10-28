@@ -1,11 +1,11 @@
-from typing import Optional, AnyStr, Any
+from typing import Any, AnyStr, Optional
 
 from twisted.internet import interfaces
 from twisted.internet.defer import Deferred
 from twisted.internet.interfaces import (
-    IProtocolFactory,
-    IProtocol,
     IOpenSSLClientConnectionCreator,
+    IProtocol,
+    IProtocolFactory,
     IStreamClientEndpoint,
 )
 from zope.interface import implementer

@@ -15,27 +15,27 @@
 import logging
 import random
 import time
-from typing import Optional, Tuple, Union, Dict, Callable, Any, Generator
+from typing import Any, Callable, Dict, Generator, Optional, Tuple
 
 import attr
 from netaddr import IPAddress
 from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import (
-    IStreamClientEndpoint,
-    IReactorTime,
-    IProtocolFactory,
     IProtocol,
+    IProtocolFactory,
+    IReactorTime,
+    IStreamClientEndpoint,
 )
-from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent, Response
+from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import (
     IAgent,
-    IBodyProducer,
-    IResponse,
     IAgentEndpointFactory,
+    IBodyProducer,
     IPolicyForHTTPS,
+    IResponse,
 )
 from zope.interface import implementer
 

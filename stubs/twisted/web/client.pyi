@@ -11,10 +11,10 @@ from twisted.internet.task import Cooperator
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import (
     IAgent,
+    IAgentEndpointFactory,
     IBodyProducer,
     IPolicyForHTTPS,
     IResponse,
-    IAgentEndpointFactory,
 )
 from zope.interface import implementer
 
