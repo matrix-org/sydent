@@ -15,7 +15,7 @@
 import logging
 import random
 import time
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, Dict
 
 import attr
 from netaddr import IPAddress
@@ -402,8 +402,8 @@ def _cache_period_from_headers(headers, time_now=time.time):
     return None
 
 
-def _parse_cache_control(headers):
-    cache_controls = {}
+def _parse_cache_control(headers: Headers) -> Dict[bytes, Optional[bytes]]:
+    cache_controls: Dict[bytes, Optional[bytes]] = {}
     for hdr in headers.getRawHeaders(b"cache-control", []):
         for directive in hdr.split(b","):
             splits = [x.strip() for x in directive.split(b"=", 1)]
