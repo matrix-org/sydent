@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Union, Type
+from typing import Callable, Optional, Type, Union
 
 from twisted.web import http
 from twisted.web.resource import IResource

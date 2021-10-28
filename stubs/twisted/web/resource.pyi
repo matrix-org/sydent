@@ -2,7 +2,6 @@ from typing import ClassVar
 
 from zope.interface import Interface, implementer
 
-
 class IResource(Interface):
     isLeaf: ClassVar[bool]
     def __init__() -> None: ...
