@@ -17,8 +17,9 @@ import logging
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Tuple, TypeVar, cast
 
-from twisted.web.client import Agent, FileBodyProducer, Response
+from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
+from twisted.web.iweb import IAgent, IResponse
 
 from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
@@ -33,7 +34,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-AgentType = TypeVar("AgentType", Agent, MatrixFederationAgent)
+AgentType = TypeVar("AgentType", bound=IAgent)
 
 
 class HTTPClient(Generic[AgentType]):
@@ -54,7 +55,7 @@ class HTTPClient(Generic[AgentType]):
         """
         logger.debug("HTTP GET %s", uri)
 
-        response: Response = await self.agent.request(
+        response = await self.agent.request(
             b"GET",
             uri.encode("utf8"),
         )
@@ -73,7 +74,7 @@ class HTTPClient(Generic[AgentType]):
 
     async def post_json_get_nothing(
         self, uri: str, post_json: JsonDict, opts: Dict[str, Any]
-    ) -> Response:
+    ) -> IResponse:
         """Make a POST request to an endpoint returning nothing
 
         :param uri: The URI to make a POST request to.
@@ -95,7 +96,7 @@ class HTTPClient(Generic[AgentType]):
         post_json: Dict[str, Any],
         opts: Dict[str, Any],
         max_size: Optional[int] = None,
-    ) -> Tuple[Response, Optional[JsonDict]]:
+    ) -> Tuple[IResponse, Optional[JsonDict]]:
         """Make a POST request to an endpoint that might be returning JSON and parse
         result
 
@@ -125,7 +126,7 @@ class HTTPClient(Generic[AgentType]):
 
         logger.debug("HTTP POST %s -> %s", json_bytes, uri)
 
-        response: Response = await self.agent.request(
+        response = await self.agent.request(
             b"POST",
             uri.encode("utf8"),
             headers,

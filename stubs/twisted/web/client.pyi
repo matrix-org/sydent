@@ -1,4 +1,4 @@
-from typing import Any, BinaryIO, Optional
+from typing import Any, BinaryIO, Optional, Type, TypeVar
 
 import twisted.internet
 from twisted.internet.defer import Deferred
@@ -11,6 +11,8 @@ from twisted.internet.task import Cooperator
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IAgent, IBodyProducer, IPolicyForHTTPS, IResponse
 from zope.interface import implementer
+
+C = TypeVar("C")
 
 @implementer(IPolicyForHTTPS)
 class BrowserLikePolicyForHTTPS:
@@ -30,16 +32,13 @@ class Agent:
         bindAddress: Optional[bytes] = None,
         pool: Optional[HTTPConnectionPool] = None,
     ): ...
-    # Type safety: IAgent says this returns a Deferred[IResponse].
-    # I'm narrowing it here (but that's not strictly allowed because Deferred[T]
-    # is _contra_variant in T. It's all muddling.
-    def request(  # type: ignore[override]
+    def request(
         self,
         method: bytes,
         uri: bytes,
         headers: Optional[Headers] = None,
         bodyProducer: Optional[IBodyProducer] = None,
-    ) -> Deferred[Response]: ...
+    ) -> Deferred[IResponse]: ...
 
 @implementer(IBodyProducer)
 class FileBodyProducer:
@@ -62,6 +61,9 @@ class FileBodyProducer:
 
 def readBody(response: IResponse) -> Deferred[bytes]: ...
 
+# Type ignore: I don't want to respecify the methods on the interface that we
+# don't use.
+@implementer(IResponse)  # type: ignore[misc]
 class Response:
     code: int
     headers: Headers
@@ -70,3 +72,26 @@ class Response:
     def deliverBody(self, protocol: IProtocol) -> None: ...
 
 class ResponseDone: ...
+
+class URI:
+    scheme: bytes
+    netloc: bytes
+    host: bytes
+    port: int
+    path: bytes
+    params: bytes
+    query: bytes
+    fragment: bytes
+    def __init__(
+        self,
+        scheme: bytes,
+        netloc: bytes,
+        host: bytes,
+        port: int,
+        path: bytes,
+        params: bytes,
+        query: bytes,
+        fragment: bytes,
+    ): ...
+    @classmethod
+    def fromBytes(cls: Type[C], uri: bytes, defaultPort: Optional[int] = None) -> C: ...

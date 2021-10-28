@@ -38,7 +38,7 @@ def optionsForClientTLS(
     extraCertificateOptions: Optional[Dict[Any, Any]] = None,
 ) -> IOpenSSLClientConnectionCreator: ...
 
-# Type safety: I don't want to respecify the methods on the interface that we
+# Type ignore: I don't want to respecify the methods on the interface that we
 # don't use.
 @implementer(IOpenSSLTrustRoot)  # type: ignore[misc]
 class OpenSSLDefaultPaths: ...
