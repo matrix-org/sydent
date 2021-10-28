@@ -158,7 +158,7 @@ class Sydent:
         cb.clock = self.reactor
         cb.start(10 * 60.0)
 
-        if self.config.http.internal_api_enabled:
+        if self.config.http.internal_port is not None:
             internalport = self.config.http.internal_port
             interface = self.config.http.internal_bind_address
 
