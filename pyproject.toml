@@ -49,18 +49,7 @@ strict = true
 files = [
     # Find files that pass with
     #     find sydent tests -type d -not -name __pycache__ -exec bash -c "mypy --strict '{}' > /dev/null"  \; -print
-    # TODO "sydent/*.py"
-    "sydent/config",
-    "sydent/db",
-    "sydent/http",
-    "sydent/hs_federation",
-    "sydent/replication",
-    "sydent/sms",
-    "sydent/terms",
-    "sydent/threepid",
-    "sydent/users",
-    "sydent/util",
-    "sydent/validators",
+    "sydent"
     # TODO the rest of CI checks these---mypy ought to too.
     # "tests",
     # "matrix_is_test",
