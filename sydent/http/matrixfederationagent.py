@@ -149,9 +149,8 @@ class MatrixFederationAgent:
             (including problems that prevent the request from being sent).
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
-        routing: _RoutingResult = yield defer.ensureDeferred(
-            self._route_matrix_uri(parsed_uri)
-        )
+        routing: _RoutingResult
+        routing = yield defer.ensureDeferred(self._route_matrix_uri(parsed_uri))
 
         # set up the TLS connection params
         #
@@ -192,7 +191,8 @@ class MatrixFederationAgent:
                 return ep
 
         agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
-        res: IResponse = yield agent.request(method, uri, headers, bodyProducer)
+        res: IResponse
+        res = yield agent.request(method, uri, headers, bodyProducer)
         return res
 
     async def _route_matrix_uri(
