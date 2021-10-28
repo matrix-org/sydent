@@ -15,7 +15,7 @@
 import logging
 import random
 import time
-from typing import Optional, Tuple, Union, Dict
+from typing import Optional, Tuple, Union, Dict, Callable
 
 import attr
 from netaddr import IPAddress
@@ -375,16 +375,18 @@ class LoggingHostnameEndpoint:
         return self.ep.connect(protocol_factory)
 
 
-def _cache_period_from_headers(headers, time_now=time.time):
+def _cache_period_from_headers(
+    headers: Headers, time_now: Callable[[], float] = time.time
+) -> Optional[float]:
     cache_controls = _parse_cache_control(headers)
 
     if b"no-store" in cache_controls:
         return 0
 
-    if b"max-age" in cache_controls:
+    max_age = cache_controls.get(b"max-age")
+    if max_age is not None:
         try:
-            max_age = int(cache_controls[b"max-age"])
-            return max_age
+            return int(max_age)
         except ValueError:
             pass
 
