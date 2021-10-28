@@ -49,17 +49,11 @@ strict = true
 files = [
     # Find files that pass with
     #     find sydent tests -type d -not -name __pycache__ -exec bash -c "mypy --strict '{}' > /dev/null"  \; -print
+    # TODO "sydent/*.py"
     "sydent/config",
     "sydent/db",
-    "sydent/http/auth.py",
-    "sydent/http/blacklisting_reactor.py",
-    "sydent/http/federation_tls_options.py",
-    "sydent/http/httpclient.py",
-    "sydent/http/httpcommon.py",
-    "sydent/http/httpsclient.py",
-    "sydent/http/httpserver.py",
-    "sydent/http/matrixfederationagent.py",
-    "sydent/http/srvresolver.py",
+    "sydent/http/*.py",
+    # TODO "sydent/http/servlets",
     "sydent/hs_federation",
     "sydent/replication",
     "sydent/sms",
