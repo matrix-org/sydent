@@ -58,6 +58,7 @@ files = [
     "sydent/http/httpcommon.py",
     "sydent/http/httpsclient.py",
     "sydent/http/httpserver.py",
+    "sydent/http/matrixfederationagent.py",
     "sydent/http/srvresolver.py",
     "sydent/hs_federation",
     "sydent/replication",
