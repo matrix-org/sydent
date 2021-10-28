@@ -18,7 +18,7 @@ import time
 from typing import Optional, Tuple, Union
 
 import attr
-from netaddr import IPAddress  # type: ignore
+from netaddr import IPAddress
 from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
 from twisted.internet.interfaces import IStreamClientEndpoint
