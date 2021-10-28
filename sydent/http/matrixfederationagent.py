@@ -169,10 +169,11 @@ class MatrixFederationAgent:
         if not headers.hasHeader(b"host"):
             headers.addRawHeader(b"host", routing.host_header)
 
+        @implementer(IAgentEndpointFactory)
         class EndpointFactory:
             @staticmethod
-            def endpointForURI(_uri):
-                ep = LoggingHostnameEndpoint(
+            def endpointForURI(_uri: URI) -> IStreamClientEndpoint:
+                ep: IStreamClientEndpoint = LoggingHostnameEndpoint(
                     self._reactor,
                     routing.target_host,
                     routing.target_port,
