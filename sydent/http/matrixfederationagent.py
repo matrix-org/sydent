@@ -141,7 +141,9 @@ class MatrixFederationAgent:
             (including problems that prevent the request from being sent).
         """
         parsed_uri = URI.fromBytes(uri, defaultPort=-1)
-        res = yield defer.ensureDeferred(self._route_matrix_uri(parsed_uri))
+        routing: _RoutingResult = yield defer.ensureDeferred(
+            self._route_matrix_uri(parsed_uri)
+        )
 
         # set up the TLS connection params
         #
@@ -152,7 +154,7 @@ class MatrixFederationAgent:
             tls_options = None
         else:
             tls_options = self._tls_client_options_factory.get_options(
-                res.tls_server_name.decode("ascii")
+                routing.tls_server_name.decode("ascii")
             )
 
         # make sure that the Host header is set correctly
@@ -163,15 +165,15 @@ class MatrixFederationAgent:
             assert headers is not None
 
         if not headers.hasHeader(b"host"):
-            headers.addRawHeader(b"host", res.host_header)
+            headers.addRawHeader(b"host", routing.host_header)
 
         class EndpointFactory:
             @staticmethod
             def endpointForURI(_uri):
                 ep = LoggingHostnameEndpoint(
                     self._reactor,
-                    res.target_host,
-                    res.target_port,
+                    routing.target_host,
+                    routing.target_port,
                 )
                 if tls_options is not None:
                     ep = wrapClientTLS(tls_options, ep)
@@ -412,7 +414,7 @@ def _parse_cache_control(headers):
     return cache_controls
 
 
-@attr.s
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class _RoutingResult:
     """The result returned by `_route_matrix_uri`.
     Contains the parameters needed to direct a federation connection to a particular
@@ -421,28 +423,28 @@ class _RoutingResult:
     chosen from the list.
     """
 
-    host_header = attr.ib()
+    host_header: bytes
     """
     The value we should assign to the Host header (host:port from the matrix
     URI, or .well-known).
     :type: bytes
     """
 
-    tls_server_name = attr.ib()
+    tls_server_name: bytes
     """
     The server name we should set in the SNI (typically host, without port, from the
     matrix URI or .well-known)
     :type: bytes
     """
 
-    target_host = attr.ib()
+    target_host: bytes
     """
     The hostname (or IP literal) we should route the TCP connection to (the target of the
     SRV record, or the hostname from the URL/.well-known)
     :type: bytes
     """
 
-    target_port = attr.ib()
+    target_port: int
     """
     The port we should route the TCP connection to (the target of the SRV record, or
     the port from the URL/.well-known, or 8448)
