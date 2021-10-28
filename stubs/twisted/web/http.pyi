@@ -10,6 +10,8 @@ from zope.interface import implementer
 
 class HTTPChannel: ...
 
+# Type ignore: I don't want to respecify the methods on the interface that we
+# don't use.
 @implementer(IRequest)  # type: ignore[misc]
 class Request:
     # Instance attributes mentioned in the docstring
