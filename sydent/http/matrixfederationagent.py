@@ -21,11 +21,22 @@ import attr
 from netaddr import IPAddress
 from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
-from twisted.internet.interfaces import IStreamClientEndpoint, IReactorTime, IProtocolFactory, IProtocol
+from twisted.internet.interfaces import (
+    IStreamClientEndpoint,
+    IReactorTime,
+    IProtocolFactory,
+    IProtocol,
+)
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent, Response
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent, IBodyProducer, IResponse, IAgentEndpointFactory, IPolicyForHTTPS
+from twisted.web.iweb import (
+    IAgent,
+    IBodyProducer,
+    IResponse,
+    IAgentEndpointFactory,
+    IPolicyForHTTPS,
+)
 from zope.interface import implementer
 
 from sydent.http.federation_tls_options import ClientTLSOptionsFactory
