@@ -144,9 +144,9 @@ class StoreInviteServlet(Resource):
             "web_client_location"
         ] = self.sydent.config.email.default_web_client_location
         if "org.matrix.web_client_location" in substitutions:
-            substitutions["web_client_location"] = substitutions.get(
+            substitutions["web_client_location"] = substitutions[
                 "org.matrix.web_client_location"
-            )
+            ]
 
         if substitutions["room_type"] == "m.space":
             subject = self.sydent.config.email.invite_subject_space % substitutions
