@@ -66,7 +66,9 @@ class BlindlySignStuffServlet(Resource):
             private_key = signedjson.key.decode_signing_key_base64(
                 "ed25519", "0", private_key_base64
             )
-            signed = signedjson.sign.sign_json(to_sign, self.server_name, private_key)
+            signed: JsonDict = signedjson.sign.sign_json(
+                to_sign, self.server_name, private_key
+            )
         except Exception:
             logger.exception("signing failed")
             raise MatrixRestError(500, "M_UNKNOWN", "Internal Server Error")
