@@ -160,7 +160,10 @@ class MatrixFederationAgent:
         if headers is None:
             headers = Headers()
         else:
-            headers = headers.copy()
+            # Type safety: Headers.copy doesn't have a return type annotated,
+            # and I don't want to stub web.http_headers. Could use stubgen? It's
+            # a pretty simple file.
+            headers = headers.copy()  # type: ignore[no-untyped-call]
             assert headers is not None
 
         if not headers.hasHeader(b"host"):
