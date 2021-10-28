@@ -177,7 +177,12 @@ class FederationHttpClient(HTTPClient[MatrixFederationAgent]):
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
         self.agent = MatrixFederationAgent(
-            BlacklistingReactorWrapper(
+            # Type-safety: I don't have a good way of expressing that
+            # the reactor is IReactorTCP, IReactorTime and
+            # IReactorPluggableNameResolver all at once. But it is, because
+            # it wraps the sydent reactor.
+            # TODO: can we introduce a SydentReactor type like SynapseReactor?
+            BlacklistingReactorWrapper(  # type: ignore[arg-type]
                 reactor=self.sydent.reactor,
                 ip_whitelist=sydent.config.general.ip_whitelist,
                 ip_blacklist=sydent.config.general.ip_blacklist,
