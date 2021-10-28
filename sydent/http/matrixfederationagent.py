@@ -237,9 +237,11 @@ class MatrixFederationAgent:
                 # parse the server name in the .well-known response into host/port.
                 # (This code is lifted from twisted.web.client.URI.fromBytes).
                 if b":" in well_known_server:
-                    well_known_host, well_known_port = well_known_server.rsplit(b":", 1)
+                    well_known_host, well_known_port_raw = well_known_server.rsplit(
+                        b":", 1
+                    )
                     try:
-                        well_known_port = int(well_known_port)
+                        well_known_port = int(well_known_port_raw)
                     except ValueError:
                         # the part after the colon could not be parsed as an int
                         # - we assume it is an IPv6 literal with no port (the closing
