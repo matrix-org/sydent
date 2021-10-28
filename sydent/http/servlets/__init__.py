@@ -16,11 +16,12 @@ import copy
 import functools
 import json
 import logging
-from typing import Any, Dict, Iterable
+from typing import Any, Awaitable, Callable, Dict, Iterable, TypeVar
 
 from twisted.internet import defer
 from twisted.python import failure
 from twisted.web import server
+from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.types import JsonDict
@@ -73,7 +74,9 @@ def get_args(
         not v1_path
         or (
             request.requestHeaders.hasHeader("Content-Type")
-            and request.requestHeaders.getRawHeaders("Content-Type")[0].startswith(
+            # type safety: getRawHeaders() will return a nonempty list because
+            # the hasHeader call has returned True.
+            and request.requestHeaders.getRawHeaders("Content-Type")[0].startswith(  # type: ignore[index]
                 "application/json"
             )
         )
@@ -127,9 +130,12 @@ def get_args(
     return request_args
 
 
-def jsonwrap(f):
+Renderer = Callable[..., JsonDict]
+
+
+def jsonwrap(f: Renderer) -> Callable[[Resource, Request], bytes]:
     @functools.wraps(f)
-    def inner(self, request: Request, *args, **kwargs) -> bytes:
+    def inner(self: Resource, request: Request) -> bytes:
         """
         Runs a web handler function with the given request and parameters, then
         converts its result into JSON and returns it. If an error happens, also sets
@@ -144,7 +150,7 @@ def jsonwrap(f):
         """
         try:
             request.setHeader("Content-Type", "application/json")
-            return dict_to_json_bytes(f(self, request, *args, **kwargs))
+            return dict_to_json_bytes(f(self, request))
         except MatrixRestError as e:
             request.setResponseCode(e.httpStatus)
             return dict_to_json_bytes({"errcode": e.errcode, "error": e.error})
@@ -162,18 +168,21 @@ def jsonwrap(f):
     return inner
 
 
-def asyncjsonwrap(f):
-    async def render(f, self, request: Request, **kwargs):
+AsyncRenderer = TypeVar("AsyncRenderer", bound=Callable[..., Awaitable[JsonDict]])
+
+
+def asyncjsonwrap(f: AsyncRenderer) -> Callable[..., object]:
+    async def render(f: AsyncRenderer, self: Resource, request: Request) -> None:
         request.setHeader("Content-Type", "application/json")
         try:
-            result = await f(self, request, **kwargs)
+            result = await f(self, request)
             request.write(dict_to_json_bytes(result))
         except MatrixRestError as e:
             request.setResponseCode(e.httpStatus)
             request.write(dict_to_json_bytes({"errcode": e.errcode, "error": e.error}))
         except Exception:
-            f = failure.Failure()
-            logger.error("Request processing failed: %r, %s", f, f.getTraceback())
+            fail = failure.Failure()
+            logger.error("Request processing failed: %r, %s", fail, fail.getTraceback())
             request.setResponseCode(500)
             request.write(
                 dict_to_json_bytes(
@@ -183,17 +192,17 @@ def asyncjsonwrap(f):
         request.finish()
 
     @functools.wraps(f)
-    def inner(*args, **kwargs) -> int:
+    def inner(self: Resource, request: Request) -> object:
         """
         Runs an asynchronous web handler function with the given arguments.
 
-        :param args: The arguments to pass to the function.
-        :param kwargs: The keyword arguments to pass to the function.
+        :param self: The servelet instance
+        :param request: The request that `f` will serve.
 
-        :return: A special code to tell the servlet that the response isn't ready yet
+        :return: An opaque object to tell the servlet that the response isn't ready yet
             and will come later.
         """
-        defer.ensureDeferred(render(f, *args, **kwargs))
+        defer.ensureDeferred(render(f, self, request))
         return server.NOT_DONE_YET
 
     return inner
