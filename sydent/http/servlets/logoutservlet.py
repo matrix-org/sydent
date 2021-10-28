@@ -20,7 +20,7 @@ from twisted.web.server import Request
 
 from sydent.db.accounts import AccountStore
 from sydent.http.auth import authV2, tokenFromRequest
-from sydent.http.servlets import jsonwrap, send_cors
+from sydent.http.servlets import MatrixRestError, jsonwrap, send_cors
 from sydent.types import JsonDict
 
 if TYPE_CHECKING:
@@ -45,6 +45,8 @@ class LogoutServlet(Resource):
         authV2(self.sydent, request, False)
 
         token = tokenFromRequest(request)
+        if token is None:
+            raise MatrixRestError(400, "M_MISSING_PARAMS", "Missing token")
 
         accountStore = AccountStore(self.sydent)
         accountStore.delToken(token)
