@@ -49,7 +49,7 @@ WELL_KNOWN_MAX_CACHE_PERIOD = 48 * 3600
 WELL_KNOWN_MAX_SIZE = 50 * 1024  # 50 KiB
 
 logger = logging.getLogger(__name__)
-well_known_cache = TTLCache("well-known")
+well_known_cache: TTLCache[bytes, Optional[bytes]] = TTLCache("well-known")
 
 
 @implementer(IAgent)
@@ -75,7 +75,6 @@ class MatrixFederationAgent:
 
     :param _well_known_cache: TTLCache impl for storing cached well-known
         lookups. Omit to use a default implementation.
-    :type _well_known_cache: TTLCache
     """
 
     def __init__(
@@ -84,7 +83,7 @@ class MatrixFederationAgent:
         tls_client_options_factory,
         _well_known_tls_policy=None,
         _srv_resolver: Optional["SrvResolver"] = None,
-        _well_known_cache: "TTLCache" = well_known_cache,
+        _well_known_cache: TTLCache[bytes, Optional[bytes]] = well_known_cache,
     ) -> None:
         self._reactor = reactor
 
