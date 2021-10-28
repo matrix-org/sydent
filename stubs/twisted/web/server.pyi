@@ -6,8 +6,7 @@ from twisted.web.resource import IResource
 class Request(http.Request): ...
 
 # A requestFactory is allowed to be "[a] factory which is called with (channel)
-# and creates L{Request} instances.". I'm having trouble hinting that because I
-# don't fully under
+# and creates L{Request} instances.".
 RequestFactory = Callable[[http.HTTPChannel], Request]
 
 # should really inherit from http.HTTPFactory
