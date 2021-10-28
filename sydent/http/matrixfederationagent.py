@@ -448,26 +448,22 @@ class _RoutingResult:
     """
     The value we should assign to the Host header (host:port from the matrix
     URI, or .well-known).
-    :type: bytes
     """
 
     tls_server_name: bytes
     """
     The server name we should set in the SNI (typically host, without port, from the
     matrix URI or .well-known)
-    :type: bytes
     """
 
     target_host: bytes
     """
     The hostname (or IP literal) we should route the TCP connection to (the target of the
     SRV record, or the hostname from the URL/.well-known)
-    :type: bytes
     """
 
     target_port: int
     """
     The port we should route the TCP connection to (the target of the SRV record, or
     the port from the URL/.well-known, or 8448)
-    :type: int
     """

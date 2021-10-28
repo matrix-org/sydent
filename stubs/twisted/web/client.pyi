@@ -29,7 +29,7 @@ class BrowserLikePolicyForHTTPS:
 class HTTPConnectionPool:
     persistent: bool
     maxPersistentPerHost: int
-    cachedConnectionTimeout: int  # (maybe float?)
+    cachedConnectionTimeout: float
     retryAutomatically: bool
     def __init__(self, reactor: object, persistent: bool = True): ...
 
