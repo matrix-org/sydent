@@ -184,9 +184,9 @@ class Sydent:
         if self.config.http.obey_x_forwarded_for and request.requestHeaders.hasHeader(
             "X-Forwarded-For"
         ):
-            return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0].decode(
-                "utf-8"
-            )
+            # Type safety: hasHeaders returning True means that getRawHeaders
+            # returns a nonempty list
+            return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]  # type: ignore[index]
         client = request.getClientAddress()
         if isinstance(client, (address.IPv4Address, address.IPv6Address)):
             return client.host
