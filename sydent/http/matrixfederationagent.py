@@ -15,7 +15,7 @@
 import logging
 import random
 import time
-from typing import Optional, Tuple, Union, Dict, Callable, Any
+from typing import Optional, Tuple, Union, Dict, Callable, Any, Generator
 
 import attr
 from netaddr import IPAddress
@@ -25,9 +25,10 @@ from twisted.internet.interfaces import IStreamClientEndpoint, IReactorTime, IPr
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent, Response
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent, IBodyProducer
+from twisted.web.iweb import IAgent, IBodyProducer, IResponse, IAgentEndpointFactory, IPolicyForHTTPS
 from zope.interface import implementer
 
+from sydent.http.federation_tls_options import ClientTLSOptionsFactory
 from sydent.http.httpcommon import read_body_with_max_size
 from sydent.http.srvresolver import SrvResolver, pick_server_from_list
 from sydent.util import json_decoder
@@ -59,19 +60,12 @@ class MatrixFederationAgent:
     Doesn't implement any retries. (Those are done in MatrixFederationHttpClient.)
 
     :param reactor: twisted reactor to use for underlying requests
-    :type reactor: IReactor
 
     :param tls_client_options_factory: Factory to use for fetching client tls
         options, or none to disable TLS.
-    :type tls_client_options_factory: ClientTLSOptionsFactory, None
 
     :param _well_known_tls_policy: TLS policy to use for fetching .well-known
         files. None to use a default (browser-like) implementation.
-    :type _well_known_tls_policy: IPolicyForHTTPS, None
-
-    :param _srv_resolver: SRVResolver impl to use for looking up SRV records.
-        None to use a default implementation.
-    :type _srv_resolver: SrvResolver, None
 
     :param _well_known_cache: TTLCache impl for storing cached well-known
         lookups. Omit to use a default implementation.
@@ -79,10 +73,14 @@ class MatrixFederationAgent:
 
     def __init__(
         self,
-        reactor,
-        tls_client_options_factory,
-        _well_known_tls_policy=None,
-        _srv_resolver: Optional["SrvResolver"] = None,
+        # This reactor should also be IReactorTCP and IReactorPluggableNameResolver
+        # because it eventually makes its way to HostnameEndpoint.__init__.
+        # But that's not easy to express with an annotation. We use the
+        # `seconds` attribute below, so mark this as IReactorTime for now.
+        reactor: IReactorTime,
+        tls_client_options_factory: Optional[ClientTLSOptionsFactory],
+        _well_known_tls_policy: Optional[IPolicyForHTTPS] = None,
+        _srv_resolver: Optional[SrvResolver] = None,
         _well_known_cache: TTLCache[bytes, Optional[bytes]] = well_known_cache,
     ) -> None:
         self._reactor = reactor
@@ -97,15 +95,15 @@ class MatrixFederationAgent:
         self._pool.maxPersistentPerHost = 5
         self._pool.cachedConnectionTimeout = 2 * 60
 
-        agent_args = {}
         if _well_known_tls_policy is not None:
             # the param is called 'contextFactory', but actually passing a
             # contextfactory is deprecated, and it expects an IPolicyForHTTPS.
-            agent_args["contextFactory"] = _well_known_tls_policy
-        _well_known_agent = RedirectAgent(
-            Agent(self._reactor, pool=self._pool, **agent_args),
-        )
-        self._well_known_agent = _well_known_agent
+            _well_known_agent = Agent(
+                self._reactor, pool=self._pool, contextFactory=_well_known_tls_policy
+            )
+        else:
+            _well_known_agent = Agent(self._reactor, pool=self._pool)
+        self._well_known_agent = RedirectAgent(_well_known_agent)
 
         # our cache of .well-known lookup results, mapping from server name
         # to delegated name. The values can be:
@@ -120,7 +118,7 @@ class MatrixFederationAgent:
         uri: bytes,
         headers: Optional["Headers"] = None,
         bodyProducer: Optional["IBodyProducer"] = None,
-    ) -> Response:
+    ) -> Generator["defer.Deferred[Any]", Any, IResponse]:
         """
         :param method: HTTP method (GET/POST/etc).
 
@@ -183,7 +181,7 @@ class MatrixFederationAgent:
                 return ep
 
         agent = Agent.usingEndpointFactory(self._reactor, EndpointFactory(), self._pool)
-        res = yield agent.request(method, uri, headers, bodyProducer)
+        res: IResponse = yield agent.request(method, uri, headers, bodyProducer)
         return res
 
     async def _route_matrix_uri(
