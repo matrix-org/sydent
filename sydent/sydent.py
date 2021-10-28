@@ -131,50 +131,7 @@ class Sydent:
 
         self.sig_verifier = Verifier(self)
 
-        self.servlets = Servlets()
-        self.servlets.v1 = V1Servlet(self)
-        self.servlets.v2 = V2Servlet(self)
-        self.servlets.emailRequestCode = EmailRequestCodeServlet(self)
-        self.servlets.emailRequestCodeV2 = EmailRequestCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.emailValidate = EmailValidateCodeServlet(self)
-        self.servlets.emailValidateV2 = EmailValidateCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.msisdnRequestCode = MsisdnRequestCodeServlet(self)
-        self.servlets.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.msisdnValidate = MsisdnValidateCodeServlet(self)
-        self.servlets.msisdnValidateV2 = MsisdnValidateCodeServlet(
-            self, require_auth=True
-        )
-        self.servlets.lookup = LookupServlet(self)
-        self.servlets.bulk_lookup = BulkLookupServlet(self)
-        self.servlets.hash_details = HashDetailsServlet(self, lookup_pepper)
-        self.servlets.lookup_v2 = LookupV2Servlet(self, lookup_pepper)
-        self.servlets.pubkey_ed25519 = Ed25519Servlet(self)
-        self.servlets.pubkeyIsValid = PubkeyIsValidServlet(self)
-        self.servlets.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(self)
-        self.servlets.threepidBind = ThreePidBindServlet(self)
-        self.servlets.threepidBindV2 = ThreePidBindServlet(self, require_auth=True)
-        self.servlets.threepidUnbind = ThreePidUnbindServlet(self)
-        self.servlets.replicationPush = ReplicationPushServlet(self)
-        self.servlets.getValidated3pid = GetValidated3pidServlet(self)
-        self.servlets.getValidated3pidV2 = GetValidated3pidServlet(
-            self, require_auth=True
-        )
-        self.servlets.storeInviteServlet = StoreInviteServlet(self)
-        self.servlets.storeInviteServletV2 = StoreInviteServlet(self, require_auth=True)
-        self.servlets.blindlySignStuffServlet = BlindlySignStuffServlet(self)
-        self.servlets.blindlySignStuffServletV2 = BlindlySignStuffServlet(
-            self, require_auth=True
-        )
-        self.servlets.termsServlet = TermsServlet(self)
-        self.servlets.accountServlet = AccountServlet(self)
-        self.servlets.registerServlet = RegisterServlet(self)
-        self.servlets.logoutServlet = LogoutServlet(self)
+        self.servlets: Servlets = Servlets(self, lookup_pepper)
 
         self.threepidBinder = ThreepidBinder(self)
 
@@ -292,7 +249,40 @@ class Validators:
 
 
 class Servlets:
-    pass
+    def __init__(self, sydent: Sydent, lookup_pepper: str):
+        self.v1 = V1Servlet(sydent)
+        self.v2 = V2Servlet(sydent)
+        self.emailRequestCode = EmailRequestCodeServlet(sydent)
+        self.emailRequestCodeV2 = EmailRequestCodeServlet(sydent, require_auth=True)
+        self.emailValidate = EmailValidateCodeServlet(sydent)
+        self.emailValidateV2 = EmailValidateCodeServlet(sydent, require_auth=True)
+        self.msisdnRequestCode = MsisdnRequestCodeServlet(sydent)
+        self.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(sydent, require_auth=True)
+        self.msisdnValidate = MsisdnValidateCodeServlet(sydent)
+        self.msisdnValidateV2 = MsisdnValidateCodeServlet(sydent, require_auth=True)
+        self.lookup = LookupServlet(sydent)
+        self.bulk_lookup = BulkLookupServlet(sydent)
+        self.hash_details = HashDetailsServlet(sydent, lookup_pepper)
+        self.lookup_v2 = LookupV2Servlet(sydent, lookup_pepper)
+        self.pubkey_ed25519 = Ed25519Servlet(sydent)
+        self.pubkeyIsValid = PubkeyIsValidServlet(sydent)
+        self.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(sydent)
+        self.threepidBind = ThreePidBindServlet(sydent)
+        self.threepidBindV2 = ThreePidBindServlet(sydent, require_auth=True)
+        self.threepidUnbind = ThreePidUnbindServlet(sydent)
+        self.replicationPush = ReplicationPushServlet(sydent)
+        self.getValidated3pid = GetValidated3pidServlet(sydent)
+        self.getValidated3pidV2 = GetValidated3pidServlet(sydent, require_auth=True)
+        self.storeInviteServlet = StoreInviteServlet(sydent)
+        self.storeInviteServletV2 = StoreInviteServlet(sydent, require_auth=True)
+        self.blindlySignStuffServlet = BlindlySignStuffServlet(sydent)
+        self.blindlySignStuffServletV2 = BlindlySignStuffServlet(
+            sydent, require_auth=True
+        )
+        self.termsServlet = TermsServlet(sydent)
+        self.accountServlet = AccountServlet(sydent)
+        self.registerServlet = RegisterServlet(sydent)
+        self.logoutServlet = LogoutServlet(sydent)
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)

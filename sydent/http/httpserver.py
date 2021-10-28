@@ -134,11 +134,10 @@ class ClientApiHttpServer:
         v2.putChild(b"lookup", self.sydent.servlets.lookup_v2)
         v2.putChild(b"hash_details", self.sydent.servlets.hash_details)
 
-        self.factory = Site(root)
-        self.factory.requestFactory = SizeLimitingRequest
+        self.factory = Site(root, SizeLimitingRequest)
         self.factory.displayTracebacks = False
 
-    def setup(self):
+    def setup(self) -> None:
         httpPort = self.sydent.config.http.client_port
         interface = self.sydent.config.http.client_bind_address
 
@@ -154,7 +153,7 @@ class InternalApiHttpServer:
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
 
-    def setup(self, interface, port):
+    def setup(self, interface: str, port: int) -> None:
         logger.info("Starting Internal API HTTP server on %s:%d", interface, port)
         root = Resource()
 
@@ -199,7 +198,7 @@ class ReplicationHttpsServer:
         self.factory = Site(root)
         self.factory.displayTracebacks = False
 
-    def setup(self):
+    def setup(self) -> None:
         httpPort = self.sydent.config.http.replication_port
         interface = self.sydent.config.http.replication_bind_address
 
