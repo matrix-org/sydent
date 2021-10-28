@@ -309,7 +309,7 @@ class MatrixFederationAgent:
 
     async def _do_get_well_known(
         self, server_name: bytes
-    ) -> Tuple[Union[bytes, None, object], int]:
+    ) -> Tuple[Optional[bytes], float]:
         """Actually fetch and parse a .well-known, without checking the cache
 
         :param server_name: Name of the server, from the requested url
@@ -322,6 +322,7 @@ class MatrixFederationAgent:
         uri = b"https://%s/.well-known/matrix/server" % (server_name,)
         uri_str = uri.decode("ascii")
         logger.info("Fetching %s", uri_str)
+        cache_period: Optional[float]
         try:
             response = await self._well_known_agent.request(b"GET", uri)
             body = await read_body_with_max_size(response, WELL_KNOWN_MAX_SIZE)
@@ -339,7 +340,7 @@ class MatrixFederationAgent:
 
             # add some randomness to the TTL to avoid a stampeding herd every hour
             # after startup
-            cache_period: float = WELL_KNOWN_INVALID_CACHE_PERIOD
+            cache_period = WELL_KNOWN_INVALID_CACHE_PERIOD
             cache_period += random.uniform(0, WELL_KNOWN_DEFAULT_CACHE_PERIOD_JITTER)
             return (None, cache_period)
 
