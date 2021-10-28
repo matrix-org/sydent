@@ -84,7 +84,7 @@ class Sydent:
         self,
         sydent_config: SydentConfig,
         reactor=twisted.internet.reactor,
-        use_tls_for_federation=True,
+        use_tls_for_federation: bool = True,
     ):
         self.config = sydent_config
 
@@ -146,7 +146,7 @@ class Sydent:
 
         self.pusher: Pusher = Pusher(self)
 
-    def run(self):
+    def run(self) -> None:
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
@@ -171,7 +171,7 @@ class Sydent:
 
         self.reactor.run()
 
-    def maybe_start_prometheus_server(self):
+    def maybe_start_prometheus_server(self) -> None:
         if self.config.general.prometheus_enabled:
             import prometheus_client
 
@@ -293,11 +293,11 @@ class Keyring:
     ed25519: SigningKey
 
 
-def get_config_file_path():
+def get_config_file_path() -> str:
     return os.environ.get("SYDENT_CONF", "sydent.conf")
 
 
-def run_gc():
+def run_gc() -> None:
     threshold = gc.get_threshold()
     counts = gc.get_count()
     for i in reversed(range(len(threshold))):
