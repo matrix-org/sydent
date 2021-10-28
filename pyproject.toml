@@ -52,8 +52,7 @@ files = [
     # TODO "sydent/*.py"
     "sydent/config",
     "sydent/db",
-    "sydent/http/*.py",
-    # TODO "sydent/http/servlets",
+    "sydent/http",
     "sydent/hs_federation",
     "sydent/replication",
     "sydent/sms",
