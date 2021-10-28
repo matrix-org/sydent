@@ -9,7 +9,13 @@ from twisted.internet.interfaces import (
 )
 from twisted.internet.task import Cooperator
 from twisted.web.http_headers import Headers
-from twisted.web.iweb import IAgent, IBodyProducer, IPolicyForHTTPS, IResponse
+from twisted.web.iweb import (
+    IAgent,
+    IAgentEndpointFactory,
+    IBodyProducer,
+    IPolicyForHTTPS,
+    IResponse,
+)
 from zope.interface import implementer
 
 C = TypeVar("C")
@@ -20,13 +26,23 @@ class BrowserLikePolicyForHTTPS:
         self, hostname: bytes, port: int
     ) -> IOpenSSLClientConnectionCreator: ...
 
-class HTTPConnectionPool: ...
+class HTTPConnectionPool:
+    persistent: bool
+    maxPersistentPerHost: int
+    cachedConnectionTimeout: float
+    retryAutomatically: bool
+    def __init__(self, reactor: object, persistent: bool = True): ...
 
 @implementer(IAgent)
 class Agent:
+    # Here and in `usingEndpointFactory`, reactor should be a "provider of
+    # L{IReactorTCP}, L{IReactorTime} and either
+    # L{IReactorPluggableNameResolver} or L{IReactorPluggableResolver}."
+    # I don't know how to encode that in the type system; see also
+    # https://github.com/Shoobx/mypy-zope/issues/58
     def __init__(
         self,
-        reactor: Any,
+        reactor: object,
         contextFactory: IPolicyForHTTPS = BrowserLikePolicyForHTTPS(),
         connectTimeout: Optional[float] = None,
         bindAddress: Optional[bytes] = None,
@@ -39,17 +55,20 @@ class Agent:
         headers: Optional[Headers] = None,
         bodyProducer: Optional[IBodyProducer] = None,
     ) -> Deferred[IResponse]: ...
+    @classmethod
+    def usingEndpointFactory(
+        cls: Type[C],
+        reactor: object,
+        endpointFactory: IAgentEndpointFactory,
+        pool: Optional[HTTPConnectionPool] = None,
+    ) -> C: ...
 
 @implementer(IBodyProducer)
 class FileBodyProducer:
     def __init__(
         self,
         inputFile: BinaryIO,
-        # Type safety: twisted.internet.task.cooperate is a function with the
-        # same signature as Cooperator.cooperate. (It just wraps a module-level
-        # global cooperator.) But there's no easy way to annotate "either this
-        # type or a specific module".
-        cooperator: Cooperator = twisted.internet.task,  # type: ignore[assignment]
+        cooperator: Cooperator = ...,
         readSize: int = 2 ** 16,
     ): ...
     # Length is either `int` or the opaque object UNKNOWN_LENGTH.
@@ -95,3 +114,14 @@ class URI:
     ): ...
     @classmethod
     def fromBytes(cls: Type[C], uri: bytes, defaultPort: Optional[int] = None) -> C: ...
+
+@implementer(IAgent)
+class RedirectAgent:
+    def __init__(self, Agent: Agent, redirectLimit: int = 20): ...
+    def request(
+        self,
+        method: bytes,
+        uri: bytes,
+        headers: Optional[Headers] = None,
+        bodyProducer: Optional[IBodyProducer] = None,
+    ) -> Deferred[IResponse]: ...
