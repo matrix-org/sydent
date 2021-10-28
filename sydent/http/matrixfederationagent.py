@@ -15,13 +15,13 @@
 import logging
 import random
 import time
-from typing import Optional, Tuple, Union, Dict, Callable
+from typing import Optional, Tuple, Union, Dict, Callable, Any
 
 import attr
 from netaddr import IPAddress
 from twisted.internet import defer
 from twisted.internet.endpoints import HostnameEndpoint, wrapClientTLS
-from twisted.internet.interfaces import IStreamClientEndpoint
+from twisted.internet.interfaces import IStreamClientEndpoint, IReactorTime, IProtocolFactory, IProtocol
 from twisted.web.client import URI, Agent, HTTPConnectionPool, RedirectAgent, Response
 from twisted.web.http import stringToDatetime
 from twisted.web.http_headers import Headers
@@ -364,13 +364,17 @@ class MatrixFederationAgent:
 class LoggingHostnameEndpoint:
     """A wrapper for HostnameEndpint which logs when it connects"""
 
-    def __init__(self, reactor, host, port, *args, **kwargs):
+    def __init__(
+        self, reactor: IReactorTime, host: bytes, port: int, *args: Any, **kwargs: Any
+    ):
         self.host = host
         self.port = port
         self.ep = HostnameEndpoint(reactor, host, port, *args, **kwargs)
         logger.info("Endpoint created with %s:%d", host, port)
 
-    def connect(self, protocol_factory):
+    def connect(
+        self, protocol_factory: IProtocolFactory
+    ) -> "defer.Deferred[IProtocol]":
         logger.info("Connecting to %s:%i", self.host.decode("ascii"), self.port)
         return self.ep.connect(protocol_factory)
 
