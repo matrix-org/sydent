@@ -25,8 +25,16 @@ import attr
 import twisted.internet.reactor
 from signedjson.types import SigningKey
 from twisted.internet import address, task
+from twisted.internet.interfaces import (
+    IReactorCore,
+    IReactorPluggableNameResolver,
+    IReactorSSL,
+    IReactorTCP,
+    IReactorTime,
+)
 from twisted.python import log
 from twisted.web.http import Request
+from zope.interface import Interface
 
 from sydent.config import SydentConfig
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -79,12 +87,23 @@ from sydent.validators.msisdnvalidator import MsisdnValidator
 logger = logging.getLogger(__name__)
 
 
+class SydentReactor(
+    IReactorCore,
+    IReactorTCP,
+    IReactorSSL,
+    IReactorTime,
+    IReactorPluggableNameResolver,
+    Interface,
+):
+    pass
+
+
 class Sydent:
     def __init__(
         self,
         sydent_config: SydentConfig,
-        reactor=twisted.internet.reactor,
-        use_tls_for_federation=True,
+        reactor: SydentReactor = twisted.internet.reactor,  # type: ignore[assignment]
+        use_tls_for_federation: bool = True,
     ):
         self.config = sydent_config
 
@@ -146,7 +165,7 @@ class Sydent:
 
         self.pusher: Pusher = Pusher(self)
 
-    def run(self):
+    def run(self) -> None:
         self.clientApiHttpServer.setup()
         self.replicationHttpsServer.setup()
         self.pusher.setup()
@@ -158,7 +177,7 @@ class Sydent:
         cb.clock = self.reactor
         cb.start(10 * 60.0)
 
-        if self.config.http.internal_api_enabled:
+        if self.config.http.internal_port is not None:
             internalport = self.config.http.internal_port
             interface = self.config.http.internal_bind_address
 
@@ -171,7 +190,7 @@ class Sydent:
 
         self.reactor.run()
 
-    def maybe_start_prometheus_server(self):
+    def maybe_start_prometheus_server(self) -> None:
         if self.config.general.prometheus_enabled:
             import prometheus_client
 
@@ -293,11 +312,11 @@ class Keyring:
     ed25519: SigningKey
 
 
-def get_config_file_path():
+def get_config_file_path() -> str:
     return os.environ.get("SYDENT_CONF", "sydent.conf")
 
 
-def run_gc():
+def run_gc() -> None:
     threshold = gc.get_threshold()
     counts = gc.get_count()
     for i in reversed(range(len(threshold))):

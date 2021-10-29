@@ -1,6 +1,7 @@
 import typing
 from typing import AnyStr, Dict, List, Optional
 
+from twisted.internet import protocol
 from twisted.internet.defer import Deferred
 from twisted.internet.interfaces import IAddress, ITCPTransport
 from twisted.logger import Logger
@@ -8,6 +9,7 @@ from twisted.web.http_headers import Headers
 from twisted.web.iweb import IRequest
 from zope.interface import implementer
 
+class HTTPFactory(protocol.ServerFactory): ...
 class HTTPChannel: ...
 
 # Type ignore: I don't want to respecify the methods on the interface that we
@@ -51,6 +53,7 @@ class Request:
     def setHeader(self, k: AnyStr, v: AnyStr) -> None: ...
     def write(self, data: bytes) -> None: ...
     def finish(self) -> None: ...
+    def getClientAddress(self) -> IAddress: ...
 
 class PotentialDataLoss(Exception): ...
 

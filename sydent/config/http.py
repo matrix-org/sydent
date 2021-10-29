@@ -38,12 +38,9 @@ class HTTPConfig(BaseConfig):
         self.internal_bind_address = cfg.get(
             "http", "internalapi.http.bind_address", fallback="::1"
         )
+        self.internal_port: Optional[int] = None
         if internal_api_port != "":
-            self.internal_api_enabled = True
-            self.internal_port: Optional[int] = int(internal_api_port)
-        else:
-            self.internal_api_enabled = False
-            self.internal_port = None
+            self.internal_port = int(internal_api_port)
 
         self.cert_file = cfg.get("http", "replication.https.certfile")
         self.ca_cert_file = cfg.get("http", "replication.https.cacert")

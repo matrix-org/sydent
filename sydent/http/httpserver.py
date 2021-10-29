@@ -145,6 +145,7 @@ class ClientApiHttpServer:
         self.sydent.reactor.listenTCP(
             httpPort,
             self.factory,
+            backlog=50,  # taken from PosixReactorBase.listenTCP
             interface=interface,
         )
 
@@ -174,7 +175,12 @@ class InternalApiHttpServer:
 
         factory = Site(root)
         factory.displayTracebacks = False
-        self.sydent.reactor.listenTCP(port, factory, interface=interface)
+        self.sydent.reactor.listenTCP(
+            port,
+            factory,
+            backlog=50,  # taken from PosixReactorBase.listenTCP
+            interface=interface,
+        )
 
 
 class ReplicationHttpsServer:
@@ -217,5 +223,9 @@ class ReplicationHttpsServer:
             )
 
             self.sydent.reactor.listenSSL(
-                httpPort, self.factory, certOptions, interface=interface
+                httpPort,
+                self.factory,
+                certOptions,
+                backlog=50,  # taken from PosixReactorBase.listenTCP
+                interface=interface,
             )
