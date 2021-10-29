@@ -5,17 +5,12 @@ from twisted.python.failure import Failure
 EventDict = Dict[str, Any]
 
 def err(
-    _stuff: Union[None, Exception, Failure] = None,
-    _why: Optional[str] = None,
+    _stuff: Union[None, Exception, Failure] = ...,
+    _why: Optional[str] = ...,
     **kw: object,
 ) -> None: ...
 
 class PythonLoggingObserver:
-    def emit(self, eventDict: EventDict) -> None:
-        """
-        Emit the given log event.
-
-        @param eventDict: a log event
-        """
+    def emit(self, eventDict: EventDict) -> None: ...
     def start(self) -> None: ...
     def stop(self) -> None: ...

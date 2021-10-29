@@ -14,7 +14,7 @@ class Site(http.HTTPFactory):
     def __init__(
         self,
         resource: IResource,
-        requestFactory: Optional[RequestFactory] = None,
+        requestFactory: Optional[RequestFactory] = ...,
         # Args and kwargs get passed to http.HTTPFactory. But we don't use them.
         *args: object,
         **kwargs: object,
