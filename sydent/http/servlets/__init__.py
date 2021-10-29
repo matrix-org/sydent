@@ -130,12 +130,13 @@ def get_args(
     return request_args
 
 
-Renderer = Callable[..., JsonDict]
+Res = TypeVar("Res", bound=Resource)
 
 
-def jsonwrap(f: Renderer) -> Callable[[Resource, Request], bytes]:
+def jsonwrap(f: Callable[[Res, Request], JsonDict]) -> Callable[[Res, Request], bytes]:
     @functools.wraps(f)
-    def inner(self: Resource, request: Request) -> bytes:
+    def inner(self: Res, request: Request) -> bytes:
+
         """
         Runs a web handler function with the given request and parameters, then
         converts its result into JSON and returns it. If an error happens, also sets
@@ -143,8 +144,6 @@ def jsonwrap(f: Renderer) -> Callable[[Resource, Request], bytes]:
 
         :param self: The current object.
         :param request: The request to process.
-        :param args: The arguments to pass to the function.
-        :param kwargs: The keyword arguments to pass to the function.
 
         :return: The JSON payload to send as a response to the request.
         """
@@ -168,11 +167,11 @@ def jsonwrap(f: Renderer) -> Callable[[Resource, Request], bytes]:
     return inner
 
 
-AsyncRenderer = TypeVar("AsyncRenderer", bound=Callable[..., Awaitable[JsonDict]])
+AsyncRenderer = Callable[[Res, Request], Awaitable[JsonDict]]
 
 
-def asyncjsonwrap(f: AsyncRenderer) -> Callable[..., object]:
-    async def render(f: AsyncRenderer, self: Resource, request: Request) -> None:
+def asyncjsonwrap(f: AsyncRenderer[Res]) -> Callable[[Res, Request], object]:
+    async def render(f: AsyncRenderer[Res], self: Res, request: Request) -> None:
         request.setHeader("Content-Type", "application/json")
         try:
             result = await f(self, request)
@@ -192,7 +191,7 @@ def asyncjsonwrap(f: AsyncRenderer) -> Callable[..., object]:
         request.finish()
 
     @functools.wraps(f)
-    def inner(self: Resource, request: Request) -> object:
+    def inner(self: Res, request: Request) -> object:
         """
         Runs an asynchronous web handler function with the given arguments.
 
