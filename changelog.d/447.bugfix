@@ -1,0 +1,1 @@
+Fix `/v2/account/logout` to return HTTP 400 BAD REQUEST instead of 200 OK if a token was not provided.
