@@ -13,7 +13,8 @@ jobs:
           python-version: '3.6'
       - run: python -m pip install -e .[dev]
       - run: black --check --diff sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
-      - run: flake8 sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
+      - run: flake8 sydent/ tests/ matrix_is_test/ scripts/ setup.py
+      - run: flake8 stubs/ --ignore E
       - run: isort --check-only --diff sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
 
   run-unit-tests:
