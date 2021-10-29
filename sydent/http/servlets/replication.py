@@ -45,8 +45,8 @@ class ReplicationPushServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request: Request) -> JsonDict:
-        # Cast safety: I haven't changed this code apart from the casts,
-        # so it can't be worse.
+        # Cast safety: This request has an ISSLTransport because this servlet
+        # is a resource under the ReplicationHttpsServer and nowhere else.
         request.transport = cast(ISSLTransport, request.transport)
         peerCert = cast(X509, request.transport.getPeerCertificate())
         peerCertCn = peerCert.get_subject().commonName
