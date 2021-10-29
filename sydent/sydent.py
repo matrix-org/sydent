@@ -26,6 +26,7 @@ import twisted.internet.reactor
 from signedjson.types import SigningKey
 from twisted.internet import address, task
 from twisted.python import log
+from twisted.web.http import Request
 
 from sydent.config import SydentConfig
 from sydent.db.hashing_metadata import HashingMetadataStore
@@ -122,18 +123,18 @@ class Sydent:
                 sha256_and_url_safe_base64, lookup_pepper
             )
 
-        self.validators = Validators()
-        self.validators.email = EmailValidator(self)
-        self.validators.msisdn = MsisdnValidator(self)
+        self.validators: Validators = Validators(
+            EmailValidator(self), MsisdnValidator(self)
+        )
 
         self.keyring: Keyring = Keyring(self.config.crypto.signing_key)
         self.keyring.ed25519.alg = "ed25519"
 
-        self.sig_verifier = Verifier(self)
+        self.sig_verifier: Verifier = Verifier(self)
 
         self.servlets: Servlets = Servlets(self, lookup_pepper)
 
-        self.threepidBinder = ThreepidBinder(self)
+        self.threepidBinder: ThreepidBinder = ThreepidBinder(self)
 
         self.sslComponents: SslComponents = SslComponents(self)
 
@@ -179,26 +180,26 @@ class Sydent:
                 addr=self.config.general.prometheus_addr,
             )
 
-    def ip_from_request(self, request):
+    def ip_from_request(self, request: Request) -> Optional[str]:
         if self.config.http.obey_x_forwarded_for and request.requestHeaders.hasHeader(
             "X-Forwarded-For"
         ):
-            return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]
+            # Type safety: hasHeaders returning True means that getRawHeaders
+            # returns a nonempty list
+            return request.requestHeaders.getRawHeaders("X-Forwarded-For")[0]  # type: ignore[index]
         client = request.getClientAddress()
         if isinstance(client, (address.IPv4Address, address.IPv6Address)):
             return client.host
         else:
             return None
 
-    def brand_from_request(self, request):
+    def brand_from_request(self, request: Request) -> Optional[str]:
         """
         If the brand GET parameter is passed, returns that as a string, otherwise returns None.
 
         :param request: The incoming request.
-        :type request: twisted.web.http.Request
 
         :return: The brand to use or None if no hint is found.
-        :rtype: str or None
         """
         if b"brand" in request.args:
             return request.args[b"brand"][0].decode("utf-8")
@@ -244,8 +245,10 @@ class Sydent:
             return os.path.join(root_template_path, brand, template_name)
 
 
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class Validators:
-    pass
+    email: EmailValidator
+    msisdn: MsisdnValidator
 
 
 class Servlets:

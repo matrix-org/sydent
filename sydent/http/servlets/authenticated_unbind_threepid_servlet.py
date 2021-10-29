@@ -18,6 +18,7 @@ from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -34,16 +35,17 @@ class AuthenticatedUnbindThreePidServlet(Resource):
         self.sydent = sydent
 
     @jsonwrap
-    def render_POST(self, request: Request) -> None:
+    def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
         args = get_args(request, ("medium", "address", "mxid"))
 
         threepid = {"medium": args["medium"], "address": args["address"]}
 
-        return self.sydent.threepidBinder.removeBinding(
+        self.sydent.threepidBinder.removeBinding(
             threepid,
             args["mxid"],
         )
+        return {}
 
     def render_OPTIONS(self, request: Request) -> bytes:
         send_cors(request)

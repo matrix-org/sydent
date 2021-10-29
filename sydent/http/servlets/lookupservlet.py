@@ -57,12 +57,15 @@ class LookupServlet(Resource):
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
 
-        sgassoc = globalAssocStore.signedAssociationStringForThreepid(medium, address)
+        sgassoc_raw = globalAssocStore.signedAssociationStringForThreepid(
+            medium, address
+        )
 
-        if not sgassoc:
+        if not sgassoc_raw:
             return {}
 
-        sgassoc = json_decoder.decode(sgassoc)
+        # TODO validate this really is a dict
+        sgassoc: JsonDict = json_decoder.decode(sgassoc_raw)
         if self.sydent.config.general.server_name not in sgassoc["signatures"]:
             # We have not yet worked out what the proper trust model should be.
             #

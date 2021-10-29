@@ -14,15 +14,17 @@
 
 import json
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, cast
 
 import twisted.python.log
+from OpenSSL.crypto import X509
+from twisted.internet.interfaces import ISSLTransport
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
-from sydent.db.threepid_associations import GlobalAssociationStore
+from sydent.db.threepid_associations import GlobalAssociationStore, SignedAssociations
 from sydent.http.servlets import MatrixRestError, jsonwrap
 from sydent.threepid import threePidAssocFromDict
 from sydent.types import JsonDict
@@ -43,7 +45,10 @@ class ReplicationPushServlet(Resource):
 
     @jsonwrap
     def render_POST(self, request: Request) -> JsonDict:
-        peerCert = request.transport.getPeerCertificate()
+        # Cast safety: This request has an ISSLTransport because this servlet
+        # is a resource under the ReplicationHttpsServer and nowhere else.
+        request.transport = cast(ISSLTransport, request.transport)
+        peerCert = cast(X509, request.transport.getPeerCertificate())
         peerCertCn = peerCert.get_subject().commonName
 
         peerStore = PeerStore(self.sydent)
@@ -62,13 +67,17 @@ class ReplicationPushServlet(Resource):
 
         if (
             not request.requestHeaders.hasHeader("Content-Type")
-            or request.requestHeaders.getRawHeaders("Content-Type")[0]
+            # Type safety: the hasHeader call returned True, so getRawHeaders()
+            # returns a nonempty list.
+            or request.requestHeaders.getRawHeaders("Content-Type")[0]  # type: ignore[index]
             != "application/json"
         ):
             logger.warning(
                 "Peer %s made push connection with non-JSON content (type: %s)",
                 peer.servername,
-                request.requestHeaders.getRawHeaders("Content-Type")[0],
+                # Type safety: the hasHeader call returned True, so getRawHeaders()
+                # returns a nonempty list.
+                request.requestHeaders.getRawHeaders("Content-Type")[0],  # type: ignore[index]
             )
             raise MatrixRestError(400, "M_NOT_JSON", "This endpoint expects JSON")
 
@@ -88,13 +97,13 @@ class ReplicationPushServlet(Resource):
             )
             raise MatrixRestError(400, "M_BAD_JSON", 'No "sgAssocs" key in JSON')
 
-        failedIds = []
+        failedIds: List[int] = []
 
         globalAssocsStore = GlobalAssociationStore(self.sydent)
 
         # Ensure items are pulled out of the dictionary in order of origin_id.
-        sg_assocs = inJson.get("sgAssocs", {})
-        sg_assocs = sorted(sg_assocs.items(), key=lambda k: int(k[0]))
+        sg_assocs_raw: SignedAssociations = inJson.get("sgAssocs", {})
+        sg_assocs = sorted(sg_assocs_raw.items(), key=lambda k: int(k[0]))
 
         for originId, sgAssoc in sg_assocs:
             try:
@@ -119,12 +128,10 @@ class ReplicationPushServlet(Resource):
 
                 if assocObj.mxid is not None:
                     # Calculate the lookup hash with our own pepper for this association
+                    pepper = self.hashing_store.get_lookup_pepper()
+                    assert pepper is not None
                     str_to_hash = " ".join(
-                        [
-                            assocObj.address,
-                            assocObj.medium,
-                            self.hashing_store.get_lookup_pepper(),
-                        ],
+                        [assocObj.address, assocObj.medium, pepper],
                     )
                     assocObj.lookup_hash = sha256_and_url_safe_base64(str_to_hash)
 

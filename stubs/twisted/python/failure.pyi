@@ -17,3 +17,8 @@ class Failure(BaseException):
     def check(
         self, *errorTypes: Union[str, Type[Exception]]
     ) -> Optional[Exception]: ...
+    def getTraceback(
+        self,
+        elideFrameworkCode: int = ...,
+        detail: str = ...,
+    ) -> str: ...

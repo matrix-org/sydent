@@ -1,0 +1,1 @@
+Fix a bug introduced in Sydent 2.0.0 where requesting `GET` from `/identity/api/v1/validate/msisdn/submitToken` or `/identity/v2/validate/msisdn/submitToken` would fail with an internal server error.

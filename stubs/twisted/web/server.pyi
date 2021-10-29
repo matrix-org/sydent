@@ -20,3 +20,5 @@ class Site:
         *args: object,
         **kwargs: object,
     ): ...
+
+NOT_DONE_YET = object  # Opaque

@@ -46,11 +46,11 @@ class ThreePidUnbindServlet(Resource):
 
     def render_POST(
         self, request: Request
-    ) -> int:  # from the twisted docs: @type NOT_DONE_YET:
+    ) -> object:  # from the twisted docs: @type NOT_DONE_YET is an opaque object
         defer.ensureDeferred(self._async_render_POST(request))
         return server.NOT_DONE_YET
 
-    async def _async_render_POST(self, request):
+    async def _async_render_POST(self, request: Request) -> None:
         try:
             try:
                 # TODO: we should really validate that this gives us a dict, and
