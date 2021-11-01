@@ -81,6 +81,7 @@ from sydent.replication.pusher import Pusher
 from sydent.threepid.bind import ThreepidBinder
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
+from sydent.util.versionstring import get_version_string
 from sydent.validators.emailvalidator import EmailValidator
 from sydent.validators.msisdnvalidator import MsisdnValidator
 
@@ -117,7 +118,9 @@ class Sydent:
         if self.config.general.sentry_enabled:
             import sentry_sdk
 
-            sentry_sdk.init(dsn=self.config.general.sentry_dsn)
+            sentry_sdk.init(
+                dsn=self.config.general.sentry_dsn, release=get_version_string()
+            )
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.config.general.server_name)
 
