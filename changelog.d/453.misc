@@ -1,1 +1,1 @@
-Include Sydent's version number when reporting to Sentry.
+Include Sydent's version number (and git commit hash if available) when reporting to Sentry.
