@@ -1,12 +1,7 @@
-from typing import Any, BinaryIO, Optional, Type, TypeVar
+from typing import BinaryIO, Optional, Type, TypeVar
 
-import twisted.internet
 from twisted.internet.defer import Deferred
-from twisted.internet.interfaces import (
-    IConsumer,
-    IOpenSSLClientConnectionCreator,
-    IProtocol,
-)
+from twisted.internet.interfaces import IConsumer, IProtocol
 from twisted.internet.task import Cooperator
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import (
@@ -18,20 +13,14 @@ from twisted.web.iweb import (
 )
 from zope.interface import implementer
 
-C = TypeVar("C")
-
-@implementer(IPolicyForHTTPS)
-class BrowserLikePolicyForHTTPS:
-    def creatorForNetloc(
-        self, hostname: bytes, port: int
-    ) -> IOpenSSLClientConnectionCreator: ...
+_C = TypeVar("_C")
 
 class HTTPConnectionPool:
     persistent: bool
     maxPersistentPerHost: int
     cachedConnectionTimeout: float
     retryAutomatically: bool
-    def __init__(self, reactor: object, persistent: bool = True): ...
+    def __init__(self, reactor: object, persistent: bool = ...): ...
 
 @implementer(IAgent)
 class Agent:
@@ -43,25 +32,25 @@ class Agent:
     def __init__(
         self,
         reactor: object,
-        contextFactory: IPolicyForHTTPS = BrowserLikePolicyForHTTPS(),
-        connectTimeout: Optional[float] = None,
-        bindAddress: Optional[bytes] = None,
-        pool: Optional[HTTPConnectionPool] = None,
+        contextFactory: IPolicyForHTTPS = ...,
+        connectTimeout: Optional[float] = ...,
+        bindAddress: Optional[bytes] = ...,
+        pool: Optional[HTTPConnectionPool] = ...,
     ): ...
     def request(
         self,
         method: bytes,
         uri: bytes,
-        headers: Optional[Headers] = None,
-        bodyProducer: Optional[IBodyProducer] = None,
+        headers: Optional[Headers] = ...,
+        bodyProducer: Optional[IBodyProducer] = ...,
     ) -> Deferred[IResponse]: ...
     @classmethod
     def usingEndpointFactory(
-        cls: Type[C],
+        cls: Type[_C],
         reactor: object,
         endpointFactory: IAgentEndpointFactory,
-        pool: Optional[HTTPConnectionPool] = None,
-    ) -> C: ...
+        pool: Optional[HTTPConnectionPool] = ...,
+    ) -> _C: ...
 
 @implementer(IBodyProducer)
 class FileBodyProducer:
@@ -69,7 +58,7 @@ class FileBodyProducer:
         self,
         inputFile: BinaryIO,
         cooperator: Cooperator = ...,
-        readSize: int = 2 ** 16,
+        readSize: int = ...,
     ): ...
     # Length is either `int` or the opaque object UNKNOWN_LENGTH.
     length: int | object
@@ -113,15 +102,17 @@ class URI:
         fragment: bytes,
     ): ...
     @classmethod
-    def fromBytes(cls: Type[C], uri: bytes, defaultPort: Optional[int] = None) -> C: ...
+    def fromBytes(
+        cls: Type[_C], uri: bytes, defaultPort: Optional[int] = ...
+    ) -> _C: ...
 
 @implementer(IAgent)
 class RedirectAgent:
-    def __init__(self, Agent: Agent, redirectLimit: int = 20): ...
+    def __init__(self, agent: Agent, redirectLimit: int = ...): ...
     def request(
         self,
         method: bytes,
         uri: bytes,
-        headers: Optional[Headers] = None,
-        bodyProducer: Optional[IBodyProducer] = None,
+        headers: Optional[Headers] = ...,
+        bodyProducer: Optional[IBodyProducer] = ...,
     ) -> Deferred[IResponse]: ...

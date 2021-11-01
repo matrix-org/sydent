@@ -9,14 +9,14 @@ from twisted.internet.interfaces import (
     IOpenSSLClientConnectionCreator,
     IOpenSSLContextFactory,
 )
-from zope.interface import Interface, implementer
+from zope.interface import implementer
 
-C = TypeVar("C")
+_C = TypeVar("_C")
 
 class Certificate:
     original: OpenSSL.crypto.X509
     @classmethod
-    def loadPEM(cls: Type[C], data: AnyStr) -> C: ...
+    def loadPEM(cls: Type[_C], data: AnyStr) -> _C: ...
 
 def platformTrust() -> IOpenSSLTrustRoot: ...
 
@@ -27,20 +27,20 @@ class PrivateCertificate(Certificate):
 @implementer(IOpenSSLContextFactory)
 class CertificateOptions:
     def __init__(
-        self, trustRoot: Optional[IOpenSSLTrustRoot] = None, **kwargs: Any
+        self, trustRoot: Optional[IOpenSSLTrustRoot] = ..., **kwargs: object
     ): ...
     def _makeContext(self) -> OpenSSL.SSL.Context: ...
     def getContext(self) -> OpenSSL.SSL.Context: ...
 
 def optionsForClientTLS(
     hostname: str,
-    trustRoot: Optional[IOpenSSLTrustRoot] = None,
-    clientCertificate: Optional[PrivateCertificate] = None,
-    acceptableProtocols: Optional[List[bytes]] = None,
+    trustRoot: Optional[IOpenSSLTrustRoot] = ...,
+    clientCertificate: Optional[PrivateCertificate] = ...,
+    acceptableProtocols: Optional[List[bytes]] = ...,
     *,
     # Shouldn't use extraCertificateOptions:
     # "any time you need to pass an option here that is a bug in this interface."
-    extraCertificateOptions: Optional[Dict[Any, Any]] = None,
+    extraCertificateOptions: Optional[Dict[Any, Any]] = ...,
 ) -> IOpenSSLClientConnectionCreator: ...
 
 # Type ignore: I don't want to respecify the methods on the interface that we

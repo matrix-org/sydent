@@ -1,4 +1,4 @@
-from typing import Any, AnyStr, Optional
+from typing import AnyStr, Optional
 
 from twisted.internet import interfaces
 from twisted.internet.defer import Deferred
@@ -20,9 +20,9 @@ class HostnameEndpoint:
         reactor: object,
         host: AnyStr,
         port: int,
-        timeout: float = 30,
-        bindAddress: Optional[bytes] = None,
-        attemptDelay: Optional[float] = None,
+        timeout: float = ...,
+        bindAddress: Optional[bytes] = ...,
+        attemptDelay: Optional[float] = ...,
     ): ...
     def connect(self, protocol_factory: IProtocolFactory) -> Deferred[IProtocol]: ...
 

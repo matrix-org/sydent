@@ -2,7 +2,7 @@ from typing import ClassVar, Generic, Optional, TypeVar
 
 class Name:
     name: bytes
-    def __init__(self, name: bytes = b""): ...
+    def __init__(self, name: bytes = ...): ...
 
 SRV: int
 
@@ -13,13 +13,13 @@ class Record_SRV:
     target: Name
     ttl: int
 
-Payload = TypeVar("Payload")  # should be bound to IEncodableRecord
+_Payload = TypeVar("_Payload")  # should be bound to IEncodableRecord
 
-class RRHeader(Generic[Payload]):
+class RRHeader(Generic[_Payload]):
     fmt: ClassVar[str]
     name: Name
     type: int
     cls: int
     ttl: int
-    payload: Optional[Payload]
+    payload: Optional[_Payload]
     auth: bool

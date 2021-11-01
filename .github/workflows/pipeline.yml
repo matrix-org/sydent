@@ -12,8 +12,11 @@ jobs:
         with:
           python-version: '3.6'
       - run: python -m pip install -e .[dev]
+      # Please keep this section up to date with `scripts-dev/lint.sh`.
+      # TODO: could just run the lint script directly?
       - run: black --check --diff sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
-      - run: flake8 sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
+      - run: flake8 sydent/ tests/ matrix_is_test/ scripts/ setup.py
+      - run: flake8 stubs/ --ignore E301,E302,E305,E701,E704
       - run: isort --check-only --diff sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
 
   run-unit-tests:

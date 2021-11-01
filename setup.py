@@ -57,6 +57,7 @@ setup(
     extras_require={
         "dev": [
             "flake8==3.9.2",
+            "flake8-pyi==20.10.0",
             "black==21.6b0",
             "isort==5.8.0",
             "mypy>=0.902",
