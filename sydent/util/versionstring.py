@@ -10,6 +10,15 @@ logger = logging.getLogger(__name__)
 def get_version_string() -> str:
     """Calculate a git-aware version string for sydent.
 
+    The version string is `sydent@x.y.z`, where `x.y.z` comes from
+    `sydent.__version__`. If the `sydent` module belongs to a git repository on
+    disk, we the current branch, tag and commit hash, plus a flag to indicate
+    if the working tree is dirty.
+
+    An example probably illustrates best. Testing locally, I get
+    `sydent@2.4.6 (b=dmr/version-in-sentry,05e1fa8,dirty)`.
+    If this wasn't done from within the repository, I'd just get `sydent@2.4.6`.
+
     Implementation nicked from Synapse.
     """
     version_string = sydent.__version__
