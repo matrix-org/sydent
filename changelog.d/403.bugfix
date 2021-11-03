@@ -1,1 +1,0 @@
-Fix issue with `obey_x_forwarded_for` not being honoured.
