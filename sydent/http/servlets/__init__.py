@@ -19,7 +19,6 @@ import logging
 from typing import Any, Awaitable, Callable, Dict, Iterable, TypeVar
 
 from twisted.internet import defer
-from twisted.python import failure
 from twisted.web import server
 from twisted.web.resource import Resource
 from twisted.web.server import Request
