@@ -1,8 +1,9 @@
-from typing import BinaryIO, Optional, Type, TypeVar
+from typing import BinaryIO, Optional, Sequence, Type, TypeVar
 
 from twisted.internet.defer import Deferred
 from twisted.internet.interfaces import IConsumer, IProtocol
 from twisted.internet.task import Cooperator
+from twisted.python.failure import Failure
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import (
     IAgent,
@@ -14,6 +15,11 @@ from twisted.web.iweb import (
 from zope.interface import implementer
 
 _C = TypeVar("_C")
+
+class ResponseFailed(Exception):
+    def __init__(
+        self, reasons: Sequence[Failure], response: Optional[Response] = ...
+    ): ...
 
 class HTTPConnectionPool:
     persistent: bool
