@@ -1,0 +1,1 @@
+Handle federation request failures in `/request` explicitly, to reduce Sentry noise.
