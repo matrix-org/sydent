@@ -4,7 +4,7 @@ Sydent 2.4.7 (2021-11-03)
 Features
 --------
 
-- Support the stable room type field for [MSC3288](https://github.com/matrix-org/matrix-doc/pull/3288). ([\#437](https://github.com/matrix-org/sydent/issues/437))
+- Support the stable `room_type` field for [MSC3288](https://github.com/matrix-org/matrix-doc/pull/3288). ([\#437](https://github.com/matrix-org/sydent/issues/437))
 
 
 Bugfixes
