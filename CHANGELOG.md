@@ -15,7 +15,7 @@ Bugfixes
 - Fix an issue where `obey_x_forwarded_for` was not being honoured. ([\#403](https://github.com/matrix-org/sydent/issues/403))
 - Fix a bug which could cause SMS sending to fail silently. ([\#412](https://github.com/matrix-org/sydent/issues/412))
 - Fix misleading logging and potential TypeErrors related to replication ports in Sydent's database. ([\#420](https://github.com/matrix-org/sydent/issues/420))
-- Fix a bug introduced in Sydent 2.0.0 where requesting `GET` from `/identity/api/v1/validate/msisdn/submitToken` or `/identity/v2/validate/msisdn/submitToken` would fail with an internal server error. ([\#445](https://github.com/matrix-org/sydent/issues/445))
+- Fix a bug introduced in v2.0.0 where requesting `GET` from `/identity/api/v1/validate/msisdn/submitToken` or `/identity/v2/validate/msisdn/submitToken` would fail with an internal server error. ([\#445](https://github.com/matrix-org/sydent/issues/445))
 - Fix `/v2/account/logout` to return HTTP 400 BAD REQUEST instead of 200 OK if a token was not provided. ([\#447](https://github.com/matrix-org/sydent/issues/447))
 - Fix a long-standing spec compliance bug where the response to `POST /identity/{api/v1,v2}/3pid/unbind` was `null`, not `{}`. ([\#449](https://github.com/matrix-org/sydent/issues/449))
 
