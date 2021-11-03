@@ -1,7 +1,7 @@
 Sydent 2.5.0 (2021-11-03)
 =========================
 
-This release [supports](https://github.com/matrix-org/sydent/issues/437) [MSC3288](https://github.com/matrix-org/matrix-doc/pull/3288), [deprecates `.eml` templates](https://github.com/matrix-org/sydent/issues/395)) and includes many internal changes related to typechecking.
+This release [deprecates `.eml` templates](https://github.com/matrix-org/sydent/issues/395) in favour of Jinja 2 `.eml.j2` templates. See the [documentation](https://github.com/matrix-org/sydent/blob/main/docs/templates.md#template-formats) for more details.
 
 Features
 --------
