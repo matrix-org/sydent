@@ -180,8 +180,7 @@ def asyncjsonwrap(f: AsyncRenderer[Res]) -> Callable[[Res, Request], object]:
             request.setResponseCode(e.httpStatus)
             request.write(dict_to_json_bytes({"errcode": e.errcode, "error": e.error}))
         except Exception:
-            fail = failure.Failure()
-            logger.error("Request processing failed: %r, %s", fail, fail.getTraceback())
+            logger.exception("Request processing failed")
             request.setResponseCode(500)
             request.write(
                 dict_to_json_bytes(
