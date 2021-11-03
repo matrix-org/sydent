@@ -19,7 +19,6 @@ import logging
 from typing import Any, Awaitable, Callable, Dict, Iterable, TypeVar
 
 from twisted.internet import defer
-from twisted.python import failure
 from twisted.web import server
 from twisted.web.resource import Resource
 from twisted.web.server import Request
@@ -180,8 +179,7 @@ def asyncjsonwrap(f: AsyncRenderer[Res]) -> Callable[[Res, Request], object]:
             request.setResponseCode(e.httpStatus)
             request.write(dict_to_json_bytes({"errcode": e.errcode, "error": e.error}))
         except Exception:
-            fail = failure.Failure()
-            logger.error("Request processing failed: %r, %s", fail, fail.getTraceback())
+            logger.exception("Request processing failed")
             request.setResponseCode(500)
             request.write(
                 dict_to_json_bytes(
