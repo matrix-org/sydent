@@ -1,1 +1,0 @@
-Make `sydent.terms` pass `mypy --strict`.

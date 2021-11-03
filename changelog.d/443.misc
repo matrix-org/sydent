@@ -1,1 +1,0 @@
-More accurately use `IResponse` rather than `http.Response` in type hints.
