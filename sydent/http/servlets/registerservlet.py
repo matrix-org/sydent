@@ -15,7 +15,7 @@
 import logging
 import urllib
 from http import HTTPStatus
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from twisted.internet.error import ConnectError, DNSLookupError
 from twisted.web.client import ResponseFailed
@@ -59,7 +59,7 @@ class RegisterServlet(Resource):
                 "error": "matrix_server_name must be a valid Matrix server name (IP address or hostname)",
             }
 
-        def federation_request_problem(error: str):
+        def federation_request_problem(error: str) -> Dict[str, str]:
             logger.warning(error)
             request.setResponseCode(HTTPStatus.INTERNAL_SERVER_ERROR)
             return {
