@@ -69,10 +69,7 @@ class RegisterTestCase(unittest.TestCase):
         )
         servlet = self.sydent.servlets.registerServlet
 
-        def mock_get_json(*args: object, **kwargs: object) -> None:
-            raise exc
-
-        with patch.object(servlet.client, "get_json", mock_get_json):
+        with patch.object(servlet.client, "get_json", side_effect=exc):
             request.render(servlet)
         self.assertEqual(channel.code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertEqual(channel.json_body["errcode"], "M_UNKNOWN")
