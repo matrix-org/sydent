@@ -1,0 +1,1 @@
+Log a warning (not an error) when we refuse to send an SMS to an unsupported country.

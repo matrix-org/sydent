@@ -100,7 +100,7 @@ class MsisdnRequestCodeServlet(Resource):
                 "intl_fmt": intl_fmt,
             }
         except DestinationRejectedException:
-            logger.error("Destination rejected for number: %s", msisdn)
+            logger.warning("Destination rejected for number: %s", msisdn)
             request.setResponseCode(400)
             resp = {
                 "errcode": "M_DESTINATION_REJECTED",
