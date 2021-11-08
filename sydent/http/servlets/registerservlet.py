@@ -14,8 +14,11 @@
 
 import logging
 import urllib
-from typing import TYPE_CHECKING
+from http import HTTPStatus
+from typing import TYPE_CHECKING, Dict
 
+from twisted.internet.error import ConnectError, DNSLookupError
+from twisted.web.client import ResponseFailed
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
@@ -56,52 +59,59 @@ class RegisterServlet(Resource):
                 "error": "matrix_server_name must be a valid Matrix server name (IP address or hostname)",
             }
 
-        result = await self.client.get_json(
-            "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
-            % (
-                matrix_server,
-                urllib.parse.quote(args["access_token"]),
-            ),
-            1024 * 5,
-        )
+        def federation_request_problem(error: str) -> Dict[str, str]:
+            logger.warning(error)
+            request.setResponseCode(HTTPStatus.INTERNAL_SERVER_ERROR)
+            return {
+                "errcode": "M_UNKNOWN",
+                "error": error,
+            }
+
+        try:
+            result = await self.client.get_json(
+                "matrix://%s/_matrix/federation/v1/openid/userinfo?access_token=%s"
+                % (
+                    matrix_server,
+                    urllib.parse.quote(args["access_token"]),
+                ),
+                1024 * 5,
+            )
+        except (DNSLookupError, ConnectError, ResponseFailed) as e:
+            return federation_request_problem(
+                f"Unable to contact the Matrix homeserver ({type(e).__name__})"
+            )
 
         if "sub" not in result:
-            raise Exception("Invalid response from homeserver")
+            return federation_request_problem(
+                "The Matrix homeserver did not include 'sub' in its response",
+            )
 
         user_id = result["sub"]
 
         if not isinstance(user_id, str):
-            request.setResponseCode(500)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "The Matrix homeserver returned a malformed reply",
-            }
+            return federation_request_problem(
+                "The Matrix homeserver returned a malformed reply"
+            )
 
         user_id_components = user_id.split(":", 1)
 
         # Ensure there's a localpart and domain in the returned user ID.
         if len(user_id_components) != 2:
-            request.setResponseCode(500)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "The Matrix homeserver returned an invalid MXID",
-            }
+            return federation_request_problem(
+                "The Matrix homeserver returned an invalid MXID"
+            )
 
         user_id_server = user_id_components[1]
 
         if not is_valid_matrix_server_name(user_id_server):
-            request.setResponseCode(500)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "The Matrix homeserver returned an invalid MXID",
-            }
+            return federation_request_problem(
+                "The Matrix homeserver returned an invalid MXID"
+            )
 
         if user_id_server != matrix_server:
-            request.setResponseCode(500)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "The Matrix homeserver returned a MXID belonging to another homeserver",
-            }
+            return federation_request_problem(
+                "The Matrix homeserver returned a MXID belonging to another homeserver"
+            )
 
         tok = issueToken(self.sydent, user_id)
 
