@@ -62,6 +62,22 @@ class TestRequestCode(unittest.TestCase):
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
         self.assertIn("Confirm your email address for Matrix", email_contents)
 
+    def test_request_code_via_url_query_params(self):
+        self.sydent.run()
+        url = (
+            "/_matrix/identity/api/v1/validate/email/requestToken?"
+            "email=test@test"
+            "&client_secret=oursecret"
+            "&send_attempt=0"
+        )
+        request, channel = make_request(self.sydent.reactor, "POST", url)
+        smtp = self._render_request(request)
+        self.assertEqual(channel.code, 200)
+
+        # Ensure the email is as expected.
+        email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
+        self.assertIn("Confirm your email address for Matrix", email_contents)
+
     def test_branded_request_code(self):
         self.sydent.run()
 
