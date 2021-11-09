@@ -48,7 +48,7 @@ class TestRequestCode(unittest.TestCase):
         request, channel = make_request(
             self.sydent.reactor,
             "POST",
-            "/_matrix/identity/v1/validate/email/requestToken",
+            "/_matrix/identity/api/v1/validate/email/requestToken",
             {
                 "email": "test@test",
                 "client_secret": "oursecret",
@@ -68,7 +68,7 @@ class TestRequestCode(unittest.TestCase):
         request, channel = make_request(
             self.sydent.reactor,
             "POST",
-            "/_matrix/identity/v1/validate/email/requestToken?brand=vector-im",
+            "/_matrix/identity/api/v1/validate/email/requestToken?brand=vector-im",
             {
                 "email": "test@test",
                 "client_secret": "oursecret",
