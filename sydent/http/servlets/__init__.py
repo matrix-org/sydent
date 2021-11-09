@@ -49,9 +49,13 @@ def get_args(
     Helper function to get arguments for an HTTP request.
     Currently takes args from the top level keys of a json object or
     www-form-urlencoded for backwards compatibility on v1 endpoints only.
-    Returns a tuple (error, args) where if error is non-null,
-    the request is malformed. Otherwise, args contains the
-    parameters passed.
+
+    ⚠️ BEWARE ⚠. If a v1 request provides its args in urlencoded form (either in
+    a POST body or as URL query parameters), then we'll return `Dict[str, str]`.
+    The caller may need to interpret these strings as e.g. an `int`, `bool`, etc.
+    Arguments given as a json body are processed with `json.JSONDecoder.decode`,
+    and so are automatically deserialised to a Python type. The caller should
+    still validate that these have the correct type!
 
     :param request: The request received by the servlet.
     :param args: The args to look for in the request's parameters.
@@ -60,6 +64,10 @@ def get_args(
 
     :raises: MatrixRestError if required is True and a given parameter
         was not found in the request's query parameters.
+    :raises: MatrixRestError if we the request body contains bad JSON.
+    :raises: MatrixRestError if arguments are given in www-form-urlencodedquery
+        form, and some argument name or value is not a valid UTF-8-encoded
+        string.
 
     :return: A dict containing the requested args and their values. String values
         are of type unicode.
