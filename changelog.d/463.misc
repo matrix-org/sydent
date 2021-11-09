@@ -1,0 +1,1 @@
+Demote a failure to parse JSON from homeservers in `/register` from an error to a warning.
