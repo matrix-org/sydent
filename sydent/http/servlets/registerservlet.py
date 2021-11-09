@@ -83,7 +83,7 @@ class RegisterServlet(Resource):
             )
         except JSONDecodeError:
             return federation_request_problem(
-                f"The Matrix homeserver returned invalid JSON"
+                "The Matrix homeserver returned invalid JSON"
             )
 
         if "sub" not in result:
