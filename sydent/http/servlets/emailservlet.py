@@ -50,8 +50,28 @@ class EmailRequestCodeServlet(Resource):
         args = get_args(request, ("email", "client_secret", "send_attempt"))
 
         email = args["email"]
-        sendAttempt = args["send_attempt"]
         clientSecret = args["client_secret"]
+
+        try:
+            # if we got this via the v1 API in a querystring or urlencoded body,
+            # then the values in args will be a string. So check that
+            # send_attempt is an int.
+            #
+            # NB: We don't check if we're processing a url-encoded v1 request.
+            # This means we accept string representations of integers for
+            # `send_attempt` in v2 requests, and in v1 requests that supply a
+            # JSON body. This is contrary to the spec and leaves me with a dirty
+            # feeling I can't quite shake off.
+            #
+            # Where's Raymond Hettinger when you need him? (THUMP) There must be
+            # a better way!
+            sendAttempt = int(args["send_attempt"])
+        except (TypeError, ValueError):
+            request.setResponseCode(400)
+            return {
+                "errcode": "M_INVALID_PARAM",
+                "error": f"send_attempt should be an integer (got {args['send_attempt']}",
+            }
 
         if not is_valid_client_secret(clientSecret):
             request.setResponseCode(400)
