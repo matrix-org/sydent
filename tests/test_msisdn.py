@@ -10,18 +10,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import asyncio
 import os.path
-from typing import TYPE_CHECKING
-from unittest.mock import patch
+from typing import Awaitable
+from unittest.mock import MagicMock, patch
 
 from twisted.trial import unittest
 from twisted.web.server import Request
 
 from tests.utils import make_request, make_sydent
-
-if TYPE_CHECKING:
-    from unittest import AsyncMock
 
 
 class TestRequestCode(unittest.TestCase):
@@ -36,9 +33,14 @@ class TestRequestCode(unittest.TestCase):
         }
         self.sydent = make_sydent(test_config=config)
 
-    def _render_request(self, request: Request) -> "AsyncMock":
+    def _render_request(self, request: Request) -> Awaitable[MagicMock]:
         # Patch out the email sending so we can investigate the resulting email.
         with patch("sydent.sms.openmarket.OpenMarketSMS.sendTextSMS") as sendTextSMS:
+            # We can't use AsyncMock until Python 3.8. Instead, mock the
+            # function as returning a future.
+            f = asyncio.Future()
+            f.set_result(MagicMock())
+            sendTextSMS.return_value = f
             request.render(self.sydent.servlets.msisdnRequestCode)
 
         return sendTextSMS
