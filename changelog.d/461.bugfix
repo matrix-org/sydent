@@ -1,0 +1,1 @@
+Fix a bug introduced in Sydent 2.5.0 where requests to validate an email or phone number would fail with an HTTP 500 Internal Server Error if arguments were given as a query string or as a www-form-urlencoded body.

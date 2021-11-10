@@ -58,7 +58,16 @@ class MsisdnRequestCodeServlet(Resource):
 
         raw_phone_number = args["phone_number"]
         country = args["country"]
-        sendAttempt = args["send_attempt"]
+        try:
+            # See the comment handling `send_attempt` in emailservlet.py for
+            # more context.
+            sendAttempt = int(args["send_attempt"])
+        except (TypeError, ValueError):
+            request.setResponseCode(400)
+            return {
+                "errcode": "M_INVALID_PARAM",
+                "error": f"send_attempt should be an integer (got {args['send_attempt']}",
+            }
         clientSecret = args["client_secret"]
 
         if not is_valid_client_secret(clientSecret):
