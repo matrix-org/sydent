@@ -15,6 +15,7 @@
 import logging
 import urllib
 from http import HTTPStatus
+from json import JSONDecodeError
 from typing import TYPE_CHECKING, Dict
 
 from twisted.internet.error import ConnectError, DNSLookupError
@@ -79,6 +80,10 @@ class RegisterServlet(Resource):
         except (DNSLookupError, ConnectError, ResponseFailed) as e:
             return federation_request_problem(
                 f"Unable to contact the Matrix homeserver ({type(e).__name__})"
+            )
+        except JSONDecodeError:
+            return federation_request_problem(
+                "The Matrix homeserver returned invalid JSON"
             )
 
         if "sub" not in result:

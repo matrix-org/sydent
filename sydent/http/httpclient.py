@@ -64,7 +64,7 @@ class HTTPClient(Generic[AgentType]):
             # json.loads doesn't allow bytes in Python 3.5
             json_body = json_decoder.decode(body.decode("UTF-8"))
         except Exception:
-            logger.exception("Error parsing JSON from %s", uri)
+            logger.warning("Error parsing JSON from %s", uri)
             raise
         if not isinstance(json_body, dict):
             raise TypeError
