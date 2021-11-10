@@ -83,14 +83,25 @@ def sendEmail(
             mailString = template_file.read() % allSubstitutions
 
     parsedFrom = email.utils.parseaddr(mailFrom)[1]
+    if parsedFrom == "":
+        # This address is part of the application config, so errors here are
+        # internal server errors.
+        raise RuntimeError(
+            f"Couldn't parse 'from' address {mailFrom} from Sydent's config."
+        )
+
     parsedTo = email.utils.parseaddr(mailTo)[1]
-    if parsedFrom == "" or parsedTo == "":
-        logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
-        raise EmailAddressException()
+    if parsedTo == "":
+        logger.warning("Couldn't parse 'to' %s", mailTo)
+        raise EmailAddressException(f"Couldn't parse 'to' address {mailTo}")
 
     if parsedTo != mailTo:
-        logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
-        raise EmailAddressException()
+        logger.warning(
+            "Parsing 'to' address changed the address: %s -> %s", mailTo, parsedTo
+        )
+        raise EmailAddressException(
+            f"Parsing 'to' address changed the address: {mailTo} -> {parsedTo}"
+        )
 
     mailServer = sydent.config.email.smtp_server
     mailPort = int(sydent.config.email.smtp_port)
