@@ -64,7 +64,7 @@ class ThreePidUnbindServlet(Resource):
                     request.content.read().decode("UTF-8")
                 )
             except ValueError:
-                request.setResponseCode(400)
+                request.setResponseCode(HTTPStatus.BAD_REQUEST)
                 request.write(
                     dict_to_json_bytes(
                         {"errcode": "M_BAD_JSON", "error": "Malformed JSON"}
@@ -75,7 +75,7 @@ class ThreePidUnbindServlet(Resource):
 
             missing = [k for k in ("threepid", "mxid") if k not in body]
             if len(missing) > 0:
-                request.setResponseCode(400)
+                request.setResponseCode(HTTPStatus.BAD_REQUEST)
                 msg = "Missing parameters: " + (",".join(missing))
                 request.write(
                     dict_to_json_bytes({"errcode": "M_MISSING_PARAMS", "error": msg})
@@ -87,7 +87,7 @@ class ThreePidUnbindServlet(Resource):
             mxid = body["mxid"]
 
             if "medium" not in threepid or "address" not in threepid:
-                request.setResponseCode(400)
+                request.setResponseCode(HTTPStatus.BAD_REQUEST)
                 request.write(
                     dict_to_json_bytes(
                         {
@@ -118,7 +118,7 @@ class ThreePidUnbindServlet(Resource):
                 client_secret = body["client_secret"]
 
                 if not is_valid_client_secret(client_secret):
-                    request.setResponseCode(400)
+                    request.setResponseCode(HTTPStatus.BAD_REQUEST)
                     request.write(
                         dict_to_json_bytes(
                             {
@@ -135,7 +135,7 @@ class ThreePidUnbindServlet(Resource):
                 try:
                     s = valSessionStore.getValidatedSession(sid, client_secret)
                 except (IncorrectClientSecretException, InvalidSessionIdException):
-                    request.setResponseCode(401)
+                    request.setResponseCode(HTTPStatus.UNAUTHORIZED)
                     request.write(
                         dict_to_json_bytes(
                             {
@@ -147,7 +147,7 @@ class ThreePidUnbindServlet(Resource):
                     request.finish()
                     return
                 except SessionNotValidatedException:
-                    request.setResponseCode(403)
+                    request.setResponseCode(HTTPStatus.FORBIDDEN)
                     request.write(
                         dict_to_json_bytes(
                             {
@@ -159,7 +159,7 @@ class ThreePidUnbindServlet(Resource):
                     return
 
                 if s.medium != threepid["medium"] or s.address != threepid["address"]:
-                    request.setResponseCode(403)
+                    request.setResponseCode(HTTPStatus.FORBIDDEN)
                     request.write(
                         dict_to_json_bytes(
                             {
@@ -178,21 +178,21 @@ class ThreePidUnbindServlet(Resource):
                         )
                     )
                 except SignatureVerifyException as ex:
-                    request.setResponseCode(401)
+                    request.setResponseCode(HTTPStatus.UNAUTHORIZED)
                     request.write(
                         dict_to_json_bytes({"errcode": "M_FORBIDDEN", "error": str(ex)})
                     )
                     request.finish()
                     return
                 except NoAuthenticationError as ex:
-                    request.setResponseCode(401)
+                    request.setResponseCode(HTTPStatus.UNAUTHORIZED)
                     request.write(
                         dict_to_json_bytes({"errcode": "M_FORBIDDEN", "error": str(ex)})
                     )
                     request.finish()
                     return
                 except InvalidServerName as ex:
-                    request.setResponseCode(400)
+                    request.setResponseCode(HTTPStatus.BAD_REQUEST)
                     request.write(
                         dict_to_json_bytes(
                             {"errcode": "M_INVALID_PARAM", "error": str(ex)}
@@ -229,7 +229,7 @@ class ThreePidUnbindServlet(Resource):
                     return
 
                 if not mxid.endswith(":" + origin_server_name):
-                    request.setResponseCode(403)
+                    request.setResponseCode(HTTPStatus.FORBIDDEN)
                     request.write(
                         dict_to_json_bytes(
                             {
@@ -247,7 +247,7 @@ class ThreePidUnbindServlet(Resource):
             request.finish()
         except Exception as ex:
             logger.exception("Exception whilst handling unbind")
-            request.setResponseCode(500)
+            request.setResponseCode(HTTPStatus.INTERNAL_SERVER_ERROR)
             request.write(
                 dict_to_json_bytes({"errcode": "M_UNKNOWN", "error": str(ex)})
             )
