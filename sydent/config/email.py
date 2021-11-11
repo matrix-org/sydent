@@ -11,14 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import email.utils
 import socket
 from configparser import ConfigParser
 from typing import Optional
 
 from sydent.config import ConfigError
 from sydent.config._base import BaseConfig
-from sydent.util.emailutils import check_valid_email_address, EmailAddressException
+from sydent.util.emailutils import EmailAddressException, check_valid_email_address
 
 
 class EmailConfig(BaseConfig):
