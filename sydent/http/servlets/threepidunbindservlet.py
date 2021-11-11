@@ -14,14 +14,18 @@
 # limitations under the License.
 
 import logging
+from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
+from twisted.internet.error import DNSLookupError
 from twisted.web import server
+from twisted.web.client import ResponseFailed
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
+from twisted.internet.error import ConnectError
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.hs_federation.verifier import InvalidServerName, NoAuthenticationError
 from sydent.http.servlets import dict_to_json_bytes
@@ -196,9 +200,26 @@ class ThreePidUnbindServlet(Resource):
                     )
                     request.finish()
                     return
+                except (DNSLookupError, ConnectError, ResponseFailed) as e:
+                    msg = (
+                        f"Unable to contact the Matrix homeserver to "
+                        f"authenticate request ({type(e).__name__})"
+                    )
+                    logger.warning(msg)
+                    request.setResponseCode(HTTPStatus.INTERNAL_SERVER_ERROR)
+                    request.write(
+                        dict_to_json_bytes(
+                            {
+                                "errcode": "M_UNKNOWN",
+                                "error": msg,
+                            }
+                        )
+                    )
+                    request.finish()
+                    return
                 except Exception:
                     logger.exception("Exception whilst authenticating unbind request")
-                    request.setResponseCode(500)
+                    request.setResponseCode(HTTPStatus.INTERNAL_SERVER_ERROR)
                     request.write(
                         dict_to_json_bytes(
                             {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
