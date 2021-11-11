@@ -15,6 +15,7 @@
 from configparser import ConfigParser
 from typing import Dict, List
 
+from sydent.config import ConfigError
 from sydent.config._base import BaseConfig
 
 
@@ -45,11 +46,11 @@ class SMSConfig(BaseConfig):
                 for origString in rawList:
                     parts = origString.split(":")
                     if len(parts) != 2:
-                        raise Exception(
+                        raise ConfigError(
                             "Originators must be in form: long:<number>, short:<number> or alpha:<text>, separated by commas"
                         )
                     if parts[0] not in ["long", "short", "alpha"]:
-                        raise Exception(
+                        raise ConfigError(
                             "Invalid originator type: valid types are long, short and alpha"
                         )
                     self.originators[country].append(
@@ -63,7 +64,7 @@ class SMSConfig(BaseConfig):
                 action = cfg.get("sms", opt)
 
                 if action not in ["allow", "reject"]:
-                    raise Exception(
+                    raise ConfigError(
                         "Invalid SMS rule action: %s, expecting 'allow' or 'reject'"
                         % action
                     )
