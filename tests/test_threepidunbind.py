@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from http import HTTPStatus
-from json import JSONDecodeError
 from unittest.mock import patch
 
 import twisted.internet.error
