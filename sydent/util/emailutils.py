@@ -82,26 +82,11 @@ def sendEmail(
         with open(templateFile) as template_file:
             mailString = template_file.read() % allSubstitutions
 
-    parsedFrom = email.utils.parseaddr(mailFrom)[1]
-    if parsedFrom == "":
-        # This address is part of the application config, so errors here are
-        # internal server errors.
-        raise RuntimeError(
-            f"Couldn't parse 'from' address {mailFrom} from Sydent's config."
-        )
-
-    parsedTo = email.utils.parseaddr(mailTo)[1]
-    if parsedTo == "":
-        logger.warning("Couldn't parse 'to' %s", mailTo)
-        raise EmailAddressException(f"Couldn't parse 'to' address {mailTo}")
-
-    if parsedTo != mailTo:
-        logger.warning(
-            "Parsing 'to' address changed the address: %s -> %s", mailTo, parsedTo
-        )
-        raise EmailAddressException(
-            f"Parsing 'to' address changed the address: {mailTo} -> {parsedTo}"
-        )
+    try:
+        check_valid_email_address(mailTo)
+    except EmailAddressException:
+        logger.warning("Invalid email address %s", mailTo)
+        raise
 
     mailServer = sydent.config.email.smtp_server
     mailPort = int(sydent.config.email.smtp_port)
@@ -138,6 +123,24 @@ def sendEmail(
         if log_send_errors:
             twisted.python.log.err()
         raise EmailSendException() from origException
+
+
+def check_valid_email_address(address: str) -> None:
+    """
+    Fetch the `email.from` config, checking it's a valid email address.
+
+    :raises EmailAddressException: if not.
+    """
+    parsed_address = email.utils.parseaddr(address)[1]
+    if parsed_address == "":
+        raise EmailAddressException(
+            f"Couldn't parse email address {address}."
+        )
+    elif address != parsed_address:
+        raise EmailAddressException(
+            f"Parsing address ({address} yielded a different address"
+            f"({parsed_address})"
+        )
 
 
 class EmailAddressException(Exception):
