@@ -19,13 +19,12 @@ from typing import TYPE_CHECKING
 
 from signedjson.sign import SignatureVerifyException
 from twisted.internet import defer
-from twisted.internet.error import DNSLookupError
+from twisted.internet.error import ConnectError, DNSLookupError
 from twisted.web import server
 from twisted.web.client import ResponseFailed
 from twisted.web.resource import Resource
 from twisted.web.server import Request
 
-from twisted.internet.error import ConnectError
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.hs_federation.verifier import InvalidServerName, NoAuthenticationError
 from sydent.http.servlets import dict_to_json_bytes
