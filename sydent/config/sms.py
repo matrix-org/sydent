@@ -15,7 +15,7 @@
 from configparser import ConfigParser
 from typing import Dict, List
 
-from sydent.config import ConfigError
+from sydent.config.exceptions import ConfigError
 from sydent.config._base import BaseConfig
 
 

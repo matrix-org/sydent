@@ -15,7 +15,7 @@ import socket
 from configparser import ConfigParser
 from typing import Optional
 
-from sydent.config import ConfigError
+from sydent.config.exceptions import ConfigError
 from sydent.config._base import BaseConfig
 from sydent.util.emailutils import EmailAddressException, check_valid_email_address
 
