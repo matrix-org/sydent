@@ -115,8 +115,8 @@ class MsisdnRequestCodeServlet(Resource):
                 "errcode": "M_DESTINATION_REJECTED",
                 "error": "Phone numbers in this country are not currently supported",
             }
-        except Exception as e:
-            logger.error("Exception sending SMS: %r", e)
+        except Exception:
+            logger.exception("Exception sending SMS")
             request.setResponseCode(500)
             resp = {"errcode": "M_UNKNOWN", "error": "Internal Server Error"}
 
