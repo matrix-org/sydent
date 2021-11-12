@@ -1,6 +1,8 @@
 Sydent 2.5.1 (2021-11-12)
 =========================
 
+This release fixes a bug in handling verification for third party IDs if requested via the deprecated `/api/v1/` endpoint. The other changes are all designed to improve error handling, and make Sydent's logging have a higher signal-to-noise ratio.
+
 Features
 --------
 
@@ -10,7 +12,7 @@ Features
 Bugfixes
 --------
 
-- Fix a bug introduced in Sydent 2.5.0 where requests to validate an email or phone number would fail with an HTTP 500 Internal Server Error if arguments were given as a query string or as a www-form-urlencoded body. ([\#461](https://github.com/matrix-org/sydent/issues/461), [\#462](https://github.com/matrix-org/sydent/issues/462))
+- __Fix a bug introduced in Sydent 2.5.0 where requests to validate an email or phone number would fail with an HTTP 500 Internal Server Error if arguments were given as a query string or as a www-form-urlencoded body. ([\#461](https://github.com/matrix-org/sydent/issues/461), [\#462](https://github.com/matrix-org/sydent/issues/462))__
 
 
 Internal Changes
