@@ -28,7 +28,7 @@ from twisted.web.client import readBody
 from twisted.web.iweb import IResponse
 from unpaddedbase64 import decode_base64
 
-from sydent.config import ConfigError
+from sydent.config.exceptions import ConfigError
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.threepid_associations import GlobalAssociationStore, SignedAssociations
 from sydent.threepid import threePidAssocFromDict

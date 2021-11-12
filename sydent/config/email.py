@@ -11,16 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import socket
 from configparser import ConfigParser
 from typing import Optional
 
 from sydent.config._base import BaseConfig
+from sydent.config.exceptions import ConfigError
+from sydent.util.emailutils import EmailAddressException, check_valid_email_address
 
 
 class EmailConfig(BaseConfig):
-    def parse_config(self, cfg: "ConfigParser") -> bool:
+    def parse_config(self, cfg: ConfigParser) -> bool:
         """
         Parse the email section of the config
 
@@ -52,6 +53,10 @@ class EmailConfig(BaseConfig):
             self.host_name = socket.getfqdn()
 
         self.sender = cfg.get("email", "email.from")
+        try:
+            check_valid_email_address(self.sender, allow_description=True)
+        except EmailAddressException as e:
+            raise ConfigError(f"Invalid email address '{self.sender}'") from e
 
         self.default_web_client_location = cfg.get(
             "email", "email.default_web_client_location"

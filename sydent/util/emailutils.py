@@ -82,15 +82,11 @@ def sendEmail(
         with open(templateFile) as template_file:
             mailString = template_file.read() % allSubstitutions
 
-    parsedFrom = email.utils.parseaddr(mailFrom)[1]
-    parsedTo = email.utils.parseaddr(mailTo)[1]
-    if parsedFrom == "" or parsedTo == "":
-        logger.info("Couldn't parse from / to address %s / %s", mailFrom, mailTo)
-        raise EmailAddressException()
-
-    if parsedTo != mailTo:
-        logger.info("Parsed to address changed the address: %s -> %s", mailTo, parsedTo)
-        raise EmailAddressException()
+    try:
+        check_valid_email_address(mailTo, allow_description=False)
+    except EmailAddressException:
+        logger.warning("Invalid email address %s", mailTo)
+        raise
 
     mailServer = sydent.config.email.smtp_server
     mailPort = int(sydent.config.email.smtp_port)
@@ -127,6 +123,25 @@ def sendEmail(
         if log_send_errors:
             twisted.python.log.err()
         raise EmailSendException() from origException
+
+
+def check_valid_email_address(address: str, allow_description: bool) -> None:
+    """Check the given string is a valid email address.
+
+    Email addresses are complicated (see RFCs 5321, 5322 and 6531; plus
+    https://www.netmeister.org/blog/email.html). This isn't a comprehensive
+    validation; we defer to Python's stdlib.
+
+    :raises EmailAddressException: if not.
+    """
+    parsed_address = email.utils.parseaddr(address)[1]
+    if parsed_address == "":
+        raise EmailAddressException(f"Couldn't parse email address {address}.")
+    if not allow_description and address != parsed_address:
+        raise EmailAddressException(
+            f"Parsing address ({address} yielded a different address"
+            f"({parsed_address})"
+        )
 
 
 class EmailAddressException(Exception):

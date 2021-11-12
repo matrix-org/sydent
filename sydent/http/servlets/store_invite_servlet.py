@@ -15,6 +15,7 @@
 import random
 import string
 from email.header import Header
+from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 import nacl.signing
@@ -27,7 +28,7 @@ from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.auth import authV2
 from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.types import JsonDict
-from sydent.util.emailutils import sendEmail
+from sydent.util.emailutils import EmailAddressException, sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH, normalise_address
 
 if TYPE_CHECKING:
@@ -166,7 +167,11 @@ class StoreInviteServlet(Resource):
         else:
             templateFile = self.sydent.config.email.invite_template
 
-        sendEmail(self.sydent, templateFile, normalised_address, substitutions)
+        try:
+            sendEmail(self.sydent, templateFile, normalised_address, substitutions)
+        except EmailAddressException:
+            request.setResponseCode(HTTPStatus.BAD_REQUEST)
+            return {"errcode": "M_INVALID_EMAIL", "error": "Invalid email address"}
 
         pubKey = self.sydent.keyring.ed25519.verify_key
         pubKeyBase64 = encode_base64(pubKey.encode())
