@@ -54,7 +54,7 @@ class EmailConfig(BaseConfig):
 
         self.sender = cfg.get("email", "email.from")
         try:
-            check_valid_email_address(self.sender)
+            check_valid_email_address(self.sender, allow_description=True)
         except EmailAddressException as e:
             raise ConfigError from e
 

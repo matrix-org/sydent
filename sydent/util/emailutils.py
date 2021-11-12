@@ -125,7 +125,7 @@ def sendEmail(
         raise EmailSendException() from origException
 
 
-def check_valid_email_address(address: str) -> None:
+def check_valid_email_address(address: str, allow_description: bool = True) -> None:
     """Check the given string is a valid email address.
 
     Email addresses are complicated (see RFCs 5321, 5322 and 6531; plus
@@ -137,7 +137,7 @@ def check_valid_email_address(address: str) -> None:
     parsed_address = email.utils.parseaddr(address)[1]
     if parsed_address == "":
         raise EmailAddressException(f"Couldn't parse email address {address}.")
-    elif address != parsed_address:
+    if not allow_description and address != parsed_address:
         raise EmailAddressException(
             f"Parsing address ({address} yielded a different address"
             f"({parsed_address})"
