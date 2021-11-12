@@ -56,7 +56,7 @@ class EmailConfig(BaseConfig):
         try:
             check_valid_email_address(self.sender, allow_description=True)
         except EmailAddressException as e:
-            raise ConfigError from e
+            raise ConfigError(f"Invalid email address '{self.sender}'") from e
 
         self.default_web_client_location = cfg.get(
             "email", "email.default_web_client_location"
