@@ -14,6 +14,7 @@
 import os.path
 from unittest.mock import patch
 
+from parameterized import parameterized
 from twisted.trial import unittest
 
 from sydent.users.accounts import Account
@@ -38,14 +39,20 @@ class StoreInviteTestCase(unittest.TestCase):
         self.sydent = make_sydent(test_config=config)
         self.sender = "@alice:wonderland"
 
-    def test_invalid_email_returns_400(self) -> None:
+    @parameterized.expand(
+        [
+            ("not@an@email@address",),
+            ("Naughty Nigel <perfectly.valid@mail.address>",),
+        ]
+    )
+    def test_invalid_email_returns_400(self, address: str) -> None:
         self.sydent.run()
         request, channel = make_request(
             self.sydent.reactor,
             "POST",
             "/_matrix/identity/v2/account/store-invite",
             content={
-                "address": "not@an@email@address",
+                "address": address,
                 "medium": "email",
                 "room_id": "!myroom:test",
                 "sender": self.sender,

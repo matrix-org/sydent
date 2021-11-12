@@ -83,7 +83,7 @@ def sendEmail(
             mailString = template_file.read() % allSubstitutions
 
     try:
-        check_valid_email_address(mailTo)
+        check_valid_email_address(mailTo, allow_description=False)
     except EmailAddressException:
         logger.warning("Invalid email address %s", mailTo)
         raise
@@ -125,7 +125,7 @@ def sendEmail(
         raise EmailSendException() from origException
 
 
-def check_valid_email_address(address: str, allow_description: bool = True) -> None:
+def check_valid_email_address(address: str, allow_description: bool) -> None:
     """Check the given string is a valid email address.
 
     Email addresses are complicated (see RFCs 5321, 5322 and 6531; plus
