@@ -126,8 +126,11 @@ def sendEmail(
 
 
 def check_valid_email_address(address: str) -> None:
-    """
-    Fetch the `email.from` config, checking it's a valid email address.
+    """Check the given string is a valid email address.
+
+    Email addresses are complicated (see RFCs 5321, 5322 and 6531; plus
+    https://www.netmeister.org/blog/email.html). This isn't a comprehensive
+    validation; we defer to Python's stdlib.
 
     :raises EmailAddressException: if not.
     """
