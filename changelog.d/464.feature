@@ -1,1 +1,0 @@
-Return HTTP 400 Bad Request rather than HTTP 500 Internal Server Error if `/store-invite` is given an invalid email address.

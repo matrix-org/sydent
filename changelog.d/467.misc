@@ -1,1 +1,0 @@
-Log failures to send SMS as exceptions, not errors (to better debug in Sentry).

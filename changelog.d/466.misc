@@ -1,1 +1,0 @@
-Handle errors to contact homeservers in `/unbind`. This returns a better errro message and reduces Sentry spam.

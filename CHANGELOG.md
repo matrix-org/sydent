@@ -1,3 +1,29 @@
+Sydent 2.5.1 (2021-11-12)
+=========================
+
+Features
+--------
+
+- Return HTTP 400 Bad Request rather than HTTP 500 Internal Server Error if `/store-invite` is given an invalid email address. ([\#464](https://github.com/matrix-org/sydent/issues/464))
+
+
+Bugfixes
+--------
+
+- Fix a bug introduced in Sydent 2.5.0 where requests to validate an email or phone number would fail with an HTTP 500 Internal Server Error if arguments were given as a query string or as a www-form-urlencoded body. ([\#461](https://github.com/matrix-org/sydent/issues/461), [\#462](https://github.com/matrix-org/sydent/issues/462))
+
+
+Internal Changes
+----------------
+
+- Improve exception logging in `asyncjsonwrap` for better Sentry reports. ([\#455](https://github.com/matrix-org/sydent/issues/455))
+- Handle federation request failures in `/request` explicitly, to reduce Sentry noise. ([\#456](https://github.com/matrix-org/sydent/issues/456))
+- Log a warning (not an error) when we refuse to send an SMS to an unsupported country. ([\#459](https://github.com/matrix-org/sydent/issues/459))
+- Demote a failure to parse JSON from homeservers in `/register` from an error to a warning. ([\#463](https://github.com/matrix-org/sydent/issues/463))
+- Handle errors to contact homeservers in `/unbind`. This returns a better errro message and reduces Sentry spam. ([\#466](https://github.com/matrix-org/sydent/issues/466))
+- Log failures to send SMS as exceptions, not errors (to better debug in Sentry). ([\#467](https://github.com/matrix-org/sydent/issues/467))
+
+
 Sydent 2.5.0 (2021-11-03)
 =========================
 
