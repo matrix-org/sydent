@@ -22,7 +22,7 @@ Internal Changes
 - Handle federation request failures in `/request` explicitly, to reduce Sentry noise. ([\#456](https://github.com/matrix-org/sydent/issues/456))
 - Log a warning (not an error) when we refuse to send an SMS to an unsupported country. ([\#459](https://github.com/matrix-org/sydent/issues/459))
 - Demote a failure to parse JSON from homeservers in `/register` from an error to a warning. ([\#463](https://github.com/matrix-org/sydent/issues/463))
-- Handle errors to contact homeservers in `/unbind`. This returns a better errro message and reduces Sentry spam. ([\#466](https://github.com/matrix-org/sydent/issues/466))
+- Handle errors to contact homeservers in `/unbind`. This returns a better error message and reduces Sentry spam. ([\#466](https://github.com/matrix-org/sydent/issues/466))
 - Log failures to send SMS as exceptions, not errors (to better debug in Sentry). ([\#467](https://github.com/matrix-org/sydent/issues/467))
 
 
