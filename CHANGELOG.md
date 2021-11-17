@@ -1,4 +1,4 @@
-Sydent 2.5.1 (2021-11-12)
+Sydent 2.5.1 (2021-11-17)
 =========================
 
 This release fixes a bug in handling verification for third party IDs if requested via the deprecated `/api/v1/` endpoint. The other changes are all designed to improve error handling, and make Sydent's logging have a higher signal-to-noise ratio.
