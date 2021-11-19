@@ -15,10 +15,33 @@ import os.path
 from typing import Awaitable
 from unittest.mock import MagicMock, patch
 
+import attr
 from twisted.trial import unittest
 from twisted.web.server import Request
 
 from tests.utils import make_request, make_sydent
+
+
+@attr.s
+class FakeHeader:
+    """
+    A fake header object
+    """
+
+    headers = attr.ib(type=dict)
+
+    def getAllRawHeaders(self):
+        return self.headers
+
+
+@attr.s
+class FakeResponse:
+    """A fake twisted.web.IResponse object"""
+
+    # HTTP response code
+    code = attr.ib(type=int)
+
+    headers = attr.ib(type=FakeHeader)
 
 
 class TestRequestCode(unittest.TestCase):
@@ -76,3 +99,24 @@ class TestRequestCode(unittest.TestCase):
         sendSMS_mock = self._render_request(request)
         sendSMS_mock.assert_called_once()
         self.assertEqual(channel.code, 200)
+
+    @patch("sydent.http.httpclient.HTTPClient.post_json_maybe_get_json")
+    def test_bad_api_response_raises_exception(self, post_json) -> None:
+        header = FakeHeader({})
+        resp = FakeResponse(code=400, headers=header), {}
+        post_json.return_value = resp
+        self.sydent.run()
+        request, channel = make_request(
+            self.sydent.reactor,
+            "POST",
+            "/_matrix/identity/api/v1/validate/msisdn/requestToken",
+            {
+                "phone_number": "447700900750",
+                "country": "GB",
+                "client_secret": "oursecret",
+                "send_attempt": 0,
+            },
+        )
+        self.assertRaises(
+            Exception, request.render(self.sydent.servlets.msisdnRequestCode)
+        )
