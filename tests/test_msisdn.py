@@ -12,36 +12,37 @@
 #  limitations under the License.
 import asyncio
 import os.path
-from typing import Awaitable
+from typing import Awaitable, Union
 from unittest.mock import MagicMock, patch
 
 import attr
 from twisted.trial import unittest
 from twisted.web.server import Request
 
-from tests.utils import make_request, make_sydent
+from tests.utils import make_request, make_sydent, AsyncMock
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class FakeHeader:
     """
     A fake header object
     """
 
-    headers = attr.ib(type=dict)
+    headers: dict
 
     def getAllRawHeaders(self):
         return self.headers
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class FakeResponse:
     """A fake twisted.web.IResponse object"""
 
     # HTTP response code
-    code = attr.ib(type=int)
+    code: int
 
-    headers = attr.ib(type=FakeHeader)
+    # Fake Header
+    headers: FakeHeader
 
 
 class TestRequestCode(unittest.TestCase):
@@ -101,7 +102,9 @@ class TestRequestCode(unittest.TestCase):
         self.assertEqual(channel.code, 200)
 
     @patch("sydent.http.httpclient.HTTPClient.post_json_maybe_get_json")
-    def test_bad_api_response_raises_exception(self, post_json) -> None:
+    def test_bad_api_response_raises_exception(
+        self, post_json: Union[AsyncMock, MagicMock]
+    ) -> None:
         header = FakeHeader({})
         resp = FakeResponse(code=400, headers=header), {}
         post_json.return_value = resp
@@ -117,6 +120,5 @@ class TestRequestCode(unittest.TestCase):
                 "send_attempt": 0,
             },
         )
-        self.assertRaises(
-            Exception, request.render(self.sydent.servlets.msisdnRequestCode)
-        )
+        request.render(self.sydent.servlets.msisdnRequestCode)
+        self.assertEqual(channel.code, 500)
