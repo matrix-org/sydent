@@ -12,14 +12,14 @@
 #  limitations under the License.
 import asyncio
 import os.path
-from typing import Awaitable, Union
+from typing import Awaitable
 from unittest.mock import MagicMock, patch
 
 import attr
 from twisted.trial import unittest
 from twisted.web.server import Request
 
-from tests.utils import make_request, make_sydent, AsyncMock
+from tests.utils import make_request, make_sydent
 
 
 @attr.s(auto_attribs=True)
@@ -102,9 +102,10 @@ class TestRequestCode(unittest.TestCase):
         self.assertEqual(channel.code, 200)
 
     @patch("sydent.http.httpclient.HTTPClient.post_json_maybe_get_json")
-    def test_bad_api_response_raises_exception(
-        self, post_json: Union[AsyncMock, MagicMock]
-    ) -> None:
+    def test_bad_api_response_raises_exception(self, post_json: MagicMock) -> None:
+        """Test that an error response from OpenMarket raises an exception
+        and that the requester receives an error code."""
+
         header = FakeHeader({})
         resp = FakeResponse(code=400, headers=header), {}
         post_json.return_value = resp
