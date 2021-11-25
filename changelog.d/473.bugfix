@@ -1,0 +1,1 @@
+Fix a bug where federation requests would fail early if a `.well-known/matrix/server` response contains an invalid type for `m.server`. Instead, try finding an SRV record, as mandated by [the spec](https://spec.matrix.org/v1.1/server-server-api/#resolving-server-names).

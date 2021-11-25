@@ -350,6 +350,8 @@ class MatrixFederationAgent:
                 raise Exception("not a dict")
             if "m.server" not in parsed_body:
                 raise Exception("Missing key 'm.server'")
+            if not isinstance(parsed_body["m.server"], str):
+                raise TypeError("m.server must be a string")
         except Exception as e:
             logger.info("Error fetching %s: %s", uri_str, e)
 
