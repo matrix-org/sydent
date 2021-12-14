@@ -45,6 +45,7 @@ setup(
         "jinja2>=3.0.0",
         "netaddr>=0.7.0",
         "phonenumbers>=8.12.32",
+        "PyNaCl>=1.2.1",
         "pyopenssl",
         "pyyaml>=3.11",
         # twisted warns about about the absence of this
@@ -52,7 +53,9 @@ setup(
         "signedjson==1.1.1",
         "sortedcontainers>=2.1.0",
         "Twisted>=18.4.0",
+        "typing-extensions>=3.7.4",
         "unpaddedbase64>=1.1.0",
+        "zope.interface>=4.6.0",
     ],
     extras_require={
         "dev": [
