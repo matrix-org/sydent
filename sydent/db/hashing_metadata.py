@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 class HashingMetadataStore:
     def __init__(self, sydent: "Sydent") -> None:
         self.sydent = sydent
+        self._cached_lookup_pepper: Optional[str] = None
 
     def get_lookup_pepper(self) -> Optional[str]:
         """Return the value of the current lookup pepper from the db
@@ -33,6 +34,10 @@ class HashingMetadataStore:
         :return: A pepper if it exists in the database, or None if one does
                  not exist
         """
+
+        if self._cached_lookup_pepper is not None:
+            return self._cached_lookup_pepper
+
         cur = self.sydent.db.cursor()
         res = cur.execute("select lookup_pepper from hashing_metadata")
         # Annotation safety: lookup_pepper is marked as varchar(256) in the
@@ -51,6 +56,8 @@ class HashingMetadataStore:
         # Ensure we're dealing with unicode.
         if isinstance(pepper, bytes):
             pepper = pepper.decode("UTF-8")
+
+        self._cached_lookup_pepper = pepper
 
         return pepper
 
