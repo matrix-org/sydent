@@ -234,6 +234,10 @@ def update_local_associations(
 
                     if not dry_run:
                         cur = db.cursor()
+                        cur.execute("BEGIN EXCLUSIVE")
+                        logger.debug(
+                            "SQLite lock acquired (update_local_associations: delete)"
+                        )
                         cur.execute(
                             "DELETE FROM local_threepid_associations WHERE medium = 'email' AND address = ?",
                             (to_delete.address,),
@@ -243,6 +247,8 @@ def update_local_associations(
             # Update the row now that there's no duplicate.
             if not dry_run:
                 cur = db.cursor()
+                cur.execute("BEGIN EXCLUSIVE")
+                logger.debug("SQLite lock acquired (update_local_associations: update)")
                 cur.execute(
                     "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
                     (
@@ -355,7 +361,14 @@ def update_global_associations(
     if not dry_run:
         cur = db.cursor()
 
+        cur.execute("BEGIN EXCLUSIVE")
+        logger.debug("SQLite lock acquired (update_global_associations)")
+
         if len(to_delete) > 0:
+            logger.info(
+                "%d rows to delete from global_threepid_associations", len(to_delete)
+            )
+
             cur.executemany(
                 "DELETE FROM global_threepid_associations WHERE medium = 'email' AND address = ?",
                 to_delete,
@@ -366,6 +379,10 @@ def update_global_associations(
             )
 
         if len(db_update_args) > 0:
+            logger.info(
+                "%d rows to update in global_threepid_associations", len(db_update_args)
+            )
+
             cur.executemany(
                 "UPDATE global_threepid_associations SET address = ?, lookup_hash = ?, sgAssoc = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
                 db_update_args,
