@@ -60,11 +60,11 @@ setup(
     extras_require={
         "dev": [
             "black==21.6b0",
-            "flake8-pyi==20.10.0",
             "flake8==3.9.2",
+            "flake8-pyi==20.10.0",
             "isort==5.8.0",
-            "mypy-zope>=0.3.1",
             "mypy>=0.902",
+            "mypy-zope>=0.3.1",
             "parameterized==0.8.1",
             "types-Jinja2",
             "types-mock",
