@@ -73,10 +73,12 @@ class CantSendEmailException(Exception):
     pass
 
 
-def calculate_lookup_hash(sydent, address):
-    cur = sydent.db.cursor()
-    pepper_result = cur.execute("SELECT lookup_pepper from hashing_metadata")
-    pepper = pepper_result.fetchone()[0]
+def calculate_lookup_hash(sydent: Sydent, address: str) -> str:
+    pepper = sydent.threepidBinder.hashing_store.get_lookup_pepper()
+    if pepper is None:
+        raise RuntimeError(
+            "No lookup pepper found; Sydent should have generated one on startup."
+        )
     combo = "%s %s %s" % (address, "email", pepper)
     lookup_hash = sha256_and_url_safe_base64(combo)
     return lookup_hash
