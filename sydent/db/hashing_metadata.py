@@ -91,6 +91,9 @@ class HashingMetadataStore:
         # Commit the queued db transactions so that adding a new pepper and hashing is atomic
         self.sydent.db.commit()
 
+        # Update the cached pepper (only once the transaction has committed successfully!)
+        self._cached_lookup_pepper = pepper
+
     def _rehash_threepids(
         self,
         cur: Cursor,
