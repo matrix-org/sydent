@@ -339,8 +339,9 @@ def setup_logging(config: SydentConfig) -> None:
     log_format = "%(asctime)s - %(name)s - %(lineno)d - %(levelname)s" " - %(message)s"
     formatter = logging.Formatter(log_format)
 
+    handler: logging.Handler
     if log_path != "":
-        handler: logging.StreamHandler = logging.handlers.TimedRotatingFileHandler(
+        handler = logging.handlers.TimedRotatingFileHandler(
             log_path, when="midnight", backupCount=365
         )
         handler.setFormatter(formatter)

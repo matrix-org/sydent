@@ -1,0 +1,1 @@
+Update type annotations to ensure Sydent typechecks with recent mypy versions.

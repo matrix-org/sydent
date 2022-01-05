@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import time
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -137,9 +137,7 @@ class JoinTokenStore:
             (publicKey,),
         )
         self.sydent.db.commit()
-        # Cast safety: DBAPI-2 says this is a "number"; c.f. python/typeshed#6150
-        rows = cast(int, cur.rowcount)
-        return rows > 0
+        return cur.rowcount > 0
 
     def getSenderForToken(self, token: str) -> Optional[str]:
         """
