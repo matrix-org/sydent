@@ -104,7 +104,6 @@ class AccountStore:
             "delete from tokens where token = ?",
             (token,),
         )
-        # Cast safety: DBAPI-2 says this is a "number"; c.f. python/typeshed#6150
-        deleted = cast(int, cur.rowcount)
+        deleted = cur.rowcount
         self.sydent.db.commit()
         return deleted

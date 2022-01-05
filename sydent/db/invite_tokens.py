@@ -137,9 +137,7 @@ class JoinTokenStore:
             (publicKey,),
         )
         self.sydent.db.commit()
-        # Cast safety: DBAPI-2 says this is a "number"; c.f. python/typeshed#6150
-        rows = cast(int, cur.rowcount)
-        return rows > 0
+        return cur.rowcount > 0
 
     def getSenderForToken(self, token: str) -> Optional[str]:
         """
