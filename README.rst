@@ -163,3 +163,9 @@ Replication
 
 It is possible to configure a mesh of Sydent instances which replicate identity bindings
 between each other. See `<docs/replication.md>`_.
+
+Discussion
+==========
+
+Matrix room: `#sydent:matrix.org <https://matrix.to/#/#sydent:matrix.org>`_.
+
