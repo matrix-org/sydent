@@ -44,9 +44,13 @@ With the virtualenv activated, you can run Sydent using::
 
     python -m sydent.sydent
 
-This will create a configuration file in ``sydent.conf`` with some defaults. If a setting is
-defined in both the ``[DEFAULT]`` section and another section in the configuration file,
-then the value in the other section is used.
+If this is the first time Sydent is run, then it will generate a configuration file in
+``sydent.conf`` with some defaults and then stop. You must run the generate-key script
+and update the config with this key before Sydent will start.
+
+You should not write anything in the ``[DEFAULT]`` section. If a
+setting is defined in both the ``[DEFAULT]`` section and another section in the configuration
+file, then the value in the other section is used.
 
 You'll most likely want to change the server name (``server.name``) and specify an email server
 (look for the settings starting with ``email.``).

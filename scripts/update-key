@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+
+# Copyright 2021 The Matrix.org Foundation C.I.C.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Run this script to convert the signing key used in a sydent configuration.
+# This doesn't change the key, only the way that it's encoded in the config
+# file.
+
+# Example run
+# ```
+# $ ./scripts/update-key b251d15e720672cbbe73626447a8458ffa1ab1413925cd51ef990e652d48318A
+# Update your sydent config file with the following:
+#
+# [crypto]
+# ed25519.signingkey = ed25519 0 slHRXnIGcsu+c2JkR6hFj/oasUE5Jc1R75kOZS1IMYo
+#
+# For reference, the public (verificiation) key is 53eNltXamSKdvxIgL3Tq4KMrwgR/sQA18xvwvxEYc4o
+# ````
+
+import sys
+
+import nacl
+import signedjson.key
+
+if len(sys.argv) != 2:
+    print("Usage: updated-key [hex encoded key]")
+else:
+    signing_key_hex = sys.argv[1]
+
+    signing_key = nacl.signing.SigningKey(
+        signing_key_hex, encoder=nacl.encoding.HexEncoder
+    )
+    signing_key.version = "0"
+    signing_key.alg = signedjson.key.NACL_ED25519
+
+    signing_key_str = "%s %s %s" % (
+        signing_key.alg,
+        signing_key.version,
+        signedjson.key.encode_signing_key_base64(signing_key),
+    )
+
+    verify_key_str = signedjson.key.encode_verify_key_base64(signing_key.verify_key)
+
+    print(f"""\
+Update your sydent config file with the following:
+
+[crypto]
+    ed25519.signingkey = {signing_key_str}
+
+For reference, the public (verification) key is {verify_key_str}.
+""")

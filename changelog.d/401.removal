@@ -1,0 +1,1 @@
+Drop support for updating existing configuration files. The `generate-key` script must now be run to create new signing keys.
