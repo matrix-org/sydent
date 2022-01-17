@@ -14,8 +14,8 @@
 
 from configparser import ConfigParser
 
-import nacl.signing
 import nacl.encoding
+import nacl.signing
 import signedjson.key
 import signedjson.types
 
