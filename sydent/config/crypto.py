@@ -14,7 +14,8 @@
 
 from configparser import ConfigParser
 
-import nacl
+import nacl.signing
+import nacl.encoding
 import signedjson.key
 
 from sydent.config._base import BaseConfig
