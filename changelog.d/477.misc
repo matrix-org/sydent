@@ -1,1 +1,1 @@
-In the casefolding migration script, get the lookup pepper from the hashing store's cache.
+Cache the lookup pepper in the `HashingMetadataStore`.
