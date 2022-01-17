@@ -17,6 +17,7 @@ from configparser import ConfigParser
 import nacl.signing
 import nacl.encoding
 import signedjson.key
+import signedjson.types
 
 from sydent.config._base import BaseConfig
 
@@ -32,6 +33,11 @@ class CryptoConfig(BaseConfig):
         signing_key_parts = signing_key_str.split(" ")
 
         save_key = False
+
+        # N.B. `signedjson` expects `nacl.signing.SigningKey` instances which
+        # have been monkeypatched to include new `alg` and `version` attributes.
+        # This is captured by the `signedjson.types.SigningKey` protocol.
+        self.signing_key: signedjson.types.SigningKey
 
         if signing_key_str == "":
             print(
