@@ -14,8 +14,10 @@
 
 from configparser import ConfigParser
 
-import nacl
+import nacl.encoding
+import nacl.signing
 import signedjson.key
+import signedjson.types
 
 from sydent.config._base import BaseConfig
 
@@ -32,6 +34,11 @@ class CryptoConfig(BaseConfig):
 
         save_key = False
 
+        # N.B. `signedjson` expects `nacl.signing.SigningKey` instances which
+        # have been monkeypatched to include new `alg` and `version` attributes.
+        # This is captured by the `signedjson.types.SigningKey` protocol.
+        self.signing_key: signedjson.types.SigningKey
+
         if signing_key_str == "":
             print(
                 "INFO: This server does not yet have an ed25519 signing key. "
@@ -46,7 +53,7 @@ class CryptoConfig(BaseConfig):
             print("INFO: Updating signing key format: brace yourselves")
 
             self.signing_key = nacl.signing.SigningKey(
-                signing_key_str, encoder=nacl.encoding.HexEncoder
+                signing_key_str.encode("ascii"), encoder=nacl.encoding.HexEncoder
             )
             self.signing_key.version = "0"
             self.signing_key.alg = signedjson.key.NACL_ED25519
