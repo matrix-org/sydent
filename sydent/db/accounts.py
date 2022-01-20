@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Optional, Tuple
 
 from sydent.users.accounts import Account
 
@@ -104,7 +104,6 @@ class AccountStore:
             "delete from tokens where token = ?",
             (token,),
         )
-        # Cast safety: DBAPI-2 says this is a "number"; c.f. python/typeshed#6150
-        deleted = cast(int, cur.rowcount)
+        deleted = cur.rowcount
         self.sydent.db.commit()
         return deleted

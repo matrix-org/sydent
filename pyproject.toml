@@ -61,7 +61,6 @@ mypy_path = "stubs"
 [[tool.mypy.overrides]]
 module = [
     "idna",
-    "nacl.*",
     "netaddr",
     "prometheus_client",
     "sentry_sdk",
