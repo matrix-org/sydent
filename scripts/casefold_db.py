@@ -239,6 +239,7 @@ def update_local_associations(
                             (to_delete.address,),
                         )
                         db.commit()
+                        logger.info(f"Deleting {to_delete.address} from table local_threepid_associations")
 
             # Update the row now that there's no duplicate.
             if not dry_run:
@@ -252,6 +253,8 @@ def update_local_associations(
                         delta.to_update.mxid,
                     ),
                 )
+                logger.info(f"Updating table local threepid associations setting address to {casefolded_address},"
+                            f"lookup_hash to {delta.to_update.lookup_hash}, where medium = email and address = {delta.to_update.mxid}")
                 db.commit()
 
         except CantSendEmailException:
@@ -261,6 +264,7 @@ def update_local_associations(
             # to avoid deleting rows we can't warn users about, and we don't want to
             # proceed with the subsequent update because there might still be duplicates
             # in the database (since we haven't deleted everything we wanted to delete).
+            logger.info(f"Failed to send email to {to_delete.address}")
             continue
 
 
