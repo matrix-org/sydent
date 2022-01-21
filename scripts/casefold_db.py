@@ -239,7 +239,9 @@ def update_local_associations(
                             (to_delete.address,),
                         )
                         db.commit()
-                        logger.info(f"Deleting {to_delete.address} from table local_threepid_associations")
+                        logger.info(
+                            f"Deleting {to_delete.address} from table local_threepid_associations"
+                        )
 
             # Update the row now that there's no duplicate.
             if not dry_run:
@@ -253,8 +255,10 @@ def update_local_associations(
                         delta.to_update.mxid,
                     ),
                 )
-                logger.info(f"Updating table local threepid associations setting address to {casefolded_address},"
-                            f"lookup_hash to {delta.to_update.lookup_hash}, where medium = email and address = {delta.to_update.mxid}")
+                logger.info(
+                    f"Updating table local threepid associations setting address to {casefolded_address},"
+                    f"lookup_hash to {delta.to_update.lookup_hash}, where medium = email and address = {delta.to_update.mxid}"
+                )
                 db.commit()
 
         except CantSendEmailException:
