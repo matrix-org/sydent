@@ -256,9 +256,13 @@ def update_local_associations(
                         delta.to_update.mxid,
                     ),
                 )
-                logger.info(
-                    f"Updating table local threepid associations setting address to {casefolded_address},"
-                    f"lookup_hash to {delta.to_update.lookup_hash}, where medium = email and address = {delta.to_update.address} and mxid = {delta.to_update.mxid}"
+                logger.debug(
+                    "Updating table local threepid associations setting address to %s, "
+                    "lookup_hash to %s, where medium = email and address = %s and mxid = %s",
+                    casefolded_address,
+                    delta.to_update.lookup_hash,
+                    delta.to_update.address,
+                    delta.to_update.mxid
                 )
                 db.commit()
 
