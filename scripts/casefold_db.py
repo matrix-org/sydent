@@ -241,7 +241,7 @@ def update_local_associations(
                         db.commit()
                         logger.debug(
                             "Deleting %s from table local_threepid_associations",
-                            to_delete.address
+                            to_delete.address,
                         )
 
             # Update the row now that there's no duplicate.
@@ -262,7 +262,7 @@ def update_local_associations(
                     casefolded_address,
                     delta.to_update.lookup_hash,
                     delta.to_update.address,
-                    delta.to_update.mxid
+                    delta.to_update.mxid,
                 )
                 db.commit()
 
