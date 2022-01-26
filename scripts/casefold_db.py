@@ -224,15 +224,13 @@ def update_local_associations(
                     if send_email and not dry_run:
                         # If the MXID is one that will still be associated with this
                         # email address after this run, don't send an email for it.
-                        if to_delete.mxid == delta.to_update.mxid:
-                            continue
-
-                        sendEmailWithBackoff(
-                            sydent,
-                            to_delete.address,
-                            to_delete.mxid,
-                            test=test,
-                        )
+                        if to_delete.mxid != delta.to_update.mxid:
+                            sendEmailWithBackoff(
+                                sydent,
+                                to_delete.address,
+                                to_delete.mxid,
+                                test=test,
+                            )
 
                     if not dry_run:
                         cur = db.cursor()
