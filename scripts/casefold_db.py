@@ -239,8 +239,9 @@ def update_local_associations(
                             (to_delete.address,),
                         )
                         db.commit()
-                        logger.info(
-                            f"Deleting {to_delete.address} from table local_threepid_associations"
+                        logger.debug(
+                            "Deleting %s from table local_threepid_associations",
+                            to_delete.address
                         )
 
             # Update the row now that there's no duplicate.
