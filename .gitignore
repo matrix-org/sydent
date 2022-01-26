@@ -11,6 +11,9 @@ _trial_temp.lock
 .mypy_cache
 /env
 
+# for direnv users
+.envrc
+
 # Runtime files
 /sydent.conf
 /sydent.db
