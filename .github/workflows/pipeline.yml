@@ -1,51 +1,44 @@
-name: Linting and tests
+name: CI
 on:
   pull_request:
   push:
     branches: ["main"]
+  workflow_dispatch:
+
 jobs:
-  check-code-style:
+  check-newsfile:
+    name: Check PR has a changelog
+    if: ${{ github.base_ref == 'main' || contains(github.base_ref, 'release-') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{github.event.pull_request.head.sha}}
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.6'
-      - run: python -m pip install -e .[dev]
-      # Please keep this section up to date with `scripts-dev/lint.sh`.
-      # TODO: could just run the lint script directly?
-      - run: black --check --diff sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
-      - run: flake8 sydent/ tests/ matrix_is_test/ scripts/ setup.py
-      - run: flake8 stubs/ --ignore E301,E302,E305,E701,E704
-      - run: isort --check-only --diff sydent/ stubs/ tests/ matrix_is_test/ scripts/ setup.py
+          python-version: "3.7"
+      - run: python -m pip install towncrier
+      - run: "scripts-dev/check_newsfragment.sh ${{ github.event.number }}"
 
-  run-unit-tests:
-    needs: [check-code-style]
+  common-python-ci:
+    uses: "matrix-org/backend-meta/.github/workflows/python-poetry-ci.yml@v1"
+  packaging:
+    uses: "matrix-org/backend-meta/.github/workflows/packaging.yml@v1"
+
+  run-tests:
+    name: Tests
+    needs: [check-newsfile, common-python-ci, packaging]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.6', '3.x']
+        python-version: ['3.7', '3.x']
+        test-dir: ['tests', 'matrix_is_tester']
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: matrix-org/setup-python-poetry@v1
         with:
          python-version: ${{ matrix.python-version }}
-      - run: python -m pip install -e .[dev]
-      - run: trial tests
+      - run: poetry run trial ${{ matrix.test-dir }}
 
-  run-matrix-is-tests:
-    needs: [check-code-style]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.6', '3.x']
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: python -m pip install -e .
-      - run: pip install git+https://github.com/matrix-org/matrix-is-tester.git
-      - run: trial matrix_is_tester
