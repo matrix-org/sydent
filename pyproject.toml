@@ -69,3 +69,64 @@ module = [
 ]
 ignore_missing_imports = true
 
+[tool.poetry]
+name = "matrix-sydent"
+version = "2.5.1"
+description = "Reference Matrix Identity Verification and Lookup Server"
+authors = ["Matrix.org Team and Contributors <packages@matrix.org>"]
+license = "Apache-2.0"
+readme = "README.rst"
+repository = "https://github.com/matrix-org/sydent"
+packages = [
+    { include = "sydent" },
+]
+
+include = [
+    { path = "matrix-sydent.service" },
+    { path = "res" },
+    { path = "scripts" },
+    { path = "matrix_is_test", format = "sdist" },
+    { path = "scripts-dev", format = "sdist" },
+    { path = "setup.cfg", format = "sdist" },
+    { path = "tests", format = "sdist" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+attrs = ">=19.1.0"
+jinja2 = ">=3.0.0"
+netaddr = ">=0.7.0"
+phonenumbers = ">=8.12.32"
+pynacl = ">=1.2.1"
+pyOpenSSL = ">=16.0.0"
+pyyaml = ">=3.11"
+# twisted warns about about the absence of this
+service-identity = ">=1.0.0"
+signedjson = "==1.1.1"
+sortedcontainers = ">=2.1.0"
+twisted = ">=18.4.0"
+typing-extensions = ">=3.7.4"
+unpaddedbase64 = ">=1.1.0"
+"zope.interface" = ">=4.6.0"
+
+[tool.poetry.dev-dependencies]
+black = "==21.6b0"
+flake8 = "==3.9.2"
+flake8-pyi = "==20.10.0"
+isort = "==5.8.0"
+matrix-is-tester = {git = "https://github.com/matrix-org/matrix-is-tester", rev = "main"}
+mypy = ">=0.902"
+mypy-zope = ">=0.3.1"
+parameterized = "==0.8.1"
+types-Jinja2 = "2.11.9"
+types-mock = "4.0.8"
+types-PyOpenSSL = "21.0.3"
+types-PyYAML = "6.0.3"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
