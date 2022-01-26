@@ -231,19 +231,27 @@ def update_local_associations(
                             test=test,
                         )
 
+                    logger.debug(
+                        "Deleting %s from table local_threepid_associations",
+                        to_delete.address,
+                    )
                     cur = db.cursor()
                     cur.execute(
                         "DELETE FROM local_threepid_associations WHERE medium = 'email' AND address = ?",
                         (to_delete.address,),
                     )
                     db.commit()
-                    logger.debug(
-                        "Deleting %s from table local_threepid_associations",
-                        to_delete.address,
-                    )
 
             # Update the row now that there's no duplicate.
             if not dry_run:
+                logger.debug(
+                    "Updating table local threepid associations setting address to %s, "
+                    "lookup_hash to %s, where medium = email and address = %s and mxid = %s",
+                    casefolded_address,
+                    delta.to_update.lookup_hash,
+                    delta.to_update.address,
+                    delta.to_update.mxid,
+                )
                 cur = db.cursor()
                 cur.execute(
                     "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
@@ -253,14 +261,6 @@ def update_local_associations(
                         delta.to_update.address,
                         delta.to_update.mxid,
                     ),
-                )
-                logger.debug(
-                    "Updating table local threepid associations setting address to %s, "
-                    "lookup_hash to %s, where medium = email and address = %s and mxid = %s",
-                    casefolded_address,
-                    delta.to_update.lookup_hash,
-                    delta.to_update.address,
-                    delta.to_update.mxid,
                 )
                 db.commit()
 
