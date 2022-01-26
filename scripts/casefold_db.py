@@ -221,16 +221,15 @@ def update_local_associations(
             # Delete each association, and send an email mentioning the affected MXID.
             if delta.to_delete is not None and not dry_run:
                 for to_delete in delta.to_delete:
-                    if send_email:
+                    if send_email and to_delete.mxid != delta.to_update.mxid:
                         # If the MXID is one that will still be associated with this
                         # email address after this run, don't send an email for it.
-                        if to_delete.mxid != delta.to_update.mxid:
-                            sendEmailWithBackoff(
-                                sydent,
-                                to_delete.address,
-                                to_delete.mxid,
-                                test=test,
-                            )
+                        sendEmailWithBackoff(
+                            sydent,
+                            to_delete.address,
+                            to_delete.mxid,
+                            test=test,
+                        )
 
                     cur = db.cursor()
                     cur.execute(
