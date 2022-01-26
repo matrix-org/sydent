@@ -273,7 +273,7 @@ def update_local_associations(
             # to avoid deleting rows we can't warn users about, and we don't want to
             # proceed with the subsequent update because there might still be duplicates
             # in the database (since we haven't deleted everything we wanted to delete).
-            logger.info(f"Failed to send email to {to_delete.address}")
+            logger.warn(f"Failed to send email to %s; skipping!", to_delete.address)
             continue
 
 
