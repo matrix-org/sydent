@@ -70,6 +70,18 @@ class MigrationTestCase(unittest.TestCase):
                 }
             )
 
+        associations.append(
+            {
+                "medium": "email",
+                "address": "BoB4@example.com",
+                "lookup_hash": calculate_lookup_hash(self.sydent, "BoB4@example.com"),
+                "mxid": "@otherbob4:example.com",
+                "ts": 42000,
+                "not_before": 0,
+                "not_after": 99999999999,
+            }
+        )
+
         # add all associations to db
         cur = self.sydent.db.cursor()
 

@@ -1,0 +1,1 @@
+Fix bug in the casefolding script that would cause some deletions to be skipped if e-mail sending was enabled.

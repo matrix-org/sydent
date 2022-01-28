@@ -219,14 +219,11 @@ def update_local_associations(
 
         try:
             # Delete each association, and send an email mentioning the affected MXID.
-            if delta.to_delete is not None:
+            if delta.to_delete is not None and not dry_run:
                 for to_delete in delta.to_delete:
-                    if send_email and not dry_run:
+                    if send_email and to_delete.mxid != delta.to_update.mxid:
                         # If the MXID is one that will still be associated with this
                         # email address after this run, don't send an email for it.
-                        if to_delete.mxid == delta.to_update.mxid:
-                            continue
-
                         sendEmailWithBackoff(
                             sydent,
                             to_delete.address,
@@ -234,20 +231,27 @@ def update_local_associations(
                             test=test,
                         )
 
-                    if not dry_run:
-                        cur = db.cursor()
-                        cur.execute(
-                            "DELETE FROM local_threepid_associations WHERE medium = 'email' AND address = ?",
-                            (to_delete.address,),
-                        )
-                        db.commit()
-                        logger.debug(
-                            "Deleting %s from table local_threepid_associations",
-                            to_delete.address,
-                        )
+                    logger.debug(
+                        "Deleting %s from table local_threepid_associations",
+                        to_delete.address,
+                    )
+                    cur = db.cursor()
+                    cur.execute(
+                        "DELETE FROM local_threepid_associations WHERE medium = 'email' AND address = ?",
+                        (to_delete.address,),
+                    )
+                    db.commit()
 
             # Update the row now that there's no duplicate.
             if not dry_run:
+                logger.debug(
+                    "Updating table local threepid associations setting address to %s, "
+                    "lookup_hash to %s, where medium = email and address = %s and mxid = %s",
+                    casefolded_address,
+                    delta.to_update.lookup_hash,
+                    delta.to_update.address,
+                    delta.to_update.mxid,
+                )
                 cur = db.cursor()
                 cur.execute(
                     "UPDATE local_threepid_associations SET address = ?, lookup_hash = ? WHERE medium = 'email' AND address = ? AND mxid = ?",
@@ -257,14 +261,6 @@ def update_local_associations(
                         delta.to_update.address,
                         delta.to_update.mxid,
                     ),
-                )
-                logger.debug(
-                    "Updating table local threepid associations setting address to %s, "
-                    "lookup_hash to %s, where medium = email and address = %s and mxid = %s",
-                    casefolded_address,
-                    delta.to_update.lookup_hash,
-                    delta.to_update.address,
-                    delta.to_update.mxid,
                 )
                 db.commit()
 
