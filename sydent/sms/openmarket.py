@@ -161,4 +161,3 @@ class OpenMarketSMS:
             request_id,
             resp.code,
         )
-
