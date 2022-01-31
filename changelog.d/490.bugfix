@@ -1,0 +1,1 @@
+Fix a bug introduced in Sydent 2.4.6 where errors communicating with openmarket would be logged as successes, and all successes would be logged twice.

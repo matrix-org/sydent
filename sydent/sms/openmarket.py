@@ -151,6 +151,7 @@ class OpenMarketSMS:
                     "Got response from sending SMS with malformed location header: %s",
                     value,
                 )
+                return
             else:
                 ticket_id = parts[-1]
 
