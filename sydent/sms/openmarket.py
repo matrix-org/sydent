@@ -151,6 +151,7 @@ class OpenMarketSMS:
                     "Got response from sending SMS with malformed location header: %s",
                     value,
                 )
+                return
             else:
                 ticket_id = parts[-1]
 
@@ -158,14 +159,6 @@ class OpenMarketSMS:
             "Successfully sent SMS (ticket ID: %s, request ID %s), OpenMarket API"
             " responded with code %d",
             ticket_id,
-            request_id,
-            resp.code,
-        )
-
-        logger.info(
-            "Successfully sent SMS (ticket ID: %s, request ID %s), OpenMarket API"
-            " responded with code %d",
-            parts[-1],
             request_id,
             resp.code,
         )
