@@ -1,35 +1,43 @@
+# This Dockerfile installs Sydent from source, which is assumed to be in the current
+# working directory. The resulting image contain a single "sydent" user, and populates
+# their home area with "src" and "venv" directories. The entrypoint runs Sydent,
+# listening on port 8090.
 #
-# Step 1: Build sydent and install dependencies
-#
-FROM docker.io/python:3.8-slim as builder
+# Users must provide a persistent volume available to the container as `/data`. This
+# will contain Sydent's configuration and database. A blank configuration and database
+# file is created the first time Sydent runs.
 
-# Install dev packages
-RUN apt-get update && apt-get install -y \
-    build-essential
+# Step 1: install dependencies
+FROM docker.io/python:3.8-slim as builder
 
 # Add user sydent
 RUN addgroup --system --gid 993 sydent \
-    && adduser --disabled-password --home /sydent --system --uid 993 --gecos sydent sydent \
-    && echo "sydent:$(dd if=/dev/random bs=32 count=1 | base64)" | chpasswd
+    && adduser --disabled-password --system --uid 993 --gecos sydent sydent
+USER sydent:sydent
 
-# Copy resources
-COPY --chown=sydent:sydent ["res", "/sydent/res"]
-COPY --chown=sydent:sydent ["scripts", "/sydent/scripts"]
-COPY --chown=sydent:sydent ["sydent", "/sydent/sydent"]
-COPY --chown=sydent:sydent ["README.rst", "setup.cfg", "setup.py", "/sydent/"]
+# Install poetry
+RUN pip install --user poetry==1.1.12
+
+# Copy source code and resources
+WORKDIR /home/sydent/src
+COPY --chown=sydent:sydent ["res", "res"]
+COPY --chown=sydent:sydent ["scripts", "scripts"]
+COPY --chown=sydent:sydent ["sydent", "sydent"]
+COPY --chown=sydent:sydent ["README.rst", "pyproject.toml", "poetry.lock", "./"]
 
 # Install dependencies
-USER sydent
-WORKDIR /sydent
-RUN pip install --user --upgrade pip setuptools sentry-sdk prometheus_client \
-    && pip install --user . \
-    && rm -rf /sydent/.cache \
-    && find /sydent -name '*.pyc' -delete
+RUN python -m poetry install --no-dev --no-interaction
 
-#
-# Step 2: Reduce image size and layers
-#
+# Record dependencies for posterity
+RUN python -m poetry export -o requirements.txt
 
+# Make the virtualenv accessible for the final image
+RUN ln -s $(python -m poetry env info -p) /home/sydent/venv
+
+# Nuke bytecode files to keep the final image slim.
+RUN find /home/sydent/venv -type f -name '*.pyc' -delete
+
+# Step 2: Create runtime image
 FROM docker.io/python:3.8-slim
 
 # Add user sydent and create /data directory
@@ -39,15 +47,16 @@ RUN addgroup --system --gid 993 sydent \
     && mkdir /data \
     && chown sydent:sydent /data
 
-# Copy sydent
-COPY --from=builder ["/sydent", "/sydent"]
+# Copy sydent and the virtualenv
+COPY --from=builder ["/home/sydent/src", "/home/sydent/src"]
+COPY --from=builder ["/home/sydent/venv", "home/sydent/venv"]
 
 ENV SYDENT_CONF=/data/sydent.conf
 ENV SYDENT_PID_FILE=/data/sydent.pid
 ENV SYDENT_DB_PATH=/data/sydent.db
 
-WORKDIR /sydent
 USER sydent:sydent
 VOLUME ["/data"]
 EXPOSE 8090/tcp
-CMD [ "python", "-m", "sydent.sydent" ]
+WORKDIR /home/sydent
+CMD [ "venv/bin/python", "-m", "sydent.sydent" ]
