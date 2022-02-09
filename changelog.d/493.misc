@@ -1,0 +1,1 @@
+Update Dockerfile to use a fixed poetry environment, rather than `pip install`ing the latest dependencies.
