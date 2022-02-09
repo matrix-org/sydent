@@ -55,8 +55,8 @@ ENV SYDENT_CONF=/data/sydent.conf
 ENV SYDENT_PID_FILE=/data/sydent.pid
 ENV SYDENT_DB_PATH=/data/sydent.db
 
+WORKDIR /home/sydent
 USER sydent:sydent
 VOLUME ["/data"]
 EXPOSE 8090/tcp
-WORKDIR /home/sydent
 CMD [ "venv/bin/python", "-m", "sydent.sydent" ]
