@@ -21,7 +21,7 @@ jobs:
       - run: python -m pip install towncrier
       - run: "scripts-dev/check_newsfragment.sh ${{ github.event.number }}"
 
-  common-python-ci:
+  checks:
     uses: "matrix-org/backend-meta/.github/workflows/python-poetry-ci.yml@v1"
   packaging:
     uses: "matrix-org/backend-meta/.github/workflows/packaging.yml@v1"
