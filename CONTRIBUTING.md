@@ -6,42 +6,86 @@ this case, the [Apache Software License v2](LICENSE).
 
 ## Set up your development environment
 
-### Create a virtualenv
+To contribute to Sydent, ensure you have Python 3.7 and `git` available on your 
+system. You'll need to clone the source code first:
 
-To contribute to Sydent, ensure you have Python 3.7 or newer and then run:
-
-```bash
-python3 -m venv venv
-./venv/bin/pip install -e '.[dev]'
+```shell
+git clone https://github.com/matrix-org/sydent.git
 ```
 
-This creates an isolated virtual Python environment ("virtualenv") just for
-use with Sydent, then installs Sydent along with its dependencies, and lastly
-installs a handful of useful tools
+### Installing `poetry`
 
-If you get `ConnectTimeoutError`, this is caused by slow internet whereby 
-`pip` has a default time out of _15 sec_. You can specify a larger timeout 
-by passing `--timeout 120` to the `pip install` command above.
+Sydent uses [Poetry](https://python-poetry.org/) to manage its dependencies.
+See [its installation instructions](https://python-poetry.org/docs/master/#installation)
+to get started. They recommend using a custom installation script, which installs
+poetry in an isolated environment capable of self updating. We recommend using
+[`pipx`](https://pypa.github.io/pipx/) instead:
 
-Finally, activate the virtualenv by running:
+```shell
+pip install pipx
+pipx install poetry==1.1.12
+poetry --version
+```
+
+For the time being, we are erring towards caution by using a pinned version of 
+poetry.
+
+### Generate a virtualenv
+
+Poetry manages a virtual environment ('virtualenv') for Sydent, using specific versions of
+every dependency. To create this environment, run
 
 ```bash
-source ./venv/bin/activate
+cd sydent
+poetry install
+```
+
+This installs Sydent, its dependencies, and useful development tools into poetry's
+virtual environment. To run a one-off command in this environment, use `poetry run`.
+Otherwise, you'll end up running against the system python environment.
+
+```shell
+$ which python
+/usr/bin/python
+$ poetry run which python
+/home/user/.cache/pypoetry/virtualenvs/matrix-sydent-Ew7U0NLX-py3.10/bin/python
+```
+
+To avoid repeatedly typing out `poetry run`, use `poetry shell`:
+
+```shell
+$ poetry shell
+Spawning shell within /home/user/.cache/pypoetry/virtualenvs/matrix-sydent-Ew7U0NLX-py3.10
+. /home/user/.cache/pypoetry/virtualenvs/matrix-sydent-Ew7U0NLX-py3.10/bin/activate
+
+$ which python
+~/.cache/pypoetry/virtualenvs/matrix-sydent-Ew7U0NLX-py3.10/bin/python
 ```
 
 Be sure to do this _every time_ you open a new terminal window for working on
-Sydent. Activating the venv ensures that any Python commands you run (`pip`,
-`python`, etc.) use the versions inside your venv, and not your system Python.
+Sydent. Using `poetry run` or `poetry shell` ensures that any Python commands 
+you run (`pip`, `python`, etc.) use the versions inside your venv, and not your 
+system Python.
 
-When you're done, you can close your terminal or run `deactivate` to disable
-the virtualenv.
+When you're done, you can close your terminal.
+
+### Optional: `direnv`
+
+If even typing `poetry shell` is too much work for you, take a look at 
+[`direnv`](https://direnv.net/). A few steps are needed:
+
+1. install direnv.
+2. Add the configuration from [here](https://github.com/direnv/direnv/wiki/Python#poetry) to `~/.direnvrc`.
+3. In the Sydent checkout, run `echo layout poetry >> .envrc`. Then run `direnv allow`.
+
+From now on, when you `cd` into the sydent directory, `poetry shell` will run automatically. Whenever you navigate out of the sydent directory, you'll no longer be using poetry's venv.
 
 ### Run the unit tests
 
 To make sure everything is working as expected, run the unit tests:
 
 ```bash
-trial tests
+poetry run trial tests
 ```
 
 If you see a message like:
@@ -55,36 +99,25 @@ PASSED (successes=25)
 
 Then all is well and you're ready to work!
 
-If `trial tests` fails but `python -m twisted.trial tests` succeeds, try ensuring
-your venv is activated and re-installing using `pip install -e '.[dev]'`, making
-sure to remember the `-e` flag.
-
 ### Run the black-box tests
 
 Sydent uses [matrix-is-tester](https://github.com/matrix-org/matrix-is-tester/) to provide
 black-box testing of compliance with the [Matrix Identity Service API](https://matrix.org/docs/spec/identity_service/latest).
 (Features that are Sydent-specific belong in unit tests rather than the black-box test suite.)
-
-If you have set up a venv using the steps above, you can install `matrix-is-tester` as follows:
-```
-pip install git+https://github.com/matrix-org/matrix-is-tester.git
-```
+This project is marked as a development dependency, so Poetry will automatically
+install for you.
 
 Now, to run `matrix-is-tester`, execute:
 ```
-trial matrix_is_tester
+poetry run trial matrix_is_tester
 ```
-
-If this doesn't work, ensure that you have first activated your venv and installed Sydent with the editable (`-e`) flag:
-`pip install -e '.[dev]'`.
-
 
 #### Advanced
 
 The steps above are sufficient and describe a clean way to run the black-box tests.
 However, in the event that you need more control, this subsection provides more information.
 
-The `SYDENT_PYTHON` enviroment variable can be set to launch Sydent with a specific python binary:
+The `SYDENT_PYTHON` environment variable can be set to launch Sydent with a specific python binary:
 
 ```
 SYDENT_PYTHON=/path/to/python trial matrix_is_tester
@@ -117,42 +150,21 @@ Some other points to follow:
  * If you need to [update your PR](#updating-your-pull-request), just add new
    commits to your branch rather than rebasing.
 
-## Code style
+## Code style and continuous integration
 
-Sydent follows the [Synapse code style].
+Sydent uses `black`, `isort` and `flake8` to enforce code style. Use the following
+script to enforce these style guides:
 
-[Synapse code style]: https://github.com/matrix-org/synapse/blob/master/CONTRIBUTING.md
-
-<!-- TODO
-Many of the conventions are enforced by scripts which are run as part of the
-[continuous integration system](#continuous-integration-and-testing).
-
-
-To help check and fix adherence to the code style, you can run `tox`
-locally. You'll need Python 3.7 or later, and a virtual environment configured and
-active:
-
-```bash
-# Activate the virtual environment
-source ./venv/bin/activate
-
-# Run the code style check
-tox -e check_codestyle
-
-# Run the types check
-tox -e check_types
+```shell
+poetry run scripts-dev/lint.sh
 ```
 
-These commands will consider the paths and files related to the project (i.e.
-everything in `sydent/` and in `tests/` as well as the `setup.py` file).
+(This also runs `mypy`, our preferred typechecker.)
 
-Before pushing new changes, ensure they don't produce linting errors. Commit any
-files that were corrected.
--->
-
-Please ensure your changes match the cosmetic style of the existing project,
-and **never** mix cosmetic and functional changes in the same commit, as it
-makes it horribly hard to review otherwise.
+All of these checks are automatically run against any pull request via GitHub
+Actions. If your change breaks the build, this
+will be shown in GitHub, with links to the build results. If your build fails,
+please try to fix the errors and update your branch.
 
 ## Changelog
 
@@ -283,23 +295,6 @@ Git allows you to add this signoff automatically when using the `-s`
 flag to `git commit`, which uses the name and email set in your
 `user.name` and `user.email` git configs.
 
-
-## Continuous integration and testing
-
-*GitHub Actions* will automatically run a series of checks and tests against any
-PR which is opened against the project; if your change breaks the build, this
-will be shown in GitHub, with links to the build results. If your build fails,
-please try to fix the errors and update your branch.
-
-<!-- TODO
-After installing tox with `pip install tox`, you can use the following to run
-unit tests and lints in a local development environment:
-
-- `tox -e py37` to run unit tests on Python 3.7.
-- `tox -e check_codestyle` to check code style and formatting.
-- `tox -e check_types` to check types with MyPy.
-- `tox` **to do all of the above.**
--->
 
 ## Updating your pull request
 
