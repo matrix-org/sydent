@@ -80,13 +80,11 @@ Docker
 A Dockerfile is provided for sydent. To use it, run ``docker build -t sydent .`` in a sydent checkout.
 To run it, use ``docker run --env=SYDENT_SERVER_NAME=my-sydent-server -p 8090:8090 sydent``.
 
-Caution: All data will be lost when the container is terminated!
-
 Persistent data
 ---------------
 
-By default, all data is stored in ``/data``.
-The best method is to put the data in a Docker volume.
+By default, all data is stored in ``/data``. To persist this to disk, bind `/data` to a
+Docker volume.
 
 .. code-block:: shell
 
