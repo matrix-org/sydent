@@ -1,5 +1,5 @@
 # This Dockerfile installs Sydent from source, which is assumed to be in the current
-# working directory. The resulting image contain a single "sydent" user, and populates
+# working directory. The resulting image contains a single "sydent" user, and populates
 # their home area with "src" and "venv" directories. The entrypoint runs Sydent,
 # listening on port 8090.
 #
