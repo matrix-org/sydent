@@ -49,7 +49,7 @@ RUN addgroup --system --gid 993 sydent \
 
 # Copy sydent and the virtualenv
 COPY --from=builder ["/home/sydent/src", "/home/sydent/src"]
-COPY --from=builder ["/home/sydent/venv", "home/sydent/venv"]
+COPY --from=builder ["/home/sydent/venv", "/home/sydent/venv"]
 
 ENV SYDENT_CONF=/data/sydent.conf
 ENV SYDENT_PID_FILE=/data/sydent.pid
