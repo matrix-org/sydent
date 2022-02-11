@@ -20,6 +20,15 @@ permissions:
   contents: write
 
 jobs:
+  echo2:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo ${{ startsWith(github.head_ref, 'dependabot/') }}
+          echo ${{ github.actor == 'dependabot[bot]' }}
+          echo ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+          echo ${{       startsWith(github.head_ref, 'dependabot/') && github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]' }}
+
   echo:
     runs-on: ubuntu-latest
     steps:
