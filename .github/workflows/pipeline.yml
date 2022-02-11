@@ -8,7 +8,9 @@ on:
 jobs:
   check-newsfile:
     name: Check PR has a changelog
-    if: ${{ github.base_ref == 'main' || contains(github.base_ref, 'release-') }}
+    if: >
+      (github.base_ref == 'main' || contains(github.base_ref, 'release-'))
+      && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
