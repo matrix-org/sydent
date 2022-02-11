@@ -3,16 +3,15 @@ name: Docker
 on:
   push:
     tags: ["v*"]
-    branches: [ main, dmr/docker-poetry ]  # TODO remove the latter
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   build:
     name: Build and publish images
     uses: "matrix-org/backend-meta/.github/workflows/docker.yml@dmr/docker"
     with:
-      image-name: dmrobertsonelement/sydent
+      image-name: matrixdotorg/sydent
       publish: true
     secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME_DMR_TEST }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN_DMR_TEST }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
