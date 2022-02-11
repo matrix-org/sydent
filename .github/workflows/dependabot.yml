@@ -11,6 +11,7 @@ on:
   # - we only run trusted actions and workflows
   # - we only request the write permissions that we need
   pull_request_target:
+    # Leaving in `edited` here for easier testing
     types: [opened, synchronize, edited]
     paths:
       # This requires the lockfile to change, but will also trigger if other files have
@@ -21,30 +22,15 @@ permissions:
   contents: write
 
 jobs:
-  echo2:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo ${{ startsWith(github.head_ref, 'dependabot/') }}
-          echo ${{ github.actor == 'dependabot[bot]' }}
-          echo ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
-          echo ${{       startsWith(github.head_ref, 'dependabot/') && github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]' }}
-
-  echo:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo hello
+  changelog:
+    # The `github.actor` invocation is recommended by
+    # https://docs.github.com/en/code-security/supply-chain-security/keeping-your-dependencies-updated-automatically/automating-dependabot-with-github-actions
     if: >
       startsWith(github.head_ref, 'dependabot/')
       && github.actor == 'dependabot[bot]'
       && github.event.pull_request.user.login == 'dependabot[bot]'
-
-#  changelog:
-#    # The `github.actor` invocation is recommended by
-#    # https://docs.github.com/en/code-security/supply-chain-security/keeping-your-dependencies-updated-automatically/automating-dependabot-with-github-actions
-#    if: ${{ github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]' }}
-#    uses: "matrix-org/backend-meta/.github/workflows/dependabot.yml@dmr/dependabot"
-#    with:
-#      pull-request-number: ${{ github.event.number }}
-#      head-ref: ${{ github.event.pull_request.head.ref }}
-#      head-sha: ${{ github.event.pull_request.head.sha }}
+    uses: "matrix-org/backend-meta/.github/workflows/dependabot.yml@dmr/dependabot"
+    with:
+      pull-request-number: ${{ github.event.number }}
+      head-ref: ${{ github.event.pull_request.head.ref }}
+      head-sha: ${{ github.event.pull_request.head.sha }}
