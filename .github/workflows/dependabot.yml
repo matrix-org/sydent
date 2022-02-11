@@ -11,6 +11,7 @@ on:
   # - we only run trusted actions and workflows
   # - we only request the write permissions that we need
   pull_request_target:
+    types: [opened, synchronize, edited]
     paths:
       # This requires the lockfile to change, but will also trigger if other files have
       # changed too.
