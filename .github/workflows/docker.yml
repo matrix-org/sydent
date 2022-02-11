@@ -11,8 +11,8 @@ jobs:
     name: Build and publish images
     uses: "matrix-org/backend-meta/.github/workflows/docker.yml@dmr/docker"
     with:
-      image-name: sydent
-      publish: false
+      image-name: dmrobertsonelement/sydent
+      publish: true
     secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME_DMR_TEST }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN_DMR_TEST }}
