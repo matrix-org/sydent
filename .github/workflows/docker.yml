@@ -13,5 +13,5 @@ jobs:
       image-name: matrixdotorg/sydent
       publish: true
     secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
