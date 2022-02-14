@@ -23,6 +23,7 @@ from typing import Optional
 
 import attr
 import twisted.internet.reactor
+from matrix_common.versionstring import get_distribution_version_string
 from signedjson.types import SigningKey
 from twisted.internet import address, task
 from twisted.internet.interfaces import (
@@ -81,7 +82,6 @@ from sydent.replication.pusher import Pusher
 from sydent.threepid.bind import ThreepidBinder
 from sydent.util.hash import sha256_and_url_safe_base64
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
-from sydent.util.versionstring import get_version_string
 from sydent.validators.emailvalidator import EmailValidator
 from sydent.validators.msisdnvalidator import MsisdnValidator
 
@@ -119,7 +119,8 @@ class Sydent:
             import sentry_sdk
 
             sentry_sdk.init(
-                dsn=self.config.general.sentry_dsn, release=get_version_string()
+                dsn=self.config.general.sentry_dsn,
+                release=get_distribution_version_string("matrix-sydent"),
             )
             with sentry_sdk.configure_scope() as scope:
                 scope.set_tag("sydent_server_name", self.config.general.server_name)

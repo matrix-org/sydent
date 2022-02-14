@@ -266,6 +266,22 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "matrix-common"
+version = "1.1.0"
+description = "Common utilities for Synapse, Sydent and Sygnal"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+attrs = "*"
+importlib-metadata = {version = ">=1.4", markers = "python_version < \"3.8\""}
+
+[package.extras]
+dev = ["tox", "twisted", "aiounittest", "mypy (==0.910)", "black (==21.9b0)", "flake8 (==4.0.1)", "isort (==5.9.3)"]
+test = ["tox", "twisted", "aiounittest"]
+
+[[package]]
 name = "matrix_is_tester"
 version = "0.1"
 description = ""
@@ -765,7 +781,7 @@ test = ["zope.i18nmessageid", "zope.testing", "zope.testrunner"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "810634e15a0766c7ad2c5dfe0e78cb21884118cc1b1631c04160894f2fffe530"
+content-hash = "79858d88e1876e60f0eb4fc2ed191c6321ececcaef3c2232236ccf018b214920"
 
 [metadata.files]
 appdirs = [
@@ -1003,6 +1019,10 @@ markupsafe = [
     {file = "MarkupSafe-2.0.1-cp39-cp39-win32.whl", hash = "sha256:10f82115e21dc0dfec9ab5c0223652f7197feb168c940f3ef61563fc2d6beb74"},
     {file = "MarkupSafe-2.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:693ce3f9e70a6cf7d2fb9e6c9d8b204b6b39897a2c4a1aa65728d5ac97dcc1d8"},
     {file = "MarkupSafe-2.0.1.tar.gz", hash = "sha256:594c67807fb16238b30c44bdf74f36c02cdf22d1c8cda91ef8a0ed8dabf5620a"},
+]
+matrix-common = [
+    {file = "matrix_common-1.1.0-py3-none-any.whl", hash = "sha256:5d6dfd777503b2f3a031b566e6af25b6e95f9c0818ef57d954c3190fce5eb407"},
+    {file = "matrix_common-1.1.0.tar.gz", hash = "sha256:a8238748afc2b37079818367fed5156f355771b07c8ff0a175934f47e0ff3276"},
 ]
 matrix_is_tester = []
 mccabe = [
