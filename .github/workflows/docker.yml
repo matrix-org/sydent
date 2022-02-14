@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build and publish images
-    uses: "matrix-org/backend-meta/.github/workflows/docker.yml@release-v1"
+    uses: "matrix-org/backend-meta/.github/workflows/docker.yml@release/v1"
     with:
       image-name: matrixdotorg/sydent
       publish: true
