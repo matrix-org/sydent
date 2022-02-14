@@ -30,6 +30,7 @@ jobs:
 
   run-tests:
     name: Tests
+    needs: [checks, packaging]
     runs-on: ubuntu-latest
     strategy:
       matrix:
