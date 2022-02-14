@@ -14,4 +14,4 @@ jobs:
       publish: true
     secrets:
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME_DMRTEST }}
-      DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN_DMR_TEST }}
+      DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN_DMRTEST }}
