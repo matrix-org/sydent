@@ -1,0 +1,14 @@
+name: "Build and upload to PyPI"
+on:
+  release:
+    types: ["published"]
+  pull_request:
+    branches: ["dmr/publish-workflow"]
+
+jobs:
+  upload:
+    uses: "matrix-org/backend-meta/.github/workflows/release.yml@v1"
+    with:
+      repository: testpypi
+    secrets:
+      PYPI_API_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
