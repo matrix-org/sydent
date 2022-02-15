@@ -3,7 +3,7 @@ on:
   release:
     types: ["published"]
   pull_request:
-    branches: ["dmr/publish-workflow"]
+    branches: ["dmr/release-gha"]
 
 jobs:
   upload:
