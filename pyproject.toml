@@ -63,7 +63,6 @@ module = [
     "idna",
     "netaddr",
     "prometheus_client",
-    "sentry_sdk",
     "signedjson.*",
     "sortedcontainers",
 ]
