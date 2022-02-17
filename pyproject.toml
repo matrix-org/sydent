@@ -101,9 +101,11 @@ jinja2 = ">=3.0.0"
 netaddr = ">=0.7.0"
 matrix-common = "^1.1.0"
 phonenumbers = ">=8.12.32"
+prometheus-client = { version = "*", optional = true }
 pynacl = ">=1.2.1"
 pyOpenSSL = ">=16.0.0"
 pyyaml = ">=3.11"
+sentry-sdk = { version = "*", optional = true }
 # twisted warns about about the absence of this
 service-identity = ">=1.0.0"
 signedjson = "==1.1.1"
@@ -127,6 +129,8 @@ types-mock = "4.0.8"
 types-PyOpenSSL = "21.0.3"
 types-PyYAML = "6.0.3"
 
+[tool.poetry.extras]
+monitoring = [ "sentry-sdk", "prometheus-client" ]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
