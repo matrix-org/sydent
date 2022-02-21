@@ -129,7 +129,8 @@ types-PyOpenSSL = "21.0.3"
 types-PyYAML = "6.0.3"
 
 [tool.poetry.extras]
-monitoring = [ "sentry-sdk", "prometheus-client" ]
+sentry = ["sentry-sdk"]
+prometheus = ["prometheus-client"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
