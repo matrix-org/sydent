@@ -513,7 +513,7 @@ name = "sentry-sdk"
 version = "1.5.5"
 description = "Python client for Sentry (https://sentry.io)"
 category = "main"
-optional = true
+optional = false
 python-versions = "*"
 
 [package.dependencies]
@@ -826,7 +826,7 @@ sentry = ["sentry-sdk"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "fc112fa651787cb8e25d6c77b5f6adddf596c28e335d15a761f0e780ba12112f"
+content-hash = "2c3fc1a13ba76678f4164268d40f9b69d56d1680ac720529948380814e7e635f"
 
 [metadata.files]
 appdirs = [
