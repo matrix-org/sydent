@@ -820,12 +820,13 @@ docs = ["sphinx", "repoze.sphinx.autointerface"]
 test = ["zope.i18nmessageid", "zope.testing", "zope.testrunner"]
 
 [extras]
-monitoring = ["sentry-sdk", "prometheus-client"]
+prometheus = ["prometheus-client"]
+sentry = ["sentry-sdk"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b72b034953a3a821441a76bd9d175937879575cd6b94def4812838e55cfd8339"
+content-hash = "fc112fa651787cb8e25d6c77b5f6adddf596c28e335d15a761f0e780ba12112f"
 
 [metadata.files]
 appdirs = [
