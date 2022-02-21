@@ -128,6 +128,9 @@ types-PyOpenSSL = "21.0.3"
 types-PyYAML = "6.0.3"
 
 
+[tool.poetry.scripts]
+sydent = "sydent.sydent:main"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

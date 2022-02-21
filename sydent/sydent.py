@@ -359,10 +359,14 @@ def setup_logging(config: SydentConfig) -> None:
     observer.start()
 
 
-if __name__ == "__main__":
+def main() -> None:
     sydent_config = SydentConfig()
     sydent_config.parse_config_file(get_config_file_path())
     setup_logging(sydent_config)
 
     syd = Sydent(sydent_config)
     syd.run()
+
+
+if __name__ == "__main__":
+    main()
