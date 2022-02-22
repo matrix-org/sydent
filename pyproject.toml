@@ -124,8 +124,8 @@ matrix-is-tester = {git = "https://github.com/matrix-org/matrix-is-tester", rev 
 mypy = ">=0.902"
 mypy-zope = ">=0.3.1"
 parameterized = "==0.8.1"
-# sentry_sdk is required for typechecking.
-sentry_sdk = "*"
+# sentry-sdk is required for typechecking.
+sentry-sdk = "*"
 types-Jinja2 = "2.11.9"
 types-mock = "4.0.8"
 types-PyOpenSSL = "21.0.3"
