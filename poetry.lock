@@ -826,7 +826,7 @@ sentry = ["sentry-sdk"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "2c3fc1a13ba76678f4164268d40f9b69d56d1680ac720529948380814e7e635f"
+content-hash = "e51aba344b29123f99e894a64d0f1e89082568d1099ce81834eac2e65c7e6d48"
 
 [metadata.files]
 appdirs = [
