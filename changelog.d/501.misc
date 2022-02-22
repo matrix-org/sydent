@@ -1,0 +1,1 @@
+Mark `sentry-sdk` and `prometheus-client` as optional dependencies.
