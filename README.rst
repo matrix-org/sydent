@@ -9,8 +9,11 @@ To install Sydent's dependencies on a Debian-based system, run::
     sudo apt-get install build-essential python3-dev libffi-dev \
                          sqlite3 libssl-dev python-virtualenv libxslt1-dev
 
-Creating the virtualenv
------------------------
+From here, you can either install Sydent by using a PyPI release, or by recreating Sydent's locked runtime environment.
+
+
+Installing the latest Sydent release from PyPI
+----------------------------------------------
 
 To create the virtual environment in which Sydent will run::
 
@@ -19,33 +22,35 @@ To create the virtual environment in which Sydent will run::
     pip install --upgrade pip
     pip install --upgrade setuptools
 
-
-Installing the latest Sydent release from PyPI
-----------------------------------------------
-
 Sydent and its dependencies can be installed using ``pip`` by running::
 
     pip install matrix-sydent
-
-Installing from source
-----------------------
-
-Alternatively, Sydent can be installed using ``pip`` from a local git checkout::
-
-    git clone https://github.com/matrix-org/sydent.git
-    cd sydent
-    pip install -e .
-
-
-Running Sydent
-==============
-
+    
 With the virtualenv activated, you can run Sydent using::
 
     python -m sydent.sydent
 
-This will create a configuration file in ``sydent.conf`` with some defaults. If a setting is
-defined in both the ``[DEFAULT]`` section and another section in the configuration file,
+Installing from source
+~~~~~~~~~~~~~~~~~~~~~~
+
+Alternatively, Sydent can be installed using ``poetry`` from a local git checkout.
+First install `poetry`. See `poetry's documentation <https://python-poetry.org/docs/#installation>`_ for details; we recommend installing via `pipx`. Once that's done::
+
+    git clone https://github.com/matrix-org/sydent.git
+    cd sydent
+    poetry install --no-dev
+    # For development, pull in extra tools with
+    # poetry install
+
+To start Sydent::
+
+    poetry run sydent
+
+Running Sydent
+==============
+
+When Sydent is first run, it will create a configuration file in ``sydent.conf`` with some defaults. 
+If a setting is defined in both the ``[DEFAULT]`` section and another section in the configuration file,
 then the value in the other section is used.
 
 You'll most likely want to change the server name (``server.name``) and specify an email server
