@@ -34,7 +34,7 @@ Installing from source
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Alternatively, Sydent can be installed using ``poetry`` from a local git checkout.
-First [install `poetry`](https://python-poetry.org/docs/#installation), then::
+First install `poetry`. See `poetry's documentation <https://python-poetry.org/docs/#installation>`_ for details; we recommend installing via `pipx`. Once that's done::
 
     git clone https://github.com/matrix-org/sydent.git
     cd sydent
