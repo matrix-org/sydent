@@ -62,6 +62,7 @@ mypy_path = "stubs"
 module = [
     "idna",
     "netaddr",
+    "prometheus_client",
     "signedjson.*",
     "sortedcontainers",
 ]
