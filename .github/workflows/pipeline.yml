@@ -28,6 +28,7 @@ jobs:
 
   run-tests:
     name: Tests
+    if: ${{ !cancelled() && !failure() }} # Allow previous steps to be skipped, but not fail
     needs: [check-newsfile, checks, packaging]
     runs-on: ubuntu-latest
     strategy:
