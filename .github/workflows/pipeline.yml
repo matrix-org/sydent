@@ -43,3 +43,17 @@ jobs:
          python-version: ${{ matrix.python-version }}
       - run: poetry run trial ${{ matrix.test-dir }}
 
+  # a job which runs once all the other jobs are complete, thus allowing PRs to
+  # be merged.
+  tests-done:
+    if: ${{ always() }}
+    needs:
+      - check-newsfile
+      - checks
+      - packaging
+      - run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: matrix-org/done-action@v2
+        with:
+          needs: ${{ toJSON(needs) }}
