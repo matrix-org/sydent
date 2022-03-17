@@ -164,6 +164,7 @@ class Verifier:
                 if server_name not in acceptable_server_names:
                     continue
 
+            logger.debug("Wanting to verify request: %r", signed_json)
             logger.debug("Considering signatures %r from %s", sigs, server_name)
 
             server_keys = await self._getKeysForServer(server_name)
@@ -177,6 +178,7 @@ class Verifier:
                     )
                     logger.info("verifying sig from key %r", key_name)
                     payload = attr.asdict(signed_json)
+                    logger.debug("Dict payload is %r", payload)
                     try:
                         signedjson.sign.verify_signed_json(
                             payload, server_name, verify_key
