@@ -164,21 +164,34 @@ class Verifier:
                 if server_name not in acceptable_server_names:
                     continue
 
+            logger.debug("Considering signatures %r from %s", sigs, server_name)
+
             server_keys = await self._getKeysForServer(server_name)
+            logger.debug("Found keys %r for server %s", server_keys, server_name)
+
             for key_name, sig in sigs.items():
                 if key_name in server_keys:
-
                     key_bytes = decode_base64(server_keys[key_name]["key"])
                     verify_key = signedjson.key.decode_verify_key_bytes(
                         key_name, key_bytes
                     )
                     logger.info("verifying sig from key %r", key_name)
                     payload = attr.asdict(signed_json)
-                    signedjson.sign.verify_signed_json(payload, server_name, verify_key)
-                    logger.info(
-                        "Verified signature with key %s from %s", key_name, server_name
-                    )
-                    return (server_name, key_name)
+                    try:
+                        signedjson.sign.verify_signed_json(
+                            payload, server_name, verify_key
+                        )
+                        logger.info(
+                            "Verified signature with key %s from %s",
+                            key_name,
+                            server_name,
+                        )
+                        return (server_name, key_name)
+                    except SignatureVerifyException as exception:
+                        logger.info(
+                            "Failed to verify sig from key %r: %r", key_name, exception
+                        )
+                        raise
             logger.warning(
                 "No matching key found for signature block %r in server keys %r",
                 signed_json.signatures,
