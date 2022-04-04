@@ -1,1 +1,0 @@
-Add a test to ensure that a bad response from the open market api raises an exception.
