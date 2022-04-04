@@ -7,20 +7,20 @@ Bugfixes
 --------
 
 - Fix a bug where federation requests would fail early if a `.well-known/matrix/server` response contains an invalid type for `m.server`. Instead, try finding an SRV record, as mandated by [the spec](https://spec.matrix.org/v1.1/server-server-api/#resolving-server-names). ([\#473](https://github.com/matrix-org/sydent/issues/473))
-- Fix bug in the casefolding script that would cause some deletions to be skipped if e-mail sending was enabled. ([\#489](https://github.com/matrix-org/sydent/issues/489))
-- Fix a bug introduced in Sydent 2.4.6 where errors communicating with openmarket would be logged as successes, and all successes would be logged twice. ([\#490](https://github.com/matrix-org/sydent/issues/490))
+- Fix a bug in the casefolding script that would cause some deletions to be skipped if e-mail sending was enabled. ([\#489](https://github.com/matrix-org/sydent/issues/489))
+- Fix a bug introduced in Sydent 2.4.6 where errors communicating with OpenMarket's SMS API would be logged as successes, and all successes would be logged twice. ([\#490](https://github.com/matrix-org/sydent/issues/490))
 
 
 Improved Documentation
 ----------------------
 
-- Added a link to `#sydent:matrix.org` in the README so users know where to discuss sydent. Contributed by @clmnin. ([\#479](https://github.com/matrix-org/sydent/issues/479))
+- Added a link to [`#sydent:matrix.org`](https://matrix.to/#/#sydent:matrix.org) in the README so users know where to discuss sydent. Contributed by @clmnin. ([\#479](https://github.com/matrix-org/sydent/issues/479))
 
 
 Internal Changes
 ----------------
 
-- Add a test to ensure that a bad response from the open market api raises an exception. ([\#471](https://github.com/matrix-org/sydent/issues/471))
+- Add a test to ensure that a bad response from the OpenMarket SMS API raises an exception. ([\#471](https://github.com/matrix-org/sydent/issues/471))
 - Add missing dependencies to `setup.py`. ([\#474](https://github.com/matrix-org/sydent/issues/474))
 - Cache the lookup pepper in the `HashingMetadataStore`. ([\#475](https://github.com/matrix-org/sydent/issues/475), [\#477](https://github.com/matrix-org/sydent/issues/477))
 - Update type annotations to ensure Sydent typechecks with recent mypy versions. ([\#481](https://github.com/matrix-org/sydent/issues/481))
