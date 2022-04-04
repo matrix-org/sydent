@@ -6,8 +6,8 @@ on:
 
 jobs:
   upload:
-    uses: "matrix-org/backend-meta/.github/workflows/release.yml@release/v1"
+    uses: "matrix-org/backend-meta/.github/workflows/release.yml@v1"
     with:
       repository: pypi
     secrets:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      PYPI_API_TOKEN: ${{ secrets.PYPI_ACCESS_TOKEN }}
