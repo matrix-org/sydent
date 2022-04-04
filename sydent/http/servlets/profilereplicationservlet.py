@@ -26,7 +26,7 @@ from sydent.db.profiles import ProfileStore
 
 logger = logging.getLogger(__name__)
 
-MAX_BATCH_SIZE = 200
+MAX_BATCH_SIZE = 500
 
 
 class ProfileReplicationServlet(Resource):
