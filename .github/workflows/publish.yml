@@ -2,10 +2,11 @@ name: "Build and upload to PyPI"
 on:
   release:
     types: ["published"]
+  workflow_dispatch:
 
 jobs:
   upload:
-    uses: "matrix-org/backend-meta/.github/workflows/release.yml@v1"
+    uses: "matrix-org/backend-meta/.github/workflows/release.yml@release/v1"
     with:
       repository: pypi
     secrets:
