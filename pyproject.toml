@@ -130,6 +130,7 @@ types-Jinja2 = "2.11.9"
 types-mock = "4.0.8"
 types-PyOpenSSL = "21.0.3"
 types-PyYAML = "6.0.3"
+towncrier = "^21.9.0"
 
 [tool.poetry.extras]
 sentry = ["sentry-sdk"]

@@ -114,6 +114,17 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
+name = "click-default-group"
+version = "1.2.2"
+description = "Extends click.Group to invoke a command without explicit subcommand name"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = "*"
+
+[[package]]
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
@@ -615,6 +626,24 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "towncrier"
+version = "21.9.0"
+description = "Building newsfiles for your project."
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = "*"
+click-default-group = "*"
+incremental = "*"
+jinja2 = "*"
+tomli = {version = "*", markers = "python_version >= \"3.6\""}
+
+[package.extras]
+dev = ["packaging"]
+
+[[package]]
 name = "twisted"
 version = "22.1.0"
 description = "An asynchronous networking framework written in Python"
@@ -826,7 +855,7 @@ sentry = ["sentry-sdk"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "e51aba344b29123f99e894a64d0f1e89082568d1099ce81834eac2e65c7e6d48"
+content-hash = "e33328ef874fd6ee5bec45d3c95fb52ca0b3194f9e19e1096359bb010441f98d"
 
 [metadata.files]
 appdirs = [
@@ -913,6 +942,9 @@ click = [
     {file = "click-8.0.3-py3-none-any.whl", hash = "sha256:353f466495adaeb40b6b5f592f9f91cb22372351c84caeb068132442a4518ef3"},
     {file = "click-8.0.3.tar.gz", hash = "sha256:410e932b050f5eed773c4cda94de75971c89cdb3155a72a0831139a79e5ecb5b"},
 ]
+click-default-group = [
+    {file = "click-default-group-1.2.2.tar.gz", hash = "sha256:d9560e8e8dfa44b3562fbc9425042a0fd6d21956fcc2db0077f63f34253ab904"},
+]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
@@ -955,6 +987,9 @@ frozendict = [
     {file = "frozendict-2.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b39cfcf563b3432d4780bf15769e2de2a2906c46c26fb73a9582b69142621814"},
     {file = "frozendict-2.2.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e7198dda9741f3da79db952ecd27607d836727ed320f29438eac565133008c8c"},
     {file = "frozendict-2.2.0-cp310-cp310-win_amd64.whl", hash = "sha256:3a564bd93767044e740e0f6c59606cf612a143160ace9d2c047c4a297a74329a"},
+    {file = "frozendict-2.2.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:2a47f3f7fe52094904777d29f300ad6c11213dd81a8fbdec96aa2d4763104319"},
+    {file = "frozendict-2.2.0-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2bfacb9f75768903495747ddaacb1bf98738fb3e966a27f0627f7f163fd676eb"},
+    {file = "frozendict-2.2.0-cp36-cp36m-win_amd64.whl", hash = "sha256:efc138fb1e2c115c39240f60b4b0daf752f1cca591d5f93ac4e788af0665d737"},
     {file = "frozendict-2.2.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:722e915421b2d869b236d8de8e0ab42f1e2f7e12d670f9bc3dedfc055550bcb9"},
     {file = "frozendict-2.2.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4519f6eb661f268c60a3ea14f000d321159cf5e6db397129ea4921aef3bf2173"},
     {file = "frozendict-2.2.0-cp37-cp37m-win_amd64.whl", hash = "sha256:9c720e4a19e9b5f48d1b12e193d39765898dff4952320251c0ccd9960631cae9"},
@@ -1383,6 +1418,10 @@ toml = [
 tomli = [
     {file = "tomli-2.0.0-py3-none-any.whl", hash = "sha256:b5bde28da1fed24b9bd1d4d2b8cba62300bfb4ec9a6187a957e8ddb9434c5224"},
     {file = "tomli-2.0.0.tar.gz", hash = "sha256:c292c34f58502a1eb2bbb9f5bbc9a5ebc37bee10ffb8c2d6bbdfa8eb13cc14e1"},
+]
+towncrier = [
+    {file = "towncrier-21.9.0-py2.py3-none-any.whl", hash = "sha256:fc5a88a2a54988e3a8ed2b60d553599da8330f65722cc607c839614ed87e0f92"},
+    {file = "towncrier-21.9.0.tar.gz", hash = "sha256:9cb6f45c16e1a1eec9d0e7651165e7be60cd0ab81d13a5c96ca97a498ae87f48"},
 ]
 twisted = [
     {file = "Twisted-22.1.0-py3-none-any.whl", hash = "sha256:ccd638110d9ccfdc003042aa3e1b6d6af272eaca45d36e083359560549e3e848"},
