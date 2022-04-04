@@ -1,3 +1,41 @@
+Sydent 2.5.2 (2022-04-04)
+=========================
+
+This release of Sydent is the first to use `poetry` to maintain a locked set of dependency versions. The use of `poetry` is optional: administrators can continue to install from a wheel or using their own virtualenv.
+
+Bugfixes
+--------
+
+- Fix a bug where federation requests would fail early if a `.well-known/matrix/server` response contains an invalid type for `m.server`. Instead, try finding an SRV record, as mandated by [the spec](https://spec.matrix.org/v1.1/server-server-api/#resolving-server-names). ([\#473](https://github.com/matrix-org/sydent/issues/473))
+- Fix bug in the casefolding script that would cause some deletions to be skipped if e-mail sending was enabled. ([\#489](https://github.com/matrix-org/sydent/issues/489))
+- Fix a bug introduced in Sydent 2.4.6 where errors communicating with openmarket would be logged as successes, and all successes would be logged twice. ([\#490](https://github.com/matrix-org/sydent/issues/490))
+
+
+Improved Documentation
+----------------------
+
+- Added a link to `#sydent:matrix.org` in the README so users know where to discuss sydent. Contributed by @clmnin. ([\#479](https://github.com/matrix-org/sydent/issues/479))
+
+
+Internal Changes
+----------------
+
+- Add a test to ensure that a bad response from the open market api raises an exception. ([\#471](https://github.com/matrix-org/sydent/issues/471))
+- Add missing dependencies to `setup.py`. ([\#474](https://github.com/matrix-org/sydent/issues/474))
+- Cache the lookup pepper in the `HashingMetadataStore`. ([\#475](https://github.com/matrix-org/sydent/issues/475), [\#477](https://github.com/matrix-org/sydent/issues/477))
+- Update type annotations to ensure Sydent typechecks with recent mypy versions. ([\#481](https://github.com/matrix-org/sydent/issues/481))
+- Fix type errors caused by an update to PyNaCl. ([\#484](https://github.com/matrix-org/sydent/issues/484))
+- Add aggressive logging to `casefoldb.py` for debugging purposes. ([\#486](https://github.com/matrix-org/sydent/issues/486))
+- Use poetry to manage dependencies. ([\#488](https://github.com/matrix-org/sydent/issues/488))
+- Build and publish a docker image on the `main` branch and tagged releases. ([\#492](https://github.com/matrix-org/sydent/issues/492))
+- Update Dockerfile to use a fixed poetry environment, rather than `pip install`ing the latest dependencies. ([\#493](https://github.com/matrix-org/sydent/issues/493))
+- Bump twisted from 21.7.0 to 22.1.0. ([\#495](https://github.com/matrix-org/sydent/issues/495))
+- Use matrix-common util to get a git-aware version number. ([\#497](https://github.com/matrix-org/sydent/issues/497))
+- Publish releases to PyPI using GitHub Actions. ([\#499](https://github.com/matrix-org/sydent/issues/499))
+- Mark `sentry-sdk` and `prometheus-client` as optional dependencies. ([\#501](https://github.com/matrix-org/sydent/issues/501))
+- Add poetry entrypoint for running sydent. ([\#502](https://github.com/matrix-org/sydent/issues/502))
+
+
 Sydent 2.5.1 (2021-11-17)
 =========================
 
