@@ -27,11 +27,6 @@ class StoreInviteTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Create a new sydent
         config = {
-            "general": {
-                "templates.path": os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "res"
-                ),
-            },
             "email": {
                 "email.from": "Sydent Validation <noreply@hostname>",
             },

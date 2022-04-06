@@ -27,17 +27,7 @@ class MigrationTestCase(unittest.TestCase):
 
     def setUp(self):
         # Create a new sydent
-        config = {
-            "general": {
-                "templates.path": os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "res"
-                ),
-            },
-            "crypto": {
-                "ed25519.signingkey": "ed25519 0 FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
-            },
-        }
-        self.sydent = make_sydent(test_config=config)
+        self.sydent = make_sydent()
 
         # create some local associations
         associations = []

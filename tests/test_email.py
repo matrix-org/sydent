@@ -22,14 +22,7 @@ from tests.utils import make_request, make_sydent
 class TestRequestCode(unittest.TestCase):
     def setUp(self):
         # Create a new sydent
-        config = {
-            "general": {
-                "templates.path": os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "res"
-                ),
-            },
-        }
-        self.sydent = make_sydent(test_config=config)
+        self.sydent = make_sydent()
 
     def _render_request(self, request):
         # Patch out the email sending so we can investigate the resulting email.

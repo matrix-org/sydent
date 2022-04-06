@@ -15,12 +15,7 @@ class ReplicationTestCase(unittest.TestCase):
 
     def setUp(self):
         # Create a new sydent
-        config = {
-            "crypto": {
-                "ed25519.signingkey": "ed25519 0 FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
-            }
-        }
-        self.sydent = make_sydent(test_config=config)
+        self.sydent = make_sydent()
 
         # Create a fake peer to replicate to.
         peer_public_key_base64 = "+vB8mTaooD/MA8YYZM8t9+vnGhP1937q2icrqPV9JTs"
