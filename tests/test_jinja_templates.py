@@ -25,14 +25,7 @@ from tests.utils import make_sydent
 class TestTemplate(unittest.TestCase):
     def setUp(self):
         # Create a new sydent
-        config = {
-            "general": {
-                "templates.path": os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "res"
-                ),
-            },
-        }
-        self.sydent = make_sydent(test_config=config)
+        self.sydent = make_sydent()
 
     def test_jinja_vector_invite(self):
         substitutions = {

@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from io import BytesIO
-from typing import Dict
+from typing import Dict, Optional
 from unittest.mock import MagicMock
 
 import attr
@@ -53,20 +53,34 @@ tWVEpHfT+G7AjA8=
 """
 
 
-def make_sydent(test_config={}):
+def make_sydent(test_config: Optional[dict] = None) -> Sydent:
     """Create a new sydent
 
     Args:
-        test_config (dict): any configuration variables for overriding the default sydent
+        test_config: Configuration variables for overriding the default sydent
             config
     """
+    if test_config is None:
+        test_config = {}
+
     # Use an in-memory SQLite database. Note that the database isn't cleaned up between
     # tests, so by default the same database will be used for each test if changed to be
     # a file on disk.
-    if "db" not in test_config:
-        test_config["db"] = {"db.file": ":memory:"}
-    else:
-        test_config["db"].setdefault("db.file", ":memory:")
+    test_config.setdefault("db", {}).setdefault("db.file", ":memory:")
+
+    # Specify a server name to avoid warnings.
+    general_config = test_config.setdefault("general", {})
+    general_config.setdefault("server.name", ":test:")
+    # Specify the default templates.
+    general_config.setdefault(
+        "templates.path",
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "res"),
+    )
+
+    # Specify a signing key.
+    test_config.setdefault("crypto", {}).setdefault(
+        "ed25519.signingkey", "ed25519 0 FJi1Rnpj3/otydngacrwddFvwz/dTDsBv62uZDN2fZM"
+    )
 
     reactor = ResolvingMemoryReactorClock()
 

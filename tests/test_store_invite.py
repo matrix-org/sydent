@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os.path
 from unittest.mock import patch
 
 from parameterized import parameterized
@@ -27,11 +26,6 @@ class StoreInviteTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Create a new sydent
         config = {
-            "general": {
-                "templates.path": os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), "res"
-                ),
-            },
             "email": {
                 "email.from": "Sydent Validation <noreply@hostname>",
             },
