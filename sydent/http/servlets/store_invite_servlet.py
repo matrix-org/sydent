@@ -122,16 +122,10 @@ class StoreInviteServlet(Resource):
             "sender_avatar_url",
             "guest_user_id",
             "guest_access_token",
+            "room_type",
         ]
         for k in extra_substitutions:
             substitutions.setdefault(k, "")
-
-        # For MSC3288 room type, prefer the stable field, but fallback to the
-        # unstable field.
-        if "room_type" not in substitutions:
-            substitutions["room_type"] = substitutions.get(
-                "org.matrix.msc3288.room_type", ""
-            )
 
         substitutions["bracketed_verified_sender"] = ""
         if verified_sender:

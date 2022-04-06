@@ -110,7 +110,6 @@ Variable                | Contents
 `bracketed_room_name`   | The string stored in `room_name` with brackets around it
 `bracketed_verified_sender`      | The string stored in `sender` with brackets around it
 `medium`                | The string "email"
-`org.matrix.msc3288.room_type`   | **UNSTABLE.** The same as `room_type`
 `org.matrix.web_client_location` | **UNSTABLE.** The same as `web_client_location`
 `room_alias`            | An alias for the room (probably more readable than `room_id`)
 `room_avatar_url`       | The URL of the room's avatar
