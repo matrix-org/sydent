@@ -1,0 +1,1 @@
+Adds prometheus-client and sentry-sdk into the Docker image.
