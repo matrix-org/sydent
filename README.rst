@@ -63,6 +63,20 @@ Sydent uses SQLite as its database backend. By default, it will create the datab
 in its working directory. The name can be overridden by modifying the ``db.file`` configuration option.
 Sydent is known to be working with SQLite version 3.16.2 and later.
 
+Listening for HTTPS connections
+-------------------------------
+
+Most homeservers and clients will expect identity servers to be reachable using HTTPS.
+
+Sydent does not currently support listening for HTTPS connection by itself. Instead, it
+is recommended to use a reverse proxy to proxy requests from homeservers and clients to
+Sydent. It is then possible to have this reverse proxy serve Sydent's API over HTTPS.
+
+When using a reverse proxy, it is recommended to limit the requests proxied to Sydent to
+ones which paths start with ``/_matrix/identity`` for security reasons.
+
+An exception to this is Sydent's internal replication API, see `<docs/replication.md>`_.
+
 SMS originators
 ---------------
 
