@@ -26,7 +26,7 @@ COPY --chown=sydent:sydent ["sydent", "sydent"]
 COPY --chown=sydent:sydent ["README.rst", "pyproject.toml", "poetry.lock", "./"]
 
 # Install dependencies
-RUN python -m poetry install --no-dev --no-interaction
+RUN python -m poetry install --no-dev --no-interaction --extras "prometheus sentry"
 
 # Record dependencies for posterity
 RUN python -m poetry export -o requirements.txt
