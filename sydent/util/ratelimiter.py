@@ -25,21 +25,47 @@ class LimitExceededException(Exception):
 
 
 class Ratelimiter(Generic[K]):
+    """A ratelimiter based on leaky token bucket algorithm.
+
+    Args:
+        reactor
+        burst: the number of requests that can happen at once before we start
+            ratelimiting
+        rate_hz: The maximum average sustained rate in hertz of requests we'll
+            accept.
+    """
+
     def __init__(self, reactor: IReactorTime, burst: int, rate_hz: float) -> None:
+        # The "burst" count (or the capacity of each bucket in leaky bucket
+        # algorithm).
         self._burst = burst
 
+        # A map from key to number of tokens in its bucket. We ratelimit when
+        # the number of tokens is greater than `burst`.
+        #
+        # Entries are removed when token count hits zero.
         self._buckets: Dict[K, int] = {}
 
+        # We remove tokens from all buckets at `rate_hz` hertz.
         call = task.LoopingCall(self._periodic_call)
         call.clock = reactor
         call.start(1 / rate_hz)
 
     def _periodic_call(self) -> None:
+        # Take one away from all active buckets. If a bucket reaches zero then
+        # remove it from the dict.
         self._buckets = {
             key: tokens - 1 for key, tokens in self._buckets.items() if tokens > 1
         }
 
     def ratelimit(self, key: K) -> None:
+        """Check if we should ratelimit the request with the given key.
+
+        Raises:
+            LimitExceededException: if the request should be denied.
+        """
+
+        # We get the current token count and compare it with the `burst`.
         current_tokens = self._buckets.get(key, 0)
         if current_tokens >= self._burst:
             raise LimitExceededException()

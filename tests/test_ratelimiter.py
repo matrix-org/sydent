@@ -25,12 +25,16 @@ class RatelimiterTest(unittest.TestCase):
         self.ratelimiter = Ratelimiter(self.clock, burst=5, rate_hz=0.5)
 
     def test_simple(self) -> None:
+        "Test that a request doesn't get ratelimited to start off with"
         key = "key"
 
         # This should not raise as we're below the ratelimit
         self.ratelimiter.ratelimit(key)
 
     def test_burst(self) -> None:
+        """Test that we can send `burst` number of messages before getting
+        ratelimited
+        """
         key = "key"
 
         # This should not raise as we're below the ratelimit
@@ -41,6 +45,9 @@ class RatelimiterTest(unittest.TestCase):
             self.ratelimiter.ratelimit(key)
 
     def test_burst_reset(self) -> None:
+        """Test that once we hit the ratelimit we can wait a while and we'll be
+        able to send requests again
+        """
         key = "key"
 
         # This should not raise as we're below the ratelimit
@@ -59,6 +66,9 @@ class RatelimiterTest(unittest.TestCase):
             self.ratelimiter.ratelimit(key)
 
     def test_average_rate(self):
+        """Test that sending requests at a rate less than the maximum rate works
+        fine.
+        """
         key = "key"
 
         with self.assertRaises(LimitExceededException):
@@ -67,6 +77,7 @@ class RatelimiterTest(unittest.TestCase):
                 self.ratelimiter.ratelimit(key)
 
     def test_average_rate_burst(self):
+        """Test that if we go above the maximum rate we'll get ratelimited"""
         key = "key"
 
         for _ in range(5):
