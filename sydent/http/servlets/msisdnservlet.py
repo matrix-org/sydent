@@ -45,12 +45,12 @@ class MsisdnRequestCodeServlet(Resource):
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
         self.sydent = syd
         self.require_auth = require_auth
-        self._msisdn_ratelimiter = Ratelimiter(
+        self._msisdn_ratelimiter = Ratelimiter[str](
             syd.reactor,
             syd.config.sms.msisdn_ratelimit_burst,
             syd.config.sms.msisdn_ratelimit_rate_hz,
         )
-        self._country_ratelimiter = Ratelimiter(
+        self._country_ratelimiter = Ratelimiter[int](
             syd.reactor,
             syd.config.sms.country_ratelimit_burst,
             syd.config.sms.country_ratelimit_rate_hz,
@@ -90,6 +90,9 @@ class MsisdnRequestCodeServlet(Resource):
 
         try:
             phone_number_object = phonenumbers.parse(raw_phone_number, country)
+
+            if phone_number_object.country_code is None:
+                raise Exception("No country code")
         except Exception as e:
             logger.warning("Invalid phone number given: %r", e)
             request.setResponseCode(400)
