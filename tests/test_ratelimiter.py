@@ -66,8 +66,8 @@ class RatelimiterTest(unittest.TestCase):
             self.ratelimiter.ratelimit(key)
 
     def test_average_rate(self):
-        """Test that sending requests at a rate less than the maximum rate works
-        fine.
+        """Test that sending requests at a rate higher than the maximum rate
+        gets ratelimited.
         """
         key = "key"
 
