@@ -122,7 +122,7 @@ class MsisdnRequestCodeServlet(Resource):
             request.setResponseCode(429)
             return {
                 "errcode": "M_UNKNOWN",
-                "error": "Limit exceeded for this countrys",
+                "error": "Limit exceeded for this country",
             }
 
         # International formatted number. The same as an E164 but with spaces

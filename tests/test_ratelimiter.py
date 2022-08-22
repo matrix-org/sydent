@@ -25,7 +25,7 @@ class RatelimiterTest(unittest.TestCase):
         self.ratelimiter = Ratelimiter(self.clock, burst=5, rate_hz=0.5)
 
     def test_simple(self) -> None:
-        "Test that a request doesn't get ratelimited to start off with"
+        """Test that a request doesn't get ratelimited to start off with"""
         key = "key"
 
         # This should not raise as we're below the ratelimit
