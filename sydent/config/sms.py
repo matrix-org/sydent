@@ -82,7 +82,7 @@ class SMSConfig(BaseConfig):
             "sms", "country.ratelimit.burst", fallback=50
         )
         self.country_ratelimit_rate_hz = cfg.getfloat(
-            "sms", "msisdn.ratelimit.rate_hz", fallback=1.0 / 60.0
+            "sms", "country.ratelimit.rate_hz", fallback=1.0 / 60.0
         )
 
         return False
