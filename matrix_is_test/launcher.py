@@ -45,6 +45,8 @@ email.smtphost = localhost
 email.from = Sydent Validation <noreply@localhost>
 email.smtpport = 9925
 email.subject = Your Validation Token
+email.ratelimit_sender.burst = 100000
+email.ratelimit_sender.rate_hz = 100000
 """
 
 
