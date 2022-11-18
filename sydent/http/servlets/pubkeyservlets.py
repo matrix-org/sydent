@@ -14,22 +14,22 @@
 
 from typing import TYPE_CHECKING
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 from unpaddedbase64 import encode_base64
 
 from sydent.db.invite_tokens import JoinTokenStore
-from sydent.http.servlets import get_args, jsonwrap
+from sydent.http.servlets import SydentResource, get_args, jsonwrap
 from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class Ed25519Servlet(Resource):
+class Ed25519Servlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent") -> None:
+        super().__init__()
         self.sydent = syd
 
     @jsonwrap
@@ -40,10 +40,11 @@ class Ed25519Servlet(Resource):
         return {"public_key": pubKeyBase64}
 
 
-class PubkeyIsValidServlet(Resource):
+class PubkeyIsValidServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent") -> None:
+        super().__init__()
         self.sydent = syd
 
     @jsonwrap
@@ -56,10 +57,11 @@ class PubkeyIsValidServlet(Resource):
         return {"valid": args["public_key"] == pubKeyBase64}
 
 
-class EphemeralPubkeyIsValidServlet(Resource):
+class EphemeralPubkeyIsValidServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent") -> None:
+        super().__init__()
         self.joinTokenStore = JoinTokenStore(syd)
 
     @jsonwrap

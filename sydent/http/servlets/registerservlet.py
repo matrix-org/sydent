@@ -20,11 +20,10 @@ from typing import TYPE_CHECKING, Dict
 
 from twisted.internet.error import ConnectError, DNSLookupError
 from twisted.web.client import ResponseFailed
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.httpclient import FederationHttpClient
-from sydent.http.servlets import asyncjsonwrap, get_args, send_cors
+from sydent.http.servlets import SydentResource, asyncjsonwrap, get_args, send_cors
 from sydent.types import JsonDict
 from sydent.users.tokens import issueToken
 from sydent.util.stringutils import is_valid_matrix_server_name
@@ -35,10 +34,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class RegisterServlet(Resource):
+class RegisterServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent") -> None:
+        super().__init__()
         self.sydent = syd
         self.client = FederationHttpClient(self.sydent)
 

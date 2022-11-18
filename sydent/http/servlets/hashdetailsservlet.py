@@ -15,11 +15,10 @@
 import logging
 from typing import TYPE_CHECKING
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
-from sydent.http.servlets import jsonwrap, send_cors
+from sydent.http.servlets import SydentResource, jsonwrap, send_cors
 from sydent.types import JsonDict
 
 if TYPE_CHECKING:
@@ -28,11 +27,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class HashDetailsServlet(Resource):
+class HashDetailsServlet(SydentResource):
     isLeaf = True
     known_algorithms = ["sha256", "none"]
 
     def __init__(self, syd: "Sydent", lookup_pepper: str) -> None:
+        super().__init__()
         self.sydent = syd
         self.lookup_pepper = lookup_pepper
 

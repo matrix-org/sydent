@@ -17,12 +17,17 @@ from typing import TYPE_CHECKING
 
 import signedjson.key
 import signedjson.sign
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.auth import authV2
-from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.http.servlets import (
+    MatrixRestError,
+    SydentResource,
+    get_args,
+    jsonwrap,
+    send_cors,
+)
 from sydent.types import JsonDict
 
 if TYPE_CHECKING:
@@ -31,10 +36,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class BlindlySignStuffServlet(Resource):
+class BlindlySignStuffServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.server_name = syd.config.general.server_name
         self.tokenStore = JoinTokenStore(syd)

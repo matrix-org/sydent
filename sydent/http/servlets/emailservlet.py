@@ -14,11 +14,10 @@
 
 from typing import TYPE_CHECKING, Optional
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import SydentResource, get_args, jsonwrap, send_cors
 from sydent.types import JsonDict
 from sydent.util.emailutils import EmailAddressException, EmailSendException
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH, is_valid_client_secret
@@ -33,10 +32,11 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class EmailRequestCodeServlet(Resource):
+class EmailRequestCodeServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.require_auth = require_auth
 
@@ -115,10 +115,11 @@ class EmailRequestCodeServlet(Resource):
         return b""
 
 
-class EmailValidateCodeServlet(Resource):
+class EmailValidateCodeServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.require_auth = require_auth
 

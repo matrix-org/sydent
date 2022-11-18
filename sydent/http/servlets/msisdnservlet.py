@@ -17,11 +17,16 @@ import logging
 from typing import TYPE_CHECKING
 
 import phonenumbers
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
-from sydent.http.servlets import asyncjsonwrap, get_args, jsonwrap, send_cors
+from sydent.http.servlets import (
+    SydentResource,
+    asyncjsonwrap,
+    get_args,
+    jsonwrap,
+    send_cors,
+)
 from sydent.types import JsonDict
 from sydent.util.ratelimiter import LimitExceededException, Ratelimiter
 from sydent.util.stringutils import is_valid_client_secret
@@ -39,10 +44,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class MsisdnRequestCodeServlet(Resource):
+class MsisdnRequestCodeServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.require_auth = require_auth
         self._msisdn_ratelimiter = Ratelimiter[str](
@@ -161,10 +167,11 @@ class MsisdnRequestCodeServlet(Resource):
         return b""
 
 
-class MsisdnValidateCodeServlet(Resource):
+class MsisdnValidateCodeServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.require_auth = require_auth
 

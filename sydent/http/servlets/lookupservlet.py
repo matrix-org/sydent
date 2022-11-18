@@ -17,11 +17,10 @@ import logging
 from typing import TYPE_CHECKING
 
 import signedjson.sign
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.threepid_associations import GlobalAssociationStore
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import SydentResource, get_args, jsonwrap, send_cors
 from sydent.types import JsonDict
 from sydent.util import json_decoder
 
@@ -31,10 +30,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class LookupServlet(Resource):
+class LookupServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent") -> None:
+        super().__init__()
         self.sydent = syd
 
     @jsonwrap
