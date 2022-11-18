@@ -82,6 +82,14 @@ class StoreInviteServlet(SydentResource):
             "Store invite request from %s to %s, in %s", sender, address, roomId
         )
 
+        sender_homeserver = sender.split(":", 1)[1]
+        if (
+            roomId in self.sydent.config.email.third_party_invite_room_blocklist
+            or sender_homeserver
+            in self.sydent.config.email.third_party_invite_homeserver_blocklist
+        ):
+            raise MatrixRestError(403, "M_UNAUTHORIZED", "Invite not allowed")
+
         self.sydent.email_sender_ratelimiter.ratelimit(
             sender, "Limit exceeded for this sender"
         )

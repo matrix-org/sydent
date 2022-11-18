@@ -70,6 +70,23 @@ class EmailConfig(BaseConfig):
             "email", "email.third_party_invite_domain_obfuscate_characters"
         )
 
+        third_party_invite_homeserver_blocklist = cfg.get(
+            "email", "email.third_party_invite_homeserver_blocklist", fallback=""
+        )
+        third_party_invite_room_blocklist = cfg.get(
+            "email", "email.third_party_invite_room_blocklist", fallback=""
+        )
+        self.third_party_invite_homeserver_blocklist = {
+            server
+            for server in third_party_invite_homeserver_blocklist.split("\n")
+            if server  # filter out empty lines
+        }
+        self.third_party_invite_room_blocklist = {
+            room_id
+            for room_id in third_party_invite_room_blocklist.split("\n")
+            if room_id  # filter out empty lines
+        }
+
         self.email_sender_ratelimit_burst = cfg.getint(
             "email", "email.ratelimit_sender.burst", fallback=5
         )
