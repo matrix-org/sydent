@@ -50,7 +50,7 @@ class EmailRequestCodeServlet(Resource):
             account = authV2(self.sydent, request)
 
             self.sydent.email_sender_ratelimiter.ratelimit(account.userId)
-        else:
+        elif ipaddress:
             # For `/v1/` requests the ip address is the best we can do for rate
             # limiting.
             self.sydent.email_sender_ratelimiter.ratelimit(ipaddress)

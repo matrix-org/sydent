@@ -170,7 +170,7 @@ class Sydent:
 
         self.pusher: Pusher = Pusher(self)
 
-        self.email_sender_ratelimiter = Ratelimiter(
+        self.email_sender_ratelimiter: Ratelimiter[str] = Ratelimiter(
             self.reactor,
             burst=self.config.email.email_sender_ratelimit_burst,
             rate_hz=self.config.email.email_sender_ratelimit_rate_hz,
