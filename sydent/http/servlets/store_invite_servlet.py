@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import random
 import string
 from email.header import Header
@@ -30,6 +31,8 @@ from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
 from sydent.types import JsonDict
 from sydent.util.emailutils import EmailAddressException, sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH, normalise_address
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -68,6 +71,12 @@ class StoreInviteServlet(Resource):
             verified_sender = sender
             if account.userId != sender:
                 raise MatrixRestError(403, "M_UNAUTHORIZED", "'sender' doesn't match")
+
+        self.sydent.email_sender_ratelimiter.ratelimit(sender)
+
+        logger.info(
+            "Store invite request from %s to %s, in %s", sender, address, roomId
+        )
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
         mxid = globalAssocStore.getMxid(medium, normalised_address)
