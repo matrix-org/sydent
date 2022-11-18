@@ -133,6 +133,9 @@ class StoreInviteServlet(Resource):
 
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
         if substitutions["room_name"] != "":
+            if len(substitutions["room_name"]) > 30:
+                substitutions["room_name"] = substitutions["room_name"][:25] + "…"
+
             substitutions["bracketed_room_name"] = "(%s) " % substitutions["room_name"]
 
         substitutions[
