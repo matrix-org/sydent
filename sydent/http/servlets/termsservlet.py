@@ -15,13 +15,18 @@
 import logging
 from typing import TYPE_CHECKING
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.accounts import AccountStore
 from sydent.db.terms import TermsStore
 from sydent.http.auth import authV2
-from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.http.servlets import (
+    MatrixRestError,
+    SydentResource,
+    get_args,
+    jsonwrap,
+    send_cors,
+)
 from sydent.terms.terms import get_terms
 from sydent.types import JsonDict
 
@@ -31,10 +36,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class TermsServlet(Resource):
+class TermsServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent") -> None:
+        super().__init__()
         self.sydent = syd
 
     @jsonwrap

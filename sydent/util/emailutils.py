@@ -22,6 +22,7 @@ from html import escape
 from typing import TYPE_CHECKING, Dict
 
 import twisted.python.log
+from prometheus_client import Counter
 
 from sydent.util import time_msec
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
@@ -30,6 +31,8 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 logger = logging.getLogger(__name__)
+
+email_counter = Counter("sydent_emails_sent", "Number of emails we attempted to send")
 
 
 def sendEmail(
@@ -112,6 +115,8 @@ def sendEmail(
             smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
         if mailUsername != "":
             smtp.login(mailUsername, mailPassword)
+
+        email_counter.inc()
 
         # We're using the parsing above to do basic validation, but instead of
         # failing it may munge the address it returns. So we should *not* use

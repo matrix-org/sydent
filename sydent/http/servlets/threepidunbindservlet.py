@@ -22,12 +22,11 @@ from twisted.internet import defer
 from twisted.internet.error import ConnectError, DNSLookupError
 from twisted.web import server
 from twisted.web.client import ResponseFailed
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.valsession import ThreePidValSessionStore
 from sydent.hs_federation.verifier import InvalidServerName, NoAuthenticationError
-from sydent.http.servlets import dict_to_json_bytes
+from sydent.http.servlets import SydentResource, dict_to_json_bytes
 from sydent.types import JsonDict
 from sydent.util import json_decoder
 from sydent.util.stringutils import is_valid_client_secret
@@ -43,8 +42,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ThreePidUnbindServlet(Resource):
+class ThreePidUnbindServlet(SydentResource):
     def __init__(self, sydent: "Sydent") -> None:
+        super().__init__()
         self.sydent = sydent
 
     def render_POST(

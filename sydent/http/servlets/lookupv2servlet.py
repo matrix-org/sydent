@@ -15,12 +15,11 @@
 import logging
 from typing import TYPE_CHECKING
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.auth import authV2
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import SydentResource, get_args, jsonwrap, send_cors
 from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
 from sydent.types import JsonDict
 
@@ -30,10 +29,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class LookupV2Servlet(Resource):
+class LookupV2Servlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", lookup_pepper: str) -> None:
+        super().__init__()
         self.sydent = syd
         self.globalAssociationStore = GlobalAssociationStore(self.sydent)
         self.lookup_pepper = lookup_pepper

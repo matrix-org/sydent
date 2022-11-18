@@ -14,24 +14,23 @@
 
 from typing import TYPE_CHECKING
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
-from sydent.http.servlets import get_args, jsonwrap, send_cors
+from sydent.http.servlets import SydentResource, get_args, jsonwrap, send_cors
 from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class AuthenticatedBindThreePidServlet(Resource):
+class AuthenticatedBindThreePidServlet(SydentResource):
     """A servlet which allows a caller to bind any 3pid they want to an mxid
 
     It is assumed that authentication happens out of band
     """
 
     def __init__(self, sydent: "Sydent") -> None:
-        Resource.__init__(self)
+        super().__init__()
         self.sydent = sydent
 
     @jsonwrap

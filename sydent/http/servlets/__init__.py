@@ -18,6 +18,7 @@ import json
 import logging
 from typing import Any, Awaitable, Callable, Dict, Iterable, TypeVar
 
+from prometheus_client import Counter
 from twisted.internet import defer
 from twisted.web import server
 from twisted.web.resource import Resource
@@ -27,6 +28,25 @@ from sydent.types import JsonDict
 from sydent.util import json_decoder
 
 logger = logging.getLogger(__name__)
+
+
+request_counter = Counter(
+    "sydent_http_received_requests",
+    "Received requests",
+    labelnames=("servlet", "method"),
+)
+
+
+class SydentResource(Resource):
+    """A subclass of resource that tracks request metrics"""
+
+    def __init__(self) -> None:
+        self._name = self.__class__.__name__
+        super().__init__()
+
+    def render(self, request: Request) -> Any:
+        request_counter.labels(self._name, request.method).inc()
+        return super().render(request)
 
 
 class MatrixRestError(Exception):

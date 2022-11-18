@@ -14,22 +14,21 @@
 
 from typing import TYPE_CHECKING
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
-from sydent.http.servlets import jsonwrap, send_cors
+from sydent.http.servlets import SydentResource, jsonwrap, send_cors
 from sydent.types import JsonDict
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class AccountServlet(Resource):
+class AccountServlet(SydentResource):
     isLeaf = False
 
     def __init__(self, syd: "Sydent") -> None:
-        Resource.__init__(self)
+        super().__init__()
         self.sydent = syd
 
     @jsonwrap

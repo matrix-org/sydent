@@ -1,5 +1,6 @@
-from typing import ClassVar
+from typing import Any, ClassVar
 
+from twisted.web.server import Request
 from zope.interface import Interface, implementer
 
 class IResource(Interface):
@@ -11,3 +12,4 @@ class IResource(Interface):
 class Resource:
     isLeaf: ClassVar[bool]
     def putChild(self, path: bytes, child: IResource) -> None: ...
+    def render(self, request: Request) -> Any: ...
