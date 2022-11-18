@@ -152,6 +152,12 @@ class StoreInviteServlet(SydentResource):
         for k in extra_substitutions:
             substitutions.setdefault(k, "")
 
+        if "sender_display_name" in substitutions:
+            if len(substitutions["sender_display_name"]) > 20:
+                substitutions["sender_display_name"] = (
+                    substitutions["sender_display_name"][:19] + "…"
+                )
+
         substitutions["bracketed_verified_sender"] = ""
         if verified_sender:
             substitutions["bracketed_verified_sender"] = "(%s) " % (verified_sender,)
