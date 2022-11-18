@@ -45,7 +45,7 @@ class SydentResource(Resource):
         super().__init__()
 
     def render(self, request: Request) -> Any:
-        request_counter.labels(self._name, request.method)
+        request_counter.labels(self._name, request.method).inc()
         return super().render(request)
 
 
