@@ -1,0 +1,1 @@
+Add some prometheus metrics and make `prometheus_client` dependency mandatory.

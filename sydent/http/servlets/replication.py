@@ -19,13 +19,12 @@ from typing import TYPE_CHECKING, List, cast
 import twisted.python.log
 from OpenSSL.crypto import X509
 from twisted.internet.interfaces import ISSLTransport
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.hashing_metadata import HashingMetadataStore
 from sydent.db.peers import PeerStore
 from sydent.db.threepid_associations import GlobalAssociationStore, SignedAssociations
-from sydent.http.servlets import MatrixRestError, jsonwrap
+from sydent.http.servlets import MatrixRestError, SydentResource, jsonwrap
 from sydent.threepid import threePidAssocFromDict
 from sydent.types import JsonDict
 from sydent.util import json_decoder
@@ -38,8 +37,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ReplicationPushServlet(Resource):
+class ReplicationPushServlet(SydentResource):
     def __init__(self, sydent: "Sydent") -> None:
+        super().__init__()
         self.sydent = sydent
         self.hashing_store = HashingMetadataStore(sydent)
 

@@ -15,11 +15,16 @@
 import logging
 from typing import TYPE_CHECKING
 
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.db.threepid_associations import GlobalAssociationStore
-from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.http.servlets import (
+    MatrixRestError,
+    SydentResource,
+    get_args,
+    jsonwrap,
+    send_cors,
+)
 from sydent.types import JsonDict
 
 if TYPE_CHECKING:
@@ -28,10 +33,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class BulkLookupServlet(Resource):
+class BulkLookupServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent") -> None:
+        super().__init__()
         self.sydent = syd
 
     @jsonwrap

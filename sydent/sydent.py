@@ -22,6 +22,7 @@ import sqlite3
 from typing import Optional
 
 import attr
+import prometheus_client
 import twisted.internet.reactor
 from matrix_common.versionstring import get_distribution_version_string
 from signedjson.types import SigningKey
@@ -203,8 +204,8 @@ class Sydent:
 
     def maybe_start_prometheus_server(self) -> None:
         if self.config.general.prometheus_enabled:
-            import prometheus_client
-
+            assert self.config.general.prometheus_addr is not None
+            assert self.config.general.prometheus_port is not None
             prometheus_client.start_http_server(
                 port=self.config.general.prometheus_port,
                 addr=self.config.general.prometheus_addr,

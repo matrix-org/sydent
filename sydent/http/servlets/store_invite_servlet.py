@@ -20,14 +20,19 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 import nacl.signing
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 from unpaddedbase64 import encode_base64
 
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.db.threepid_associations import GlobalAssociationStore
 from sydent.http.auth import authV2
-from sydent.http.servlets import MatrixRestError, get_args, jsonwrap, send_cors
+from sydent.http.servlets import (
+    MatrixRestError,
+    SydentResource,
+    get_args,
+    jsonwrap,
+    send_cors,
+)
 from sydent.types import JsonDict
 from sydent.util.emailutils import EmailAddressException, sendEmail
 from sydent.util.stringutils import MAX_EMAIL_ADDRESS_LENGTH, normalise_address
@@ -38,8 +43,9 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class StoreInviteServlet(Resource):
+class StoreInviteServlet(SydentResource):
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.random = random.SystemRandom()
         self.require_auth = require_auth
@@ -72,8 +78,6 @@ class StoreInviteServlet(Resource):
             if account.userId != sender:
                 raise MatrixRestError(403, "M_UNAUTHORIZED", "'sender' doesn't match")
 
-        self.sydent.email_sender_ratelimiter.ratelimit(sender)
-
         logger.info(
             "Store invite request from %s to %s, in %s", sender, address, roomId
         )
@@ -85,6 +89,10 @@ class StoreInviteServlet(Resource):
             in self.sydent.config.email.third_party_invite_homeserver_blocklist
         ):
             raise MatrixRestError(403, "M_UNAUTHORIZED", "Invite not allowed")
+
+        self.sydent.email_sender_ratelimiter.ratelimit(
+            sender, "Limit exceeded for this sender"
+        )
 
         globalAssocStore = GlobalAssociationStore(self.sydent)
         mxid = globalAssocStore.getMxid(medium, normalised_address)
@@ -150,6 +158,9 @@ class StoreInviteServlet(Resource):
 
         substitutions["ephemeral_private_key"] = ephemeralPrivateKeyBase64
         if substitutions["room_name"] != "":
+            if len(substitutions["room_name"]) > 30:
+                substitutions["room_name"] = substitutions["room_name"][:25] + "…"
+
             substitutions["bracketed_room_name"] = "(%s) " % substitutions["room_name"]
 
         substitutions[

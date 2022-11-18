@@ -17,13 +17,18 @@ import logging
 from typing import TYPE_CHECKING
 
 import phonenumbers
-from twisted.web.resource import Resource
 from twisted.web.server import Request
 
 from sydent.http.auth import authV2
-from sydent.http.servlets import asyncjsonwrap, get_args, jsonwrap, send_cors
+from sydent.http.servlets import (
+    SydentResource,
+    asyncjsonwrap,
+    get_args,
+    jsonwrap,
+    send_cors,
+)
 from sydent.types import JsonDict
-from sydent.util.ratelimiter import LimitExceededException, Ratelimiter
+from sydent.util.ratelimiter import Ratelimiter
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     DestinationRejectedException,
@@ -39,10 +44,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class MsisdnRequestCodeServlet(Resource):
+class MsisdnRequestCodeServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.require_auth = require_auth
         self._msisdn_ratelimiter = Ratelimiter[str](
@@ -105,25 +111,10 @@ class MsisdnRequestCodeServlet(Resource):
             phone_number_object, phonenumbers.PhoneNumberFormat.E164
         )[1:]
 
-        try:
-            self._msisdn_ratelimiter.ratelimit(msisdn)
-        except LimitExceededException:
-            logger.warning("Ratelimit hit for number: %s", msisdn)
-            request.setResponseCode(429)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "Limit exceeded for this number",
-            }
-
-        try:
-            self._country_ratelimiter.ratelimit(phone_number_object.country_code)
-        except LimitExceededException:
-            logger.warning("Ratelimit hit for country: %s", msisdn)
-            request.setResponseCode(429)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "Limit exceeded for this country",
-            }
+        self._msisdn_ratelimiter.ratelimit(msisdn, "Limit exceeded for this number")
+        self._country_ratelimiter.ratelimit(
+            phone_number_object.country_code, "Limit exceeded for this country"
+        )
 
         # International formatted number. The same as an E164 but with spaces
         # in appropriate places to make it nicer for the humans.
@@ -161,10 +152,11 @@ class MsisdnRequestCodeServlet(Resource):
         return b""
 
 
-class MsisdnValidateCodeServlet(Resource):
+class MsisdnValidateCodeServlet(SydentResource):
     isLeaf = True
 
     def __init__(self, syd: "Sydent", require_auth: bool = False) -> None:
+        super().__init__()
         self.sydent = syd
         self.require_auth = require_auth
 
