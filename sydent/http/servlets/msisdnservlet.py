@@ -28,7 +28,7 @@ from sydent.http.servlets import (
     send_cors,
 )
 from sydent.types import JsonDict
-from sydent.util.ratelimiter import LimitExceededException, Ratelimiter
+from sydent.util.ratelimiter import Ratelimiter
 from sydent.util.stringutils import is_valid_client_secret
 from sydent.validators import (
     DestinationRejectedException,
@@ -111,25 +111,10 @@ class MsisdnRequestCodeServlet(SydentResource):
             phone_number_object, phonenumbers.PhoneNumberFormat.E164
         )[1:]
 
-        try:
-            self._msisdn_ratelimiter.ratelimit(msisdn)
-        except LimitExceededException:
-            logger.warning("Ratelimit hit for number: %s", msisdn)
-            request.setResponseCode(429)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "Limit exceeded for this number",
-            }
-
-        try:
-            self._country_ratelimiter.ratelimit(phone_number_object.country_code)
-        except LimitExceededException:
-            logger.warning("Ratelimit hit for country: %s", msisdn)
-            request.setResponseCode(429)
-            return {
-                "errcode": "M_UNKNOWN",
-                "error": "Limit exceeded for this country",
-            }
+        self._msisdn_ratelimiter.ratelimit(msisdn, "Limit exceeded for this number")
+        self._country_ratelimiter.ratelimit(
+            phone_number_object.country_code, "Limit exceeded for this country"
+        )
 
         # International formatted number. The same as an E164 but with spaces
         # in appropriate places to make it nicer for the humans.

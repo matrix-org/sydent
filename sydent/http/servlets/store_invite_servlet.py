@@ -78,10 +78,12 @@ class StoreInviteServlet(SydentResource):
             if account.userId != sender:
                 raise MatrixRestError(403, "M_UNAUTHORIZED", "'sender' doesn't match")
 
-        self.sydent.email_sender_ratelimiter.ratelimit(sender)
-
         logger.info(
             "Store invite request from %s to %s, in %s", sender, address, roomId
+        )
+
+        self.sydent.email_sender_ratelimiter.ratelimit(
+            sender, "Limit exceeded for this sender"
         )
 
         globalAssocStore = GlobalAssociationStore(self.sydent)

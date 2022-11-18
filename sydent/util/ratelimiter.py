@@ -11,17 +11,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict, Generic, TypeVar
+import logging
+from http import HTTPStatus
+from typing import Dict, Generic, Optional, TypeVar
 
 from twisted.internet import task
 from twisted.internet.interfaces import IReactorTime
 
+from sydent.http.servlets import MatrixRestError
+
+logger = logging.getLogger(__name__)
+
 K = TypeVar("K")
 
 
-class LimitExceededException(Exception):
-    def __init__(self) -> None:
-        super().__init__("Too many requests")
+class LimitExceededException(MatrixRestError):
+    def __init__(self, error: Optional[str] = None) -> None:
+        if error is None:
+            error = "Too many requests"
+
+        super().__init__(HTTPStatus.TOO_MANY_REQUESTS, "M_UNKNOWN", error)
 
 
 class Ratelimiter(Generic[K]):
@@ -58,16 +67,19 @@ class Ratelimiter(Generic[K]):
             key: tokens - 1 for key, tokens in self._buckets.items() if tokens > 1
         }
 
-    def ratelimit(self, key: K) -> None:
+    def ratelimit(self, key: K, error: Optional[str] = None) -> None:
         """Check if we should ratelimit the request with the given key.
 
         Raises:
             LimitExceededException: if the request should be denied.
         """
+        if error is None:
+            error = "Too many requests"
 
         # We get the current token count and compare it with the `burst`.
         current_tokens = self._buckets.get(key, 0)
         if current_tokens >= self._burst:
-            raise LimitExceededException()
+            logger.warning("Ratelimit hit: %s: %s", error, key)
+            raise LimitExceededException(error)
 
         self._buckets[key] = current_tokens + 1
