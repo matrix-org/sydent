@@ -81,6 +81,7 @@ from sydent.http.servlets.v2_servlet import V2Servlet
 from sydent.replication.pusher import Pusher
 from sydent.threepid.bind import ThreepidBinder
 from sydent.util.hash import sha256_and_url_safe_base64
+from sydent.util.ratelimiter import Ratelimiter
 from sydent.util.tokenutils import generateAlphanumericTokenOfLength
 from sydent.validators.emailvalidator import EmailValidator
 from sydent.validators.msisdnvalidator import MsisdnValidator
@@ -168,6 +169,12 @@ class Sydent:
         )
 
         self.pusher: Pusher = Pusher(self)
+
+        self.email_sender_ratelimiter: Ratelimiter[str] = Ratelimiter(
+            self.reactor,
+            burst=self.config.email.email_sender_ratelimit_burst,
+            rate_hz=self.config.email.email_sender_ratelimit_rate_hz,
+        )
 
     def run(self) -> None:
         self.clientApiHttpServer.setup()

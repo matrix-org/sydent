@@ -70,4 +70,11 @@ class EmailConfig(BaseConfig):
             "email", "email.third_party_invite_domain_obfuscate_characters"
         )
 
+        self.email_sender_ratelimit_burst = cfg.getint(
+            "email", "email.ratelimit_sender.burst", fallback=5
+        )
+        self.email_sender_ratelimit_rate_hz = cfg.getfloat(
+            "email", "email.ratelimit_sender.rate_hz", fallback=1.0 / (5 * 60.0)
+        )
+
         return False

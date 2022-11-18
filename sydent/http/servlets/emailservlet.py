@@ -44,8 +44,16 @@ class EmailRequestCodeServlet(Resource):
     def render_POST(self, request: Request) -> JsonDict:
         send_cors(request)
 
+        ipaddress = self.sydent.ip_from_request(request)
+
         if self.require_auth:
-            authV2(self.sydent, request)
+            account = authV2(self.sydent, request)
+
+            self.sydent.email_sender_ratelimiter.ratelimit(account.userId)
+        elif ipaddress:
+            # For `/v1/` requests the ip address is the best we can do for rate
+            # limiting.
+            self.sydent.email_sender_ratelimiter.ratelimit(ipaddress)
 
         args = get_args(request, ("email", "client_secret", "send_attempt"))
 
@@ -84,7 +92,6 @@ class EmailRequestCodeServlet(Resource):
             request.setResponseCode(400)
             return {"errcode": "M_INVALID_PARAM", "error": "Invalid email provided"}
 
-        ipaddress = self.sydent.ip_from_request(request)
         brand = self.sydent.brand_from_request(request)
 
         nextLink: Optional[str] = None
