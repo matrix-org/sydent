@@ -76,6 +76,9 @@ class EmailConfig(BaseConfig):
         third_party_invite_room_blocklist = cfg.get(
             "email", "email.third_party_invite_room_blocklist", fallback=""
         )
+        third_party_invite_keyword_blocklist = cfg.get(
+            "email", "email.third_party_invite_keyword_blocklist", fallback=""
+        )
         self.third_party_invite_homeserver_blocklist = {
             server
             for server in third_party_invite_homeserver_blocklist.split("\n")
@@ -85,6 +88,11 @@ class EmailConfig(BaseConfig):
             room_id
             for room_id in third_party_invite_room_blocklist.split("\n")
             if room_id  # filter out empty lines
+        }
+        self.third_party_invite_keyword_blocklist = {
+            keyword
+            for keyword in third_party_invite_keyword_blocklist.split("\n")
+            if keyword
         }
 
         self.email_sender_ratelimit_burst = cfg.getint(
