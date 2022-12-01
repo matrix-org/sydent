@@ -6,7 +6,7 @@ from twisted.web.client import Response
 from sydent.db.invite_tokens import JoinTokenStore
 from sydent.http.httpclient import FederationHttpClient
 from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
-from tests.utils import make_sydent
+from tests.utils import make_request, make_sydent
 
 
 class ThreepidInvitesTestCase(unittest.TestCase):
@@ -19,6 +19,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
                 # Used by test_invited_email_address_obfuscation
                 "email.third_party_invite_username_obfuscate_characters": "6",
                 "email.third_party_invite_domain_obfuscate_characters": "8",
+                "email.third_party_invite_keyword_blocklist": "evil\nbad",
             },
         }
         self.sydent = make_sydent(test_config=config)
@@ -101,6 +102,23 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         )
 
         self.assertEqual(redacted_address, "...@1...")
+
+    def test_third_party_invite_keyword_block_works(self):
+        invite_config = {
+            "medium": "email",
+            "address": "evil",
+            "room_id": "bad",
+            "sender": "@bad_dude:badness.org",
+        }
+        request, channel = make_request(
+            self.sydent.reactor,
+            "POST",
+            "/_matrix/identity/v2/store-invite",
+            invite_config,
+        )
+        store_invite_servlet = StoreInviteServlet(self.sydent)
+        request.render(store_invite_servlet)
+        self.assertEqual(channel.code, 403)
 
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
