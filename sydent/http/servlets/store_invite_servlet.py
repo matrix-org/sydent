@@ -94,6 +94,10 @@ class StoreInviteServlet(SydentResource):
             sender, "Limit exceeded for this sender"
         )
 
+        for keyword in self.sydent.config.email.third_party_invite_keyword_blocklist:
+            if keyword in [medium, address, roomId, sender]:
+                raise MatrixRestError(403, "M_UNAUTHORIZED", "Invite not allowed")
+
         globalAssocStore = GlobalAssociationStore(self.sydent)
         mxid = globalAssocStore.getMxid(medium, normalised_address)
         if mxid:
