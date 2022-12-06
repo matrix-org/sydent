@@ -138,7 +138,7 @@ class StoreInviteServlet(SydentResource):
 
         for keyword in self.sydent.config.email.third_party_invite_keyword_blocklist:
             for (key, value) in args.items():
-                if keyword in value:
+                if keyword in value.casefold():
                     logger.info(
                         "Denying invites as %r appears in arg %r: %r",
                         keyword,

@@ -109,7 +109,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
             "address": "foo@example.com",
             "room_id": "!bar",
             "sender": "@foo:example.com",
-            "room_name": "This is an evil room name.",
+            "room_name": "This is an EVIL room name.",
         }
         request, channel = make_request(
             self.sydent.reactor,

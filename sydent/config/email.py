@@ -90,7 +90,7 @@ class EmailConfig(BaseConfig):
             if room_id  # filter out empty lines
         }
         self.third_party_invite_keyword_blocklist = {
-            keyword
+            keyword.casefold()
             for keyword in third_party_invite_keyword_blocklist.split("\n")
             if keyword
         }
