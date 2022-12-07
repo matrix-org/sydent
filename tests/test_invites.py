@@ -106,9 +106,10 @@ class ThreepidInvitesTestCase(unittest.TestCase):
     def test_third_party_invite_keyword_block_works(self):
         invite_config = {
             "medium": "email",
-            "address": "evil",
-            "room_id": "bad",
-            "sender": "@bad_dude:badness.org",
+            "address": "foo@example.com",
+            "room_id": "!bar",
+            "sender": "@foo:example.com",
+            "room_name": "This is an EVIL room name.",
         }
         request, channel = make_request(
             self.sydent.reactor,

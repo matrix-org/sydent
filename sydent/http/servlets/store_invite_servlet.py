@@ -94,10 +94,6 @@ class StoreInviteServlet(SydentResource):
             sender, "Limit exceeded for this sender"
         )
 
-        for keyword in self.sydent.config.email.third_party_invite_keyword_blocklist:
-            if keyword in [medium, address, roomId, sender]:
-                raise MatrixRestError(403, "M_UNAUTHORIZED", "Invite not allowed")
-
         globalAssocStore = GlobalAssociationStore(self.sydent)
         mxid = globalAssocStore.getMxid(medium, normalised_address)
         if mxid:
@@ -139,6 +135,17 @@ class StoreInviteServlet(SydentResource):
             if isinstance(v, str):
                 substitutions[k] = v
         substitutions["token"] = token
+
+        for keyword in self.sydent.config.email.third_party_invite_keyword_blocklist:
+            for (key, value) in args.items():
+                if keyword in value.casefold():
+                    logger.info(
+                        "Denying invites as %r appears in arg %r: %r",
+                        keyword,
+                        key,
+                        value,
+                    )
+                    raise MatrixRestError(403, "M_UNAUTHORIZED", "Invite not allowed")
 
         # Substitutions that the template requires, but are optional to provide
         # to the API.
