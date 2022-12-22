@@ -31,6 +31,7 @@ from sydent.http.servlets.authenticated_unbind_threepid_servlet import (
 )
 from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
 from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
+from sydent.http.servlets.cors_servlet import CorsServlet
 from sydent.http.servlets.emailservlet import (
     EmailRequestCodeServlet,
     EmailValidateCodeServlet,
@@ -55,8 +56,6 @@ from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
 from sydent.http.servlets.termsservlet import TermsServlet
 from sydent.http.servlets.threepidbindservlet import ThreePidBindServlet
 from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
-from sydent.http.servlets.v1_servlet import V1Servlet
-from sydent.http.servlets.v2_servlet import V2Servlet
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -72,8 +71,8 @@ class ClientApiHttpServer:
         matrix = Resource()
         identity = Resource()
         api = Resource()
-        v1 = V1Servlet(sydent)
-        v2 = V2Servlet(sydent)
+        v1 = CorsServlet(sydent)
+        v2 = CorsServlet(sydent)
 
         validate = Resource()
         validate_v2 = Resource()
