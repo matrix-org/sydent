@@ -22,12 +22,41 @@ from twisted.web.resource import Resource
 from twisted.web.server import Site
 
 from sydent.http.httpcommon import SizeLimitingRequest
+from sydent.http.servlets.accountservlet import AccountServlet
 from sydent.http.servlets.authenticated_bind_threepid_servlet import (
     AuthenticatedBindThreePidServlet,
 )
 from sydent.http.servlets.authenticated_unbind_threepid_servlet import (
     AuthenticatedUnbindThreePidServlet,
 )
+from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
+from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
+from sydent.http.servlets.emailservlet import (
+    EmailRequestCodeServlet,
+    EmailValidateCodeServlet,
+)
+from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
+from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
+from sydent.http.servlets.logoutservlet import LogoutServlet
+from sydent.http.servlets.lookupservlet import LookupServlet
+from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
+from sydent.http.servlets.msisdnservlet import (
+    MsisdnRequestCodeServlet,
+    MsisdnValidateCodeServlet,
+)
+from sydent.http.servlets.pubkeyservlets import (
+    Ed25519Servlet,
+    EphemeralPubkeyIsValidServlet,
+    PubkeyIsValidServlet,
+)
+from sydent.http.servlets.registerservlet import RegisterServlet
+from sydent.http.servlets.replication import ReplicationPushServlet
+from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
+from sydent.http.servlets.termsservlet import TermsServlet
+from sydent.http.servlets.threepidbindservlet import ThreePidBindServlet
+from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
+from sydent.http.servlets.v1_servlet import V1Servlet
+from sydent.http.servlets.v2_servlet import V2Servlet
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -36,15 +65,15 @@ logger = logging.getLogger(__name__)
 
 
 class ClientApiHttpServer:
-    def __init__(self, sydent: "Sydent") -> None:
+    def __init__(self, sydent: "Sydent", lookup_pepper: str) -> None:
         self.sydent = sydent
 
         root = Resource()
         matrix = Resource()
         identity = Resource()
         api = Resource()
-        v1 = self.sydent.servlets.v1
-        v2 = self.sydent.servlets.v2
+        v1 = V1Servlet(sydent)
+        v2 = V2Servlet(sydent)
 
         validate = Resource()
         validate_v2 = Resource()
@@ -55,7 +84,7 @@ class ClientApiHttpServer:
 
         threepid_v1 = Resource()
         threepid_v2 = Resource()
-        unbind = self.sydent.servlets.threepidUnbind
+        unbind = ThreePidUnbindServlet(sydent)
 
         pubkey = Resource()
         ephemeralPubkey = Resource()
@@ -74,65 +103,71 @@ class ClientApiHttpServer:
 
         v1.putChild(b"validate", validate)
 
-        v1.putChild(b"lookup", self.sydent.servlets.lookup)
-        v1.putChild(b"bulk_lookup", self.sydent.servlets.bulk_lookup)
+        v1.putChild(b"lookup", LookupServlet(sydent))
+        v1.putChild(b"bulk_lookup", BulkLookupServlet(sydent))
 
         v1.putChild(b"pubkey", pubkey)
-        pubkey.putChild(b"isvalid", self.sydent.servlets.pubkeyIsValid)
-        pubkey.putChild(b"ed25519:0", self.sydent.servlets.pubkey_ed25519)
+        pubkey.putChild(b"isvalid", PubkeyIsValidServlet(sydent))
+        pubkey.putChild(b"ed25519:0", Ed25519Servlet(sydent))
         pubkey.putChild(b"ephemeral", ephemeralPubkey)
-        ephemeralPubkey.putChild(
-            b"isvalid", self.sydent.servlets.ephemeralPubkeyIsValid
-        )
+        ephemeralPubkey.putChild(b"isvalid", EphemeralPubkeyIsValidServlet(sydent))
 
         threepid_v2.putChild(
-            b"getValidated3pid", self.sydent.servlets.getValidated3pidV2
+            b"getValidated3pid", GetValidated3pidServlet(sydent, require_auth=True)
         )
-        threepid_v2.putChild(b"bind", self.sydent.servlets.threepidBindV2)
+        threepid_v2.putChild(b"bind", ThreePidBindServlet(sydent, require_auth=True))
         threepid_v2.putChild(b"unbind", unbind)
 
-        threepid_v1.putChild(b"getValidated3pid", self.sydent.servlets.getValidated3pid)
+        threepid_v1.putChild(b"getValidated3pid", GetValidated3pidServlet(sydent))
         threepid_v1.putChild(b"unbind", unbind)
         if self.sydent.config.general.enable_v1_associations:
-            threepid_v1.putChild(b"bind", self.sydent.servlets.threepidBind)
+            threepid_v1.putChild(b"bind", ThreePidBindServlet(sydent))
 
         v1.putChild(b"3pid", threepid_v1)
 
-        email.putChild(b"requestToken", self.sydent.servlets.emailRequestCode)
-        email.putChild(b"submitToken", self.sydent.servlets.emailValidate)
+        email.putChild(b"requestToken", EmailRequestCodeServlet(sydent))
+        email.putChild(b"submitToken", EmailValidateCodeServlet(sydent))
 
-        email_v2.putChild(b"requestToken", self.sydent.servlets.emailRequestCodeV2)
-        email_v2.putChild(b"submitToken", self.sydent.servlets.emailValidateV2)
+        email_v2.putChild(
+            b"requestToken", EmailRequestCodeServlet(sydent, require_auth=True)
+        )
+        email_v2.putChild(
+            b"submitToken", EmailValidateCodeServlet(sydent, require_auth=True)
+        )
 
-        msisdn.putChild(b"requestToken", self.sydent.servlets.msisdnRequestCode)
-        msisdn.putChild(b"submitToken", self.sydent.servlets.msisdnValidate)
+        msisdn.putChild(b"requestToken", MsisdnRequestCodeServlet(sydent))
+        msisdn.putChild(b"submitToken", MsisdnValidateCodeServlet(sydent))
 
-        msisdn_v2.putChild(b"requestToken", self.sydent.servlets.msisdnRequestCodeV2)
-        msisdn_v2.putChild(b"submitToken", self.sydent.servlets.msisdnValidateV2)
+        msisdn_v2.putChild(
+            b"requestToken", MsisdnRequestCodeServlet(sydent, require_auth=True)
+        )
+        msisdn_v2.putChild(
+            b"submitToken", MsisdnValidateCodeServlet(sydent, require_auth=True)
+        )
 
-        v1.putChild(b"store-invite", self.sydent.servlets.storeInviteServlet)
+        v1.putChild(b"store-invite", StoreInviteServlet(sydent))
 
-        v1.putChild(b"sign-ed25519", self.sydent.servlets.blindlySignStuffServlet)
+        v1.putChild(b"sign-ed25519", BlindlySignStuffServlet(sydent))
 
         # v2
         # note v2 loses the /api so goes on 'identity' not 'api'
         identity.putChild(b"v2", v2)
 
         # v2 exclusive APIs
-        v2.putChild(b"terms", self.sydent.servlets.termsServlet)
-        account = self.sydent.servlets.accountServlet
+        v2.putChild(b"terms", TermsServlet(sydent))
+        account = AccountServlet(sydent)
         v2.putChild(b"account", account)
-        account.putChild(b"register", self.sydent.servlets.registerServlet)
-        account.putChild(b"logout", self.sydent.servlets.logoutServlet)
+        account.putChild(b"register", RegisterServlet(sydent))
+        account.putChild(b"logout", LogoutServlet(sydent))
 
         # v2 versions of existing APIs
         v2.putChild(b"validate", validate_v2)
         v2.putChild(b"pubkey", pubkey)
         v2.putChild(b"3pid", threepid_v2)
-        v2.putChild(b"store-invite", self.sydent.servlets.storeInviteServletV2)
-        v2.putChild(b"sign-ed25519", self.sydent.servlets.blindlySignStuffServletV2)
-        v2.putChild(b"lookup", self.sydent.servlets.lookup_v2)
-        v2.putChild(b"hash_details", self.sydent.servlets.hash_details)
+        v2.putChild(b"store-invite", StoreInviteServlet(sydent, require_auth=True))
+        v2.putChild(b"sign-ed25519", BlindlySignStuffServlet(sydent, require_auth=True))
+        v2.putChild(b"lookup", LookupV2Servlet(sydent, lookup_pepper))
+        v2.putChild(b"hash_details", HashDetailsServlet(sydent, lookup_pepper))
 
         self.factory = Site(root, SizeLimitingRequest)
         self.factory.displayTracebacks = False
@@ -199,7 +234,7 @@ class ReplicationHttpsServer:
 
         identity.putChild(b"replicate", replicate)
         replicate.putChild(b"v1", replV1)
-        replV1.putChild(b"push", self.sydent.servlets.replicationPush)
+        replV1.putChild(b"push", ReplicationPushServlet(sydent))
 
         self.factory = Site(root)
         self.factory.displayTracebacks = False

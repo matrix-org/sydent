@@ -16,6 +16,7 @@ from unittest.mock import patch
 from parameterized import parameterized
 from twisted.trial import unittest
 
+from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
 from sydent.users.accounts import Account
 from tests.utils import make_request, make_sydent
 
@@ -31,6 +32,7 @@ class StoreInviteTestCase(unittest.TestCase):
             },
         }
         self.sydent = make_sydent(test_config=config)
+        self.resource = StoreInviteServlet(self.sydent, require_auth=True)
         self.sender = "@alice:wonderland"
 
     @parameterized.expand(
@@ -55,7 +57,7 @@ class StoreInviteTestCase(unittest.TestCase):
 
         with patch("sydent.http.servlets.store_invite_servlet.authV2") as authV2:
             authV2.return_value = Account(self.sender, 0, None)
-            request.render(self.sydent.servlets.storeInviteServletV2)
+            request.render(self.resource)
 
         self.assertEqual(channel.code, 400)
         self.assertEqual(channel.json_body["errcode"], "M_INVALID_EMAIL")

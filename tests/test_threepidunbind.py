@@ -19,6 +19,7 @@ import twisted.web.client
 from parameterized import parameterized
 from twisted.trial import unittest
 
+from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
 from tests.utils import make_request, make_sydent
 
 
@@ -28,6 +29,7 @@ class ThreepidUnbindTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Create a new sydent
         self.sydent = make_sydent()
+        self.resource = ThreePidUnbindServlet(self.sydent)
 
     # Duplicated from TestRegisterServelet. Is there a way for us to keep
     # ourselves DRY?
@@ -60,7 +62,7 @@ class ThreepidUnbindTestCase(unittest.TestCase):
         with patch.object(
             self.sydent.sig_verifier, "authenticate_request", side_effect=exc
         ):
-            request.render(self.sydent.servlets.threepidUnbind)
+            request.render(self.resource)
         self.assertEqual(channel.code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertEqual(channel.json_body["errcode"], "M_UNKNOWN")
         self.assertIn("contact", channel.json_body["error"])

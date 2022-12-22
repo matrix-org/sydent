@@ -15,6 +15,7 @@ from unittest.mock import patch
 
 from twisted.trial import unittest
 
+from sydent.http.servlets.emailservlet import EmailRequestCodeServlet
 from tests.utils import make_request, make_sydent
 
 
@@ -22,11 +23,12 @@ class TestRequestCode(unittest.TestCase):
     def setUp(self):
         # Create a new sydent
         self.sydent = make_sydent()
+        self.resource = EmailRequestCodeServlet(self.sydent)
 
     def _render_request(self, request):
         # Patch out the email sending so we can investigate the resulting email.
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            request.render(self.sydent.servlets.emailRequestCode)
+            request.render(self.resource)
 
         # Fish out the SMTP object and return it.
         smtp = smtplib.SMTP.return_value

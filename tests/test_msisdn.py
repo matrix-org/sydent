@@ -19,6 +19,7 @@ import attr
 from twisted.trial import unittest
 from twisted.web.server import Request
 
+from sydent.http.servlets.msisdnservlet import MsisdnRequestCodeServlet
 from tests.utils import make_request, make_sydent
 
 
@@ -56,6 +57,7 @@ class TestRequestCode(unittest.TestCase):
             },
         }
         self.sydent = make_sydent(test_config=config)
+        self.resource = MsisdnRequestCodeServlet(self.sydent)
 
     def _render_request(self, request: Request) -> Awaitable[MagicMock]:
         # Patch out the email sending so we can investigate the resulting email.
@@ -65,7 +67,7 @@ class TestRequestCode(unittest.TestCase):
             f = asyncio.Future()
             f.set_result(MagicMock())
             sendTextSMS.return_value = f
-            request.render(self.sydent.servlets.msisdnRequestCode)
+            request.render(self.resource)
 
         return sendTextSMS
 
@@ -121,5 +123,5 @@ class TestRequestCode(unittest.TestCase):
                 "send_attempt": 0,
             },
         )
-        request.render(self.sydent.servlets.msisdnRequestCode)
+        request.render(self.resource)
         self.assertEqual(channel.code, 500)

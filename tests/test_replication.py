@@ -5,6 +5,7 @@ from twisted.internet import defer
 from twisted.trial import unittest
 from twisted.web.client import Response
 
+from sydent.http.servlets.replication import ReplicationPushServlet
 from sydent.threepid import ThreepidAssociation
 from sydent.threepid.signer import Signer
 from tests.utils import make_request, make_sydent
@@ -16,6 +17,7 @@ class ReplicationTestCase(unittest.TestCase):
     def setUp(self):
         # Create a new sydent
         self.sydent = make_sydent()
+        self.resource = ReplicationPushServlet(self.sydent)
 
         # Create a fake peer to replicate to.
         peer_public_key_base64 = "+vB8mTaooD/MA8YYZM8t9+vnGhP1937q2icrqPV9JTs"
@@ -81,7 +83,7 @@ class ReplicationTestCase(unittest.TestCase):
         request, channel = make_request(
             self.sydent.reactor, "POST", "/_matrix/identity/replicate/v1/push", body
         )
-        request.render(self.sydent.servlets.replicationPush)
+        request.render(self.resource)
 
         self.assertEqual(channel.code, 200)
 

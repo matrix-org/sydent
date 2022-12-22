@@ -19,6 +19,7 @@ from twisted.trial.unittest import TestCase
 from twisted.web.client import Agent
 
 from sydent.http.blacklisting_reactor import BlacklistingReactorWrapper
+from sydent.http.servlets.registerservlet import RegisterServlet
 from sydent.http.srvresolver import Server
 from tests.utils import AsyncMock, make_request, make_sydent
 
@@ -33,6 +34,7 @@ class BlacklistingAgentTest(TestCase):
         }
 
         self.sydent = make_sydent(test_config=config)
+        self.register_resource = RegisterServlet(self.sydent)
 
         self.reactor = self.sydent.reactor
 
@@ -118,7 +120,7 @@ class BlacklistingAgentTest(TestCase):
             )
         ]
 
-        request.render(self.sydent.servlets.registerServlet)
+        request.render(self.register_resource)
 
         transport, protocol = self._get_http_request(
             self.allowed_ip.decode("ascii"), 443
@@ -170,7 +172,7 @@ class BlacklistingAgentTest(TestCase):
             )
         ]
 
-        request.render(self.sydent.servlets.registerServlet)
+        request.render(self.register_resource)
 
         transport, protocol = self._get_http_request(self.safe_ip.decode("ascii"), 443)
 
@@ -218,7 +220,7 @@ class BlacklistingAgentTest(TestCase):
             )
         ]
 
-        request.render(self.sydent.servlets.registerServlet)
+        request.render(self.register_resource)
 
         self.assertNot(self.reactor.tcpClients)
 

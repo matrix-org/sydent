@@ -20,6 +20,7 @@ import twisted.web.client
 from parameterized import parameterized
 from twisted.trial import unittest
 
+from sydent.http.servlets.registerservlet import RegisterServlet
 from tests.utils import make_request, make_sydent
 
 
@@ -29,6 +30,7 @@ class RegisterTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Create a new sydent
         self.sydent = make_sydent()
+        self.resource = RegisterServlet(self.sydent)
 
     def test_sydent_rejects_invalid_hostname(self) -> None:
         """Tests that the /register endpoint rejects an invalid hostname passed as matrix_server_name"""
@@ -43,7 +45,7 @@ class RegisterTestCase(unittest.TestCase):
             content={"matrix_server_name": bad_hostname, "access_token": "foo"},
         )
 
-        request.render(self.sydent.servlets.registerServlet)
+        request.render(self.resource)
 
         self.assertEqual(channel.code, 400)
 
@@ -68,7 +70,7 @@ class RegisterTestCase(unittest.TestCase):
                 "access_token": "back_in_wonderland",
             },
         )
-        servlet = self.sydent.servlets.registerServlet
+        servlet = self.resource
 
         with patch.object(servlet.client, "get_json", side_effect=exc):
             request.render(servlet)
@@ -89,7 +91,7 @@ class RegisterTestCase(unittest.TestCase):
                 "access_token": "back_in_wonderland",
             },
         )
-        servlet = self.sydent.servlets.registerServlet
+        servlet = self.resource
         exc = JSONDecodeError("ruh roh", "C'est n'est pas une objet JSON", 0)
         with patch.object(servlet.client, "get_json", side_effect=exc):
             request.render(servlet)

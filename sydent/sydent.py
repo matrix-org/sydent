@@ -50,35 +50,6 @@ from sydent.http.httpserver import (
     InternalApiHttpServer,
     ReplicationHttpsServer,
 )
-from sydent.http.servlets.accountservlet import AccountServlet
-from sydent.http.servlets.blindlysignstuffservlet import BlindlySignStuffServlet
-from sydent.http.servlets.bulklookupservlet import BulkLookupServlet
-from sydent.http.servlets.emailservlet import (
-    EmailRequestCodeServlet,
-    EmailValidateCodeServlet,
-)
-from sydent.http.servlets.getvalidated3pidservlet import GetValidated3pidServlet
-from sydent.http.servlets.hashdetailsservlet import HashDetailsServlet
-from sydent.http.servlets.logoutservlet import LogoutServlet
-from sydent.http.servlets.lookupservlet import LookupServlet
-from sydent.http.servlets.lookupv2servlet import LookupV2Servlet
-from sydent.http.servlets.msisdnservlet import (
-    MsisdnRequestCodeServlet,
-    MsisdnValidateCodeServlet,
-)
-from sydent.http.servlets.pubkeyservlets import (
-    Ed25519Servlet,
-    EphemeralPubkeyIsValidServlet,
-    PubkeyIsValidServlet,
-)
-from sydent.http.servlets.registerservlet import RegisterServlet
-from sydent.http.servlets.replication import ReplicationPushServlet
-from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
-from sydent.http.servlets.termsservlet import TermsServlet
-from sydent.http.servlets.threepidbindservlet import ThreePidBindServlet
-from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
-from sydent.http.servlets.v1_servlet import V1Servlet
-from sydent.http.servlets.v2_servlet import V2Servlet
 from sydent.replication.pusher import Pusher
 from sydent.threepid.bind import ThreepidBinder
 from sydent.util.hash import sha256_and_url_safe_base64
@@ -157,13 +128,11 @@ class Sydent:
 
         self.sig_verifier: Verifier = Verifier(self)
 
-        self.servlets: Servlets = Servlets(self, lookup_pepper)
-
         self.threepidBinder: ThreepidBinder = ThreepidBinder(self)
 
         self.sslComponents: SslComponents = SslComponents(self)
 
-        self.clientApiHttpServer = ClientApiHttpServer(self)
+        self.clientApiHttpServer = ClientApiHttpServer(self, lookup_pepper)
         self.replicationHttpsServer = ReplicationHttpsServer(self)
         self.replicationHttpsClient: ReplicationHttpsClient = ReplicationHttpsClient(
             self
@@ -280,43 +249,6 @@ class Sydent:
 class Validators:
     email: EmailValidator
     msisdn: MsisdnValidator
-
-
-class Servlets:
-    def __init__(self, sydent: Sydent, lookup_pepper: str):
-        self.v1 = V1Servlet(sydent)
-        self.v2 = V2Servlet(sydent)
-        self.emailRequestCode = EmailRequestCodeServlet(sydent)
-        self.emailRequestCodeV2 = EmailRequestCodeServlet(sydent, require_auth=True)
-        self.emailValidate = EmailValidateCodeServlet(sydent)
-        self.emailValidateV2 = EmailValidateCodeServlet(sydent, require_auth=True)
-        self.msisdnRequestCode = MsisdnRequestCodeServlet(sydent)
-        self.msisdnRequestCodeV2 = MsisdnRequestCodeServlet(sydent, require_auth=True)
-        self.msisdnValidate = MsisdnValidateCodeServlet(sydent)
-        self.msisdnValidateV2 = MsisdnValidateCodeServlet(sydent, require_auth=True)
-        self.lookup = LookupServlet(sydent)
-        self.bulk_lookup = BulkLookupServlet(sydent)
-        self.hash_details = HashDetailsServlet(sydent, lookup_pepper)
-        self.lookup_v2 = LookupV2Servlet(sydent, lookup_pepper)
-        self.pubkey_ed25519 = Ed25519Servlet(sydent)
-        self.pubkeyIsValid = PubkeyIsValidServlet(sydent)
-        self.ephemeralPubkeyIsValid = EphemeralPubkeyIsValidServlet(sydent)
-        self.threepidBind = ThreePidBindServlet(sydent)
-        self.threepidBindV2 = ThreePidBindServlet(sydent, require_auth=True)
-        self.threepidUnbind = ThreePidUnbindServlet(sydent)
-        self.replicationPush = ReplicationPushServlet(sydent)
-        self.getValidated3pid = GetValidated3pidServlet(sydent)
-        self.getValidated3pidV2 = GetValidated3pidServlet(sydent, require_auth=True)
-        self.storeInviteServlet = StoreInviteServlet(sydent)
-        self.storeInviteServletV2 = StoreInviteServlet(sydent, require_auth=True)
-        self.blindlySignStuffServlet = BlindlySignStuffServlet(sydent)
-        self.blindlySignStuffServletV2 = BlindlySignStuffServlet(
-            sydent, require_auth=True
-        )
-        self.termsServlet = TermsServlet(sydent)
-        self.accountServlet = AccountServlet(sydent)
-        self.registerServlet = RegisterServlet(sydent)
-        self.logoutServlet = LogoutServlet(sydent)
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
