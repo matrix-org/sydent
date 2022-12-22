@@ -187,6 +187,7 @@ class FakeSite:
 
 def make_request(
     reactor,
+    site,
     method,
     path,
     content=b"",
@@ -201,6 +202,7 @@ def make_request(
 
     Args:
         reactor (IReactor): The Twisted reactor to use when performing the request.
+        site (
         method (bytes or unicode): The HTTP request method ("verb").
         path (bytes or unicode): The HTTP path, suitably URL encoded (e.g.
         escaped UTF-8 & spaces and such).
@@ -236,11 +238,9 @@ def make_request(
     if isinstance(content, str):
         content = content.encode("utf8")
 
-    site = FakeSite()
     channel = FakeChannel(site, reactor)
 
     req = request(channel)
-    req.process = lambda: b""
     req.content = BytesIO(content)
     req.postpath = list(map(unquote, path[1:].split(b"/")))
 

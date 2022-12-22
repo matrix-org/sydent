@@ -20,7 +20,6 @@ import twisted.web.client
 from parameterized import parameterized
 from twisted.trial import unittest
 
-from sydent.http.servlets.registerservlet import RegisterServlet
 from tests.utils import make_request, make_sydent
 
 
@@ -30,7 +29,6 @@ class RegisterTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Create a new sydent
         self.sydent = make_sydent()
-        self.resource = RegisterServlet(self.sydent)
 
     def test_sydent_rejects_invalid_hostname(self) -> None:
         """Tests that the /register endpoint rejects an invalid hostname passed as matrix_server_name"""
@@ -40,12 +38,11 @@ class RegisterTestCase(unittest.TestCase):
 
         request, channel = make_request(
             self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
             "POST",
             "/_matrix/identity/v2/account/register",
             content={"matrix_server_name": bad_hostname, "access_token": "foo"},
         )
-
-        request.render(self.resource)
 
         self.assertEqual(channel.code, 400)
 
@@ -61,19 +58,19 @@ class RegisterTestCase(unittest.TestCase):
     )
     def test_connection_failure(self, exc: Exception) -> None:
         self.sydent.run()
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/register",
-            content={
-                "matrix_server_name": "matrix.alice.com",
-                "access_token": "back_in_wonderland",
-            },
-        )
-        servlet = self.resource
-
-        with patch.object(servlet.client, "get_json", side_effect=exc):
-            request.render(servlet)
+        with patch(
+            "sydent.http.httpclient.FederationHttpClient.get_json", side_effect=exc
+        ):
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/v2/account/register",
+                content={
+                    "matrix_server_name": "matrix.alice.com",
+                    "access_token": "back_in_wonderland",
+                },
+            )
         self.assertEqual(channel.code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertEqual(channel.json_body["errcode"], "M_UNKNOWN")
         # Check that we haven't just returned the generic error message in asyncjsonwrap
@@ -82,19 +79,20 @@ class RegisterTestCase(unittest.TestCase):
 
     def test_federation_does_not_return_json(self) -> None:
         self.sydent.run()
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/register",
-            content={
-                "matrix_server_name": "matrix.alice.com",
-                "access_token": "back_in_wonderland",
-            },
-        )
-        servlet = self.resource
         exc = JSONDecodeError("ruh roh", "C'est n'est pas une objet JSON", 0)
-        with patch.object(servlet.client, "get_json", side_effect=exc):
-            request.render(servlet)
+        with patch(
+            "sydent.http.httpclient.FederationHttpClient.get_json", side_effect=exc
+        ):
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/v2/account/register",
+                content={
+                    "matrix_server_name": "matrix.alice.com",
+                    "access_token": "back_in_wonderland",
+                },
+            )
         self.assertEqual(channel.code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertEqual(channel.json_body["errcode"], "M_UNKNOWN")
         # Check that we haven't just returned the generic error message in asyncjsonwrap

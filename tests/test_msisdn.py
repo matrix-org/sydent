@@ -12,14 +12,13 @@
 #  limitations under the License.
 import asyncio
 import os.path
-from typing import Awaitable
-from unittest.mock import MagicMock, patch
+from typing import Optional
+from unittest.mock import Mock, patch
 
 import attr
 from twisted.trial import unittest
-from twisted.web.server import Request
 
-from sydent.http.servlets.msisdnservlet import MsisdnRequestCodeServlet
+from sydent.types import JsonDict
 from tests.utils import make_request, make_sydent
 
 
@@ -57,26 +56,31 @@ class TestRequestCode(unittest.TestCase):
             },
         }
         self.sydent = make_sydent(test_config=config)
-        self.resource = MsisdnRequestCodeServlet(self.sydent)
 
-    def _render_request(self, request: Request) -> Awaitable[MagicMock]:
+    def _make_request(self, url: str, body: Optional[JsonDict] = None) -> Mock:
         # Patch out the email sending so we can investigate the resulting email.
         with patch("sydent.sms.openmarket.OpenMarketSMS.sendTextSMS") as sendTextSMS:
             # We can't use AsyncMock until Python 3.8. Instead, mock the
             # function as returning a future.
             f = asyncio.Future()
-            f.set_result(MagicMock())
+            f.set_result(Mock())
             sendTextSMS.return_value = f
-            request.render(self.resource)
+
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                url,
+                body,
+            )
+            self.assertEqual(channel.code, 200)
 
         return sendTextSMS
 
     def test_request_code(self) -> None:
         self.sydent.run()
 
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
+        sendSMS_mock = self._make_request(
             "/_matrix/identity/api/v1/validate/msisdn/requestToken",
             {
                 "phone_number": "447700900750",
@@ -85,9 +89,7 @@ class TestRequestCode(unittest.TestCase):
                 "send_attempt": 0,
             },
         )
-        sendSMS_mock = self._render_request(request)
         sendSMS_mock.assert_called_once()
-        self.assertEqual(channel.code, 200)
 
     def test_request_code_via_url_query_params(self) -> None:
         self.sydent.run()
@@ -98,13 +100,11 @@ class TestRequestCode(unittest.TestCase):
             "&client_secret=oursecret"
             "&send_attempt=0"
         )
-        request, channel = make_request(self.sydent.reactor, "POST", url)
-        sendSMS_mock = self._render_request(request)
+        sendSMS_mock = self._make_request(url)
         sendSMS_mock.assert_called_once()
-        self.assertEqual(channel.code, 200)
 
     @patch("sydent.http.httpclient.HTTPClient.post_json_maybe_get_json")
-    def test_bad_api_response_raises_exception(self, post_json: MagicMock) -> None:
+    def test_bad_api_response_raises_exception(self, post_json: Mock) -> None:
         """Test that an error response from OpenMarket raises an exception
         and that the requester receives an error code."""
 
@@ -114,6 +114,7 @@ class TestRequestCode(unittest.TestCase):
         self.sydent.run()
         request, channel = make_request(
             self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
             "POST",
             "/_matrix/identity/api/v1/validate/msisdn/requestToken",
             {
@@ -123,5 +124,4 @@ class TestRequestCode(unittest.TestCase):
                 "send_attempt": 0,
             },
         )
-        request.render(self.resource)
         self.assertEqual(channel.code, 500)
