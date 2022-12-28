@@ -56,6 +56,7 @@ from sydent.http.servlets.store_invite_servlet import StoreInviteServlet
 from sydent.http.servlets.termsservlet import TermsServlet
 from sydent.http.servlets.threepidbindservlet import ThreePidBindServlet
 from sydent.http.servlets.threepidunbindservlet import ThreePidUnbindServlet
+from sydent.http.servlets.versions import VersionsServlet
 
 if TYPE_CHECKING:
     from sydent.sydent import Sydent
@@ -97,6 +98,7 @@ class ClientApiHttpServer:
         matrix.putChild(b"identity", identity)
         identity.putChild(b"api", api)
         identity.putChild(b"v2", v2)
+        identity.putChild(b"versions", VersionsServlet())
         api.putChild(b"v1", v1)
 
         validate.putChild(b"email", email)
