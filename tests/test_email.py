@@ -11,22 +11,32 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from unittest.mock import patch
+from typing import Optional
+from unittest.mock import Mock, patch
 
 from twisted.trial import unittest
 
+from sydent.types import JsonDict
 from tests.utils import make_request, make_sydent
 
 
 class TestRequestCode(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         # Create a new sydent
         self.sydent = make_sydent()
 
-    def _render_request(self, request):
+    def _make_request(self, url: str, body: Optional[JsonDict] = None) -> Mock:
         # Patch out the email sending so we can investigate the resulting email.
         with patch("sydent.util.emailutils.smtplib") as smtplib:
-            request.render(self.sydent.servlets.emailRequestCode)
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                url,
+                body,
+            )
+
+        self.assertEqual(channel.code, 200)
 
         # Fish out the SMTP object and return it.
         smtp = smtplib.SMTP.return_value
@@ -34,12 +44,10 @@ class TestRequestCode(unittest.TestCase):
 
         return smtp
 
-    def test_request_code(self):
+    def test_request_code(self) -> None:
         self.sydent.run()
 
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
+        smtp = self._make_request(
             "/_matrix/identity/api/v1/validate/email/requestToken",
             {
                 "email": "test@test",
@@ -47,14 +55,12 @@ class TestRequestCode(unittest.TestCase):
                 "send_attempt": 0,
             },
         )
-        smtp = self._render_request(request)
-        self.assertEqual(channel.code, 200)
 
         # Ensure the email is as expected.
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
         self.assertIn("Confirm your email address for Matrix", email_contents)
 
-    def test_request_code_via_url_query_params(self):
+    def test_request_code_via_url_query_params(self) -> None:
         self.sydent.run()
         url = (
             "/_matrix/identity/api/v1/validate/email/requestToken?"
@@ -62,20 +68,16 @@ class TestRequestCode(unittest.TestCase):
             "&client_secret=oursecret"
             "&send_attempt=0"
         )
-        request, channel = make_request(self.sydent.reactor, "POST", url)
-        smtp = self._render_request(request)
-        self.assertEqual(channel.code, 200)
+        smtp = self._make_request(url)
 
         # Ensure the email is as expected.
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")
         self.assertIn("Confirm your email address for Matrix", email_contents)
 
-    def test_branded_request_code(self):
+    def test_branded_request_code(self) -> None:
         self.sydent.run()
 
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
+        smtp = self._make_request(
             "/_matrix/identity/api/v1/validate/email/requestToken?brand=vector-im",
             {
                 "email": "test@test",
@@ -83,8 +85,6 @@ class TestRequestCode(unittest.TestCase):
                 "send_attempt": 0,
             },
         )
-        smtp = self._render_request(request)
-        self.assertEqual(channel.code, 200)
 
         # Ensure the email is as expected.
         email_contents = smtp.sendmail.call_args[0][2].decode("utf-8")

@@ -113,12 +113,11 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         }
         request, channel = make_request(
             self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
             "POST",
-            "/_matrix/identity/v2/store-invite",
+            "/_matrix/identity/api/v1/store-invite",
             invite_config,
         )
-        store_invite_servlet = StoreInviteServlet(self.sydent)
-        request.render(store_invite_servlet)
         self.assertEqual(channel.code, 403)
 
 

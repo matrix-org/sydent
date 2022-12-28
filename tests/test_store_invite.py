@@ -41,21 +41,22 @@ class StoreInviteTestCase(unittest.TestCase):
     )
     def test_invalid_email_returns_400(self, address: str) -> None:
         self.sydent.run()
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/store-invite",
-            content={
-                "address": address,
-                "medium": "email",
-                "room_id": "!myroom:test",
-                "sender": self.sender,
-            },
-        )
 
         with patch("sydent.http.servlets.store_invite_servlet.authV2") as authV2:
             authV2.return_value = Account(self.sender, 0, None)
-            request.render(self.sydent.servlets.storeInviteServletV2)
+
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/v2/store-invite",
+                content={
+                    "address": address,
+                    "medium": "email",
+                    "room_id": "!myroom:test",
+                    "sender": self.sender,
+                },
+            )
 
         self.assertEqual(channel.code, 400)
         self.assertEqual(channel.json_body["errcode"], "M_INVALID_EMAIL")

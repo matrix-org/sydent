@@ -44,23 +44,22 @@ class ThreepidUnbindTestCase(unittest.TestCase):
     def test_connection_failure(self, exc: Exception) -> None:
         """Check we respond sensibly if we can't contact the homeserver."""
         self.sydent.run()
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/3pid/unbind",
-            content={
-                "mxid": "@alice:wonderland",
-                "threepid": {
-                    "address": "alice.cooper@wonderland.biz",
-                    "medium": "email",
-                },
-            },
-        )
-
         with patch.object(
             self.sydent.sig_verifier, "authenticate_request", side_effect=exc
         ):
-            request.render(self.sydent.servlets.threepidUnbind)
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/v2/3pid/unbind",
+                content={
+                    "mxid": "@alice:wonderland",
+                    "threepid": {
+                        "address": "alice.cooper@wonderland.biz",
+                        "medium": "email",
+                    },
+                },
+            )
         self.assertEqual(channel.code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertEqual(channel.json_body["errcode"], "M_UNKNOWN")
         self.assertIn("contact", channel.json_body["error"])

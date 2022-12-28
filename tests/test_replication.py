@@ -77,11 +77,14 @@ class ReplicationTestCase(unittest.TestCase):
             signed_assocs[assoc_id] = signed_assoc
 
         # Send the replication push.
-        body = json.dumps({"sgAssocs": signed_assocs})
+        body = {"sgAssocs": signed_assocs}
         request, channel = make_request(
-            self.sydent.reactor, "POST", "/_matrix/identity/replicate/v1/push", body
+            self.sydent.reactor,
+            self.sydent.replicationHttpsServer.factory,
+            "POST",
+            "/_matrix/identity/replicate/v1/push",
+            body,
         )
-        request.render(self.sydent.servlets.replicationPush)
 
         self.assertEqual(channel.code, 200)
 

@@ -45,7 +45,10 @@ class AuthTestCase(unittest.TestCase):
         self.sydent.run()
 
         request, _ = make_request(
-            self.sydent.reactor, "GET", "/_matrix/identity/v2/hash_details"
+            self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
+            "GET",
+            "/_matrix/identity/v2/hash_details",
         )
         request.requestHeaders.addRawHeader(
             b"Authorization", b"Bearer " + self.test_token.encode("ascii")
@@ -61,6 +64,7 @@ class AuthTestCase(unittest.TestCase):
 
         request, _ = make_request(
             self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
             "GET",
             "/_matrix/identity/v2/hash_details?access_token=" + self.test_token,
         )
