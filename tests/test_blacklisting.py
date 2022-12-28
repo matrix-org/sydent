@@ -96,18 +96,6 @@ class BlacklistingAgentTest(TestCase):
     def test_federation_client_allowed_ip(self, resolver):
         self.sydent.run()
 
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/register",
-            {
-                "access_token": "foo",
-                "expires_in": 300,
-                "matrix_server_name": "example.com",
-                "token_type": "Bearer",
-            },
-        )
-
         resolver.return_value = [
             Server(
                 host=self.allowed_domain,
@@ -118,7 +106,18 @@ class BlacklistingAgentTest(TestCase):
             )
         ]
 
-        request.render(self.sydent.servlets.registerServlet)
+        request, channel = make_request(
+            self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
+            "POST",
+            "/_matrix/identity/v2/account/register",
+            {
+                "access_token": "foo",
+                "expires_in": 300,
+                "matrix_server_name": "example.com",
+                "token_type": "Bearer",
+            },
+        )
 
         transport, protocol = self._get_http_request(
             self.allowed_ip.decode("ascii"), 443
@@ -148,18 +147,6 @@ class BlacklistingAgentTest(TestCase):
     def test_federation_client_safe_ip(self, resolver):
         self.sydent.run()
 
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/register",
-            {
-                "access_token": "foo",
-                "expires_in": 300,
-                "matrix_server_name": "example.com",
-                "token_type": "Bearer",
-            },
-        )
-
         resolver.return_value = [
             Server(
                 host=self.safe_domain,
@@ -170,7 +157,18 @@ class BlacklistingAgentTest(TestCase):
             )
         ]
 
-        request.render(self.sydent.servlets.registerServlet)
+        request, channel = make_request(
+            self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
+            "POST",
+            "/_matrix/identity/v2/account/register",
+            {
+                "access_token": "foo",
+                "expires_in": 300,
+                "matrix_server_name": "example.com",
+                "token_type": "Bearer",
+            },
+        )
 
         transport, protocol = self._get_http_request(self.safe_ip.decode("ascii"), 443)
 
@@ -196,18 +194,6 @@ class BlacklistingAgentTest(TestCase):
     def test_federation_client_unsafe_ip(self, resolver):
         self.sydent.run()
 
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/register",
-            {
-                "access_token": "foo",
-                "expires_in": 300,
-                "matrix_server_name": "example.com",
-                "token_type": "Bearer",
-            },
-        )
-
         resolver.return_value = [
             Server(
                 host=self.unsafe_domain,
@@ -218,7 +204,18 @@ class BlacklistingAgentTest(TestCase):
             )
         ]
 
-        request.render(self.sydent.servlets.registerServlet)
+        request, channel = make_request(
+            self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
+            "POST",
+            "/_matrix/identity/v2/account/register",
+            {
+                "access_token": "foo",
+                "expires_in": 300,
+                "matrix_server_name": "example.com",
+                "token_type": "Bearer",
+            },
+        )
 
         self.assertNot(self.reactor.tcpClients)
 

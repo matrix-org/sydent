@@ -1,4 +1,5 @@
-# Copyright 2019 The Matrix.org Foundation C.I.C.
+# Copyright 2018 Travis Ralston
+# Copyright 2018 New Vector Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
     from sydent.sydent import Sydent
 
 
-class V2Servlet(SydentResource):
+class CorsServlet(SydentResource):
     isLeaf = False
 
     def __init__(self, syd: "Sydent") -> None:

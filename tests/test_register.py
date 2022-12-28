@@ -38,12 +38,11 @@ class RegisterTestCase(unittest.TestCase):
 
         request, channel = make_request(
             self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
             "POST",
             "/_matrix/identity/v2/account/register",
             content={"matrix_server_name": bad_hostname, "access_token": "foo"},
         )
-
-        request.render(self.sydent.servlets.registerServlet)
 
         self.assertEqual(channel.code, 400)
 
@@ -59,19 +58,19 @@ class RegisterTestCase(unittest.TestCase):
     )
     def test_connection_failure(self, exc: Exception) -> None:
         self.sydent.run()
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/register",
-            content={
-                "matrix_server_name": "matrix.alice.com",
-                "access_token": "back_in_wonderland",
-            },
-        )
-        servlet = self.sydent.servlets.registerServlet
-
-        with patch.object(servlet.client, "get_json", side_effect=exc):
-            request.render(servlet)
+        with patch(
+            "sydent.http.httpclient.FederationHttpClient.get_json", side_effect=exc
+        ):
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/v2/account/register",
+                content={
+                    "matrix_server_name": "matrix.alice.com",
+                    "access_token": "back_in_wonderland",
+                },
+            )
         self.assertEqual(channel.code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertEqual(channel.json_body["errcode"], "M_UNKNOWN")
         # Check that we haven't just returned the generic error message in asyncjsonwrap
@@ -80,19 +79,20 @@ class RegisterTestCase(unittest.TestCase):
 
     def test_federation_does_not_return_json(self) -> None:
         self.sydent.run()
-        request, channel = make_request(
-            self.sydent.reactor,
-            "POST",
-            "/_matrix/identity/v2/account/register",
-            content={
-                "matrix_server_name": "matrix.alice.com",
-                "access_token": "back_in_wonderland",
-            },
-        )
-        servlet = self.sydent.servlets.registerServlet
         exc = JSONDecodeError("ruh roh", "C'est n'est pas une objet JSON", 0)
-        with patch.object(servlet.client, "get_json", side_effect=exc):
-            request.render(servlet)
+        with patch(
+            "sydent.http.httpclient.FederationHttpClient.get_json", side_effect=exc
+        ):
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/v2/account/register",
+                content={
+                    "matrix_server_name": "matrix.alice.com",
+                    "access_token": "back_in_wonderland",
+                },
+            )
         self.assertEqual(channel.code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertEqual(channel.json_body["errcode"], "M_UNKNOWN")
         # Check that we haven't just returned the generic error message in asyncjsonwrap
