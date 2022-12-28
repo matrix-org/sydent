@@ -6,6 +6,6 @@ set -ex
 # consistent with CI.
 
 black .
-flake8
+ruff .
 isort .
 mypy
