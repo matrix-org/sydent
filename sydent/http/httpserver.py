@@ -67,7 +67,7 @@ class ClientApiHttpServer:
     def __init__(self, sydent: "Sydent", lookup_pepper: str) -> None:
         """
         Args:
-            lookup_pepper: The pepper used in hashing identifiers.
+            lookup_pepper: The pepper used when hashing identifiers.
 
         """
         self.sydent = sydent
