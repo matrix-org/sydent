@@ -24,7 +24,7 @@ class VersionsServlet(SydentResource):
     @jsonwrap
     def render_GET(self, request: Request) -> JsonDict:
         """
-        Get the terms that must be agreed to in order to use this service
+        Return the supported Matrix versions.
         Returns: Object describing the terms that require agreement
         """
         send_cors(request)
