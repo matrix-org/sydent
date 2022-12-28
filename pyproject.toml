@@ -117,8 +117,7 @@ unpaddedbase64 = ">=1.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "==21.6b0"
-flake8 = "==3.9.2"
-flake8-pyi = "==20.10.0"
+ruff = "0.0.189"
 isort = "==5.8.0"
 matrix-is-tester = {git = "https://github.com/matrix-org/matrix-is-tester", rev = "main"}
 mypy = ">=0.902"
@@ -138,6 +137,22 @@ prometheus = ["prometheus-client"]
 
 [tool.poetry.scripts]
 sydent = "sydent.sydent:main"
+
+[tool.ruff]
+line-length = 88
+
+ignore = [
+    "E501",
+    "F401",
+    "F821",
+]
+select = [
+    # pycodestyle checks.
+    "E",
+    "W",
+    # pyflakes checks.
+    "F",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

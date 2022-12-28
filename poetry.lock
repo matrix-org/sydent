@@ -160,33 +160,6 @@ ssh = ["bcrypt (>=3.1.5)"]
 test = ["hypothesis (>=1.11.4,!=3.79.2)", "iso8601", "pretend", "pytest (>=6.2.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pytz"]
 
 [[package]]
-name = "flake8"
-version = "3.9.2"
-description = "the modular source code checker: pep8 pyflakes and co"
-category = "dev"
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
-
-[package.dependencies]
-importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
-mccabe = ">=0.6.0,<0.7.0"
-pycodestyle = ">=2.7.0,<2.8.0"
-pyflakes = ">=2.3.0,<2.4.0"
-
-[[package]]
-name = "flake8-pyi"
-version = "20.10.0"
-description = "A plugin for flake8 to enable linting .pyi files."
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-attrs = "*"
-flake8 = ">=3.2.1"
-pyflakes = ">=2.1.1"
-
-[[package]]
 name = "frozendict"
 version = "2.2.0"
 description = "A simple immutable dictionary"
@@ -316,14 +289,6 @@ reference = "main"
 resolved_reference = "c87641b9866b5fd6d648d829283c18fbb06d1bbe"
 
 [[package]]
-name = "mccabe"
-version = "0.6.1"
-description = "McCabe checker, plugin for flake8"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "mypy"
 version = "0.931"
 description = "Optional static typing for Python"
@@ -431,26 +396,10 @@ python-versions = "*"
 pyasn1 = ">=0.4.6,<0.5.0"
 
 [[package]]
-name = "pycodestyle"
-version = "2.7.0"
-description = "Python style guide checker"
-category = "dev"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-
-[[package]]
 name = "pycparser"
 version = "2.21"
 description = "C parser in Python"
 category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-
-[[package]]
-name = "pyflakes"
-version = "2.3.1"
-description = "passive checker of Python programs"
-category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -518,6 +467,14 @@ urllib3 = ">=1.21.1,<1.27"
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<5)"]
+
+[[package]]
+name = "ruff"
+version = "0.0.189"
+description = "An extremely fast Python linter, written in Rust."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
 
 [[package]]
 name = "sentry-sdk"
@@ -877,7 +834,7 @@ sentry = ["sentry-sdk"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "35d5adeaa066b74277945ef10c8b27b0b1e34021c64c1662dfc1536f0d10677e"
+content-hash = "c4ad590610a5359334a69d0f832d925a408f41ff85bfee63f954b5f143e3945a"
 
 [metadata.files]
 appdirs = [
@@ -997,14 +954,6 @@ cryptography = [
     {file = "cryptography-36.0.1-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:39bdf8e70eee6b1c7b289ec6e5d84d49a6bfa11f8b8646b5b3dfe41219153316"},
     {file = "cryptography-36.0.1.tar.gz", hash = "sha256:53e5c1dc3d7a953de055d77bef2ff607ceef7a2aac0353b5d630ab67f7423638"},
 ]
-flake8 = [
-    {file = "flake8-3.9.2-py2.py3-none-any.whl", hash = "sha256:bf8fd333346d844f616e8d47905ef3a3384edae6b4e9beb0c5101e25e3110907"},
-    {file = "flake8-3.9.2.tar.gz", hash = "sha256:07528381786f2a6237b061f6e96610a4167b226cb926e2aa2b6b1d78057c576b"},
-]
-flake8-pyi = [
-    {file = "flake8-pyi-20.10.0.tar.gz", hash = "sha256:cee3b20a5123152c697870e7e800b60e3c95eb89e272a2b63d8cf55cafb0472c"},
-    {file = "flake8_pyi-20.10.0-py2.py3-none-any.whl", hash = "sha256:ff5dfc40bffa878f6ce95bcfd9a6ad14c44b85cbe99c4864e729301bf54267f0"},
-]
 frozendict = [
     {file = "frozendict-2.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b39cfcf563b3432d4780bf15769e2de2a2906c46c26fb73a9582b69142621814"},
     {file = "frozendict-2.2.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e7198dda9741f3da79db952ecd27607d836727ed320f29438eac565133008c8c"},
@@ -1121,10 +1070,6 @@ matrix-common = [
     {file = "matrix_common-1.1.0.tar.gz", hash = "sha256:a8238748afc2b37079818367fed5156f355771b07c8ff0a175934f47e0ff3276"},
 ]
 matrix-is-tester = []
-mccabe = [
-    {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
-    {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
-]
 mypy = [
     {file = "mypy-0.931-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:3c5b42d0815e15518b1f0990cff7a705805961613e701db60387e6fb663fe78a"},
     {file = "mypy-0.931-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:c89702cac5b302f0c5d33b172d2b55b5df2bede3344a2fbed99ff96bddb2cf00"},
@@ -1183,17 +1128,9 @@ pyasn1-modules = [
     {file = "pyasn1-modules-0.2.8.tar.gz", hash = "sha256:905f84c712230b2c592c19470d3ca8d552de726050d1d1716282a1f6146be65e"},
     {file = "pyasn1_modules-0.2.8-py2.py3-none-any.whl", hash = "sha256:a50b808ffeb97cb3601dd25981f6b016cbb3d31fbf57a8b8a87428e6158d0c74"},
 ]
-pycodestyle = [
-    {file = "pycodestyle-2.7.0-py2.py3-none-any.whl", hash = "sha256:514f76d918fcc0b55c6680472f0a37970994e07bbb80725808c17089be302068"},
-    {file = "pycodestyle-2.7.0.tar.gz", hash = "sha256:c389c1d06bf7904078ca03399a4816f974a1d590090fecea0c63ec26ebaf1cef"},
-]
 pycparser = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
     {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
-]
-pyflakes = [
-    {file = "pyflakes-2.3.1-py2.py3-none-any.whl", hash = "sha256:7893783d01b8a89811dd72d7dfd4d84ff098e5eed95cfa8905b22bbffe52efc3"},
-    {file = "pyflakes-2.3.1.tar.gz", hash = "sha256:f5bc8ecabc05bb9d291eb5203d6810b49040f6ff446a756326104746cc00c1db"},
 ]
 pynacl = [
     {file = "PyNaCl-1.5.0-cp36-abi3-macosx_10_10_universal2.whl", hash = "sha256:401002a4aaa07c9414132aaed7f6836ff98f59277a234704ff66878c2ee4a0d1"},
@@ -1332,6 +1269,24 @@ regex = [
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
     {file = "requests-2.27.1.tar.gz", hash = "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61"},
+]
+ruff = [
+    {file = "ruff-0.0.189-py3-none-macosx_10_7_x86_64.whl", hash = "sha256:07c947b42d3c5efc6761214acdb6b71a49b833ad9fb9b320454244a6fe01f212"},
+    {file = "ruff-0.0.189-py3-none-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:76e6161d021bde5738bf9d123ae445cb3a22fa60f14958ce64961d8af16141a0"},
+    {file = "ruff-0.0.189-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c27f51e5b48cd483459cdd1c95a6bd989adcf7653ccc440ca437f4993fe4b812"},
+    {file = "ruff-0.0.189-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:e89f488a16ce2b21d940fc6271ed161affec788955f7b41761a9693a92e994bb"},
+    {file = "ruff-0.0.189-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:fee593d8d470811c316ff2eb0124ac74668a3d637ab3fb237aa3fa8561fb89aa"},
+    {file = "ruff-0.0.189-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:bc3a73683a5b3b4b7bf951bbd4aa7d79b993c8c2e608a68de120c342ebe510f2"},
+    {file = "ruff-0.0.189-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:e5d73877558651f48c86d958afe0f662b6c3639990c230a6b9d82ac6093484db"},
+    {file = "ruff-0.0.189-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:3d1e6e9813f59ba54e7cb6f28c1f2a9a756197f6e321bd68519afe57f8522fce"},
+    {file = "ruff-0.0.189-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8d177090cf03004b14814b0aad530758f5186d391250afb737570edd55beabc6"},
+    {file = "ruff-0.0.189-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:48de3253856a0a85f9b53a0ca1982946c7fd343c796cdc76ece0ae359d5b71b5"},
+    {file = "ruff-0.0.189-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:e935bb5a213030de312ad00df477f38c78ac97af58b0e6a4ae5762705a5113da"},
+    {file = "ruff-0.0.189-py3-none-musllinux_1_2_i686.whl", hash = "sha256:bdb8173d6efff96e0cc5fe38f5fc4daa0d28fb11553482b9989d372fdafc7708"},
+    {file = "ruff-0.0.189-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:14486fd8632bc4c7f926137a9c6a8c45993ff6667ddb7a88192c369c3afd86e9"},
+    {file = "ruff-0.0.189-py3-none-win32.whl", hash = "sha256:e281080e2ed04f01275b3df5baa0afe2802ab145349298e24700cdd09c0afddc"},
+    {file = "ruff-0.0.189-py3-none-win_amd64.whl", hash = "sha256:c552ff0b0587a5e13f935131d2a19782c0baf8b59175cf3160a76545fbdbdd76"},
+    {file = "ruff-0.0.189.tar.gz", hash = "sha256:90a3031461ed83686ff78f96e58d28cdee835110c51bdfa0968a2d5892610c71"},
 ]
 sentry-sdk = [
     {file = "sentry-sdk-1.5.5.tar.gz", hash = "sha256:98fd155fa5d5fec1dbabed32a1a4ae2705f1edaa5dae4e7f7b62a384ba30e759"},

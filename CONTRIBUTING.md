@@ -152,7 +152,7 @@ Some other points to follow:
 
 ## Code style and continuous integration
 
-Sydent uses `black`, `isort` and `flake8` to enforce code style. Use the following
+Sydent uses `black`, `isort` and `ruff` to enforce code style. Use the following
 script to enforce these style guides:
 
 ```shell
