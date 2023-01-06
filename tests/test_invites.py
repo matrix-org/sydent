@@ -19,7 +19,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
                 # Used by test_invited_email_address_obfuscation
                 "email.third_party_invite_username_obfuscate_characters": "6",
                 "email.third_party_invite_domain_obfuscate_characters": "8",
-                "email.third_party_invite_keyword_blocklist": "evil\nbad\nhttp",
+                "email.third_party_invite_keyword_blocklist": "evil\nbad\nhttps://",
             },
         }
         self.sydent = make_sydent(test_config=config)
