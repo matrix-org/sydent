@@ -14,6 +14,7 @@
 
 import logging
 import random
+import re
 import string
 from email.header import Header
 from http import HTTPStatus
@@ -138,13 +139,10 @@ class StoreInviteServlet(SydentResource):
 
         for keyword in self.sydent.config.email.third_party_invite_keyword_blocklist:
             for (key, value) in args.items():
+                # make sure the blocklist doesn't stomp on invite_client_location url
+                if key == "org.matrix.web_client_location":
+                    value = re.sub(r"^(https?://)", "", value)
                 if keyword in value.casefold():
-                    # make sure the blocklist doesn't stomp on invite_client_location url
-                    if key == "org.matrix.web_client_location" and keyword in [
-                        "https",
-                        "http",
-                    ]:
-                        continue
                     logger.info(
                         "Denying invites as %r appears in arg %r: %r",
                         keyword,
