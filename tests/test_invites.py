@@ -19,7 +19,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
                 # Used by test_invited_email_address_obfuscation
                 "email.third_party_invite_username_obfuscate_characters": "6",
                 "email.third_party_invite_domain_obfuscate_characters": "8",
-                "email.third_party_invite_keyword_blocklist": "evil\nbad\nhttp"
+                "email.third_party_invite_keyword_blocklist": "evil\nbad\nhttp",
             },
         }
         self.sydent = make_sydent(test_config=config)
@@ -120,29 +120,32 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         )
         self.assertEqual(channel.code, 403)
 
-    def test_third_party_invite_keyword_blocklist_exempts_invite_client_location_url(self):
-            invite_config = {
-                "medium": "email",
-                "address": "foo@example.com",
-                "room_id": "!bar",
-                "sender": "@foo:example.com",
-                "room_name": "This is a fine room name.",
-                "org.matrix.web_client_location": "https://example.com"
-            }
+    def test_third_party_invite_keyword_blocklist_exempts_invite_client_location_url(
+        self,
+    ):
+        invite_config = {
+            "medium": "email",
+            "address": "foo@example.com",
+            "room_id": "!bar",
+            "sender": "@foo:example.com",
+            "room_name": "This is a fine room name.",
+            "org.matrix.web_client_location": "https://example.com",
+        }
 
-            # don't actually send the email
-            with patch("sydent.util.emailutils.smtplib") as smtplib:
-                request, channel = make_request(
-                    self.sydent.reactor,
-                    self.sydent.clientApiHttpServer.factory,
-                    "POST",
-                    "/_matrix/identity/api/v1/store-invite",
-                    invite_config,
-                )
-            self.assertEqual(channel.code, 200)
-            smtp = smtplib.SMTP.return_value
-            # but make sure we did try to send it
-            smtp.sendmail.assert_called_once()
+        # don't actually send the email
+        with patch("sydent.util.emailutils.smtplib") as smtplib:
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/api/v1/store-invite",
+                invite_config,
+            )
+        self.assertEqual(channel.code, 200)
+        smtp = smtplib.SMTP.return_value
+        # but make sure we did try to send it
+        smtp.sendmail.assert_called_once()
+
 
 class ThreepidInvitesNoDeleteTestCase(unittest.TestCase):
     """Test that invite tokens are not deleted when that is disabled."""
