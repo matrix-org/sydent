@@ -139,7 +139,7 @@ class StoreInviteServlet(SydentResource):
 
         for keyword in self.sydent.config.email.third_party_invite_keyword_blocklist:
             for (key, value) in args.items():
-                # make sure the blocklist doesn't stomp on invite_client_location url
+                # make sure the blocklist doesn't stomp on web_client_location url
                 if key == "org.matrix.web_client_location":
                     value = re.sub(r"^https?://", "", value)
                 if keyword in value.casefold():

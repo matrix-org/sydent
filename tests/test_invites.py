@@ -120,7 +120,7 @@ class ThreepidInvitesTestCase(unittest.TestCase):
         )
         self.assertEqual(channel.code, 403)
 
-    def test_third_party_invite_keyword_blocklist_exempts_invite_client_location_url(
+    def test_third_party_invite_keyword_blocklist_exempts_web_client_location_url(
         self,
     ):
         invite_config = {
