@@ -141,7 +141,7 @@ class StoreInviteServlet(SydentResource):
             for (key, value) in args.items():
                 # make sure the blocklist doesn't stomp on invite_client_location url
                 if key == "org.matrix.web_client_location":
-                    value = re.sub(r"^(https?://)", "", value)
+                    value = re.sub(r"^https?://", "", value)
                 if keyword in value.casefold():
                     logger.info(
                         "Denying invites as %r appears in arg %r: %r",
