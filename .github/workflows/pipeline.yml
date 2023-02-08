@@ -5,10 +5,14 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-newsfile:
     name: Check PR has a changelog
-    if: ${{ github.base_ref == 'main' || contains(github.base_ref, 'release-') }}
+    if: ${{ (github.base_ref == 'main' || contains(github.base_ref, 'release-')) && github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -57,7 +61,7 @@ jobs:
       - uses: matrix-org/done-action@v2
         with:
           needs: ${{ toJSON(needs) }}
-          # The newsfile lint may be skipped on non PR builds
+          # The newsfile lint may be skipped on non PR builds or on dependabot builds
           skippable:
             check-newsfile
 

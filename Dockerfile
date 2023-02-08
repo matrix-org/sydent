@@ -16,7 +16,7 @@ RUN addgroup --system --gid 993 sydent \
 USER sydent:sydent
 
 # Install poetry
-RUN pip install --user poetry==1.1.12
+RUN pip install --user poetry==1.2.2
 
 # Copy source code and resources
 WORKDIR /home/sydent/src
