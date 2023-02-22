@@ -7,7 +7,7 @@ Installing the system dependencies
 To install Sydent's dependencies on a Debian-based system, run::
 
     sudo apt-get install build-essential python3-dev libffi-dev \
-                         sqlite3 libssl-dev python-virtualenv libxslt1-dev
+                         sqlite3 libssl-dev python3-virtualenv libxslt1-dev
 
 From here, you can either install Sydent by using a PyPI release, or by recreating Sydent's locked runtime environment.
 
