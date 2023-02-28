@@ -215,7 +215,7 @@ class ThreepidBinder:
             "Error notifying on bind for %s: %s - rescheduling", assoc["mxid"], error
         )
         self.sydent.reactor.callLater(
-            math.pow(2, attempt), self._notify, assoc, attempt + 1
+            math.pow(2, attempt), defer.ensureDeferred, self._notify(assoc, attempt + 1)
         )
 
     # The below is lovingly ripped off of synapse/http/endpoint.py
