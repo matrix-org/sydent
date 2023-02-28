@@ -1,1 +1,0 @@
-Fix a bug where Sydent would not retry attempts to inform homeservers of a successful bind after an initial failure.
