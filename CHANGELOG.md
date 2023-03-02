@@ -19,7 +19,7 @@ Bugfixes
 Updates to the Docker image
 ---------------------------
 
-- Adds prometheus-client and sentry-sdk into the Docker image. ([\#519](https://github.com/matrix-org/sydent/issues/519))
+- Add prometheus-client and sentry-sdk into the Docker image. ([\#519](https://github.com/matrix-org/sydent/issues/519))
 
 
 Improved Documentation
