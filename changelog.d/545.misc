@@ -1,1 +1,0 @@
-Don't block invites containing `web_client_location` when using "http" in the keyword block list.
