@@ -148,7 +148,7 @@ Environment variables
 +--------------------+-----------------+-----------------------+
 | Variable Name      | Sydent default  | Dockerfile default    |
 +====================+=================+=======================+
-| SYDENT_SERVER_NAME | **empty*         | *empty*               |
+| SYDENT_SERVER_NAME | *empty*         | *empty*               |
 +--------------------+-----------------+-----------------------+
 | SYDENT_CONF        | ``sydent.conf`` | ``/data/sydent.conf`` |
 +--------------------+-----------------+-----------------------+
