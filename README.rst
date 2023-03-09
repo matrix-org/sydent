@@ -1,3 +1,24 @@
+What is Sydent?
+===============
+
+Sydent is an `identity server <https://spec.matrix.org/v1.6/identity-service-api/>`_ for the `Matrix communications protocol <matrix.org>`_. It allows Matrix users to prove that they own an email address or phone number, and allows _other_ Matrix users to look them up using that email address or phone number.
+
+Do I need to run Sydent to run my own homeserver?
+-------------------------------------------------
+
+Short answer: **no**.
+
+Medium answer: **probably not**. Most homeservers and clients use the Sydent
+instance run by `matrix.org`, or use no identity server whatsoever.
+
+Longer answer: if you want to allow user lookup via emails and phone numbers in
+a private federation of multiple homeservers, Sydent _might_ be useful for you.
+If you want your homeserver to be able to verify phone numbers via SMS and
+you have an API token for the `OpenMarket HTTP SMS API
+<https://www.openmarket.com/docs/Content/apis/v4http/overview.htm>`_, then
+Sydent might be useful for you.
+
+
 Installation
 ============
 
