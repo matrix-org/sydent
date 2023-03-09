@@ -13,7 +13,7 @@ instance run by `matrix.org`, or use no identity server whatsoever.
 
 Longer answer: if you want to allow user lookup via emails and phone numbers in
 a private federation of multiple homeservers, Sydent _might_ be useful for you.
-If you want to your homeserver to be able to verify phone numbers via SMS and
+If you want your homeserver to be able to verify phone numbers via SMS and
 you have an API token for the `OpenMarket HTTP SMS API
 <https://www.openmarket.com/docs/Content/apis/v4http/overview.htm>`_, then
 Sydent might be useful for you.
