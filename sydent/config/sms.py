@@ -18,7 +18,7 @@ from typing import Dict, List
 import sydent.sms.openmarket
 from sydent.config._base import BaseConfig
 from sydent.config.exceptions import ConfigError
-from pydoc import locate
+from sydent.util.loader import load_class
 
 
 class SMSConfig(BaseConfig):
@@ -42,8 +42,7 @@ class SMSConfig(BaseConfig):
             pass
         else:
             if sms_provider:
-                self.provider_class = locate(sms_provider)
-                assert self.provider_class is not None, "Invalid SMS provider class: %s" % sms_provider
+                self.provider_class = load_class(sms_provider)
 
         self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
