@@ -43,7 +43,10 @@ class SMSConfig(BaseConfig):
         else:
             if sms_provider:
                 self.provider_class = load_class(sms_provider)
-                self.provider_config = self.provider_class.parse_config(cfg.get("sms", "provider_config"))
+                if self.provider_class != sydent.sms.openmarket.OpenMarketSMS:
+                    self.provider_config = self.provider_class.parse_config(
+                        cfg.get("sms", "provider_config", fallback={})
+                    )
 
         self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
