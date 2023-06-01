@@ -99,6 +99,11 @@ class GeneralConfig(BaseConfig):
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
 
+        homeserver_allow_list = list_from_comma_sep_string(
+            cfg.get("general", "homeserver_allow_list")
+        )
+        self.homeserver_allow_list = homeserver_allow_list
+
         return False
 
 

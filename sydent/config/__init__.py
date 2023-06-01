@@ -72,6 +72,9 @@ CONFIG_DEFAULTS = {
         # This whitelist overrides `ip.blacklist` and defaults to an empty
         # list.
         "ip.whitelist": "",
+        # A list of homeservers that are allowed to register with this identity server. Defaults to
+        # allowing all homeservers.
+        "homeserver_allow_list": "",
     },
     "db": {
         "db.file": os.environ.get("SYDENT_DB_PATH", "sydent.db"),
