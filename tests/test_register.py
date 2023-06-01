@@ -98,3 +98,47 @@ class RegisterTestCase(unittest.TestCase):
         # Check that we haven't just returned the generic error message in asyncjsonwrap
         self.assertNotEqual(channel.json_body["error"], "Internal Server Error")
         self.assertIn("JSON", channel.json_body["error"])
+
+
+class RegisterAllowListTestCase(unittest.TestCase):
+    """
+    Test registering works with or without the homeserver_allow_list config option specified
+    """
+
+    def test_registering_works_if_no_homeserver_allow_list(self) -> None:
+        # Create a new sydent with no homsever_allow_list
+        self.sydent = make_sydent()
+        self.sydent.run()
+
+        return_val = {"sub": "@user_id:not.example.com"}
+        with patch(
+            "sydent.http.httpclient.FederationHttpClient.get_json",
+            return_value=return_val,
+        ):
+            request, channel = make_request(
+                self.sydent.reactor,
+                self.sydent.clientApiHttpServer.factory,
+                "POST",
+                "/_matrix/identity/v2/account/register",
+                content={
+                    "matrix_server_name": "not.example.com",
+                    "access_token": "foo",
+                },
+            )
+            self.assertEqual(channel.code, 200)
+
+    def test_registering_not_allowed_if_homeserver_not_in_allow_list(self) -> None:
+        config = {"general": {"homeserver_allow_list": "friendly.com, example.com"}}
+        # Create a new sydent with a homeserver_allow_list specified
+        self.sydent = make_sydent(test_config=config)
+        self.sydent.run()
+
+        request, channel = make_request(
+            self.sydent.reactor,
+            self.sydent.clientApiHttpServer.factory,
+            "POST",
+            "/_matrix/identity/v2/account/register",
+            content={"matrix_server_name": "not.example.com", "access_token": "foo"},
+        )
+        self.assertEqual(channel.code, 403)
+        self.assertEqual(channel.json_body["errcode"], "M_UNAUTHORIZED")
