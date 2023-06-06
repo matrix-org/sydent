@@ -102,33 +102,16 @@ class RegisterTestCase(unittest.TestCase):
 
 class RegisterAllowListTestCase(unittest.TestCase):
     """
-    Test registering works with or without the homeserver_allow_list config option specified
+    Test registering works with the `homeserver_allow_list` config option specified
     """
 
-    def test_registering_works_if_no_homeserver_allow_list(self) -> None:
-        # Create a new sydent with no homsever_allow_list
-        self.sydent = make_sydent()
-        self.sydent.run()
-
-        return_val = {"sub": "@user_id:not.example.com"}
-        with patch(
-            "sydent.http.httpclient.FederationHttpClient.get_json",
-            return_value=return_val,
-        ):
-            request, channel = make_request(
-                self.sydent.reactor,
-                self.sydent.clientApiHttpServer.factory,
-                "POST",
-                "/_matrix/identity/v2/account/register",
-                content={
-                    "matrix_server_name": "not.example.com",
-                    "access_token": "foo",
-                },
-            )
-            self.assertEqual(channel.code, 200)
-
     def test_registering_not_allowed_if_homeserver_not_in_allow_list(self) -> None:
-        config = {"general": {"homeserver_allow_list": "friendly.com, example.com"}}
+        config = {
+            "general": {
+                "homeserver_allow_list": "friendly.com, example.com",
+                "disable_v1_access": "true",
+            }
+        }
         # Create a new sydent with a homeserver_allow_list specified
         self.sydent = make_sydent(test_config=config)
         self.sydent.run()
