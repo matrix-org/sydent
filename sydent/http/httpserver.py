@@ -99,40 +99,56 @@ class ClientApiHttpServer:
         identity.putChild(b"api", api)
         identity.putChild(b"v2", v2)
         identity.putChild(b"versions", VersionsServlet())
-        api.putChild(b"v1", v1)
 
-        validate.putChild(b"email", email)
-        validate.putChild(b"msisdn", msisdn)
-
-        validate_v2.putChild(b"email", email_v2)
-        validate_v2.putChild(b"msisdn", msisdn_v2)
-
-        v1.putChild(b"validate", validate)
-
-        v1.putChild(b"lookup", LookupServlet(sydent))
-        v1.putChild(b"bulk_lookup", BulkLookupServlet(sydent))
-
-        v1.putChild(b"pubkey", pubkey)
         pubkey.putChild(b"isvalid", PubkeyIsValidServlet(sydent))
         pubkey.putChild(b"ed25519:0", Ed25519Servlet(sydent))
         pubkey.putChild(b"ephemeral", ephemeralPubkey)
         ephemeralPubkey.putChild(b"isvalid", EphemeralPubkeyIsValidServlet(sydent))
+
+        # v1
+        if not self.sydent.config.general.disable_v1_access:
+            api.putChild(b"v1", v1)
+            validate.putChild(b"email", email)
+            validate.putChild(b"msisdn", msisdn)
+            v1.putChild(b"validate", validate)
+
+            v1.putChild(b"lookup", LookupServlet(sydent))
+            v1.putChild(b"bulk_lookup", BulkLookupServlet(sydent))
+
+            v1.putChild(b"pubkey", pubkey)
+
+            threepid_v1.putChild(b"getValidated3pid", GetValidated3pidServlet(sydent))
+            threepid_v1.putChild(b"unbind", unbind)
+            v1.putChild(b"3pid", threepid_v1)
+
+            email.putChild(b"requestToken", EmailRequestCodeServlet(sydent))
+            email.putChild(b"submitToken", EmailValidateCodeServlet(sydent))
+
+            msisdn.putChild(b"requestToken", MsisdnRequestCodeServlet(sydent))
+            msisdn.putChild(b"submitToken", MsisdnValidateCodeServlet(sydent))
+
+            v1.putChild(b"store-invite", StoreInviteServlet(sydent))
+
+            v1.putChild(b"sign-ed25519", BlindlySignStuffServlet(sydent))
+
+        if (
+            self.sydent.config.general.enable_v1_associations
+            or not self.sydent.config.general.disable_v1_access
+        ):
+            threepid_v1.putChild(b"bind", ThreePidBindServlet(sydent))
+
+        # v2
+        # note v2 loses the /api so goes on 'identity' not 'api'
+        identity.putChild(b"v2", v2)
+
+        validate_v2.putChild(b"email", email_v2)
+        validate_v2.putChild(b"msisdn", msisdn_v2)
 
         threepid_v2.putChild(
             b"getValidated3pid", GetValidated3pidServlet(sydent, require_auth=True)
         )
         threepid_v2.putChild(b"bind", ThreePidBindServlet(sydent, require_auth=True))
         threepid_v2.putChild(b"unbind", unbind)
-
-        threepid_v1.putChild(b"getValidated3pid", GetValidated3pidServlet(sydent))
-        threepid_v1.putChild(b"unbind", unbind)
-        if self.sydent.config.general.enable_v1_associations:
-            threepid_v1.putChild(b"bind", ThreePidBindServlet(sydent))
-
-        v1.putChild(b"3pid", threepid_v1)
-
-        email.putChild(b"requestToken", EmailRequestCodeServlet(sydent))
-        email.putChild(b"submitToken", EmailValidateCodeServlet(sydent))
 
         email_v2.putChild(
             b"requestToken", EmailRequestCodeServlet(sydent, require_auth=True)
@@ -141,23 +157,12 @@ class ClientApiHttpServer:
             b"submitToken", EmailValidateCodeServlet(sydent, require_auth=True)
         )
 
-        msisdn.putChild(b"requestToken", MsisdnRequestCodeServlet(sydent))
-        msisdn.putChild(b"submitToken", MsisdnValidateCodeServlet(sydent))
-
         msisdn_v2.putChild(
             b"requestToken", MsisdnRequestCodeServlet(sydent, require_auth=True)
         )
         msisdn_v2.putChild(
             b"submitToken", MsisdnValidateCodeServlet(sydent, require_auth=True)
         )
-
-        v1.putChild(b"store-invite", StoreInviteServlet(sydent))
-
-        v1.putChild(b"sign-ed25519", BlindlySignStuffServlet(sydent))
-
-        # v2
-        # note v2 loses the /api so goes on 'identity' not 'api'
-        identity.putChild(b"v2", v2)
 
         # v2 exclusive APIs
         v2.putChild(b"terms", TermsServlet(sydent))
