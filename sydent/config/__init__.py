@@ -51,7 +51,8 @@ CONFIG_DEFAULTS = {
         # 'prometheus_addr': '',  # The address to bind to. Empty string means bind to all.
         # The following can be added to your local config file to enable sentry support.
         # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
-        # Whether clients and homeservers can register an association using v1 endpoints.
+        # Whether clients and homeservers can register an association using v1 endpoints. This
+        # option is now deprecated and will be superceded by the option `homeserver_allow_list`
         "enable_v1_associations": "true",
         "delete_tokens_on_bind": "true",
         # Prevent outgoing requests from being sent to the following blacklisted
@@ -73,8 +74,11 @@ CONFIG_DEFAULTS = {
         # list.
         "ip.whitelist": "",
         # A list of homeservers that are allowed to register with this identity server. Defaults to
-        # allowing all homeservers.
+        # allowing all homeservers. If a list is specified, the config option `disable_v1_access` must be
+        # set to 'true'.
         "homeserver_allow_list": "",
+        # If set to 'true`, entirely disable access via the V1 api.
+        "disable_v1_access": "false",
     },
     "db": {
         "db.file": os.environ.get("SYDENT_DB_PATH", "sydent.db"),

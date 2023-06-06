@@ -99,9 +99,17 @@ class GeneralConfig(BaseConfig):
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
 
+        self.disable_v1_access = parse_cfg_bool(cfg.get("general", "disable_v1_access"))
+
         homeserver_allow_list = list_from_comma_sep_string(
             cfg.get("general", "homeserver_allow_list")
         )
+        if homeserver_allow_list and not self.disable_v1_access:
+            raise RuntimeError(
+                """The V1 api must be disabled for the `homeserver_allow_list` to function, if you have 
+                specified a `homeserver_allow_list` in the config file please ensure that the config 
+                option `disable_v1_access` is set to 'true'."""
+            )
         self.homeserver_allow_list = homeserver_allow_list
 
         return False
