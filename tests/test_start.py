@@ -18,7 +18,7 @@ class StartupTestCase(unittest.TestCase):
         config = {
             "general": {
                 "homeserver_allow_list": "friendly.com, example.com",
-                "disable_v1_access": "false",
+                "enable_v1_access": "true",
             }
         }
 

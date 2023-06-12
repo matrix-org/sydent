@@ -82,10 +82,6 @@ class GeneralConfig(BaseConfig):
         self.sentry_enabled = cfg.has_option("general", "sentry_dsn")
         self.sentry_dsn = cfg.get("general", "sentry_dsn", fallback=None)
 
-        self.enable_v1_associations = parse_cfg_bool(
-            cfg.get("general", "enable_v1_associations")
-        )
-
         self.delete_tokens_on_bind = parse_cfg_bool(
             cfg.get("general", "delete_tokens_on_bind")
         )
@@ -99,18 +95,25 @@ class GeneralConfig(BaseConfig):
         self.ip_blacklist = generate_ip_set(ip_blacklist)
         self.ip_whitelist = generate_ip_set(ip_whitelist)
 
-        self.disable_v1_access = parse_cfg_bool(cfg.get("general", "disable_v1_access"))
+        self.enable_v1_access = parse_cfg_bool(cfg.get("general", "enable_v1_access"))
 
         homeserver_allow_list = list_from_comma_sep_string(
             cfg.get("general", "homeserver_allow_list")
         )
-        if homeserver_allow_list and not self.disable_v1_access:
+        if homeserver_allow_list and self.enable_v1_access:
             raise RuntimeError(
                 """The V1 api must be disabled for the `homeserver_allow_list` to function, if you have 
                 specified a `homeserver_allow_list` in the config file please ensure that the config 
-                option `disable_v1_access` is set to 'true'."""
+                option `enable_v1_access` is set to 'false'."""
             )
         self.homeserver_allow_list = homeserver_allow_list
+
+        if not self.enable_v1_access:
+            self.enable_v1_associations = False
+        else:
+            self.enable_v1_associations = parse_cfg_bool(
+                cfg.get("general", "enable_v1_associations")
+            )
 
         return False
 

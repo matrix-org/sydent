@@ -109,7 +109,7 @@ class RegisterAllowListTestCase(unittest.TestCase):
         config = {
             "general": {
                 "homeserver_allow_list": "friendly.com, example.com",
-                "disable_v1_access": "true",
+                "enable_v1_access": "false",
             }
         }
         # Create a new sydent with a homeserver_allow_list specified

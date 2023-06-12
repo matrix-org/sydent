@@ -52,7 +52,7 @@ CONFIG_DEFAULTS = {
         # The following can be added to your local config file to enable sentry support.
         # 'sentry_dsn': 'https://...'  # The DSN has configured in the sentry instance project.
         # Whether clients and homeservers can register an association using v1 endpoints. This
-        # option is now deprecated and will be superceded by the option `homeserver_allow_list`
+        # option is now deprecated and will be superceded by the option `enable_v1_access`
         "enable_v1_associations": "true",
         "delete_tokens_on_bind": "true",
         # Prevent outgoing requests from being sent to the following blacklisted
@@ -74,11 +74,11 @@ CONFIG_DEFAULTS = {
         # list.
         "ip.whitelist": "",
         # A list of homeservers that are allowed to register with this identity server. Defaults to
-        # allowing all homeservers. If a list is specified, the config option `disable_v1_access` must be
-        # set to 'true'.
+        # allowing all homeservers. If a list is specified, the config option `enable_v1_access` must be
+        # set to 'false'.
         "homeserver_allow_list": "",
-        # If set to 'true`, entirely disable access via the V1 api.
-        "disable_v1_access": "false",
+        # If set to 'false', entirely disable access via the V1 api.
+        "enable_v1_access": "true",
     },
     "db": {
         "db.file": os.environ.get("SYDENT_DB_PATH", "sydent.db"),

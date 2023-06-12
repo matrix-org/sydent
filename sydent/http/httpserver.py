@@ -106,7 +106,7 @@ class ClientApiHttpServer:
         ephemeralPubkey.putChild(b"isvalid", EphemeralPubkeyIsValidServlet(sydent))
 
         # v1
-        if not self.sydent.config.general.disable_v1_access:
+        if self.sydent.config.general.enable_v1_access:
             api.putChild(b"v1", v1)
             validate.putChild(b"email", email)
             validate.putChild(b"msisdn", msisdn)
@@ -131,10 +131,7 @@ class ClientApiHttpServer:
 
             v1.putChild(b"sign-ed25519", BlindlySignStuffServlet(sydent))
 
-        if (
-            self.sydent.config.general.enable_v1_associations
-            or not self.sydent.config.general.disable_v1_access
-        ):
+        if self.sydent.config.general.enable_v1_associations:
             threepid_v1.putChild(b"bind", ThreePidBindServlet(sydent))
 
         # v2
