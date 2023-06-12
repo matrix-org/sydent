@@ -53,6 +53,14 @@ class RegisterServlet(SydentResource):
 
         matrix_server = args["matrix_server_name"].lower()
 
+        if self.sydent.config.general.homeserver_allow_list:
+            if matrix_server not in self.sydent.config.general.homeserver_allow_list:
+                request.setResponseCode(403)
+                return {
+                    "errcode": "M_UNAUTHORIZED",
+                    "error": "This homeserver is not authorized to access this server.",
+                }
+
         if not is_valid_matrix_server_name(matrix_server):
             request.setResponseCode(400)
             return {
