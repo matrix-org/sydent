@@ -1,1 +1,1 @@
-Fix docker failing to install poetry due to /home/sydent not created
+Fix an issue where the Docker image would fail to build due to /home/sydent not being created.
