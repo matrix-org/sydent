@@ -1,3 +1,7 @@
+# Sydent 2.5.5 (2023-06-22)
+
+This version is fixing Docker builds.
+
 # Sydent 2.5.4 (2023-06-22)
 
 ### Features
