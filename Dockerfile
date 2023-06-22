@@ -12,7 +12,7 @@ FROM docker.io/python:3.8-slim as builder
 
 # Add user sydent
 RUN addgroup --system --gid 993 sydent \
-    && adduser --disabled-login -m --system --uid 993 --gecos sydent sydent
+    && useradd -m --system --uid 993 sydent
 USER sydent:sydent
 
 # Install poetry
@@ -42,7 +42,7 @@ FROM docker.io/python:3.8-slim
 
 # Add user sydent and create /data directory
 RUN addgroup --system --gid 993 sydent \
-    && adduser --disabled-login -m --system --uid 993 --gecos sydent sydent \
+    && useradd -m --system --uid 993 sydent \
     && mkdir /data \
     && chown sydent:sydent /data
 
