@@ -42,7 +42,7 @@ FROM docker.io/python:3.8-slim
 
 # Add user sydent and create /data directory
 RUN addgroup --system --gid 993 sydent \
-    && adduser --disabled-login --home /sydent --system --uid 993 --gecos sydent sydent \
+    && adduser --disabled-login --system --uid 993 --gecos sydent sydent \
     && mkdir /data \
     && chown sydent:sydent /data
 
