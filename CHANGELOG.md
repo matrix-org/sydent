@@ -1,3 +1,14 @@
+# Sydent 2.5.4 (2023-06-22)
+
+### Features
+
+- Add a config option `homeserver_allow_list` to specify which homeservers can access Sydent. ([\#566](https://github.com/matrix-org/sydent/issues/566))
+
+### Internal Changes
+
+- Warn would-be users that they probably don't want to use Sydent. ([\#557](https://github.com/matrix-org/sydent/issues/557))
+
+
 Sydent 2.5.3 (2023-03-02)
 =========================
 

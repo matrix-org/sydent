@@ -69,7 +69,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "matrix-sydent"
-version = "2.5.3"
+version = "2.5.4"
 description = "Reference Matrix Identity Verification and Lookup Server"
 authors = ["Matrix.org Team and Contributors <packages@matrix.org>"]
 license = "Apache-2.0"
