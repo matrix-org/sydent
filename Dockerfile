@@ -8,7 +8,7 @@
 # file is created the first time Sydent runs.
 
 # Step 1: install dependencies
-FROM docker.io/python:3.8-slim as builder
+FROM docker.io/python:3.8-slim-bookworm as builder
 
 # Add user sydent
 RUN addgroup --system --gid 993 sydent \
@@ -38,7 +38,7 @@ RUN ln -s $(python -m poetry env info -p) /home/sydent/venv
 RUN find /home/sydent/venv -type f -name '*.pyc' -delete
 
 # Step 2: Create runtime image
-FROM docker.io/python:3.8-slim
+FROM docker.io/python:3.8-slim-bookworm
 
 # Add user sydent and create /data directory
 RUN addgroup --system --gid 993 sydent \
