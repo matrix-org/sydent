@@ -1,0 +1,1 @@
+Fix a long-standing issue where Sydent would not verify the configured SMTP server's certificates. See [GHSA-p6hw-wm59-3q5q](https://github.com/matrix-org/sydent/security/advisories/GHSA-p6hw-wm59-3g5g) and [CVE-2023-38686](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-38686). Reported by Martin Schobert, [Pentagrid AG](https://pentagrid.ch).
