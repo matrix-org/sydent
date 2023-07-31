@@ -16,6 +16,7 @@ import email.utils
 import logging
 import random
 import smtplib
+import ssl
 import string
 import urllib
 from html import escape
@@ -106,11 +107,14 @@ def sendEmail(
     )
     try:
         smtp: smtplib.SMTP
+        # Explicitly create a context, to ensure we verify the server's certificate
+        # and hostname.
+        ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
         if mailTLSMode == "SSL" or mailTLSMode == "TLS":
-            smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname)
+            smtp = smtplib.SMTP_SSL(mailServer, mailPort, myHostname, context=ctx)
         elif mailTLSMode == "STARTTLS":
             smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
-            smtp.starttls()
+            smtp.starttls(context=ctx)
         else:
             smtp = smtplib.SMTP(mailServer, mailPort, myHostname)
         if mailUsername != "":
