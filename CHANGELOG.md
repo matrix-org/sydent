@@ -1,3 +1,82 @@
+Sydent 2.5.6 (2023-07-31)
+=========================
+
+Bugfixes
+--------
+
+- Fix a long-standing issue where Sydent would not verify the configured SMTP server's certificates. See [GHSA-p6hw-wm59-3q5q](https://github.com/matrix-org/sydent/security/advisories/GHSA-p6hw-wm59-3g5g) and [CVE-2023-38686](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-38686). Reported by Martin Schobert, [Pentagrid AG](https://pentagrid.ch). ([\#574](https://github.com/matrix-org/sydent/issues/574))
+
+
+# Sydent 2.5.5 (2023-06-22)
+
+This version is fixing Docker builds.
+
+# Sydent 2.5.4 (2023-06-22)
+
+### Features
+
+- Add a config option `homeserver_allow_list` to specify which homeservers can access Sydent. ([\#566](https://github.com/matrix-org/sydent/issues/566))
+
+### Internal Changes
+
+- Warn would-be users that they probably don't want to use Sydent. ([\#557](https://github.com/matrix-org/sydent/issues/557))
+
+
+Sydent 2.5.3 (2023-03-02)
+=========================
+
+Features
+--------
+
+- Add ratelimiting to MSISDN request token endpoint. ([\#521](https://github.com/matrix-org/sydent/issues/521), [\#522](https://github.com/matrix-org/sydent/issues/522))
+- Add `email.third_party_invite_homeserver_blocklist` and `email.third_party_invite_room_blocklist` config options to block invites from a list of homeservers or for a list of rooms. ([\#530](https://github.com/matrix-org/sydent/issues/530))
+- Support Matrix v1.1. ([\#542](https://github.com/matrix-org/sydent/issues/542))
+
+
+Bugfixes
+--------
+
+- Respond with a 429 instead of 500 when exceeding invite rate limit. ([\#529](https://github.com/matrix-org/sydent/issues/529))
+- Fix a bug where Sydent would not retry attempts to inform homeservers of a successful bind after an initial failure. ([\#552](https://github.com/matrix-org/sydent/issues/552))
+
+
+Updates to the Docker image
+---------------------------
+
+- Add prometheus-client and sentry-sdk into the Docker image. ([\#519](https://github.com/matrix-org/sydent/issues/519))
+
+
+Improved Documentation
+----------------------
+
+- Document a way to serve identity service APIs over HTTPS. ([\#518](https://github.com/matrix-org/sydent/issues/518))
+
+
+Internal Changes
+----------------
+
+- Update README to describe how to install from source with poetry. ([\#505](https://github.com/matrix-org/sydent/issues/505))
+- Fix a typechecking error introduced in #501. ([\#506](https://github.com/matrix-org/sydent/issues/506))
+- Ensure CI runs tests on main branch. ([\#507](https://github.com/matrix-org/sydent/issues/507))
+- Bump twisted from 22.1.0 to 22.2.0. ([\#508](https://github.com/matrix-org/sydent/issues/508))
+- Add a 'tests-done' Github Actions job. ([\#509](https://github.com/matrix-org/sydent/issues/509))
+- Allow the newsfile job to be skipped. ([\#514](https://github.com/matrix-org/sydent/issues/514))
+- Remove support for the unstable identifier from [MSC3288](https://github.com/matrix-org/matrix-doc/pull/3288). ([\#515](https://github.com/matrix-org/sydent/issues/515))
+- Avoid spurious warnings in tests. ([\#516](https://github.com/matrix-org/sydent/issues/516))
+- (Dependabot) Bump Twisted to 22.4.0. ([\#517](https://github.com/matrix-org/sydent/issues/517))
+- Add ratelimiting to email sending. ([\#526](https://github.com/matrix-org/sydent/issues/526))
+- Add some prometheus metrics and make `prometheus_client` dependency mandatory. ([\#527](https://github.com/matrix-org/sydent/issues/527))
+- Limit length of room names in third party invites. ([\#528](https://github.com/matrix-org/sydent/issues/528))
+- Limit length of sender display name in third party invites. ([\#531](https://github.com/matrix-org/sydent/issues/531))
+- Add a config option to drop emails if user-supplied content contains a given keyword. ([\#535](https://github.com/matrix-org/sydent/issues/535), [\#536](https://github.com/matrix-org/sydent/issues/536))
+- (Dependabot) Bump certifi to 2022.12.7. ([\#537](https://github.com/matrix-org/sydent/issues/537))
+- Fix a typo to properly allow the newsfile job to be skipped. ([\#538](https://github.com/matrix-org/sydent/issues/538))
+- Refactor creation of servlets. ([\#541](https://github.com/matrix-org/sydent/issues/541))
+- Use [ruff](https://github.com/charliermarsh/ruff/) instead of flake8. ([\#543](https://github.com/matrix-org/sydent/issues/543), [\#544](https://github.com/matrix-org/sydent/issues/544))
+- Don't block invites containing `web_client_location` when using "http" in the keyword block list. ([\#545](https://github.com/matrix-org/sydent/issues/545))
+- Build using Poetry 1.2.2, for better dependabot compatability. ([\#548](https://github.com/matrix-org/sydent/issues/548))
+
+
 Sydent 2.5.2 (2022-04-04)
 =========================
 
