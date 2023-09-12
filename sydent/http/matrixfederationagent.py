@@ -273,27 +273,41 @@ class MatrixFederationAgent:
                 res = await self._route_matrix_uri(new_uri, lookup_well_known=False)
                 return res
 
-        # try a SRV lookup
-        service_name = b"_matrix._tcp.%s" % (parsed_uri.host,)
+        # Look up SRV for Matrix 1.8 `matrix-fed` service first
+        service_name = b"_matrix-fed._tcp.%s" % (parsed_uri.host,)
         server_list = await self._srv_resolver.resolve_service(service_name)
-
-        if not server_list:
-            target_host = parsed_uri.host
-            port = 8448
-            logger.debug(
-                "No SRV record for %s, using %s:%i",
-                parsed_uri.host.decode("ascii"),
-                target_host.decode("ascii"),
-                port,
-            )
-        else:
+        if server_list:
             target_host, port = pick_server_from_list(server_list)
             logger.debug(
-                "Picked %s:%i from SRV records for %s",
+                "Picked %s:%i from _matrix-fed SRV records for %s",
                 target_host.decode("ascii"),
                 port,
                 parsed_uri.host.decode("ascii"),
             )
+
+        else:
+            # Fall back to deprecated `matrix` service
+            service_name = b"_matrix._tcp.%s" % (parsed_uri.host,)
+            server_list = await self._srv_resolver.resolve_service(service_name)
+
+            # Fall even further back to just port 8448
+            if not server_list:
+                target_host = parsed_uri.host
+                port = 8448
+                logger.debug(
+                    "No SRV record for %s, using %s:%i",
+                    parsed_uri.host.decode("ascii"),
+                    target_host.decode("ascii"),
+                    port,
+                )
+            else:
+                target_host, port = pick_server_from_list(server_list)
+                logger.debug(
+                    "Picked %s:%i from _matrix SRV records for %s",
+                    target_host.decode("ascii"),
+                    port,
+                    parsed_uri.host.decode("ascii"),
+                )
 
         return _RoutingResult(
             host_header=parsed_uri.netloc,
