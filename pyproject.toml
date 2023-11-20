@@ -116,20 +116,20 @@ unpaddedbase64 = ">=1.1.0"
 "zope.interface" = ">=4.6.0"
 
 [tool.poetry.dev-dependencies]
-black = "==21.6b0"
-ruff = "0.0.189"
-isort = "==5.8.0"
+black = "*"
+ruff = "*"
+isort = "*"
+mypy = "*"
+mypy-zope = "*"
 matrix-is-tester = {git = "https://github.com/matrix-org/matrix-is-tester", rev = "main"}
-mypy = ">=0.902"
-mypy-zope = ">=0.3.1"
 parameterized = "==0.8.1"
 # sentry-sdk is required for typechecking.
 sentry-sdk = "*"
-types-Jinja2 = "2.11.9"
-types-mock = "4.0.8"
-types-PyOpenSSL = "21.0.3"
-types-PyYAML = "6.0.3"
-towncrier = "^21.9.0"
+types-Jinja2 = "*"
+types-mock = "*"
+types-PyOpenSSL = "*"
+types-PyYAML = "*"
+towncrier = "*"
 
 [tool.poetry.extras]
 sentry = ["sentry-sdk"]
