@@ -1,12 +1,6 @@
 Sydent 2.6.1 (2023-11-20)
 =========================
 
-No significant changes.
-
-
-Sydent 2.6.1 (2023-11-20)
-=========================
-
 No significant changes since 2.6.0; the only changes are to CI config, which should fix
 an error in building the Docker image.
 
