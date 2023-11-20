@@ -1,3 +1,18 @@
+Sydent 2.6.0 (2023-11-20)
+=========================
+
+Features
+--------
+
+- Support resolving homeservers using `matrix-fed` DNS SRV records from [MSC4040](https://github.com/matrix-org/matrix-spec-proposals/pull/4040). ([\#576](https://github.com/matrix-org/sydent/issues/576))
+
+
+Improved Documentation
+----------------------
+
+- Fix installation documentation for Debian based systems. ([\#549](https://github.com/matrix-org/sydent/issues/549))
+
+
 Sydent 2.5.6 (2023-07-31)
 =========================
 
