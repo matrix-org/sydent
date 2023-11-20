@@ -2,16 +2,49 @@ name: Docker
 
 on:
   push:
+    branches: ["main"]
     tags: ["v*"]
-    branches: [ main ]
+
+env:
+  PLATFORMS: "linux/amd64,linux/arm64"
 
 jobs:
   build:
     name: Build and publish images
-    uses: "matrix-org/backend-meta/.github/workflows/docker.yml@v1"
-    with:
-      image-name: matrixdotorg/sydent
-      publish: true
-    secrets:
-      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-qemu-action@v2
+        with:
+          platforms: ${{ env.PLATFORMS }}
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build main Sydent image
+        if: github.ref_name == 'main'
+        uses: docker/build-push-action@v4
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          context: .
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          tags: |
+            matrixdotorg/sydent:main
+
+      - name: Build release Sydent image
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        id: docker_build_sliding_sync_release
+        uses: docker/build-push-action@v4
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          context: .
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          tags: |
+            matrixdotorg/sydent:latest
+            matrixdotorg/sydent:${{ github.ref_name }}
