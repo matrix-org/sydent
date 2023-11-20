@@ -59,6 +59,22 @@ jobs:
   packaging:
     uses: "matrix-org/backend-meta/.github/workflows/packaging.yml@v1"
 
+  docker:
+    # Sanity check that we can build the x64 image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build image
+        uses: docker/build-push-action@v4
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          context: .
+          push: false
+
   run-tests:
     name: Tests
     if: ${{ !cancelled() && !failure() }} # Allow previous steps to be skipped, but not fail
