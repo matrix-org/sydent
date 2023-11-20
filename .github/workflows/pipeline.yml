@@ -26,7 +26,35 @@ jobs:
       - run: "scripts-dev/check_newsfragment.sh ${{ github.event.number }}"
 
   checks:
-    uses: "matrix-org/backend-meta/.github/workflows/python-poetry-ci.yml@v2"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: matrix-org/setup-python-poetry@v1
+        with:
+          install-project: false
+
+      - name: Import order (isort)
+        run: poetry run isort --check --diff .
+
+      - name: Code style (black)
+        run: poetry run black --check --diff .
+
+      - name: Semantic checks (ruff)
+        # --quiet suppresses the update check.
+        run: poetry run ruff --quiet .
+
+      - name: Restore/persist mypy's cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .mypy_cache
+          key: mypy-cache-${{ github.context.sha }}
+          restore-keys: mypy-cache-
+
+      - name: Typechecking (mypy)
+        run: poetry run mypy
+
   packaging:
     uses: "matrix-org/backend-meta/.github/workflows/packaging.yml@v1"
 
