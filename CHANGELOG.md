@@ -1,3 +1,36 @@
+Sydent 2.6.1 (2023-11-20)
+=========================
+
+No significant changes.
+
+
+Sydent 2.6.1 (2023-11-20)
+=========================
+
+No significant changes since 2.6.0; the only changes are to CI config, which should fix
+an error in building the Docker image.
+
+As mentioned in the 2.6.0 release notes, Sydent will soon be forked by Element
+under an AGPLv3.0 licence (with CLA, for proprietary dual licensing). We expect
+this to be the last release of Sydent under the current Apache 2 licence.
+
+You can read more about this here:
+
+- https://matrix.org/blog/2023/11/06/future-of-synapse-dendrite/
+- https://element.io/blog/element-to-adopt-agplv3/
+
+The Matrix.org Foundation copy of the project will be archived. Any changes needed
+by server administrators will be communicated in Sydent's changelog, but we are
+striving to make this as seamless as possible.
+
+
+Internal Changes
+----------------
+
+- Pin CI to Python 3.11. ([\#583](https://github.com/matrix-org/sydent/issues/583))
+- Inline docker job definition in this repo, and update docker-related action versions. ([\#584](https://github.com/matrix-org/sydent/issues/584))
+
+
 Sydent 2.6.0 (2023-11-20)
 =========================
 
