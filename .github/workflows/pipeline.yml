@@ -21,12 +21,41 @@ jobs:
           ref: ${{github.event.pull_request.head.sha}}
       - uses: actions/setup-python@v2
         with:
-          python-version: "3.7"
+          python-version: "3.11"
       - run: python -m pip install towncrier
       - run: "scripts-dev/check_newsfragment.sh ${{ github.event.number }}"
 
   checks:
-    uses: "matrix-org/backend-meta/.github/workflows/python-poetry-ci.yml@v2"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: matrix-org/setup-python-poetry@v1
+        with:
+          python-version: 3.11
+          install-project: false
+
+      - name: Import order (isort)
+        run: poetry run isort --check --diff .
+
+      - name: Code style (black)
+        run: poetry run black --check --diff .
+
+      - name: Semantic checks (ruff)
+        # --quiet suppresses the update check.
+        run: poetry run ruff --quiet .
+
+      - name: Restore/persist mypy's cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .mypy_cache
+          key: mypy-cache-${{ github.context.sha }}
+          restore-keys: mypy-cache-
+
+      - name: Typechecking (mypy)
+        run: poetry run mypy
+
   packaging:
     uses: "matrix-org/backend-meta/.github/workflows/packaging.yml@v1"
 
@@ -37,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.7', '3.x']
+        python-version: ['3.7', '3.11']
         test-dir: ['tests', 'matrix_is_tester']
 
     steps:
