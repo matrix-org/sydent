@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import configparser
 from configparser import ConfigParser
 from typing import Dict, List
 
+import sydent.sms.openmarket
 from sydent.config._base import BaseConfig
 from sydent.config.exceptions import ConfigError
+from sydent.util.loader import load_class
 
 
 class SMSConfig(BaseConfig):
@@ -32,6 +34,16 @@ class SMSConfig(BaseConfig):
         # b64encode.
         self.api_username = cfg.get("sms", "username").encode("UTF-8")
         self.api_password = cfg.get("sms", "password").encode("UTF-8")
+
+        self.provider_class = sydent.sms.openmarket.OpenMarketSMS
+        try:
+            sms_provider = cfg.get("sms", "provider")
+        except configparser.NoOptionError:
+            pass
+        else:
+            if sms_provider:
+                self.provider_class = load_class(sms_provider)
+                self.provider_config = cfg.get("sms", "provider_config", fallback={})
 
         self.originators: Dict[str, List[Dict[str, str]]] = {}
         self.smsRules = {}
