@@ -219,14 +219,15 @@ class SydentConfig:
 
         :param config_file: the file to be parsed
         """
-        # If the config file doesn't exist, prepopulate the config object
-        # with the defaults, in the right section.
+        # If the config file already exists, place all config options in
+        # the DEFAULT section, to avoid overriding any of the user's
+        # configured values in the sections other than DEFAULT.
         #
-        # Otherwise, we have to put the defaults in the DEFAULT section,
-        # to ensure that they don't override anyone's settings which are
-        # in their config file in the default section (which is likely,
-        # because sydent used to be braindead).
-        use_defaults = not os.path.exists(config_file)
+        # We don't always do this as earlier Sydent versions required
+        # users to put their settings in the DEFAULT section.
+        #
+        # We want to avoid overwriting those.
+        use_defaults = os.path.exists(config_file)
 
         cfg = ConfigParser()
         for sect, entries in CONFIG_DEFAULTS.items():
