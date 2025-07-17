@@ -1,1 +1,0 @@
-Prevent bare line feed rejection errors by using CRLF line endings when sending emails. Contributed by @NICO-SOLUTIONS.
