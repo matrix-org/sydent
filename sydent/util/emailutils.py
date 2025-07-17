@@ -131,7 +131,6 @@ def sendEmail(
         # sending to strict mail servers.
         mailStringCRLF = "\r\n".join(mailString.splitlines())
         smtp.sendmail(mailFrom, mailTo, mailStringCRLF.encode("utf-8"))
-        smtp.sendmail(mailFrom, mailTo, mailStringCRLF.encode("utf-8"))
         smtp.quit()
     except Exception as origException:
         if log_send_errors:
