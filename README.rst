@@ -1,4 +1,4 @@
-Sydent is now actively maintained at [element-hq/sydent](https://github.com/element-hq/sydent)
+Sydent is now actively maintained at `element-hq/sydent <https://github.com/element-hq/sydent>`_
 =================================================================================================
 
 Sydent is an `identity server <https://spec.matrix.org/v1.6/identity-service-api/>`_ for the `Matrix communications protocol <matrix.org>`_
