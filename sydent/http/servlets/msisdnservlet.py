@@ -251,11 +251,11 @@ class MsisdnValidateCodeServlet(SydentResource):
                 "error": "The token doesn't match",
             }
         except IncorrectSessionTokenException:
-            request.setResponseCode(404)
+            request.setResponseCode(400)
             return {
                 "success": False,
-                "errcode": "M_NO_VALID_SESSION",
-                "error": "No session could be found with this sid",
+                "errcode": "M_TOKEN_INCORRECT",
+                "error": "The token supplied is incorrect",
             }
 
     def render_OPTIONS(self, request: Request) -> bytes:
