@@ -61,6 +61,8 @@ With the virtualenv activated, you can run Sydent using::
 
     python -m sydent.sydent
 
+With this method, you still need to copy the Template Ressources /res from tgis repository to your installation. 
+
 Installing from source
 ~~~~~~~~~~~~~~~~~~~~~~
 
